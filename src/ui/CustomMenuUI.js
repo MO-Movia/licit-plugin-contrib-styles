@@ -21,6 +21,9 @@ import {
 } from '../CustomStyleCommand';
 import {
   setStyles,
+  saveStyle,
+  renameStyle,
+  removeStyle,
 } from '../customStyle';
 import { setTextAlign } from '../TextAlignCommand';
 import { setTextLineSpacing } from '../TextLineSpacingCommand';
@@ -203,8 +206,7 @@ class CustomMenuUI extends React.PureComponent<any, any> {
                     this.props.editorState
                   )
                 ) {
-                  this.props.editorView.runtime
-                    .removeStyle(val.command._customStyleName)
+                  removeStyle(val.command._customStyleName)
                     .then((success) => {
                       // [FS] IRAD-1099 2020-11-17
                       // Issue fix: Even the applied style is removed the style name is showing in the editor
@@ -350,7 +352,7 @@ class CustomMenuUI extends React.PureComponent<any, any> {
           if (this._stylePopup) {
             //handle save style object part here
             if (undefined !== val) {
-              const { dispatch, runtime } = this.props.editorView;
+              const { dispatch } = this.props.editorView;
               // [FS] IRAD-1112 2020-12-14
               // Issue fix: Duplicate style created while modified the style name.
               delete val.runtime;
@@ -364,7 +366,7 @@ class CustomMenuUI extends React.PureComponent<any, any> {
                 if (
                   !isLevelUpdated(this.props.editorState, val.styleName, val)
                 ) {
-                  runtime.saveStyle(val).then((result) => {
+                  saveStyle(val).then((result) => {
                     if (result) {
                       setStyles(result);
                       result.forEach((obj) => {
@@ -390,8 +392,7 @@ class CustomMenuUI extends React.PureComponent<any, any> {
                 }
               } else {
                 // rename
-                runtime
-                  .renameStyle(this._styleName, val.styleName)
+                renameStyle(this._styleName, val.styleName)
                   .then((result) => {
                     // [FS] IRAD-1133 2021-01-06
                     // Issue fix: After modify a custom style, the modified style not applied to the paragraph.

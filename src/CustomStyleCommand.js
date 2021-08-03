@@ -26,6 +26,8 @@ import {
   getCustomStyleByLevel,
   isPreviousLevelExists,
   setStyles,
+  saveStyle,
+  getStylesAsync,
 } from './customStyle';
 import type { StyleProps, EditorRuntime } from './Types';
 import {
@@ -416,53 +418,48 @@ class CustomStyleCommand extends UICommand {
                   this.getCustomStyles(view.runtime, style, view);
                 });
               } else {
+                delete val.editorView;
+                // [FS] IRAD-1415 2021-06-02
+                // Issue: Allow to create custom style numbering level 2 without level 1
                 if (
-                  view.runtime &&
-                  typeof view.runtime.saveStyle === 'function'
+                  styleHasNumbering(val) &&
+                  !isValidHeirarchy(
+                    val.styleName,
+                    parseInt(val.styles.styleLevel)
+                  )
                 ) {
-                  delete val.editorView;
 
-                  // [FS] IRAD-1415 2021-06-02
-                  // Issue: Allow to create custom style numbering level 2 without level 1
-                  if (
-                    styleHasNumbering(val) &&
-                    !isValidHeirarchy(
-                      val.styleName,
-                      parseInt(val.styles.styleLevel)
-                    )
-                  ) {
-                    this.showAlert();
-                  } else {
-                    view.runtime.saveStyle(val).then((result) => {
-                      setStyles(result);
-                      // Issue fix: Created custom style Numbering not applied to paragraph.
-                      tr = tr.setSelection(TextSelection.create(doc, 0, 0));
-                      // Apply created styles to document
-                      const { selection } = state;
-                      const startPos = selection.$from.before(1);
-                      const endPos = selection.$to.after(1);
-                      const node = getNode(state, startPos, endPos, tr);
-                      // [FS] IRAD-1238 2021-03-08
-                      // Fix: Shows alert message 'This Numberings breaks hierarchy, Previous levels are missing' on create styles
-                      // if a numbering applied in editor.
-                      if (
-                        !styleHasNumbering(val) ||
-                        isValidHeirarchy(val.styleName, 0)
-                      ) {
-                        // to add previous heirarchy levels
-                        hasMismatchHeirarchy(
-                          state,
-                          tr,
-                          node,
-                          startPos,
-                          endPos,
-                          val.styleName
-                        );
-                        tr = applyStyle(val, val.styleName, state, tr);
-                        dispatch(tr);
-                      }
-                    });
-                  }
+                  this.showAlert();
+                } else {
+                  saveStyle(val).then((result) => {
+                    setStyles(result);
+                    // Issue fix: Created custom style Numbering not applied to paragraph.
+                    tr = tr.setSelection(TextSelection.create(doc, 0, 0));
+                    // Apply created styles to document
+                    const { selection } = state;
+                    const startPos = selection.$from.before(1);
+                    const endPos = selection.$to.after(1);
+                    const node = getNode(state, startPos, endPos, tr);
+                    // [FS] IRAD-1238 2021-03-08
+                    // Fix: Shows alert message 'This Numberings breaks hierarchy, Previous levels are missing' on create styles
+                    // if a numbering applied in editor.
+                    if (
+                      !styleHasNumbering(val) ||
+                      isValidHeirarchy(val.styleName, 0)
+                    ) {
+                      // to add previous heirarchy levels
+                      hasMismatchHeirarchy(
+                        state,
+                        tr,
+                        node,
+                        startPos,
+                        endPos,
+                        val.styleName
+                      );
+                      tr = applyStyle(val, val.styleName, state, tr);
+                      dispatch(tr);
+                    }
+                  });
                 }
               }
             }
@@ -480,22 +477,20 @@ class CustomStyleCommand extends UICommand {
     styleName: string,
     editorView: EditorView
   ) {
-    if (runtime && typeof runtime.getStylesAsync === 'function') {
-      runtime.getStylesAsync().then((result) => {
-        if (styleName) {
-          const { dispatch, state } = editorView;
-          let tr;
-          result.forEach((obj) => {
-            if (styleName === obj.styleName) {
-              tr = updateDocument(state, state.tr, styleName, obj);
-            }
-          });
-          if (tr) {
-            dispatch(tr);
+    getStylesAsync().then((result) => {
+      if (styleName) {
+        const { dispatch, state } = editorView;
+        let tr;
+        result.forEach((obj) => {
+          if (styleName === obj.styleName) {
+            tr = updateDocument(state, state.tr, styleName, obj);
           }
+        });
+        if (tr) {
+          dispatch(tr);
         }
-      });
-    }
+      }
+    });
   }
 
   // creates a sample style object

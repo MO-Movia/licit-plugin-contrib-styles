@@ -27,9 +27,9 @@
 
 Run these commands before npm install.
 
-- npm install *modusoperandi-licit-doc-attrs-step-0.0.1.tgz*
+Put the _modusoperandi-licit-customstyles-0.0.1-0.tgz_ file in your project location, open command prompt and run:
 
-- npm install *mo-licit-customstyles-0.0.1-0.tgz*
+- npm install *modusoperandi-licit-customstyles-0.0.1-0.tgz*
 
 
 Include plugin in licit component 
@@ -40,10 +40,13 @@ Include plugin in licit component
 
 ```
 
-import {CustomstylePlugin} from  '@mo/licit-customstyles';
+import {CustomstylePlugin} from  '@modusoperandi/licit-customstyles';
 
+Expecting a CustomStyleRuntime to configure the style service to licit expects methods like saveStyle(),getStyles(),renameStyle() and removeStyle(). Please refer *licit\client\CustomStyleRuntime.js* for getting more detailed idea.
 
-const  plugins = [new  CustomstylePlugin()]
+import {CustomstylePlugin} from  '@modusoperandi/licit-customstyles';
+const styleRuntime = new CustomStyleRuntime();
+const plugins = [new  CustomstylePlugin(styleRuntime)]
 
 ReactDOM.render(<Licit docID={0} plugins={plugins}/>
   

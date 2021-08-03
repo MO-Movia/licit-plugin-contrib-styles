@@ -7,7 +7,7 @@ import './custom-style-edit.css';
 import ColorEditor from './ColorEditor';
 import createPopUp from './CreatePopUp';
 import { getLineSpacingValue } from './toCSSLineSpacing';
-import { isCustomStyleExists, setStyles } from '../customStyle';
+import { isCustomStyleExists, setStyles, saveStyle, getStylesAsync } from '../customStyle';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 import { EditorState } from 'prosemirror-state';
 import type { EditorRuntime, StyleProps } from '../Types';
@@ -1287,25 +1287,20 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
   // [FS] IRAD-1176 2021-02-08
   // save the custom styles from Edit all option.
   modifyCustomStyle(val: EditorState) {
-    const { runtime } = this.props.editorView;
-    if (runtime && typeof runtime.saveStyle === 'function') {
-      delete val.editorView;
-      runtime.saveStyle(val).then((result) => {setStyles(result); });
-    }
+    delete val.editorView;
+    saveStyle(val).then((result) => { setStyles(result); });
   }
 
   // To fetch the custom styles from server and set to the state.
   getCustomStyles(runtime: EditorRuntime) {
-    if (runtime && typeof runtime.getStylesAsync === 'function') {
-      runtime.getStylesAsync().then((result) => {
-        customStyles = result;
-        // [FS] IRAD-1222 2021-03-01
-        // Issue fix: In edit all, the style list not showing the first time.
-        this.setState({
-          customStyles: result,
-        });
+    getStylesAsync().then((result) => {
+      customStyles = result;
+      // [FS] IRAD-1222 2021-03-01
+      // Issue fix: In edit all, the style list not showing the first time.
+      this.setState({
+        customStyles: result,
       });
-    }
+    });
   }
 
   // [FS] IRAD-1231 2021-03-03

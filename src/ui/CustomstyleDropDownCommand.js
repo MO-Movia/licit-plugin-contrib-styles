@@ -15,6 +15,7 @@ import {
 } from '../CustomStyleNodeSpec';
 import {
   setStyles,
+  getStylesAsync,
 } from '../customStyle';
 
 // [FS] IRAD-1042 2020-09-09
@@ -44,31 +45,24 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
     };
     // Check runtime is avilable in editorview
     // Get styles form server configured in runtime
-    if (
-      this.props.editorView &&
-      this.props.editorView.runtime &&
-      typeof this.props.editorView.runtime.getStylesAsync === 'function'
-    ) {
-      let HEADING_NAMES = null;
-      this.props.editorView.runtime.getStylesAsync().then((result) => {
-        if (result) {
-          setStyles(result);
-          HEADING_NAMES = result;
-          if (null != HEADING_NAMES) {
-            HEADING_NAMES.forEach((obj) => {
-              HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
-                obj,
-                obj.styleName
-              );
-            });
-          }
+    let HEADING_NAMES = null;
+    getStylesAsync().then((result) => {
+      if (result) {
+        setStyles(result);
+        HEADING_NAMES = result;
+        if (null != HEADING_NAMES) {
+          HEADING_NAMES.forEach((obj) => {
+            HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
+              obj,
+              obj.styleName
+            );
+          });
         }
-        return [HEADING_COMMANDS];
-      });
-      this.hasRuntime = true;
-    } else {
-      this.hasRuntime = false;
-    }
+      }
+      return [HEADING_COMMANDS];
+    });
+    this.hasRuntime = true;
+
     return [HEADING_COMMANDS];
   }
   staticCommands() {

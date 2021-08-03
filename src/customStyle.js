@@ -5,7 +5,8 @@ import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
 } from './CustomStyleNodeSpec';
-let customStyles: StyleProps[] = new Array<StyleProps>(0);
+let customStyles: StyleProps[] = new Array < StyleProps > (0);
+let styleRuntime;
 
 // [FS] IRAD-1202 2021-02-15
 // None & None-@#$- have same effect of None.
@@ -56,6 +57,9 @@ export function getCustomStyleByName(name: string): StyleProps {
 // store styles in cache
 export function setStyles(style: StyleProps[]) {
   customStyles = style;
+}
+export function setStyleRuntime(runtime: any) {
+  styleRuntime = runtime;
 }
 
 // get a style by Level
@@ -167,4 +171,18 @@ export function getCustomStyle(customStyle: any) {
     }
   }
   return style;
+}
+// [FS] IRAD-1539 2021-08-02
+// method to save,retrive,rename and remove style from the style server.
+export function saveStyle(StyleProps: StyleProps): Promise<StyleProps[]> {
+    return styleRuntime.saveStyle(StyleProps);
+}
+export function getStylesAsync(): Promise<StyleProps[]> {
+    return styleRuntime.getStylesAsync();
+}
+export function renameStyle(oldName: string, newName: string): Promise<StyleProps[]> {
+    return styleRuntime.renameStyle(oldName, newName);
+}
+export function removeStyle(styleName: string): Promise<StyleProps[]> {
+  return styleRuntime.removeStyle(styleName);
 }

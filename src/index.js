@@ -9,7 +9,7 @@ import {
   getStyleLevel,
   applyLineStyle
 } from './CustomStyleCommand';
-import { getCustomStyleByName, getCustomStyleByLevel } from './customStyle';
+import { getCustomStyleByName, getCustomStyleByLevel, setStyleRuntime } from './customStyle';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 import { getLineSpacingValue } from './ui/toCSSLineSpacing';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
@@ -35,7 +35,7 @@ const requiredAddAttr = (node) => {
 // [FS] IRAD-1503 2021-07-02
 // Fix: Update the private plugin classes as a named export rather than the default
 export class CustomstylePlugin extends Plugin {
-  constructor() {
+  constructor(runtime: any) {
     let csview = null;
     let firstTime = true;
     let loaded = false;
@@ -45,6 +45,7 @@ export class CustomstylePlugin extends Plugin {
         init(config, state) {
           loaded = false;
           firstTime = true;
+          setStyleRuntime(runtime);
         },
         apply(tr, prev, oldState, newState) {
           // [FS] IRAD-1202 2021-02-15

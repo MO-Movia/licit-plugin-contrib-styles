@@ -1,5 +1,5 @@
 {
-  "name": "@mo/licit-customstyles",
+  "name": "@modusoperandi/licit-customstyles",
   "version": "0.0.1",
   "subversion": "1",
   "description": "CustomStyle plugin built with ProseMirror",
@@ -11,7 +11,7 @@
   },
   "scripts": {
     "test": "jest --passWithNoTests",
-    "build:clean": "rm -rf dist/ && rm -f mo-licit-customstyles-*.*.*.tgz",
+    "build:clean": "rm -rf dist/ && rm -f modusoperandi-licit-customstyles-*.*.*.tgz",
     "webpack": "webpack",
     "build:babel": "babel src --out-dir dist",
     "build:flow": "flow-copy-source -v -i '**/__tests__/**' src dist",

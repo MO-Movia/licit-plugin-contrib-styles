@@ -44,9 +44,9 @@ import {CustomstylePlugin} from  '@modusoperandi/licit-customstyles';
 
 Expecting a CustomStyleRuntime to configure the style service to licit expects methods like saveStyle(),getStyles(),renameStyle() and removeStyle(). Please refer *licit\client\CustomStyleRuntime.js* for getting more detailed idea.
 
-import {CustomstylePlugin} from  '@modusoperandi/licit-customstyles';
+import CustomStyleRuntime from  './CustomStyleRuntime';
 const styleRuntime = new CustomStyleRuntime();
-const plugins = [new  CustomstylePlugin(styleRuntime)]
+const plugins = [new CustomstylePlugin(styleRuntime)]
 
 ReactDOM.render(<Licit docID={0} plugins={plugins}/>
   

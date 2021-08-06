@@ -62,6 +62,9 @@ export function setStyleRuntime(runtime: any) {
   styleRuntime = runtime;
 }
 
+export function hasStyleRuntime() {
+  return styleRuntime ? true : false;
+}
 // get a style by Level
 export function getCustomStyleByLevel(level: number) {
   let style = null;
@@ -175,13 +178,13 @@ export function getCustomStyle(customStyle: any) {
 // [FS] IRAD-1539 2021-08-02
 // method to save,retrive,rename and remove style from the style server.
 export function saveStyle(StyleProps: StyleProps): Promise<StyleProps[]> {
-    return styleRuntime.saveStyle(StyleProps);
+  return styleRuntime.saveStyle(StyleProps);
 }
 export function getStylesAsync(): Promise<StyleProps[]> {
-    return styleRuntime.getStylesAsync();
+  return styleRuntime.getStylesAsync();
 }
 export function renameStyle(oldName: string, newName: string): Promise<StyleProps[]> {
-    return styleRuntime.renameStyle(oldName, newName);
+  return styleRuntime.renameStyle(oldName, newName);
 }
 export function removeStyle(styleName: string): Promise<StyleProps[]> {
   return styleRuntime.removeStyle(styleName);

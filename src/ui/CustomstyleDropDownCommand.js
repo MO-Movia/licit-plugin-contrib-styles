@@ -16,6 +16,7 @@ import {
 import {
   setStyles,
   getStylesAsync,
+  hasStyleRuntime
 } from '../customStyle';
 
 // [FS] IRAD-1042 2020-09-09
@@ -31,7 +32,7 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
     editorState: EditorState,
     editorView: ?EditorView,
   };
-  hasRuntime: boolean = true;
+  hasRuntime: boolean = hasStyleRuntime();
   //[FS] IRAD-1085 2020-10-09
   //method to build commands for list buttons
   getCommandGroups() {
@@ -46,23 +47,23 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
     // Check runtime is avilable in editorview
     // Get styles form server configured in runtime
     let HEADING_NAMES = null;
-    getStylesAsync().then((result) => {
-      if (result) {
-        setStyles(result);
-        HEADING_NAMES = result;
-        if (null != HEADING_NAMES) {
-          HEADING_NAMES.forEach((obj) => {
-            HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
-              obj,
-              obj.styleName
-            );
-          });
+    if (this.hasRuntime) {
+      getStylesAsync().then((result) => {
+        if (result) {
+          setStyles(result);
+          HEADING_NAMES = result;
+          if (null != HEADING_NAMES) {
+            HEADING_NAMES.forEach((obj) => {
+              HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
+                obj,
+                obj.styleName
+              );
+            });
+          }
         }
-      }
-      return [HEADING_COMMANDS];
-    });
-    this.hasRuntime = true;
-
+        return [HEADING_COMMANDS];
+      });
+    }
     return [HEADING_COMMANDS];
   }
   staticCommands() {

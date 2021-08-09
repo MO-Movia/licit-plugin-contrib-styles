@@ -16,6 +16,7 @@ import { findParentNodeClosestToPos } from 'prosemirror-utils';
 import { Node, Schema } from 'prosemirror-model';
 import CustomstyleDropDownCommand from './ui/CustomstyleDropDownCommand';
 import { applyEffectiveSchema } from './EditorSchema';
+import type { StyleRuntime } from './StyleRuntime';
 
 const ENTERKEYCODE = 13;
 const DELKEYCODE = 46;
@@ -35,7 +36,7 @@ const requiredAddAttr = (node) => {
 // [FS] IRAD-1503 2021-07-02
 // Fix: Update the private plugin classes as a named export rather than the default
 export class CustomstylePlugin extends Plugin {
-  constructor(runtime: any) {
+  constructor(runtime: StyleRuntime) {
     let csview = null;
     let firstTime = true;
     let loaded = false;

@@ -10,7 +10,7 @@ import { getLineSpacingValue } from './toCSSLineSpacing';
 import { isCustomStyleExists, setStyles, saveStyle, getStylesAsync } from '../customStyle';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 import { EditorState } from 'prosemirror-state';
-import type { EditorRuntime, StyleProps } from '../Types';
+import type { Style } from '../StyleRuntime';
 
 let customStyles: StyleProps[] = [];
 const otherStyleSelected = false;
@@ -98,7 +98,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
     if (!this.state.styles.fontSize) {
       this.state.styles.fontSize = 11;
     }
-    this.getCustomStyles(props.editorView.runtime);
+    this.getCustomStyles();
   }
 
   componentWillUnmount(): void {
@@ -1292,7 +1292,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   // To fetch the custom styles from server and set to the state.
-  getCustomStyles(runtime: EditorRuntime) {
+  getCustomStyles() {
     getStylesAsync().then((result) => {
       customStyles = result;
       // [FS] IRAD-1222 2021-03-01

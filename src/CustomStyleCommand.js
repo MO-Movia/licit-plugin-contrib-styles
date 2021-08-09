@@ -29,7 +29,7 @@ import {
   saveStyle,
   getStylesAsync,
 } from './customStyle';
-import type { StyleProps, EditorRuntime } from './Types';
+import type { Style } from './StyleRuntime';
 import {
   MARK_STRONG,
   MARK_EM,
@@ -415,7 +415,7 @@ class CustomStyleCommand extends UICommand {
               if (3 === mode) {
                 // edit All
                 val.forEach((style) => {
-                  this.getCustomStyles(view.runtime, style, view);
+                  this.getCustomStyles(style, view);
                 });
               } else {
                 delete val.editorView;
@@ -473,7 +473,6 @@ class CustomStyleCommand extends UICommand {
   // [FS] IRAD-1231 2021-03-02
   // update the document with the edited styles list.
   getCustomStyles(
-    runtime: EditorRuntime,
     styleName: string,
     editorView: EditorView
   ) {
@@ -720,7 +719,7 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
   return marks;
 }
 function applyStyleEx(
-  styleProp: ?StyleProps,
+  styleProp: ?Style,
   styleName: string,
   state: EditorState,
   tr: Transform,
@@ -1342,7 +1341,7 @@ export function applyLatestStyle(
   node: Node,
   startPos: number,
   endPos: number,
-  style: ?StyleProps
+  style: ?Style
 ) {
   tr = applyStyleEx(style, styleName, state, tr, node, startPos, endPos);
   // apply bold first word/sentence custom style
@@ -1378,7 +1377,7 @@ function removeAllMarksExceptLink(
   to: number,
   tr: Transform,
   schema: Schema,
-  styleProp: ?StyleProps,
+  styleProp: ?Style,
   state: EditorState
 ) {
   const { doc } = tr;
@@ -1407,7 +1406,7 @@ function handleRemoveMarks(
   from: number,
   to: number,
   schema: Schema,
-  styleProp: ?StyleProps,
+  styleProp: ?Style,
   state: EditorState
 ) {
   tasks.forEach((job) => {
@@ -1435,7 +1434,7 @@ function handleRemoveMarks(
 // [FS] IRAD-1087 2020-10-14
 // Apply selected styles to document
 export function applyStyle(
-  style: StyleProps,
+  style: Style,
   styleName: string,
   state: EditorState,
   tr: Transform
@@ -1452,7 +1451,7 @@ export function applyStyleToEachNode(
   from: number,
   to: number,
   tr: Transform,
-  style: StyleProps,
+  style: Style,
   styleName: string
 ) {
   let _node = null;
@@ -1608,7 +1607,7 @@ export function updateDocument(
   state: EditorState,
   tr: Transform,
   styleName: string,
-  style: StyleProps
+  style: Style
 ) {
   const { doc } = state;
   doc.descendants(function (child, pos) {
@@ -1665,7 +1664,7 @@ function haveEligibleChildren(
 export function isLevelUpdated(
   state: EditorState,
   styleName: string,
-  style: StyleProps
+  style: Style
 ) {
   let bOK = false;
   // [FS] IRAD-1478 2021-06-24

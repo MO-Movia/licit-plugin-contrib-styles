@@ -1,11 +1,11 @@
 // @flow
 // [FS] IRAD-1085 2020-10-09
-import type { StyleProps, CSSStyle } from './Types';
+import type { Style, CSSStyle } from './StyleRuntime';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
 } from './CustomStyleNodeSpec';
-let customStyles: StyleProps[] = new Array < StyleProps > (0);
+let customStyles: Style[] = new Array < Style > (0);
 let styleRuntime;
 
 // [FS] IRAD-1202 2021-02-15
@@ -39,8 +39,8 @@ export function isCustomStyleExists(styleName: string) {
 
 // [FS] IRAD-1128 2020-12-30
 // get a style by styleName
-export function getCustomStyleByName(name: string): StyleProps {
-  let style: StyleProps = {};
+export function getCustomStyleByName(name: string): Style {
+  let style: Style = {};
   let has = false;
   if (isValidStyleName(name)) {
     // break the loop if find any matches
@@ -55,7 +55,7 @@ export function getCustomStyleByName(name: string): StyleProps {
 }
 
 // store styles in cache
-export function setStyles(style: StyleProps[]) {
+export function setStyles(style: Style[]) {
   customStyles = style;
 }
 export function setStyleRuntime(runtime: any) {
@@ -177,15 +177,15 @@ export function getCustomStyle(customStyle: any) {
 }
 // [FS] IRAD-1539 2021-08-02
 // method to save,retrive,rename and remove style from the style server.
-export function saveStyle(StyleProps: StyleProps): Promise<StyleProps[]> {
-  return styleRuntime.saveStyle(StyleProps);
+export function saveStyle(styleProps: Style): Promise<Style[]> {
+  return styleRuntime.saveStyle(styleProps);
 }
-export function getStylesAsync(): Promise<StyleProps[]> {
+export function getStylesAsync(): Promise<Style[]> {
   return styleRuntime.getStylesAsync();
 }
-export function renameStyle(oldName: string, newName: string): Promise<StyleProps[]> {
+export function renameStyle(oldName: string, newName: string): Promise<Style[]> {
   return styleRuntime.renameStyle(oldName, newName);
 }
-export function removeStyle(styleName: string): Promise<StyleProps[]> {
+export function removeStyle(styleName: string): Promise<Style[]> {
   return styleRuntime.removeStyle(styleName);
 }

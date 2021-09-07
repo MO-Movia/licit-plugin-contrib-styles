@@ -11,7 +11,7 @@ import {
 } from './CustomStyleCommand';
 import { getCustomStyleByName, getCustomStyleByLevel, setStyleRuntime } from './customStyle';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
-import { getLineSpacingValue } from './ui/toCSSLineSpacing';
+import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
 import { Node, Schema } from 'prosemirror-model';
 import CustomstyleDropDownCommand from './ui/CustomstyleDropDownCommand';
@@ -344,7 +344,7 @@ function applyStyleForNextParagraph(prevState, nextState, tr, view) {
           nextNode &&
           IsActiveNode &&
           nextNode.type.name === 'paragraph' &&
-          nextNode.attrs.styleName === 'None'
+          (nextNode.attrs.styleName === 'None'|| 'null' === nextNode.attrs.styleName)
         ) {
           const style = getCustomStyleByName(newattrs.styleName);
           if (style && style.styles && style.styles.nextLineStyleName) {

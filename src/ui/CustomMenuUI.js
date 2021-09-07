@@ -8,8 +8,8 @@ import uuid from './Uuid';
 import './listType.css';
 import CustomStyleItem from './CustomStyleItem';
 
-import { atViewportCenter } from './PopUpPosition';
-import createPopUp from './CreatePopUp';
+import { atViewportCenter } from '@modusoperandi/licit-ui-commands';
+import { createPopUp } from '@modusoperandi/licit-ui-commands';
 import AlertInfo from './AlertInfo';
 
 import CustomStyleSubMenu from './CustomStyleSubMenu';
@@ -25,8 +25,8 @@ import {
   renameStyle,
   removeStyle,
 } from '../customStyle';
-import { setTextAlign } from '../TextAlignCommand';
-import { setTextLineSpacing } from '../TextLineSpacingCommand';
+import { setTextAlign } from '@modusoperandi/licit-ui-commands';
+import { setTextLineSpacing } from '@modusoperandi/licit-ui-commands';
 import { setParagraphSpacing } from '../ParagraphSpacingCommand';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 

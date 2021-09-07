@@ -2,7 +2,7 @@
 
 import { Node, DOMOutputSpec } from 'prosemirror-model';
 import type { KeyValuePair } from './Constants';
-import toCSSLineSpacing from './ui/toCSSLineSpacing';
+import { toCSSLineSpacing } from '@modusoperandi/licit-ui-commands';
 
 import { getCustomStyleByName } from './customStyle';
 import './ui/czi-cust-style-numbered.css';
@@ -34,9 +34,8 @@ function getAttrs(base: getAttrsFn, dom: HTMLElement) {
 function toDOM(base: toDOMFn, node: Node) {
   const output = base(node);
   output[1][STYLENAME] = node.attrs[STYLENAME];
-  const attrs = {};
   const { style, styleLevel, indentOverriden } = getStyle(node.attrs);
-  style && (attrs.style = style);
+  style && (output[1].style = style);
   if (styleLevel) {
     output[1][ATTRIBUTE_STYLE_LEVEL] = String(styleLevel);
   }
@@ -95,53 +94,55 @@ function getStyleEx(align, lineSpacing, styleName) {
       `--czi-content-line-height: ${cssLineSpacing};`;
   }
 
-  // to get the styles of the corresponding style name
-  const styleProps = getCustomStyleByName(styleName);
-  if (null !== styleProps && styleProps.styles) {
-    // [FS] IRAD-1100 2020-11-04
-    // Add in leading and trailing spacing (before and after a paragraph)
-    if (styleProps.styles.paragraphSpacingAfter) {
-      style += `margin-bottom: ${styleProps.styles.paragraphSpacingAfter}pt !important;`;
-    }
-    if (styleProps.styles.paragraphSpacingBefore) {
-      style += `margin-top: ${styleProps.styles.paragraphSpacingBefore}pt !important;`;
-    }
-    if (styleProps.styles.styleLevel) {
-      if (styleProps.styles.strong) {
-        style += 'font-weight: bold;';
+  if (null !== styleName && 'None' !== styleName) {
+    // to get the styles of the corresponding style name
+    const styleProps = getCustomStyleByName(styleName);
+    if (null !== styleProps && styleProps.styles) {
+      // [FS] IRAD-1100 2020-11-04
+      // Add in leading and trailing spacing (before and after a paragraph)
+      if (styleProps.styles.paragraphSpacingAfter) {
+        style += `margin-bottom: ${styleProps.styles.paragraphSpacingAfter}pt !important;`;
       }
-      if (styleProps.styles.boldNumbering) {
-        style += ' --czi-counter-bold: bold;';
+      if (styleProps.styles.paragraphSpacingBefore) {
+        style += `margin-top: ${styleProps.styles.paragraphSpacingBefore}pt !important;`;
       }
-      if (styleProps.styles.em) {
-        style += 'font-style: italic;';
+      if (styleProps.styles.styleLevel) {
+        if (styleProps.styles.strong) {
+          style += 'font-weight: bold;';
+        }
+        if (styleProps.styles.boldNumbering) {
+          style += ' --czi-counter-bold: bold;';
+        }
+        if (styleProps.styles.em) {
+          style += 'font-style: italic;';
+        }
+        if (styleProps.styles.color) {
+          style += `color: ${styleProps.styles.color};`;
+        }
+        if (styleProps.styles.fontSize) {
+          style += `font-size: ${styleProps.styles.fontSize}pt;`;
+        }
+        if (styleProps.styles.fontName) {
+          style += `font-family: ${styleProps.styles.fontName};`;
+        }
+        if (styleProps.styles.indent) {
+          indentOverriden = styleProps.styles.indent;
+        }
+        // [FS] IRAD-1462 2021-06-17
+        // FIX:  Numbering applied for paragraph even though the custom style not selected numbering(but set level)
+        styleLevel = styleProps.styles.hasNumbering
+          ? parseInt(styleProps.styles.styleLevel)
+          : 0;
+        style += refreshCounters(styleLevel);
       }
-      if (styleProps.styles.color) {
-        style += `color: ${styleProps.styles.color};`;
+    } else if (styleName && styleName.includes(RESERVED_STYLE_NONE_NUMBERING)) {
+      const indices = styleName.split(RESERVED_STYLE_NONE_NUMBERING);
+      if (indices && 2 === indices.length) {
+        styleLevel = parseInt(indices[1]);
       }
-      if (styleProps.styles.fontSize) {
-        style += `font-size: ${styleProps.styles.fontSize}pt;`;
+      if (styleLevel) {
+        style += refreshCounters(styleLevel);
       }
-      if (styleProps.styles.fontName) {
-        style += `font-family: ${styleProps.styles.fontName};`;
-      }
-      if (styleProps.styles.indent) {
-        indentOverriden = styleProps.styles.indent;
-      }
-      // [FS] IRAD-1462 2021-06-17
-      // FIX:  Numbering applied for paragraph even though the custom style not selected numbering(but set level)
-      styleLevel = styleProps.styles.hasNumbering
-        ? parseInt(styleProps.styles.styleLevel)
-        : 0;
-      style += refreshCounters(styleLevel);
-    }
-  } else if (styleName && styleName.includes(RESERVED_STYLE_NONE_NUMBERING)) {
-    const indices = styleName.split(RESERVED_STYLE_NONE_NUMBERING);
-    if (indices && 2 === indices.length) {
-      styleLevel = parseInt(indices[1]);
-    }
-    if (styleLevel) {
-      style += refreshCounters(styleLevel);
     }
   }
   return { style, styleLevel, indentOverriden };

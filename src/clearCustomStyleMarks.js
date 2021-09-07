@@ -2,8 +2,8 @@
 
 import { Schema, Node } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
-import { setTextAlign } from './TextAlignCommand';
-import { setTextLineSpacing } from './TextLineSpacingCommand';
+import { setTextAlign } from '@modusoperandi/licit-ui-commands';
+import { setTextLineSpacing } from '@modusoperandi/licit-ui-commands';
 import { setParagraphSpacing } from './ParagraphSpacingCommand';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 

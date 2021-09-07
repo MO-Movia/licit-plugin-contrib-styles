@@ -4,15 +4,15 @@
 //Need to change the button binding implementation
 import * as React from 'react';
 import './custom-style-edit.css';
-import ColorEditor from './ColorEditor';
-import createPopUp from './CreatePopUp';
-import { getLineSpacingValue } from './toCSSLineSpacing';
+import { ColorEditor } from '@modusoperandi/licit-ui-commands';
+import { createPopUp } from '@modusoperandi/licit-ui-commands';
+import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { isCustomStyleExists, setStyles, saveStyle, getStylesAsync } from '../customStyle';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 import { EditorState } from 'prosemirror-state';
 import type { Style } from '../StyleRuntime';
 
-let customStyles: StyleProps[] = [];
+let customStyles: Style[] = [];
 const otherStyleSelected = false;
 const editedStyles = [];
 
@@ -142,14 +142,22 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
       // Not able to set paragraph spacing before and after.
       case 'before':
         if (event) {
-          state = { styles: { ...this.state.styles } };
-          state.styles['paragraphSpacingBefore'] = event.target.value;
+          state = {
+            styles: {
+              ...this.state.styles,
+              paragraphSpacingBefore: event.target.value
+            }
+          };
         }
         break;
       case 'after':
         if (event) {
-          state = { styles: { ...this.state.styles } };
-          state.styles['paragraphSpacingAfter'] = event.target.value;
+          state = {
+            styles: {
+              ...this.state.styles,
+              paragraphSpacingAfter: event.target.value
+            }
+          };
         }
         break;
       default:
@@ -389,7 +397,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
   // to populate the selected custom styles.
   onSelectCustomStyle(e: any) {
     if (null !== customStyles) {
-      const value = this.state.customStyles.find(
+      const value = customStyles.find(
         (u) => u.styleName === e.target.value
       );
       // FIX: not able to modify and save the populated style

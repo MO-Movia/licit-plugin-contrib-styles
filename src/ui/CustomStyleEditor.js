@@ -12,7 +12,7 @@ import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 import { EditorState } from 'prosemirror-state';
 import type { Style } from '../StyleRuntime';
 
-let customStyles: StyleProps[] = [];
+let customStyles: Style[] = [];
 const otherStyleSelected = false;
 const editedStyles = [];
 

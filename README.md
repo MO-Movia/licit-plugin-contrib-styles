@@ -1,5 +1,8 @@
 
 # Customstyle ProseMirror Plugin For Licit
+![Build Status](https://github.com/MO-Movia/licit-plugin-contrib-styles/workflows/build/badge.svg?branch=master)
+![GitHub last commit](https://img.shields.io/github/last-commit/MO-Movia/licit-plugin-contrib-styles)
+[![codecov](https://codecov.io/gh/MO-Movia/licit-plugin-contrib-styles/branch/master/graph/badge.svg?token=NATCWSTFE6)](https://codecov.io/gh/MO-Movia/licit-plugin-contrib-styles)
 
 
 

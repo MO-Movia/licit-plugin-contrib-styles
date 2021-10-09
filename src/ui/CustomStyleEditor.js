@@ -10,8 +10,9 @@ import { getLineSpacingValue } from './toCSSLineSpacing';
 import { isCustomStyleExists, setStyles, saveStyle, getStylesAsync } from '../customStyle';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 import { EditorState } from 'prosemirror-state';
+import type { Style } from '../StyleRuntime';
 
-let customStyles = [];
+let customStyles: Style[] = [];
 const otherStyleSelected = false;
 const editedStyles = [];
 

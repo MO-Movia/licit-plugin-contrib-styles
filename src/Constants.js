@@ -5,6 +5,7 @@ export const MARK_TEXT_HIGHLIGHT = 'mark-text-highlight';
 export const MARKFROM = 'markFrom';
 export const PARAGRAPH = 'paragraph';
 export const STYLEKEY = 'styleName';
+export const ATTR_OVERRIDDEN = 'overridden';
 
 export type KeyValuePair = { [key: string]: any };
 

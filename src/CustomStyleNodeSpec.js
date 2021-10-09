@@ -34,9 +34,8 @@ function getAttrs(base: getAttrsFn, dom: HTMLElement) {
 function toDOM(base: toDOMFn, node: Node) {
   const output = base(node);
   output[1][STYLENAME] = node.attrs[STYLENAME];
-  const attrs = {};
   const { style, styleLevel, indentOverriden } = getStyle(node.attrs);
-  style && (attrs.style = style);
+  style && (output[1].style = style);
   if (styleLevel) {
     output[1][ATTRIBUTE_STYLE_LEVEL] = String(styleLevel);
   }

@@ -35,3 +35,4 @@
 ./flow-typed/.*
 
 [options]
+module.name_mapper='.*(.css.scss)' -> '{}'

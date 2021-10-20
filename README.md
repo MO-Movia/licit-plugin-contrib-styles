@@ -1,5 +1,8 @@
 
 # Customstyle ProseMirror Plugin For Licit
+![Build Status](https://github.com/MO-Movia/licit-plugin-contrib-styles/workflows/build/badge.svg?branch=master)
+![GitHub last commit](https://img.shields.io/github/last-commit/MO-Movia/licit-plugin-contrib-styles)
+[![codecov](https://codecov.io/gh/MO-Movia/licit-plugin-contrib-styles/branch/master/graph/badge.svg?token=NATCWSTFE6)](https://codecov.io/gh/MO-Movia/licit-plugin-contrib-styles)
 
 
 
@@ -16,7 +19,7 @@
   
 
 ### Commands
-
+ 
 - npm install
 
 - npm pack
@@ -27,9 +30,9 @@
 
 Run these commands before npm install.
 
-Put the _modusoperandi-licit-customstyles-0.0.1-0.tgz_ file in your project location, open command prompt and run:
+Put the _modusoperandi-licit-custom-styles-0.1.0.tgz_ file in your project location, open command prompt and run:
 
-- npm install *modusoperandi-licit-customstyles-0.0.1-0.tgz*
+- npm install *modusoperandi-licit-custom-styles-0.1.0.tgz*
 
 
 Include plugin in licit component 
@@ -39,8 +42,7 @@ Include plugin in licit component
 - add CustomstylePlugin instance in licit's plugin array
 
 ```
-
-import {CustomstylePlugin} from  '@modusoperandi/licit-customstyles';
+import {CustomstylePlugin} from  '@modusoperandi/licit-custom-styles';
 
 Expecting a CustomStyleRuntime to configure the style service to licit expects methods like saveStyle(),getStyles(),renameStyle() and removeStyle(). Please refer *licit\client\CustomStyleRuntime.js* for getting more detailed idea.
 
@@ -49,7 +51,8 @@ const styleRuntime = new CustomStyleRuntime();
 const plugins = [new CustomstylePlugin(styleRuntime)]
 
 ReactDOM.render(<Licit docID={0} plugins={plugins}/>
-  
-
 ```
- 
+- To load the styles from the customstyle , import the customstyle.css file in  the default global CSS file
+ ```
+@import  "~@modusoperandi/licit-custom-styles/dist/customstyle.css";
+```

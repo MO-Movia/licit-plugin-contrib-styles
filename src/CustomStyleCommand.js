@@ -2,7 +2,7 @@
 import { EditorState, TextSelection, Selection } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
-import { Node, Fragment, Schema, Mark } from 'prosemirror-model';
+import { Node, Fragment, Schema } from 'prosemirror-model';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { atViewportCenter } from '@modusoperandi/licit-ui-commands';
 import { createPopUp } from '@modusoperandi/licit-ui-commands';
@@ -542,11 +542,6 @@ function compareMarkWithStyle(mark, style, tr, startPos, endPos, retObj, state) 
   }
 
   overridden = !same;
-  // [FS] IRAD-1475 2021-07-05
-  // FIX: Unable to apply tool bar format after applying a style
-  if (overridden && undefined === mark.attrs[ATTR_OVERRIDDEN]) {
-    addMarkAttribute(mark, state);
-  }
   if (
     undefined !== mark.attrs[ATTR_OVERRIDDEN] &&
     mark.attrs[ATTR_OVERRIDDEN] !== overridden &&
@@ -562,39 +557,6 @@ function compareMarkWithStyle(mark, style, tr, startPos, endPos, retObj, state) 
     case LHEIGHT:*/
 
   return tr;
-}
-
-function addMarkAttribute(mark: Mark, state: EditorState) {
-  const NEWATTRS = [ATTR_OVERRIDDEN];
-  const existingAttr = getAnExistingAttribute(state.schema);
-  const requiredAttrs = [...NEWATTRS];
-  requiredAttrs.forEach((key) => {
-    if (mark.attrs) {
-      let newAttr = mark.attrs[key];
-      if (!newAttr) {
-        if (existingAttr) {
-          newAttr = Object.assign(
-            Object.create(Object.getPrototypeOf(existingAttr)),
-            existingAttr
-          );
-          newAttr.default = false;
-        } else {
-          newAttr = {};
-          newAttr.hasDefault = true;
-          newAttr.default = false;
-        }
-        mark.attrs[key] = newAttr;
-      }
-    }
-  });
-}
-
-function getAnExistingAttribute(schema) {
-  let existingAttr = null;
-
-  existingAttr = schema['marks']['link']['attrs']['href'];
-
-  return existingAttr;
 }
 
 export function updateOverrideFlag(

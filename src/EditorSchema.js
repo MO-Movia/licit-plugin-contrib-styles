@@ -6,11 +6,39 @@ import {
   getCustomStyleAttrs,
 } from './CustomStyleNodeSpec';
 import {
+  toMarkDOM,
+  getMarkAttrs,
+} from './CustomStyleMarkSpec';
+import {
   STYLEKEY,
   PARAGRAPH,
 } from './Constants';
 
+import {
+  MARK_STRONG,
+  MARK_EM,
+  MARK_TEXT_COLOR,
+  MARK_FONT_SIZE,
+  MARK_FONT_TYPE,
+  MARK_STRIKE,
+  MARK_SUPER,
+  MARK_TEXT_HIGHLIGHT,
+  MARK_UNDERLINE,
+} from './MarkNames';
 
+const ALLOWED_MARKS = [
+  MARK_STRONG,
+  MARK_EM,
+  MARK_TEXT_COLOR,
+  MARK_FONT_SIZE,
+  MARK_FONT_TYPE,
+  MARK_STRIKE,
+  MARK_SUPER,
+  MARK_TEXT_HIGHLIGHT,
+  MARK_UNDERLINE,
+];
+const ATTR_OVERRIDDEN = 'overridden';
+const NEWATTRS = [ATTR_OVERRIDDEN];
 const SPEC = 'spec';
 const NODES = 'nodes';
 const CONTENT = 'content';
@@ -22,6 +50,7 @@ const ALIGN = 'align';
 export function effectiveSchema(schema: Schema) {
   if (schema && schema[SPEC]) {
     createStyleNodeAttributes(schema);
+    createNewAttributes(schema);
   }
   return schema;
 }
@@ -87,4 +116,94 @@ function createStyleNodeAttributes(schema: Schema) {
   });
 }
 
+function getAnExistingAttribute(schema) {
+  let existingAttr = null;
+  existingAttr = schema['marks']['link']['attrs']['href'];
+  return existingAttr;
+}
+function getMarkContent(type, schema, nodeAttrs, toDOM) {
+  let content = null;
+  const contentArr = schema[SPEC]['marks']['content'];
+  const len = contentArr.length;
+  // check even index to find the content type name
+  for (let i = 0; i < len; i += 2) {
+    if (type == contentArr[i]) {
+      // found, so get the actual content which is in the next index.
+      content = contentArr[i + 1];
+      // Always append to base calls.
+      if (!content[PARSEDOM][0][GETATTRS]) {
+        if (MARK_STRONG === type) {
+          content[PARSEDOM][0].getAttrs = (node) => node.style.fontWeight != 'normal' && null;
+        }
+        else if (MARK_EM === type) {
+          content[PARSEDOM][0].getAttrs = (node) => node.style.fontStyle === 'italic' && null;
+        }
+      }
+      content[PARSEDOM][0][GETATTRS] = nodeAttrs.bind(
+        null,
+        content[PARSEDOM][0][GETATTRS]
+      );
+      content[TODOM] = toDOM.bind(null, content[TODOM]);
+    }
+  }
+  return content;
+}
+function getRequiredMarks(marks, markName, schema) {
+  const mark = getMarkContent(markName, schema, getMarkAttrs, toMarkDOM);
+  if (mark) {
+    marks.push(mark);
+    marks.push(schema[SPEC]['marks'][markName]);
+  }
+}
+function createMarkAttributes(mark, markName, existingAttr) {
+  if (mark) {
+    const requiredAttrs = [...NEWATTRS];
+    requiredAttrs.forEach((key) => {
+      if (!mark.attrs) {
+        mark['attrs'] = {};
+      }
+      if (mark.attrs) {
+        let newAttr = mark.attrs[key];
+        if (!newAttr) {
+          if (existingAttr) {
+            newAttr = Object.assign(
+              Object.create(Object.getPrototypeOf(existingAttr)),
+              existingAttr
+            );
+            newAttr.default = false;
+          } else {
+            newAttr = {};
+            newAttr.hasDefault = true;
+            newAttr.default = false;
+          }
+          mark.attrs[key] = newAttr;
+        }
+      }
+    });
+  }
+}
+function createNewAttributes(schema) {
+  const marks = [];
+  const existingAttr = getAnExistingAttribute(schema);
+  ALLOWED_MARKS.forEach((name) => {
+    getRequiredMarks(marks, name, schema);
+  });
+  for (let i = 0, name = ''; i < marks.length; i++) {
+    if (i < marks.length - 1) {
+      // even items are content.
+      // odd items are marks.
+      // Hence name is available only in the node.
+      if (0 === i % 2) {
+        const mark = marks[i + 1];
+        if (mark) {
+          name = mark.name;
+        }
+      }
+    } else {
+      name = '';
+    }
+    createMarkAttributes(marks[i], name, existingAttr);
+  }
+  return schema;
+}
 export const applyEffectiveSchema = effectiveSchema;

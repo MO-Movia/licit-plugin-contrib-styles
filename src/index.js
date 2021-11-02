@@ -149,6 +149,12 @@ function applyStyles(state, tr) {
   return tr;
 }
 
+function validateStyleName(node) {
+  let bOK = false;
+  bOK = node && node.attrs && node.attrs.styleName && RESERVED_STYLE_NONE !== node.attrs.styleName;
+  return bOK;
+}
+
 // [FS] IRAD-1130 2021-01-07
 // Handle heirarchy on delete
 function manageHierarchyOnDelete(prevState, nextState, tr, view) {
@@ -174,9 +180,7 @@ function manageHierarchyOnDelete(prevState, nextState, tr, view) {
         DELKEYCODE === view.lastKeyCode ? selectedPos - 1 : selectedPos + 1;
       const selectedNode = prevState.doc.nodeAt(selectedPos);
       if (
-        selectedNode &&
-        selectedNode.attrs &&
-        selectedNode.attrs.styleName !== 'None' &&
+        validateStyleName(selectedNode) &&
         0 !== Number(getStyleLevel(selectedNode.attrs.styleName))
       ) {
         if (nodesBeforeSelection.length > 0 || nodesAfterSelection.length > 0) {
@@ -283,7 +287,7 @@ function applyLineStyleForBoldPartial(nextState, tr) {
       tr = nextState.tr;
     }
     // Check styleName is available for node
-    if (node.attrs && node.attrs.styleName && RESERVED_STYLE_NONE !== node.attrs.styleName) {
+    if (validateStyleName(node)) {
       const style = getCustomStyleByName(node.attrs.styleName);
       if (null !== style && style.styles && style.styles.boldPartial) {
         tr = applyLineStyle(nextState, tr, node, pos);
@@ -303,7 +307,7 @@ function applyStyleForEmptyParagraph(nextState, tr) {
   }
 
   const node = nextState.tr.doc.nodeAt(startPos);
-  if (RESERVED_STYLE_NONE !== node.attrs.styleName) {
+  if (validateStyleName(node)) {
     if (
       node.content &&
       node.content.content &&

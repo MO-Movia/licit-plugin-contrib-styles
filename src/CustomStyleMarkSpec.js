@@ -10,9 +10,11 @@ type toDOMFn = (node: Node) => DOMOutputSpec;
 type getAttrsFn = (p: Node | string) => KeyValuePair;
 
 function getAttrs(base: getAttrsFn, dom: HTMLElement) {
-  if (typeof dom != 'string') {
+  if (typeof dom != 'string' && undefined !== base) {
     const attrs = base(dom);
-    attrs[ATTR_OVERRIDDEN] = dom.getAttribute(ATTR_OVERRIDDEN);
+    if (typeof attrs === 'object') {
+      attrs[ATTR_OVERRIDDEN] = dom.getAttribute(ATTR_OVERRIDDEN);
+    }
     return attrs;
   }
   else {

@@ -9,7 +9,7 @@ import {
   getStyleLevel,
   applyLineStyle
 } from './CustomStyleCommand';
-import { getCustomStyleByName, getCustomStyleByLevel, setStyleRuntime } from './customStyle';
+import { getCustomStyleByName, getCustomStyleByLevel, setStyleRuntime, isStylesLoaded } from './customStyle';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
@@ -64,11 +64,13 @@ export class CustomstylePlugin extends Plugin {
       appendTransaction: (transactions, prevState, nextState) => {
         let tr = null;
         if (!loaded) {
-          loaded = true;
+          loaded = isStylesLoaded();
+          if(loaded) {
           tr = updateStyleOverrideFlag(nextState, tr);
           // do this only once when the document is loaded.
-          tr = applyStyles(nextState, tr);
-        } else if (isDocChanged(transactions)) {
+          tr = applyStyles(nextState, tr);}
+        }
+        else if (isDocChanged(transactions)) {
           if (!firstTime) {
             // when user updates
             tr = updateStyleOverrideFlag(nextState, tr);

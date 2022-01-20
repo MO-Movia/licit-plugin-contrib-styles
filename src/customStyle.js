@@ -60,6 +60,15 @@ export function setStyles(style: Style[]) {
 }
 export function setStyleRuntime(runtime: any) {
   styleRuntime = runtime;
+  getStylesAsync().then((result) => {
+    if (result) {
+      setStyles(result);
+    }
+  });
+}
+
+export function isStylesLoaded() {
+  return customStyles.length > 0;
 }
 
 export function hasStyleRuntime() {

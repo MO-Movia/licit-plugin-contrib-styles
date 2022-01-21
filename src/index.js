@@ -51,7 +51,7 @@ export class CustomstylePlugin extends Plugin {
         init(config, state) {
           loaded = false;
           firstTime = true;
-          setStyleRuntime(runtime, refreshToApplyStyles.bind(this, state));
+          setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
         },
         apply(tr, prev, oldState, newState) {
           // [FS] IRAD-1202 2021-02-15
@@ -162,10 +162,10 @@ function applyStyles(state, tr) {
 }
 
 // [FS] IRAD-1668 2022-01-21
-function refreshToApplyStyles(state) {
+function refreshToApplyStyles() {
   if (this.csview) {
     this.csview.dispatch(
-      state.tr.setSelection(TextSelection.create(state.doc, 0))
+      this.csview.state.tr.scrollIntoView()
     );
   }
 }

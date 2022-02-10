@@ -1,6 +1,6 @@
 // @flow
 
-import './czi-custom-button.css';
+import '@modusoperandi/licit-ui-commands/dist/ui/czi-custom-button.css';
 import * as React from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
@@ -8,8 +8,8 @@ import { EditorView } from 'prosemirror-view';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import './custom-dropdown.css';
 import { getCustomStyleByName, getCustomStyle } from '../customStyle';
-import PointerSurface from './PointerSurface';
-import type { PointerSurfaceProps } from './PointerSurface';
+import { PointerSurface } from '@modusoperandi/licit-ui-commands';;
+import type { PointerSurfaceProps } from '@modusoperandi/licit-ui-commands';
 import Icon from './Icon';
 import cx from 'classnames';
 class CustomStyleItem extends React.PureComponent<any, any> {

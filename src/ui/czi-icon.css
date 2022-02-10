@@ -62,11 +62,17 @@
 }
 
 .czi-icon .superscript-top {
-  margin: 0 2px;
+  margin-bottom: 0;
+  margin-left: 2px;
+  margin-right: 2px;
+  margin-top: 0;
   vertical-align: super;
 }
 
 .czi-icon .subscript-bottom {
-  margin: 0 2px;
+  margin-bottom: 0;
+  margin-left: 2px;
+  margin-right: 2px;
+  margin-top: 0;
   vertical-align: sub;
 }

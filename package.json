@@ -9,6 +9,9 @@
     "type": "git",
     "url": "git+https://github.com/MO-Movia/licit.git"
   },
+  "bundleDependencies": [
+    "prosemirror-utils"
+  ],
   "scripts": {
     "test": "jest --passWithNoTests",
     "build:clean": "rm -rf dist/ && rm -f modusoperandi-licit-customstyles-*.*.*.tgz",
@@ -76,7 +79,7 @@
   },
   "dependencies": {
     "@modusoperandi/licit-doc-attrs-step": "^0.1.1",
-    "@modusoperandi/licit-ui-commands": "git+https://github.com/MO-Movia/licit-ui-components.git",
+    "@modusoperandi/licit-ui-commands": "file:modusoperandi-licit-ui-commands-0.0.1.tgz",
     "classnames": "^2.3.1",
     "color": "3.1.2",
     "cors": "^2.8.5",

@@ -79,7 +79,7 @@
   },
   "dependencies": {
     "@modusoperandi/licit-doc-attrs-step": "^0.1.1",
-    "@modusoperandi/licit-ui-commands": "git+https://github.com/MO-Movia/licit-ui-components.git",
+    "@modusoperandi/licit-ui-commands": "git+https://github.com/MO-Movia/licit-ui-components.git#prosemirror-model-upgrade",
     "classnames": "^2.3.1",
     "color": "3.1.2",
     "cors": "^2.8.5",

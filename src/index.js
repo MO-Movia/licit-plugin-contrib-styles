@@ -1,7 +1,7 @@
 // @flow
 
 // Plugin to handle Styles.
-import { Plugin, PluginKey, TextSelection } from 'prosemirror-state';
+import { Plugin, PluginKey } from 'prosemirror-state';
 import {
   updateOverrideFlag,
   applyLatestStyle,

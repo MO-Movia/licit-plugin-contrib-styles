@@ -58,8 +58,19 @@ export function getCustomStyleByName(name: string): Style {
 export function setStyles(style: Style[]) {
   customStyles = style;
 }
-export function setStyleRuntime(runtime: any) {
+
+export function setStyleRuntime(runtime: any, callback) {
   styleRuntime = runtime;
+  getStylesAsync().then((result) => {
+    if (result) {
+      setStyles(result);
+      callback();
+    }
+  });
+}
+
+export function isStylesLoaded() {
+  return customStyles.length > 0;
 }
 
 export function hasStyleRuntime() {

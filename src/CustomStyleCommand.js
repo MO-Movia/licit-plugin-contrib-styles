@@ -4,19 +4,19 @@ import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
 import { Node, Fragment, Schema } from 'prosemirror-model';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
-import { atViewportCenter } from './ui/PopUpPosition';
-import createPopUp from './ui/CreatePopUp';
+import { atViewportCenter } from '@modusoperandi/licit-ui-commands';
+import { createPopUp } from '@modusoperandi/licit-ui-commands';
 import AlertInfo from './ui/AlertInfo';
 import CustomStyleEditor from './ui/CustomStyleEditor';
-import MarkToggleCommand from './MarkToggleCommand';
-import TextColorCommand from './TextColorCommand';
-import TextHighlightCommand from './TextHighlightCommand';
-import FontTypeCommand from './FontTypeCommand';
-import FontSizeCommand from './FontSizeCommand';
-import TextLineSpacingCommand from './TextLineSpacingCommand';
-import TextAlignCommand, { setTextAlign } from './TextAlignCommand';
+import { MarkToggleCommand } from '@modusoperandi/licit-ui-commands';
+import { TextColorCommand } from '@modusoperandi/licit-ui-commands';
+import { TextHighlightCommand } from '@modusoperandi/licit-ui-commands';
+import { FontTypeCommand } from '@modusoperandi/licit-ui-commands';
+import { FontSizeCommand } from '@modusoperandi/licit-ui-commands';
+import { TextLineSpacingCommand } from '@modusoperandi/licit-ui-commands';
+import { TextAlignCommand, setTextAlign } from '@modusoperandi/licit-ui-commands';
 import ParagraphSpacingCommand from './ParagraphSpacingCommand';
-import IndentCommand from './IndentCommand';
+import { IndentCommand } from '@modusoperandi/licit-ui-commands';
 import {
   removeTextAlignAndLineSpacing,
   clearCustomStyleAttribute,
@@ -42,7 +42,7 @@ import {
   MARK_UNDERLINE,
 } from './MarkNames';
 import { PARAGRAPH } from './NodeNames';
-import { getLineSpacingValue } from './ui/toCSSLineSpacing';
+import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
@@ -396,7 +396,7 @@ class CustomStyleCommand extends UICommand {
   // shows the create style popup
   editWindow(state: EditorState, view: EditorView, mode: number) {
     const { dispatch } = view;
-    let tr = state.tr;
+    const tr = state.tr;
     const doc = state.doc;
 
     this._popUp = createPopUp(
@@ -418,49 +418,9 @@ class CustomStyleCommand extends UICommand {
                   this.getCustomStyles(style, view);
                 });
               } else {
-                delete val.editorView;
-                // [FS] IRAD-1415 2021-06-02
-                // Issue: Allow to create custom style numbering level 2 without level 1
-                if (
-                  styleHasNumbering(val) &&
-                  !isValidHeirarchy(
-                    val.styleName,
-                    parseInt(val.styles.styleLevel)
-                  )
-                ) {
 
-                  this.showAlert();
-                } else {
-                  saveStyle(val).then((result) => {
-                    setStyles(result);
-                    // Issue fix: Created custom style Numbering not applied to paragraph.
-                    tr = tr.setSelection(TextSelection.create(doc, 0, 0));
-                    // Apply created styles to document
-                    const { selection } = state;
-                    const startPos = selection.$from.before(1);
-                    const endPos = selection.$to.after(1);
-                    const node = getNode(state, startPos, endPos, tr);
-                    // [FS] IRAD-1238 2021-03-08
-                    // Fix: Shows alert message 'This Numberings breaks hierarchy, Previous levels are missing' on create styles
-                    // if a numbering applied in editor.
-                    if (
-                      !styleHasNumbering(val) ||
-                      isValidHeirarchy(val.styleName, 0)
-                    ) {
-                      // to add previous heirarchy levels
-                      hasMismatchHeirarchy(
-                        state,
-                        tr,
-                        node,
-                        startPos,
-                        endPos,
-                        val.styleName
-                      );
-                      tr = applyStyle(val, val.styleName, state, tr);
-                      dispatch(tr);
-                    }
-                  });
-                }
+                // new style
+                this.createNewStyle(val, tr, state, dispatch, doc);
               }
             }
           }
@@ -468,6 +428,50 @@ class CustomStyleCommand extends UICommand {
         },
       }
     );
+  }
+  createNewStyle(val: any, tr: any, state: any, dispatch: any, doc: any) {
+    delete val.editorView;
+    // [FS] IRAD-1415 2021-06-02
+    // Issue: Allow to create custom style numbering level 2 without level 1
+    if (
+      styleHasNumbering(val) &&
+      !isValidHeirarchy(
+        val.styleName,
+        parseInt(val.styles.styleLevel)
+      )
+    ) {
+      this.showAlert();
+    } else {
+      saveStyle(val).then((result) => {
+        setStyles(result);
+        // Issue fix: Created custom style Numbering not applied to paragraph.
+        tr = tr.setSelection(TextSelection.create(doc, 0, 0));
+        // Apply created styles to document
+        const { selection } = state;
+        const startPos = selection.$from.before(1);
+        const endPos = selection.$to.after(1);
+        const node = getNode(state, startPos, endPos, tr);
+        // [FS] IRAD-1238 2021-03-08
+        // Fix: Shows alert message 'This Numberings breaks hierarchy, Previous levels are missing' on create styles
+        // if a numbering applied in editor.
+        if (
+          !styleHasNumbering(val) ||
+          isValidHeirarchy(val.styleName, 0)
+        ) {
+          // to add previous heirarchy levels
+          hasMismatchHeirarchy(
+            state,
+            tr,
+            node,
+            startPos,
+            endPos,
+            val.styleName
+          );
+          tr = applyStyle(val, val.styleName, state, tr);
+          dispatch(tr);
+        }
+      });
+    }
   }
 
   // [FS] IRAD-1231 2021-03-02
@@ -553,10 +557,6 @@ function compareMarkWithStyle(mark, style, tr, startPos, endPos, retObj, state) 
     case LHEIGHT:*/
 
   return tr;
-
-
-
-
 }
 
 export function updateOverrideFlag(
@@ -986,21 +986,15 @@ function createEmptyElement(
       }
       if (nodesAfterSelection.length > 0 && !hasNodeAfter) {
         nodesAfterSelection.forEach((item) => {
-          if (startPos === item.pos) {
-            newattrs = MISSED_HEIRACHY_ELEMENT.attrs;
+          if (startPos > item.pos) {
             posArray.push({
               pos: startPos,
               appliedLevel: appliedLevel,
               currentLevel: 0,
             });
-          } else if (startPos < item.pos) {
+          }
+          else {
             newattrs = MISSED_HEIRACHY_ELEMENT.attrs;
-            posArray.push({
-              pos: startPos,
-              appliedLevel: appliedLevel,
-              currentLevel: 0,
-            });
-          } else if (startPos > item.pos) {
             posArray.push({
               pos: startPos,
               appliedLevel: appliedLevel,

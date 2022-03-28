@@ -1,7 +1,7 @@
 // @flow
 
 import CustomMenuButton from './CustomMenuButton';
-import HeadingCommand from '../HeadingCommand';
+import { HeadingCommand } from '@modusoperandi/licit-ui-commands';
 import CustomStyleCommand from '../CustomStyleCommand';
 
 import * as React from 'react';

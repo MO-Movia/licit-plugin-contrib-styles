@@ -1,17 +1,22 @@
 // @flow
 
 // Plugin to handle Styles.
-import { Plugin, PluginKey } from 'prosemirror-state';
+import { Plugin, PluginKey, TextSelection } from 'prosemirror-state';
 import {
   updateOverrideFlag,
   applyLatestStyle,
   getMarkByStyleName,
   getStyleLevel,
-  applyLineStyle
+  applyLineStyle,
 } from './CustomStyleCommand';
-import { getCustomStyleByName, getCustomStyleByLevel, setStyleRuntime } from './customStyle';
+import {
+  getCustomStyleByName,
+  getCustomStyleByLevel,
+  setStyleRuntime,
+  isStylesLoaded,
+} from './customStyle';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
-import { getLineSpacingValue } from './ui/toCSSLineSpacing';
+import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
 import { Node, Schema } from 'prosemirror-model';
 import CustomstyleDropDownCommand from './ui/CustomstyleDropDownCommand';
@@ -46,13 +51,24 @@ export class CustomstylePlugin extends Plugin {
         init(config, state) {
           loaded = false;
           firstTime = true;
-          setStyleRuntime(runtime);
+          setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
         },
         apply(tr, prev, oldState, newState) {
           // [FS] IRAD-1202 2021-02-15
           remapCounterFlags(tr);
         },
       },
+      view: (view) => {
+        // [FS] IRAD-1668 2022-01-21
+        // dummy plugin view so that EditorView is accessible when refreshing the document
+        // to apply styles after getting the styles.
+        this.csview = view;
+        return {
+          update: () => {},
+          destroy: () => {},
+        };
+      },
+
       props: {
         handleDOMEvents: {
           keydown(view, event) {
@@ -64,10 +80,12 @@ export class CustomstylePlugin extends Plugin {
       appendTransaction: (transactions, prevState, nextState) => {
         let tr = null;
         if (!loaded) {
-          loaded = true;
-          tr = updateStyleOverrideFlag(nextState, tr);
-          // do this only once when the document is loaded.
-          tr = applyStyles(nextState, tr);
+          loaded = isStylesLoaded();
+          if (loaded) {
+            tr = updateStyleOverrideFlag(nextState, tr);
+            // do this only once when the document is loaded.
+            tr = applyStyles(nextState, tr);
+          }
         } else if (isDocChanged(transactions)) {
           if (!firstTime) {
             // when user updates
@@ -80,15 +98,9 @@ export class CustomstylePlugin extends Plugin {
           firstTime = false;
           // custom style for next line
           if (csview && ENTERKEYCODE === csview.lastKeyCode) {
-            tr = applyStyleForNextParagraph(
-              prevState,
-              nextState,
-              tr,
-              csview
-            );
+            tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
           }
           tr = applyLineStyleForBoldPartial(nextState, tr);
-
         }
         return tr;
       },
@@ -153,6 +165,14 @@ function validateStyleName(node) {
   let bOK = false;
   bOK = node && node.attrs && node.attrs.styleName && RESERVED_STYLE_NONE !== node.attrs.styleName;
   return bOK;
+}
+// [FS] IRAD-1668 2022-01-21
+function refreshToApplyStyles() {
+  if (this.csview) {
+    this.csview.dispatch(
+      this.csview.state.tr.scrollIntoView()
+    );
+  }
 }
 
 // [FS] IRAD-1130 2021-01-07
@@ -315,7 +335,14 @@ function applyStyleForEmptyParagraph(nextState, tr) {
       node.content.content[0].marks &&
       0 === node.content.content[0].marks.length
     ) {
-      tr = applyLatestStyle(node.attrs.styleName, nextState, tr, node, startPos, endPos);
+      tr = applyLatestStyle(
+        node.attrs.styleName,
+        nextState,
+        tr,
+        node,
+        startPos,
+        endPos
+      );
     }
   }
   return tr;
@@ -348,7 +375,8 @@ function applyStyleForNextParagraph(prevState, nextState, tr, view) {
           nextNode &&
           IsActiveNode &&
           nextNode.type.name === 'paragraph' &&
-          nextNode.attrs.styleName === 'None'
+          (nextNode.attrs.styleName === 'None' ||
+            'null' === nextNode.attrs.styleName)
         ) {
           const style = getCustomStyleByName(newattrs.styleName);
           if (style && style.styles && style.styles.nextLineStyleName) {
@@ -359,7 +387,9 @@ function applyStyleForNextParagraph(prevState, nextState, tr, view) {
             // [FS] IRAD-1201 2021-02-18
             // get the nextLine Style from the current style object.
             const marks = getMarkByStyleName(
-              (style.styles && style.styles.nextLineStyleName) ? style.styles.nextLineStyleName : '',
+              style.styles && style.styles.nextLineStyleName
+                ? style.styles.nextLineStyleName
+                : '',
               nextState.schema
             );
             node.descendants((child, pos) => {
@@ -395,7 +425,9 @@ function setNodeAttrs(nextLineStyleName, newattrs) {
       newattrs.align = nextLineStyle.styles.align;
       // [FS] IRAD-1223 2021-03-04
       // Line spacing not working for next line style
-      newattrs.lineSpacing = getLineSpacingValue(nextLineStyle.styles.lineHeight ? nextLineStyle.styles.lineHeight : '');
+      newattrs.lineSpacing = getLineSpacingValue(
+        nextLineStyle.styles.lineHeight ? nextLineStyle.styles.lineHeight : ''
+      );
     } else if (RESERVED_STYLE_NONE === nextLineStyleName) {
       // [FS] IRAD-1229 2021-03-03
       // Next line style None not applied

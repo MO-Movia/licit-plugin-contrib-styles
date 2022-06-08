@@ -13,7 +13,7 @@
 
 ### Commands
  
-- npm install
+- npm install --legacy-peer-deps --omit=optional --no-shrinkwrap
 
 - npm pack 
 

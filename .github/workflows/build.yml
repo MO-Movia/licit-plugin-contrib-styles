@@ -25,7 +25,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         fetch-depth: 2
-    - run: npm ci --omit=optional 
+    - run: npm ci --no-optional 
     - run: npm run build:dist
     - run: npm run test
 

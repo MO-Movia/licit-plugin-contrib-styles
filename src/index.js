@@ -97,7 +97,7 @@ export class CustomstylePlugin extends Plugin {
 
           firstTime = false;
           // custom style for next line
-          if (csview && ENTERKEYCODE === csview.lastKeyCode) {
+          if (csview && ENTERKEYCODE === csview.input.lastKeyCode) {
             tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
           }
           tr = applyLineStyleForBoldPartial(nextState, tr);
@@ -184,7 +184,7 @@ function manageHierarchyOnDelete(prevState, nextState, tr, view) {
   if (prevState.doc !== nextState.doc) {
     if (
       view &&
-      (DELKEYCODE === view.lastKeyCode || BACKSPACEKEYCODE === view.lastKeyCode)
+      (DELKEYCODE === view.input.lastKeyCode || BACKSPACEKEYCODE === view.input.lastKeyCode)
     ) {
       const nextNodes = nodeAssignment(nextState);
       // seperating  the nodes to two arrays, ie selection before and after
@@ -197,7 +197,7 @@ function manageHierarchyOnDelete(prevState, nextState, tr, view) {
       });
       // for backspace and delete to get the correct node position
       selectedPos =
-        DELKEYCODE === view.lastKeyCode ? selectedPos - 1 : selectedPos + 1;
+        DELKEYCODE === view.input.lastKeyCode ? selectedPos - 1 : selectedPos + 1;
       const selectedNode = prevState.doc.nodeAt(selectedPos);
       if (
         validateStyleName(selectedNode) &&
@@ -449,7 +449,7 @@ function resetNodeAttrs(newattrs, nextLineStyleName) {
 function isNewParagraph(prevState, nextState, view) {
   let bOk = false;
   if (
-    ENTERKEYCODE === view.lastKeyCode &&
+    ENTERKEYCODE === view.input.lastKeyCode &&
     PARA_POSITION_DIFF === nextState.selection.from - prevState.selection.from
   ) {
     bOk = true;

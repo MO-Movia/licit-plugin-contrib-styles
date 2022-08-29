@@ -524,7 +524,7 @@ function compareMarkWithStyle(mark, style, tr, startPos, endPos, retObj, state) 
         same = mark.attrs['color'] === style[COLOR];
         break;
       case MARK_FONT_SIZE:
-        same = mark.attrs['pt'] === style[FONTSIZE];
+        same = mark.attrs['pt'] ===  Number(style[FONTSIZE]);
         break;
       case MARK_FONT_TYPE:
         same = mark.attrs['name'] === style[FONTNAME];

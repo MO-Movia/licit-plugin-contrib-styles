@@ -64,8 +64,8 @@ export class CustomstylePlugin extends Plugin {
         // to apply styles after getting the styles.
         this.csview = view;
         return {
-          update: () => {},
-          destroy: () => {},
+          update: () => { },
+          destroy: () => { },
         };
       },
 
@@ -374,10 +374,7 @@ function applyStyleForNextParagraph(prevState, nextState, tr, view) {
         if (
           nextNode &&
           IsActiveNode &&
-          nextNode.type.name === 'paragraph' &&
-          (nextNode.attrs.styleName === 'None' ||
-            'null' === nextNode.attrs.styleName)
-        ) {
+          nextNode.type.name === 'paragraph') {
           const style = getCustomStyleByName(newattrs.styleName);
           if (style && style.styles && style.styles.nextLineStyleName) {
             // [FS] IRAD-1217 2021-02-24

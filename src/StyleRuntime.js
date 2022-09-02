@@ -27,6 +27,7 @@ export type Style = {
     isLevelbased?: boolean, // true= Text indent will be based on Level
     indent?: string, // Text indent
     nextLineStyleName?: string,
+    toc?:Boolean,
   },
 };
 

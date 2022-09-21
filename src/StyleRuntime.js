@@ -27,13 +27,15 @@ export type Style = {
     isLevelbased?: boolean, // true= Text indent will be based on Level
     indent?: string, // Text indent
     nextLineStyleName?: string,
+    toc?: Boolean,
+    isHidden?: Boolean,
   },
 };
 
 /**
  * Styles to display in Preview text
  **/
- export type CSSStyle = {
+export type CSSStyle = {
   float: ?string, // css float property
   fontWeight: ?string, // css font-weight property
   fontStyle: ?string, //css font-style property

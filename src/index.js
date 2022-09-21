@@ -13,6 +13,7 @@ import {
   getCustomStyleByName,
   getCustomStyleByLevel,
   setStyleRuntime,
+  setHidenumberingFlag,
   isStylesLoaded,
 } from './customStyle';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
@@ -22,6 +23,9 @@ import { Node, Schema } from 'prosemirror-model';
 import CustomstyleDropDownCommand from './ui/CustomstyleDropDownCommand';
 import { applyEffectiveSchema } from './EditorSchema';
 import type { StyleRuntime } from './StyleRuntime';
+import {
+  saveStyle
+} from './customStyle';
 
 const ENTERKEYCODE = 13;
 const DELKEYCODE = 46;
@@ -41,7 +45,7 @@ const requiredAddAttr = (node) => {
 // [FS] IRAD-1503 2021-07-02
 // Fix: Update the private plugin classes as a named export rather than the default
 export class CustomstylePlugin extends Plugin {
-  constructor(runtime: StyleRuntime) {
+  constructor(runtime: StyleRuntime, hideNumbering: boolean) {
     let csview = null;
     let firstTime = true;
     let loaded = false;
@@ -52,6 +56,9 @@ export class CustomstylePlugin extends Plugin {
           loaded = false;
           firstTime = true;
           setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
+          setHidenumberingFlag(hideNumbering);
+          // save a Default style in server
+          saveDefaultStyle();
         },
         apply(tr, prev, oldState, newState) {
           // [FS] IRAD-1202 2021-02-15
@@ -70,6 +77,26 @@ export class CustomstylePlugin extends Plugin {
       },
 
       props: {
+        handlePaste(view, event, slice) {
+          const startPos = view.state.selection.$from.before(1);
+          const endPos = view.state.selection.$to.after(1) - 1;
+          if (slice.content && slice.content.content[0] && slice.content.content[0].attrs) {
+            const styleName = slice.content.content[0].attrs.styleName;
+            const node = view.state.tr.doc.nodeAt(startPos);
+            const newattrs = Object.assign({}, node.attrs);
+            newattrs.styleName = styleName;
+            const storedmarks = getMarkByStyleName(styleName, view.state.schema);
+            let tr = view.state.tr.setNodeMarkup(startPos, undefined, newattrs);
+            tr.storedMarks = storedmarks;
+            tr = applyLatestStyle(styleName, view.state, tr, node, startPos, endPos);
+
+            if (tr) {
+              view.dispatch(tr);
+            }
+          }
+          return false;
+
+        },
         handleDOMEvents: {
           keydown(view, event) {
             csview = view;
@@ -97,8 +124,16 @@ export class CustomstylePlugin extends Plugin {
 
           firstTime = false;
           // custom style for next line
-          if (csview && ENTERKEYCODE === csview.input.lastKeyCode) {
-            tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
+
+
+          if (csview) {
+            const head = csview.state.selection.$head;
+            const cPos = head.pos;
+            const start = head.posAtIndex(0);
+            if (ENTERKEYCODE === csview.input.lastKeyCode && (cPos > start)) {
+              tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
+            }
+
           }
           tr = applyLineStyleForBoldPartial(nextState, tr);
         }
@@ -137,6 +172,28 @@ function remapCounterFlags(tr) {
   }
 }
 
+function saveDefaultStyle() {
+  const styleObj = {
+    styleName: 'Default',
+    mode: 0,
+    description: 'Default Style',
+    styles: {
+      align: 'left',
+      boldNumbering: true,
+      boldSentence: true,
+      fontName: 'Tahoma',
+      fontSize: '12',
+      nextLineStyleName: 'Default',
+      paragraphSpacingAfter: '3',
+      toc: false,
+      isHidden: true,
+    }
+  };
+  saveStyle(styleObj).then((result) => {
+
+  });
+}
+
 function applyStyles(state, tr) {
   if (!tr) {
     tr = state.tr;
@@ -163,7 +220,7 @@ function applyStyles(state, tr) {
 
 function validateStyleName(node) {
   let bOK = false;
-  bOK = node && node.attrs && node.attrs.styleName && RESERVED_STYLE_NONE !== node.attrs.styleName;
+  bOK = node && node.attrs && node.attrs.styleName;
   return bOK;
 }
 // [FS] IRAD-1668 2022-01-21
@@ -379,7 +436,7 @@ function applyStyleForNextParagraph(prevState, nextState, tr, view) {
           if (style && style.styles && style.styles.nextLineStyleName) {
             // [FS] IRAD-1217 2021-02-24
             // Select style for next line not working continuously for more that 2 paragraphs
-            newattrs = setNodeAttrs(style.styles.nextLineStyleName, newattrs);
+            newattrs = setNodeAttrs(resetTheDefaultStyleNameToNone(style.styles.nextLineStyleName), newattrs);
             tr = tr.setNodeMarkup(nextNodePos, undefined, newattrs);
             // [FS] IRAD-1201 2021-02-18
             // get the nextLine Style from the current style object.
@@ -409,6 +466,13 @@ function applyStyleForNextParagraph(prevState, nextState, tr, view) {
   }
 
   return modified ? tr : null;
+}
+
+function resetTheDefaultStyleNameToNone(styleName) {
+  if ('Default' === styleName) {
+    styleName = RESERVED_STYLE_NONE;
+  }
+  return styleName;
 }
 
 // [FS] IRAD-1217 2021-02-24
@@ -488,7 +552,6 @@ function haveEligibleChildren(node, contentLen) {
   return (
     node instanceof Node &&
     0 < contentLen &&
-    node.type.name === 'paragraph' &&
-    RESERVED_STYLE_NONE !== node.attrs.styleName
+    node.type.name === 'paragraph'
   );
 }

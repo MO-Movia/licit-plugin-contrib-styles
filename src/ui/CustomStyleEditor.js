@@ -80,6 +80,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
     super(props);
     this.state = {
       ...props,
+      toc: false,
+      isHidden: false,
       otherStyleSelected,
       customStyles,
     };
@@ -89,6 +91,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
     }
     if (0 === this.state.mode) {
       this.state.styles.boldNumbering = true;
+      this.state.styles.toc = false;
+      this.state.styles.isHidden = false;
       this.state.styles.boldSentence = true;
       this.state.styles.nextLineStyleName = RESERVED_STYLE_NONE;
     }
@@ -473,6 +477,12 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
     });
   }
 
+  handleTOC(val) {
+    this.setState({
+      styles: { ...this.state.styles, toc: val.target.checked },
+    });
+  }
+
   // [FS] IRAD-1201 2021-02-17
   // to check if the "select style" option selected by user
   selectStyleCheckboxState() {
@@ -660,7 +670,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </label>
                 </div>
               </button>
-              <div className="panel">
+              <div className="panel" style={{ marginBottom: '5px' }}>
                 <div className="sectiondiv">
                   <select
                     className="fonttype fontstyle"
@@ -863,6 +873,18 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       }}
                     >
                       First Word
+                    </label>
+                  </span>
+                </div>
+                <div>
+                  <span style={{ float: 'left', marginTop: '3px' }}>
+                    <label style={{ fontSize: '12px', color: '#464343' }}>
+                      <input
+                        checked={this.state.styles.toc}
+                        onChange={this.handleTOC.bind(this)}
+                        type="checkbox"
+                      />
+                      TOC
                     </label>
                   </span>
                 </div>
@@ -1296,7 +1318,15 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
   // save the custom styles from Edit all option.
   modifyCustomStyle(val: EditorState) {
     delete val.editorView;
-    saveStyle(val).then((result) => { setStyles(result); });
+    const styleObj = {
+      styleName: val.styleName,
+      mode: val.mode,
+      description: val.description,
+      styles: val.styles
+    };
+    saveStyle(styleObj).then((result) => {
+      setStyles(result);
+    });
   }
 
   // To fetch the custom styles from server and set to the state.

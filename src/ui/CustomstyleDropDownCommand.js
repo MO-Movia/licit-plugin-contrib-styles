@@ -37,12 +37,6 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
   //method to build commands for list buttons
   getCommandGroups() {
     HEADING_COMMANDS = {
-      // [FS] IRAD-1074 2020-12-09
-      // When apply 'None' from style menu, not clearing the applied custom style.
-      [RESERVED_STYLE_NONE]: new CustomStyleCommand(
-        RESERVED_STYLE_NONE,
-        RESERVED_STYLE_NONE
-      ),
     };
     // Check runtime is avilable in editorview
     // Get styles form server configured in runtime
@@ -54,10 +48,19 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
           HEADING_NAMES = result;
           if (null != HEADING_NAMES) {
             HEADING_NAMES.forEach((obj) => {
-              HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
-                obj,
-                obj.styleName
-              );
+              if (undefined === obj.styles.isHidden || (!obj.styles.isHidden)) {
+                HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
+                  obj,
+                  obj.styleName
+                );
+              }
+              else if ((obj.styles.isHidden && obj.styles.isHidden)) {
+                HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
+                  obj,
+                  RESERVED_STYLE_NONE
+                );
+              }
+
             });
           }
         }

@@ -56,7 +56,7 @@ export class CustomstylePlugin extends Plugin {
           loaded = false;
           firstTime = true;
           setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
-          setHidenumberingFlag(hideNumbering);
+          setHidenumberingFlag(hideNumbering ? hideNumbering : false);
           // save a Default style in server
           saveDefaultStyle();
         },

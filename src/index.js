@@ -97,8 +97,16 @@ export class CustomstylePlugin extends Plugin {
 
           firstTime = false;
           // custom style for next line
-          if (csview && ENTERKEYCODE === csview.input.lastKeyCode) {
-            tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
+
+
+          if (csview) {
+            const head = csview.state.selection.$head;
+            const cPos = head.pos;
+            const start = head.posAtIndex(0);
+            if (ENTERKEYCODE === csview.input.lastKeyCode && (cPos > start)) {
+              tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
+            }
+
           }
           tr = applyLineStyleForBoldPartial(nextState, tr);
         }

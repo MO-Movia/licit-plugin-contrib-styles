@@ -318,7 +318,7 @@ class CustomStyleCommand extends UICommand {
     if (isValidated) {
       tr = applyStyle(
         this._customStyle,
-        this._customStyle.styleName,
+        'Default' === this._customStyle.styleName ? 'None' : this._customStyle.styleName,
         state,
         tr
       );
@@ -524,7 +524,7 @@ function compareMarkWithStyle(mark, style, tr, startPos, endPos, retObj, state) 
         same = mark.attrs['color'] === style[COLOR];
         break;
       case MARK_FONT_SIZE:
-        same = mark.attrs['pt'] ===  Number(style[FONTSIZE]);
+        same = mark.attrs['pt'] === Number(style[FONTSIZE]);
         break;
       case MARK_FONT_TYPE:
         same = mark.attrs['name'] === style[FONTNAME];
@@ -1343,7 +1343,7 @@ function removeAllMarksExceptLink(
   doc.nodesBetween(from, to, (node, pos) => {
     if (node.marks && node.marks.length) {
       node.marks.some((mark) => {
-        if ('link' !== mark.type.name) {
+        if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
           tasks.push({
             node,
             pos,

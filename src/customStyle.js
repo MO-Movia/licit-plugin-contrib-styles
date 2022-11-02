@@ -7,15 +7,14 @@ import {
 } from './CustomStyleNodeSpec';
 let customStyles: Style[] = new Array < Style > (0);
 let styleRuntime;
+let hideNumbering = false;
 
 // [FS] IRAD-1202 2021-02-15
 // None & None-@#$- have same effect of None.
 // None-@#$-<styleLevel> is used for numbering to set style level for None, based on the cursor level style level.
 function isValidStyleName(styleName) {
   return (
-    styleName &&
-    styleName !== RESERVED_STYLE_NONE &&
-    !styleName.includes(RESERVED_STYLE_NONE_NUMBERING) &&
+    styleName && !styleName.includes(RESERVED_STYLE_NONE_NUMBERING) &&
     customStyles.length > 0
   );
 }
@@ -45,7 +44,11 @@ export function getCustomStyleByName(name: string): Style {
   if (isValidStyleName(name)) {
     // break the loop if find any matches
     for (let i = 0; !has && i < customStyles.length; i++) {
-      if (name === customStyles[i].styleName) {
+      if (RESERVED_STYLE_NONE === name && customStyles[i].styles.isHidden) {
+        style = customStyles[i];
+        has = true;
+      }
+      else if (name === customStyles[i].styleName) {
         style = customStyles[i];
         has = true;
       }
@@ -57,6 +60,14 @@ export function getCustomStyleByName(name: string): Style {
 // store styles in cache
 export function setStyles(style: Style[]) {
   customStyles = style;
+}
+
+export function setHidenumberingFlag(hideNumberingFlag: boolean) {
+  hideNumbering = hideNumberingFlag;
+}
+
+export function getHidenumberingFlag(): boolean {
+  return hideNumbering;
 }
 
 export function setStyleRuntime(runtime: any, callback) {

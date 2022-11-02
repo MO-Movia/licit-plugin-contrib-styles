@@ -45,7 +45,6 @@ const CONTENT = 'content';
 const GETATTRS = 'getAttrs';
 const PARSEDOM = 'parseDOM';
 const TODOM = 'toDOM';
-const ALIGN = 'align';
 
 export function effectiveSchema(schema: Schema) {
   if (schema && schema[SPEC]) {
@@ -55,10 +54,11 @@ export function effectiveSchema(schema: Schema) {
   return schema;
 }
 
-function createAttribute(content, attr, key, value) {
+function createAttribute(content, key, value) {
   if (content) {
+    const attr = (content).attrs && Object.keys((content).attrs)[0];
     let styleAttrSpec = content.attrs[key];
-    if (content.attrs && !styleAttrSpec) {
+    if (attr && content.attrs && !styleAttrSpec) {
       const contentAttr = content.attrs[attr];
       styleAttrSpec = Object.assign(
         Object.create(Object.getPrototypeOf(contentAttr)),
@@ -112,7 +112,7 @@ function createStyleNodeAttributes(schema: Schema) {
   ];
 
   contentArr.forEach((content) => {
-    createAttribute(content, ALIGN, STYLEKEY, null);
+    createAttribute(content,  STYLEKEY, null);
   });
 }
 

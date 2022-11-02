@@ -71,56 +71,120 @@ html {
   counter-increment: C10;
 }
 
-.ProseMirror p[data-style-level='1']::before {
+.ProseMirror p[data-style-level='1'][hide-style-level='true']::before {
+  content: counter(C1, decimal) '. ';
+  font-weight: var(--czi-counter-bold);
+  display: none;
+}
+
+.ProseMirror p[data-style-level='1'][hide-style-level='false']::before {
   content: counter(C1, decimal) '. ';
   font-weight: var(--czi-counter-bold);
 }
 
-.ProseMirror p[data-style-level='2']::before {
+.ProseMirror p[data-style-level='2'][hide-style-level='true']::before {
+  content: counter(C1, decimal) '.' counter(C2, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  display: none;
+}
+.ProseMirror p[data-style-level='2'][hide-style-level='false']::before {
   content: counter(C1, decimal) '.' counter(C2, decimal) ' ';
   font-weight: var(--czi-counter-bold);
 }
 
-.ProseMirror p[data-style-level='3']::before {
+.ProseMirror p[data-style-level='3'][hide-style-level='true']::before {
+  content: counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  display: none;
+}
+.ProseMirror p[data-style-level='3'][hide-style-level='false']::before {
   content: counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) ' ';
   font-weight: var(--czi-counter-bold);
 }
 
-.ProseMirror p[data-style-level='4']::before {
+.ProseMirror p[data-style-level='4'][hide-style-level='true']::before {
+  content: counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  display: none;
+}
+
+.ProseMirror p[data-style-level='4'][hide-style-level='false']::before {
   content: counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) '.' counter(C4, decimal) ' ';
   font-weight: var(--czi-counter-bold);
 }
 
-.ProseMirror p[data-style-level='5']::before {
+.ProseMirror p[data-style-level='5'][hide-style-level='true']::before {
+  content: counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  display: none;
+}
+
+.ProseMirror p[data-style-level='5'][hide-style-level='false']::before {
   content: counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) ' ';
   font-weight: var(--czi-counter-bold);
 }
 
-.ProseMirror p[data-style-level='6']::before {
+.ProseMirror p[data-style-level='6'][hide-style-level='true']::before {
+  content: counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
+    counter(C6, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  display: none;
+}
+
+.ProseMirror p[data-style-level='6'][hide-style-level='false']::before {
   content: counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
     counter(C6, decimal) ' ';
   font-weight: var(--czi-counter-bold);
 }
 
-.ProseMirror p[data-style-level='7']::before {
+.ProseMirror p[data-style-level='7'][hide-style-level='true']::before {
+  content: counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
+    counter(C6, decimal) '.' counter(C7, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  display: none;
+}
+
+.ProseMirror p[data-style-level='7'][hide-style-level='false']::before {
   content: counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
     counter(C6, decimal) '.' counter(C7, decimal) ' ';
   font-weight: var(--czi-counter-bold);
 }
 
-.ProseMirror p[data-style-level='8']::before {
+.ProseMirror p[data-style-level='8'][hide-style-level='true']::before {
+  content: counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
+    counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  display: none;
+}
+
+.ProseMirror p[data-style-level='8'][hide-style-level='false']::before {
   content: counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
     counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) ' ';
   font-weight: var(--czi-counter-bold);
 }
 
-.ProseMirror p[data-style-level='9']::before {
+.ProseMirror p[data-style-level='9'][hide-style-level='true']::before {
+  content: counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
+    counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) '.'
+    counter(C9, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  display: none;
+}
+
+.ProseMirror p[data-style-level='9'][hide-style-level='false']::before {
   content: counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
     counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) '.'
@@ -128,7 +192,16 @@ html {
   font-weight: var(--czi-counter-bold);
 }
 
-.ProseMirror p[data-style-level='10']::before {
+.ProseMirror p[data-style-level='10'][hide-style-level='true']::before {
+  content: counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
+    counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) '.'
+    counter(C9, decimal) '.' counter(C10, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  display: none;
+}
+
+.ProseMirror p[data-style-level='10'][hide-style-level='false']::before {
   content: counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
     counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) '.'

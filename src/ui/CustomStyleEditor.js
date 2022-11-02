@@ -81,6 +81,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
     this.state = {
       ...props,
       toc: false,
+      isHidden: false,
       otherStyleSelected,
       customStyles,
     };
@@ -91,6 +92,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
     if (0 === this.state.mode) {
       this.state.styles.boldNumbering = true;
       this.state.styles.toc = false;
+      this.state.styles.isHidden = false;
       this.state.styles.boldSentence = true;
       this.state.styles.nextLineStyleName = RESERVED_STYLE_NONE;
     }

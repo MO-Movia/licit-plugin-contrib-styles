@@ -4,7 +4,7 @@ import { Node, DOMOutputSpec } from 'prosemirror-model';
 import type { KeyValuePair } from './Constants';
 import { toCSSLineSpacing } from '@modusoperandi/licit-ui-commands';
 
-import { getCustomStyleByName } from './customStyle';
+import { getCustomStyleByName, getHidenumberingFlag } from './customStyle';
 import './ui/czi-cust-style-numbered.css';
 
 // This assumes that every 36pt maps to one indent level.
@@ -13,6 +13,7 @@ export const MIN_INDENT_LEVEL = 0;
 export const MAX_INDENT_LEVEL = 7;
 export const ATTRIBUTE_INDENT = 'data-indent';
 export const ATTRIBUTE_STYLE_LEVEL = 'data-style-level';
+export const HIDE_STYLE_LEVEL = 'hide-style-level';
 export const RESERVED_STYLE_NONE = 'None';
 export const RESERVED_STYLE_NONE_NUMBERING = RESERVED_STYLE_NONE + '-@#$-';
 const cssVal = new Set < string > (['', '0%', '0pt', '0px']);
@@ -38,6 +39,7 @@ function toDOM(base: toDOMFn, node: Node) {
   style && (output[1].style = style);
   if (styleLevel) {
     output[1][ATTRIBUTE_STYLE_LEVEL] = String(styleLevel);
+    output[1][HIDE_STYLE_LEVEL] = getHidenumberingFlag();
   }
   if ('' !== indentOverriden) {
     output[1][ATTRIBUTE_INDENT] = String(indentOverriden);

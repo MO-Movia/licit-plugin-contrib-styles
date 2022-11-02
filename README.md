@@ -34,11 +34,14 @@ Include plugin in licit component
 ```
 import {CustomstylePlugin} from  '@modusoperandi/licit-custom-styles';
 
-Expecting a CustomStyleRuntime to configure the style service to licit expects methods like saveStyle(),getStyles(),renameStyle() and removeStyle(). Please refer *licit\client\CustomStyleRuntime.js* for getting more detailed idea.
+Expecting two parameters in CustomstylePlugin and the parameters are:
+
+ 1.A CustomStyleRuntime to configure the style service to licit expects methods like saveStyle(),getStyles(),renameStyle() and removeStyle(). Please refer *licit\client\CustomStyleRuntime.js* for getting more detailed idea.
+ 2. A boolean flag that indicating the custom style numbering should be displayed or not for the document. For hide numbering pass true.
 
 import CustomStyleRuntime from  './CustomStyleRuntime';
 const styleRuntime = new CustomStyleRuntime();
-const plugins = [new CustomstylePlugin(styleRuntime)]
+const plugins = [new CustomstylePlugin(styleRuntime,false)]
 
 ReactDOM.render(<Licit docID={''} plugins={plugins}/>
 ```

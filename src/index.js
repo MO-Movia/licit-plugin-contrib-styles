@@ -97,16 +97,10 @@ export class CustomstylePlugin extends Plugin {
 
           firstTime = false;
           // custom style for next line
-
-
           if (csview) {
-            const head = csview.state.selection.$head;
-            const cPos = head.pos;
-            const start = head.posAtIndex(0);
-            if (ENTERKEYCODE === csview.input.lastKeyCode && (cPos > start)) {
+            if (ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$from.start() == tr.selection.$from.end()) {
               tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
             }
-
           }
           tr = applyLineStyleForBoldPartial(nextState, tr);
         }

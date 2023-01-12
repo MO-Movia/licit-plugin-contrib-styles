@@ -8,7 +8,7 @@ import { ColorEditor } from '@modusoperandi/licit-ui-commands';
 import { createPopUp } from '@modusoperandi/licit-ui-commands';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { isCustomStyleExists, setStyles, saveStyle, getStylesAsync } from '../customStyle';
-import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
+import { RESERVED_STYLE_NONE, getDetailsBullet, BULLET_POINTS } from '../CustomStyleNodeSpec';
 import { EditorState } from 'prosemirror-state';
 import type { Style } from '../StyleRuntime';
 
@@ -279,6 +279,11 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
         sampleDiv.innerText = `${SAMPLE_TEXT}`;
         sampleDiv.innerHTML = textSample;
       }
+
+      if (this.state.styles.styleLevel && this.state.styles.hasBullet) {
+        const bulletDetails = getDetailsBullet(this.state.styles.bulletLevel);
+        sampleDiv.innerHTML = `<strong style=color:${bulletDetails.color}>${bulletDetails.symbol}</strong>${textSample}`;
+      }
     }
     return style;
   }
@@ -333,6 +338,26 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
   onLevelChange(e: any) {
     const val = RESERVED_STYLE_NONE === e.target.value ? null : e.target.value;
     this.setState({ styles: { ...this.state.styles, styleLevel: val } });
+  }
+
+  // handles Bullet Level drop down change
+  onBulletLevelChange(e: any) {
+    this.setState({ styles: { ...this.state.styles, bulletLevel: e.target.value } });
+  }
+
+  // handles the bullet checkbox actions
+  handleBulletPoints(val: any) {
+    this.setState({
+      styles: {
+        ...this.state.styles,
+        hasBullet: val.target.checked,
+        bulletLevel: this.state.styles.bulletLevel ? this.state.styles.bulletLevel : '25CF',
+        hasNumbering: val.target.checked ? false : this.state.styles.hasNumbering,
+        nextLineStyleName: val.target.checked
+          ? this.state.styleName
+          : RESERVED_STYLE_NONE,
+      },
+    });
   }
 
   // handles indent dropdown change
@@ -456,6 +481,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
       styles: {
         ...this.state.styles,
         hasNumbering: val.target.checked,
+        hasBullet: val.target.checked ? false : this.state.styles.hasBullet,
         nextLineStyleName: val.target.checked
           ? this.state.styleName
           : RESERVED_STYLE_NONE,
@@ -1060,10 +1086,10 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </label>
                 </div>
               </button>
-              <div className="panel2 formp">
+              <div className="panel2 formp" style={{ maxHeight: '100%' }}>
                 <p className="formp">Level:</p>
-                <div className="hierarchydiv">
-                  <span style={{ float: 'left', marginTop: '8px' }}>
+                <div className="hierarchydiv" style={{ display: 'flex' }}>
+                  <div style={{ float: 'left', marginTop: '8px' }}>
                     <select
                       className="leveltype fontstyle"
                       id="levelValue"
@@ -1076,8 +1102,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                         </option>
                       ))}
                     </select>
-                  </span>
-                  <span>
+                  </div>
+                  <div>
                     <label>
                       <input
                         checked={this.state.styles.hasNumbering}
@@ -1098,7 +1124,32 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       />
                       Bold numbering
                     </label>
-                  </span>
+                    <label>
+                      <input
+                        checked={this.state.styles.hasBullet}
+                        className="chknumbering"
+                        disabled={this.state.styles.styleLevel ? false : true}
+                        onChange={this.handleBulletPoints.bind(this)}
+                        type="checkbox"
+                      />
+                      Bullet&nbsp;
+                      <span>
+                        <select
+                          className="fontstyle"
+                          disabled={this.state.styles.hasBullet ? false : true}
+                          id="bulletValue"
+                          onChange={this.onBulletLevelChange.bind(this)}
+                          style={{ textAlign: 'center' }}
+                          value={this.state.styles.bulletLevel || ''}>
+                          {BULLET_POINTS.map((value) => (
+                            <option style={{ color: value.color }} value={value.key}>
+                              <span>{value.symbol}</span>
+                            </option>
+                          ))}
+                        </select>
+                      </span>
+                    </label>
+                  </div>
                 </div>
                 <p className="formp">Indenting:</p>
                 <div className="hierarchydiv">

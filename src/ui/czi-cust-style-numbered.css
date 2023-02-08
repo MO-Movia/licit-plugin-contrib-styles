@@ -71,6 +71,19 @@ html {
   counter-increment: C10;
 }
 
+.ProseMirror p[data-bullet-color='#0000FF']::before {
+  color: #0000FF;
+}
+
+.ProseMirror p[data-bullet-color='#000000']::before {
+  color: #000000;
+}
+
+.ProseMirror p[data-show-bullet='true']::before {
+  content: attr(data-bullet-symbol) !important;
+  font-weight: normal !important;
+}
+
 .ProseMirror p[data-style-level='1'][hide-style-level='true']::before {
   content: counter(C1, decimal) '. ';
   font-weight: var(--czi-counter-bold);
@@ -87,6 +100,7 @@ html {
   font-weight: var(--czi-counter-bold);
   display: none;
 }
+
 .ProseMirror p[data-style-level='2'][hide-style-level='false']::before {
   content: counter(C1, decimal) '.' counter(C2, decimal) ' ';
   font-weight: var(--czi-counter-bold);
@@ -98,6 +112,7 @@ html {
   font-weight: var(--czi-counter-bold);
   display: none;
 }
+
 .ProseMirror p[data-style-level='3'][hide-style-level='false']::before {
   content: counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) ' ';

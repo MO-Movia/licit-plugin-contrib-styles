@@ -14,9 +14,19 @@ export const MAX_INDENT_LEVEL = 7;
 export const ATTRIBUTE_INDENT = 'data-indent';
 export const ATTRIBUTE_STYLE_LEVEL = 'data-style-level';
 export const HIDE_STYLE_LEVEL = 'hide-style-level';
+export const ATTRIBUTE_BULLET_SYMBOL = 'data-bullet-symbol';
+export const ATTRIBUTE_SHOW_SYMBOL = 'data-show-bullet';
+export const ATTRIBUTE_BULLET_COLOR = 'data-bullet-color';
 export const RESERVED_STYLE_NONE = 'None';
 export const RESERVED_STYLE_NONE_NUMBERING = RESERVED_STYLE_NONE + '-@#$-';
 const cssVal = new Set < string > (['', '0%', '0pt', '0px']);
+/*
+Symbols are grabbed from
+https://en.wikipedia.org/wiki/List_of_Unicode_characters
+https://en.wikipedia.org/wiki/List_of_Unicode_characters#Number_Forms
+*/
+export const BULLET_POINTS = [{ key: '25CF', symbol: '● ', color: '#000000' }, { key: '25CB', symbol: '○ ', color: '#000000' }, { key: '2B9A', symbol: '⮚ ', color: '#000000' },
+{ key: '2713', symbol: '✓ ', color: '#000000' }, { key: '272A', symbol: '✪ ', color: '#0000FF' }, { key: '272A272A', symbol: '✪✪ ', color: '#0000FF' }];
 
 export const EMPTY_CSS_VALUE = cssVal;
 
@@ -35,7 +45,7 @@ function getAttrs(base: getAttrsFn, dom: HTMLElement) {
 function toDOM(base: toDOMFn, node: Node) {
   const output = base(node);
   output[1][STYLENAME] = node.attrs[STYLENAME];
-  const { style, styleLevel, indentOverriden } = getStyle(node.attrs);
+  const { style, styleLevel, indentOverriden, bulletDetails } = getStyle(node.attrs);
   style && (output[1].style = style);
   if (styleLevel) {
     output[1][ATTRIBUTE_STYLE_LEVEL] = String(styleLevel);
@@ -44,6 +54,13 @@ function toDOM(base: toDOMFn, node: Node) {
   if ('' !== indentOverriden) {
     output[1][ATTRIBUTE_INDENT] = String(indentOverriden);
   }
+
+  if (bulletDetails && bulletDetails.symbol && bulletDetails.symbol.length > 0) {
+    output[1][ATTRIBUTE_BULLET_SYMBOL] = bulletDetails.symbol;
+    output[1][ATTRIBUTE_SHOW_SYMBOL] = bulletDetails.symbol.length > 0;
+    output[1][ATTRIBUTE_BULLET_COLOR] = bulletDetails.color ? bulletDetails.color : '#000000';
+  }
+
   return output;
 }
 
@@ -79,10 +96,26 @@ function refreshCounters(styleLevel) {
   return latestCounters;
 }
 
+function getBulletDetails(code) {
+  const bulletData = {
+    symbol: '',
+    color: ''
+  };
+  BULLET_POINTS.forEach(bullet => {
+    if (bullet.key === code) {
+      bulletData.symbol = bullet.symbol;
+      bulletData.color = bullet.color;
+      return;
+    }
+  });
+  return bulletData;
+}
+
 function getStyleEx(align, lineSpacing, styleName) {
   let style = '';
   let styleLevel = 0;
   let indentOverriden = '';
+  let bulletDetails = {};
   if (align && align !== 'left') {
     style += `text-align: ${align};`;
   }
@@ -100,6 +133,12 @@ function getStyleEx(align, lineSpacing, styleName) {
     // to get the styles of the corresponding style name
     const styleProps = getCustomStyleByName(styleName);
     if (null !== styleProps && styleProps.styles) {
+
+      if (styleProps.styles.hasBullet) {
+        bulletDetails = getBulletDetails(styleProps.styles.bulletLevel);
+        styleLevel = parseInt(styleProps.styles.styleLevel);
+      }
+
       // [FS] IRAD-1100 2020-11-04
       // Add in leading and trailing spacing (before and after a paragraph)
       if (styleProps.styles.paragraphSpacingAfter) {
@@ -147,8 +186,9 @@ function getStyleEx(align, lineSpacing, styleName) {
       }
     }
   }
-  return { style, styleLevel, indentOverriden };
+  return { style, styleLevel, indentOverriden, bulletDetails };
 }
 
 export const toCustomStyleDOM = toDOM;
 export const getCustomStyleAttrs = getAttrs;
+export const getDetailsBullet = getBulletDetails;

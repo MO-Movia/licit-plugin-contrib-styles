@@ -8,6 +8,7 @@ import { EditorView } from 'prosemirror-view';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import './custom-dropdown.css';
 import { getCustomStyleByName, getCustomStyle } from '../customStyle';
+import { getDetailsBullet } from '../CustomStyleNodeSpec';
 import { PointerSurface } from '@modusoperandi/licit-ui-commands';;
 import type { PointerSurfaceProps } from '@modusoperandi/licit-ui-commands';
 import Icon from './Icon';
@@ -87,6 +88,18 @@ class CustomStyleItem extends React.PureComponent<any, any> {
             {level}
           </PointerSurface>
         </div>
+        <div style={{
+          display: pointerProps.command._customStyle.styles &&
+            pointerProps.command._customStyle.styles.hasBullet ? '' : 'none',
+          color: pointerProps.command._customStyle.styles && pointerProps.command._customStyle.styles.bulletLevel ? getDetailsBullet(pointerProps.command._customStyle.styles.bulletLevel).color : '',
+          marginTop: '-4px',
+        }}>
+          <PointerSurface
+            {...pointerProps}
+            className={klass}>
+            {pointerProps.command._customStyle.styles && pointerProps.command._customStyle.styles.bulletLevel ? getDetailsBullet(pointerProps.command._customStyle.styles.bulletLevel).symbol : ''}
+          </PointerSurface>
+        </div>
         <div
           style={{
             display: hasBoldPartial ? '' : 'none',
@@ -137,6 +150,11 @@ class CustomStyleItem extends React.PureComponent<any, any> {
         level = level + '1.';
       }
     }
+
+    if (this.props.hasText && styles && styles.hasBullet) {
+      level = '';
+    }
+
     return level;
   }
 

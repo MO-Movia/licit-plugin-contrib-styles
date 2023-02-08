@@ -79,7 +79,7 @@
   },
   "dependencies": {
     "@modusoperandi/licit-doc-attrs-step": "^0.1.5",
-    "@modusoperandi/licit-ui-commands": "^0.1.13",
+    "@modusoperandi/licit-ui-commands": "^0.1.14",
     "classnames": "^2.3.1",
     "color": "3.1.2",
     "cors": "^2.8.5",

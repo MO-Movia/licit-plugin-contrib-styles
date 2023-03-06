@@ -88,3 +88,7 @@
   white-space: nowrap;
   width: 105px;
 }
+
+.stylemenu-backgroundcolor {
+  background-color: yellow;
+}

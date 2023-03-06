@@ -39,7 +39,7 @@ class CustomStyleSubMenu extends React.PureComponent<any, any> {
             command: command,
           })}
         >
-          Remove Style..
+          Reset Style to Normal..
         </a>
       </div>
     );

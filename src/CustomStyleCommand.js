@@ -758,7 +758,11 @@ function applyStyleEx(
         element.executeCustom &&
         typeof element.executeCustom === 'function'
       ) {
-        tr = element.executeCustom(state, tr, startPos, endPos);
+        const returnVal = element.executeCustom(state, tr, startPos, endPos);
+        if (typeof returnVal != 'boolean') {
+          tr = returnVal;
+        }
+        // tr = element.executeCustom(state, tr, startPos, endPos);
       }
     });
     const storedmarks = getMarkByStyleName(styleName, state.schema);
@@ -1431,7 +1435,8 @@ export function applyStyleToEachNode(
 // Fix: bold first sentence custom style not showing after reload editor.
 export function applyLineStyle(state: EditorState, tr: Transform, node: Node, startPos: number) {
   if (node) {
-    if (node.attrs && node.attrs.styleName && RESERVED_STYLE_NONE !== node.attrs.styleName) {
+    if (node.attrs && node.attrs.styleName) {
+      // if (node.attrs && node.attrs.styleName && RESERVED_STYLE_NONE !== node.attrs.styleName) {
       const styleProp = getCustomStyleByName(node.attrs.styleName);
       if (
         null !== styleProp &&
@@ -1462,8 +1467,8 @@ export function applyLineStyle(state: EditorState, tr: Transform, node: Node, st
         // Check styleName is available for node
         if (
           node.attrs &&
-          node.attrs.styleName &&
-          RESERVED_STYLE_NONE !== node.attrs.styleName
+          node.attrs.styleName
+          // && RESERVED_STYLE_NONE !== node.attrs.styleName
         ) {
           const styleProp = getCustomStyleByName(node.attrs.styleName);
           if (

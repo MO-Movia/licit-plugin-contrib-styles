@@ -2,10 +2,9 @@
 // [FS] IRAD-1085 2020-10-09
 import type { Style, CSSStyle } from './StyleRuntime';
 import {
-  RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
 } from './CustomStyleNodeSpec';
-let customStyles: Style[] = new Array < Style > (0);
+let customStyles: Style[] = new Array<Style>(0);
 let styleRuntime;
 let hideNumbering = false;
 
@@ -44,11 +43,7 @@ export function getCustomStyleByName(name: string): Style {
   if (isValidStyleName(name)) {
     // break the loop if find any matches
     for (let i = 0; !has && i < customStyles.length; i++) {
-      if (RESERVED_STYLE_NONE === name && customStyles[i].styles.isHidden) {
-        style = customStyles[i];
-        has = true;
-      }
-      else if (name === customStyles[i].styleName) {
+      if (name === customStyles[i].styleName) {
         style = customStyles[i];
         has = true;
       }

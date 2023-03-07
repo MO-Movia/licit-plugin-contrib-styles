@@ -83,7 +83,6 @@ class CustomMenuUI extends React.PureComponent<any, any> {
     commandGroups.forEach((group, ii) => {
       Object.keys(group).forEach((label) => {
         const command = group[label];
-        const hasText = RESERVED_STYLE_NONE !== label;
         counter++;
         if (label === selectedName && '' === selecteClassName) {
           selecteClassName = 'selectbackground';
@@ -98,7 +97,7 @@ class CustomMenuUI extends React.PureComponent<any, any> {
             dispatch={dispatch}
             editorState={editorState}
             editorView={editorView}
-            hasText={hasText}
+            hasText={true}
             key={label}
             label={label}
             onClick={this._onUIEnter}
@@ -398,24 +397,32 @@ class CustomMenuUI extends React.PureComponent<any, any> {
                     // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
 
                     if (null != result) {
-                      let tr;
-                      result.forEach((obj) => {
-                        if (val.styleName === obj.styleName) {
-                          tr = this.renameStyleInDocument(
-                            this.props.editorState,
-                            this.props.editorState.tr,
-                            this._styleName,
-                            val.styleName,
-                            obj.styles
-                          );
-                        }
-                      });
-                      if (tr) {
-                        dispatch(tr);
+                      if (val.styleName === val.styles.nextLineStyleName) {
+                        let tr;
+                        saveStyle(val).then((result) => {
+                          if (result) {
+                            setStyles(result);
+                            result.forEach((obj) => {
+                              if (val.styleName === obj.styleName) {
+                                tr = this.renameStyleInDocument(
+                                  this.props.editorState,
+                                  this.props.editorState.tr,
+                                  this._styleName,
+                                  val.styleName,
+                                  obj.styles
+                                );
+                              }
+                            });
+                            if (tr) {
+                              dispatch(tr);
+                            }
+                          }
+                          this.props.editorView.focus();
+                          this._stylePopup.close();
+                          this._stylePopup = null;
+                        });
+
                       }
-                      this._stylePopup.close();
-                      this._stylePopup = null;
-                      this.props.editorView.focus();
                     }
                   });
               }

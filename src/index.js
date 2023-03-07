@@ -90,6 +90,8 @@ export class CustomstylePlugin extends Plugin {
             tr.storedMarks = storedmarks;
             tr = applyLatestStyle(styleName, view.state, tr, node, startPos, endPos);
 
+            tr = applyNormalIfNoStyle(view.state, tr, node);
+
             if (tr) {
               view.dispatch(tr);
             }
@@ -112,6 +114,9 @@ export class CustomstylePlugin extends Plugin {
             tr = updateStyleOverrideFlag(nextState, tr);
             // do this only once when the document is loaded.
             tr = applyStyles(nextState, tr);
+            if (firstTime) {
+              tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc);
+            }
           }
         } else if (isDocChanged(transactions)) {
           if (!firstTime) {
@@ -168,19 +173,18 @@ function remapCounterFlags(tr) {
 
 function saveDefaultStyle() {
   const styleObj = {
-    styleName: 'Default',
+    styleName: 'Normal',
     mode: 0,
-    description: 'Default Style',
+    description: 'Normal',
     styles: {
       align: 'left',
       boldNumbering: true,
       boldSentence: true,
       fontName: 'Tahoma',
       fontSize: '12',
-      nextLineStyleName: 'Default',
+      nextLineStyleName: 'Normal',
       paragraphSpacingAfter: '3',
       toc: false,
-      isHidden: true,
     }
   };
   saveStyle(styleObj).then((result) => {
@@ -205,7 +209,10 @@ function applyStyles(state, tr) {
         // Can't be out of range.
         end = docLen;
       }
-      tr = applyLatestStyle(child.attrs.styleName, state, tr, child, pos, end);
+
+      // check if the loaded document's para have valid styleName
+      const styleName = child.attrs.styleName;
+      tr = applyLatestStyle(styleName, state, tr, child, pos, end);
     }
   });
 
@@ -514,6 +521,31 @@ function isNewParagraph(prevState, nextState, view) {
 
 function isDocChanged(transactions) {
   return transactions.some((transaction) => transaction.docChanged);
+}
+
+function applyNormalIfNoStyle(nextState, tr, node) {
+  if (!tr) {
+    tr = nextState.tr;
+  }
+  node.descendants(function (child, pos) {
+    const contentLen = child.content.size;
+    if (tr && haveEligibleChildren(child, contentLen)) {
+      const docLen = tr.doc.content.size;
+      let end = pos + contentLen;
+      // Validate end position.
+      if (end > docLen) {
+        // Can't be out of range.
+        end = docLen;
+      }
+      let styleName = child.attrs.styleName;
+      if (RESERVED_STYLE_NONE == styleName || !styleName) {
+        child.attrs.styleName = RESERVED_STYLE_NONE;
+        styleName = RESERVED_STYLE_NONE;
+      }
+      tr = applyLatestStyle(styleName, nextState, tr, child, pos, end + 1);
+    }
+  });
+  return tr;
 }
 
 function updateStyleOverrideFlag(state, tr) {

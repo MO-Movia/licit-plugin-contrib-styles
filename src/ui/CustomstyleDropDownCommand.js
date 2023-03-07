@@ -16,13 +16,15 @@ import {
 import {
   setStyles,
   getStylesAsync,
-  hasStyleRuntime
+  hasStyleRuntime,
+  isCustomStyleExists
 } from '../customStyle';
+import './custom-dropdown.css';
 
 // [FS] IRAD-1042 2020-09-09
 // To include custom styles in the toolbar
 
-let HEADING_COMMANDS: Object = {
+const HEADING_COMMANDS: Object = {
   [RESERVED_STYLE_NONE]: new HeadingCommand(0),
 };
 
@@ -36,8 +38,8 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
   //[FS] IRAD-1085 2020-10-09
   //method to build commands for list buttons
   getCommandGroups() {
-    HEADING_COMMANDS = {
-    };
+    // HEADING_COMMANDS = {
+    // };
     // Check runtime is avilable in editorview
     // Get styles form server configured in runtime
     let HEADING_NAMES = null;
@@ -48,18 +50,10 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
           HEADING_NAMES = result;
           if (null != HEADING_NAMES) {
             HEADING_NAMES.forEach((obj) => {
-              if (undefined === obj.styles.isHidden || (!obj.styles.isHidden)) {
-                HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
-                  obj,
-                  obj.styleName
-                );
-              }
-              else if ((obj.styles.isHidden && obj.styles.isHidden)) {
-                HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
-                  obj,
-                  RESERVED_STYLE_NONE
-                );
-              }
+              HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
+                obj,
+                obj.styleName
+              );
 
             });
           }
@@ -69,6 +63,12 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
     }
     return [HEADING_COMMANDS];
   }
+
+  isValidCustomstyle(styleName) {
+    const bOK = isCustomStyleExists(this.state.styleName);
+    return bOK;
+  }
+
   staticCommands() {
     const MENU_COMMANDS: Object = {
       ['newstyle']: new CustomStyleCommand('newstyle', 'New Style..'),
@@ -126,10 +126,14 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
         }
       }
     });
+    let backgroundColorClass = 'width-100';
+    if (!isCustomStyleExists(customStyleName)) {
+      backgroundColorClass = 'width-100 stylemenu-backgroundcolor';
+    }
 
     return (
       <CustomMenuButton
-        className="width-100"
+        className= {backgroundColorClass}
         // [FS] IRAD-1008 2020-07-16
         // Disable font type menu on editor disable state
         commandGroups={this.getCommandGroups()}

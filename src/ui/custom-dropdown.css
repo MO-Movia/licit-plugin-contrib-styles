@@ -1,4 +1,4 @@
-.dropbtn {
+.czi-editor-frameset .molsp-dropbtn {
   background-color: #fff;
   border-color: #cec7c7;
   border-style: solid;
@@ -12,18 +12,13 @@
   padding: 5px;
 }
 
-.stylenames {
+.czi-editor-frameset .molsp-stylenames {
   max-height: 205px;
   min-height: 30px;
   overflow: auto;
 }
 
-.dropdown {
-  display: inline-block;
-  position: relative;
-}
-
-.dropdown-content {
+.czi-editor-frameset .molsp-dropdown-content {
   background-color: #f9f9f9;
   border-color: #cec7c7;
   border-style: solid;
@@ -35,10 +30,10 @@
   font-size: 14px;
   height: 95px;
   line-height: 0.75;
-  min-width: 136px;
+  width: max-content;
 }
 
-.dropdown-content a {
+.czi-editor-frameset .molsp-dropdown-content a {
   display: block;
   padding-bottom: 10px;
   padding-left: 14px;
@@ -47,14 +42,8 @@
   text-decoration: none;
 }
 
-.dropdown-content a:hover {
+.czi-editor-frameset .molsp-dropdown-content a:hover {
   background-color: lightgrey;
-}
-
-.dropdown:hover .dropdown-content {
-  opacity: 1;
-  transition: opacity;
-  transition-delay: 2s;
 }
 
 #container1 {
@@ -65,7 +54,7 @@
   width: 265px;
 }
 
-#container1 > div {
+#container1>div {
   height: 30px;
 }
 
@@ -77,18 +66,18 @@
   background-color: lightgrey;
 }
 
-.arrow-right {
+.czi-editor-frameset .molsp-arrow-right {
   text-align: right;
   width: 30px;
 }
 
-.style-sampletext {
+.czi-editor-frameset .molsp-style-sampletext {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 105px;
 }
 
-.stylemenu-backgroundcolor {
+.czi-editor-frameset .stylemenu-backgroundcolor {
   background-color: yellow;
 }

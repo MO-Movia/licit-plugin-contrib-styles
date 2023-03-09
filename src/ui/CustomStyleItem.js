@@ -117,7 +117,7 @@ class CustomStyleItem extends React.PureComponent<any, any> {
             {(hasBoldPartial && hasBoldSentence) ? BOLD_SENTENCE : BOLD_WORD}
           </PointerSurface>
         </div>
-        <div className="style-sampletext" style={customStyle}>
+        <div className="molsp-style-sampletext" style={customStyle}>
           <PointerSurface
             {...pointerProps}
             className={klass}
@@ -127,7 +127,7 @@ class CustomStyleItem extends React.PureComponent<any, any> {
           </PointerSurface>
         </div>
         <div
-          className="arrow-right"
+          className="molsp-arrow-right"
           style={{ width: '50px' }}
           style={hasText ? { display: 'block' } : { display: 'none' }}
         >

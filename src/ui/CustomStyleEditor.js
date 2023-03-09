@@ -522,12 +522,12 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   componentDidMount() {
-    const acc = document.getElementsByClassName('licit-accordion');
+    const acc = document.getElementsByClassName('molsp-licit-accordion');
     let i;
 
     for (i = 0; i < acc.length; i++) {
       acc[i].addEventListener('click', function () {
-        this.classList.toggle('accactive');
+        this.classList.toggle('molsp-accactive');
         const panel = this.nextElementSibling;
         if (panel.style.maxHeight) {
           panel.style.maxHeight = null;
@@ -536,13 +536,13 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
         }
       });
     }
-    const mp = document.getElementsByClassName('panel')[0];
+    const mp = document.getElementsByClassName('molsp-panel')[0];
     mp.style.maxHeight = mp.scrollHeight + 'px';
-    const mp1 = document.getElementsByClassName('panel1')[0];
+    const mp1 = document.getElementsByClassName('molsp-panel1')[0];
     mp1.style.maxHeight = mp1.scrollHeight + 'px';
-    const mp2 = document.getElementsByClassName('panel2')[0];
+    const mp2 = document.getElementsByClassName('molsp-panel2')[0];
     mp2.style.maxHeight = mp2.scrollHeight + 'px';
-    const mp3 = document.getElementsByClassName('panel3')[0];
+    const mp3 = document.getElementsByClassName('molsp-panel3')[0];
     mp3.style.maxHeight = mp3.scrollHeight + 'px';
 
     this.setNextLineStyle(this.state.styles.nextLineStyleName);
@@ -559,20 +559,20 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
 
   render(): React.Element<any> {
     return (
-      <div className="customedit-div">
-        <div className="customedit-head">
+      <div className="molsp-customedit-div">
+        <div className="molsp-customedit-head">
           <span>{this.state.mode === 0 ? 'Create Style' : 'Edit Style'}</span>
         </div>
-        <div className="customedit-body">
-          <div className="sectiondiv">
+        <div className="molsp-customedit-body">
+          <div className="molsp-sectiondiv">
             <div
               style={
                 3 > this.props.mode ? { display: 'none' } : { display: 'block' }
               }
             >
-              <p className="formp">Styles:</p>
+              <p className="molsp-formp">Styles:</p>
               <select
-                className="stylenameinput fontstyle"
+                className="molsp-stylenameinput molsp-fontstyle"
                 defaultValue={'DEFAULT'}
                 onChange={this.onSelectCustomStyle.bind(this)}
                 style={{ height: '24px' }}
@@ -588,7 +588,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                 ))}
               </select>
             </div>
-            <p className="formp">
+            <p className="molsp-formp">
               Style Name:{' '}
               <span id="errormsg" style={{ display: 'none', color: 'red' }}>
                 {isCustomStyleExists(this.state.styleName)
@@ -599,7 +599,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
             <span>
               <input
                 autoFocus
-                className="stylenameinput fontstyle"
+                className="molsp-stylenameinput molsp-fontstyle"
                 disabled={
                   this.state.mode === 1 || this.state.mode === 3 ? true : false
                 }
@@ -610,10 +610,10 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                 value={this.state.styleName || ''}
               />
             </span>
-            <p className="formp">Description:</p>
+            <p className="molsp-formp">Description:</p>
             <span>
               <input
-                className="stylenameinput fontstyle"
+                className="molsp-stylenameinput molsp-fontstyle"
                 key="description"
                 onChange={this.onStyleClick.bind(this, 'description')}
                 type="text"
@@ -621,23 +621,23 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
               />
             </span>
 
-            <p className="formp">Preview:</p>
+            <p className="molsp-formp">Preview:</p>
             <div
-              className="textareadiv"
+              className="molsp-textareadiv"
               name="body"
               style={
                 3 === this.props.mode ? { height: '164px' } : { height: '215px' }
               }
             >
-              <div className="sampletext">
+              <div className="molsp-sampletext">
                 Paragraph Paragraph Paragraph Paragraph Paragraph Paragraph
                 Paragraph Paragraph Paragraph Paragraph
               </div>
               <div
                 className={
                   this.state.styles.super
-                    ? 'hide-sampletext'
-                    : 'visible-sampletext'
+                    ? 'molsp-hide-sampletext'
+                    : 'molsp-visible-sampletext'
                 }
                 id="sampletextdiv"
                 style={this.buildStyle()}
@@ -647,15 +647,15 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
               <sup
                 className={
                   this.state.styles.super
-                    ? 'visible-sampletext'
-                    : 'hide-sampletext'
+                    ? 'molsp-visible-sampletext'
+                    : 'molsp-hide-sampletext'
                 }
                 id="mo-sup"
                 style={this.buildStyle()}
               >
                 {SAMPLE_TEXT}
               </sup>
-              <div className="sampletext">
+              <div className="molsp-sampletext">
                 Paragraph Paragraph Paragraph Paragraph Paragraph Paragraph
                 Paragraph Paragraph Paragraph Paragraph Paragraph Paragraph
                 Paragraph Paragraph Paragraph Paragraph Paragraph Paragraph
@@ -665,10 +665,10 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
           </div>
 
           <div
-            className="sectiondiv editorsection"
+            className="molsp-sectiondiv molsp-editorsection"
             style={this.disableRename()}
           >
-            <p className="formp">Style Attributes:</p>
+            <p className="molsp-formp">Style Attributes:</p>
             <div
               style={{
                 height: '329px',
@@ -677,10 +677,10 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                 border: '1px solid',
               }}
             >
-              <button className="licit-accordion accactive" id="accordion1">
-                <div className="indentdiv">
+              <button className="molsp-licit-accordion molsp-accactive" id="accordion1">
+                <div className="molsp-indentdiv">
                   <span
-                    className="iconspan czi-icon text_format"
+                    className="molsp-iconspan czi-icon text_format"
                     style={{ marginTop: '1px' }}
                   >
                     text_format
@@ -696,10 +696,10 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </label>
                 </div>
               </button>
-              <div className="panel" style={{ marginBottom: '5px' }}>
-                <div className="sectiondiv">
+              <div className="molsp-panel" style={{ marginBottom: '5px' }}>
+                <div className="molsp-sectiondiv">
                   <select
-                    className="fonttype fontstyle"
+                    className="molsp-fonttype molsp-fontstyle"
                     onChange={this.onFontNameChange.bind(this)}
                     value={this.state.styles.fontName || 'Arial'}
                   >
@@ -710,7 +710,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     ))}
                   </select>
                   <select
-                    className="fontsize fontstyle"
+                    className="molsp-fontsize molsp-fontstyle"
                     onChange={this.onFontSizeChange.bind(this)}
                     value={this.state.styles.fontSize || 11}
                   >
@@ -721,10 +721,10 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     ))}
                   </select>
                 </div>
-                <div className="font-buttons">
+                <div className="molsp-font-buttons">
                   <span
                     aria-label=" Bold"
-                    className="czi-tooltip-surface markbutton-container"
+                    className="czi-tooltip-surface molsp-markbutton-container"
                     data-tooltip=" Bold"
                     id="86ba3aa0-ff11-11ea-930a-95c69ca4f97f"
                     onClick={this.onStyleClick.bind(this, 'strong')}
@@ -736,19 +736,19 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-pressed="false"
                       className={
                         this.state.styles.strong
-                          ? 'czi-custom-button use-icon active markbuttons'
-                          : 'czi-custom-button use-icon markbuttons'
+                          ? 'czi-custom-button use-icon active molsp-markbuttons'
+                          : 'czi-custom-button use-icon molsp-markbuttons'
                       }
                       role="button"
                     >
-                      <span className="iconspan czi-icon format_bold editor-markbuttons">
+                      <span className="molsp-iconspan czi-icon format_bold editor-markbuttons">
                         format_bold
                       </span>
                     </span>
                   </span>
                   <span
                     aria-label=" Italic"
-                    className="czi-tooltip-surface fontstyle markbutton-container"
+                    className="czi-tooltip-surface molsp-fontstyle molsp-markbutton-container"
                     data-tooltip=" Italic"
                     id="86ba61b0-ff11-11ea-930a-95c69ca4f97f"
                     onClick={this.onStyleClick.bind(this, 'em')}
@@ -759,12 +759,12 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-pressed="false"
                       className={
                         this.state.styles.em
-                          ? 'czi-custom-button use-icon active markbuttons'
-                          : 'czi-custom-button use-icon markbuttons'
+                          ? 'czi-custom-button use-icon active molsp-markbuttons'
+                          : 'czi-custom-button use-icon molsp-markbuttons'
                       }
                       role="button"
                     >
-                      <span className="iconspan czi-icon format_italic editor-markbuttons">
+                      <span className="molsp-iconspan czi-icon format_italic editor-markbuttons">
                         format_italic
                       </span>
                       <span> </span>
@@ -772,7 +772,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </span>
                   <span
                     aria-label=" Underline"
-                    className="czi-tooltip-surface fontstyle markbutton-container"
+                    className="czi-tooltip-surface molsp-fontstyle molsp-markbutton-container"
                     data-tooltip=" Underline"
                     id="86ba88c0-ff11-11ea-930a-95c69ca4f97f"
                     onClick={this.onStyleClick.bind(this, 'underline')}
@@ -783,12 +783,12 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-pressed="false"
                       className={
                         this.state.styles.underline
-                          ? 'czi-custom-button use-icon active markbuttons'
-                          : 'czi-custom-button use-icon markbuttons'
+                          ? 'czi-custom-button use-icon active molsp-markbuttons'
+                          : 'czi-custom-button use-icon molsp-markbuttons'
                       }
                       role="button"
                     >
-                      <span className="iconspan czi-icon  format_underline editor-markbuttons">
+                      <span className="molsp-iconspan czi-icon  format_underline editor-markbuttons">
                         format_underline
                       </span>
                       <span> </span>
@@ -796,7 +796,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </span>
                   <span
                     aria-label=" Text color"
-                    className="czi-tooltip-surface fontstyle markbutton-container"
+                    className="czi-tooltip-surface molsp-fontstyle molsp-markbutton-container"
                     data-tooltip=" Text color"
                     id="86bad6e1-ff11-11ea-930a-95c69ca4f97f"
                     onClick={this.showColorDialog.bind(this, true)}
@@ -805,11 +805,11 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     <span
                       aria-disabled="false"
                       aria-pressed="false"
-                      className="czi-custom-button use-icon markbuttons"
+                      className="czi-custom-button use-icon molsp-markbuttons"
                       role="button"
                     >
                       <span
-                        className="iconspan czi-icon format_color_text editor-markbuttons"
+                        className="molsp-iconspan czi-icon format_color_text editor-markbuttons"
                         style={{
                           color:
                             this.state.styles.color !== 'rgba(0,0,0,0)'
@@ -824,7 +824,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </span>
                   <span
                     aria-label=" Highlight color"
-                    className="czi-tooltip-surface fontstyle markbutton-container"
+                    className="czi-tooltip-surface molsp-fontstyle molsp-markbutton-container"
                     data-tooltip=" Highlight color"
                     id="86bafdf0-ff11-11ea-930a-95c69ca4f97f"
                     onClick={this.showColorDialog.bind(this, false)}
@@ -833,11 +833,11 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     <span
                       aria-disabled="false"
                       aria-pressed="false"
-                      className="czi-custom-button use-icon markbuttons"
+                      className="czi-custom-button use-icon molsp-markbuttons"
                       role="button"
                     >
                       <span
-                        className=" iconspan czi-icon border_color editor-markbuttons"
+                        className="molsp-iconspan czi-icon border_color editor-markbuttons"
                         style={{
                           color:
                             this.state.styles.textHighlight !== 'rgba(0,0,0,0)'
@@ -852,7 +852,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </span>
                 </div>
 
-                <div className="formp hierarchydiv">
+                <div className="molsp-formp molsp-hierarchydiv">
                   <span style={{ float: 'left' }}>
                     <label>
                       <input
@@ -915,10 +915,10 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </span>
                 </div>
               </div>
-              <button className="licit-accordion accactive">
-                <div className="indentdiv">
+              <button className="molsp-licit-accordion molsp-accactive">
+                <div className="molsp-indentdiv">
                   <span
-                    className="iconspan czi-icon format_textdirection_l_to_r"
+                    className="molsp-iconspan czi-icon format_textdirection_l_to_r"
                     style={{ marginTop: '1px' }}
                   >
                     format_textdirection_l_to_r
@@ -934,9 +934,9 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </label>
                 </div>
               </button>
-              <div className="panel1">
-                <p className="formp">Alignment:</p>
-                <div className="czi-custom-buttons">
+              <div className="molsp-panel1">
+                <p className="molsp-formp">Alignment:</p>
+                <div className="molsp-czi-custom-buttons">
                   <span
                     aria-label=" Align Left"
                     className="czi-tooltip-surface"
@@ -949,20 +949,20 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-pressed="false"
                       className={
                         this.state.styles.align === 'left'
-                          ? 'czi-custom-button use-icon activealignbuttons'
-                          : 'czi-custom-button alignbuttons'
+                          ? 'czi-custom-button use-icon molsp-activealignbuttons'
+                          : 'czi-custom-button molsp-alignbuttons'
                       }
                       onClick={this.onAlignButtonClick.bind(this, 'left')}
                       role="button"
                     >
-                      <span className="iconspan czi-icon format_align_left">
+                      <span className="molsp-iconspan czi-icon format_align_left">
                         format_align_left
                       </span>
                     </span>
                   </span>
                   <span
                     aria-label=" Align Center"
-                    className="czi-tooltip-surface alignbuttons"
+                    className="czi-tooltip-surface molsp-alignbuttons"
                     data-tooltip=" Align Center"
                     id="86ba61b0-ff11-11ea-930a-95c69ca4f97f"
                     role="tooltip"
@@ -972,20 +972,20 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-pressed="false"
                       className={
                         this.state.styles.align === 'center'
-                          ? 'czi-custom-button use-icon activealignbuttons'
-                          : 'czi-custom-button  alignbuttons'
+                          ? 'czi-custom-button use-icon molsp-activealignbuttons'
+                          : 'czi-custom-button  molsp-alignbuttons'
                       }
                       onClick={this.onAlignButtonClick.bind(this, 'center')}
                       role="button"
                     >
-                      <span className="iconspan czi-icon format_align_center">
+                      <span className="molsp-iconspan czi-icon format_align_center">
                         format_align_center
                       </span>
                     </span>
                   </span>
                   <span
                     aria-label=" Align Right"
-                    className="czi-tooltip-surface alignbuttons"
+                    className="czi-tooltip-surface molsp-alignbuttons"
                     data-tooltip=" Align Right"
                     id="86ba88c0-ff11-11ea-930a-95c69ca4f97f"
                     role="tooltip"
@@ -995,20 +995,20 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-pressed="false"
                       className={
                         this.state.styles.align === 'right'
-                          ? 'czi-custom-button use-icon activealignbuttons'
-                          : 'czi-custom-button  alignbuttons'
+                          ? 'czi-custom-button use-icon molsp-activealignbuttons'
+                          : 'czi-custom-button  molsp-alignbuttons'
                       }
                       onClick={this.onAlignButtonClick.bind(this, 'right')}
                       role="button"
                     >
-                      <span className="iconspan czi-icon format_align_right">
+                      <span className="molsp-iconspan czi-icon format_align_right">
                         format_align_right
                       </span>
                     </span>
                   </span>
                   <span
                     aria-label=" Justify"
-                    className="czi-tooltip-surface alignbuttons"
+                    className="czi-tooltip-surface molsp-alignbuttons"
                     data-tooltip=" Justify"
                     id="86baafd0-ff11-11ea-930a-95c69ca4f97f"
                     role="tooltip"
@@ -1018,21 +1018,21 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-pressed="false"
                       className={
                         this.state.styles.align === 'justify'
-                          ? 'czi-custom-button use-icon activealignbuttons'
-                          : 'czi-custom-button  alignbuttons'
+                          ? 'czi-custom-button use-icon molsp-activealignbuttons'
+                          : 'czi-custom-button  molsp-alignbuttons'
                       }
                       onClick={this.onAlignButtonClick.bind(this, 'justify')}
                       role="button"
                     >
-                      <span className="iconspan czi-icon format_align_justify">
+                      <span className="molsp-iconspan czi-icon format_align_justify">
                         format_align_justify
                       </span>
                     </span>
                   </span>
                 </div>
-                <p className="formp">Line Spacing:</p>
+                <p className="molsp-formp">Line Spacing:</p>
                 <select
-                  className="linespacing fontstyle"
+                  className="molsp-linespacing molsp-fontstyle"
                   onChange={this.onLineSpaceChange.bind(this)}
                   value={this.state.styles.lineHeight || ''}
                 >
@@ -1042,13 +1042,13 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     </option>
                   ))}
                 </select>
-                <p className="formp">Paragraph Spacing:</p>
+                <p className="molsp-formp">Paragraph Spacing:</p>
 
-                <div className="spacingdiv">
+                <div className="molsp-spacingdiv">
                   <label>Before: </label>
                   <span>
                     <input
-                      className="spacinginput fontstyle"
+                      className="molsp-spacinginput molsp-fontstyle"
                       key="before"
                       onChange={this.onStyleClick.bind(this, 'before')}
                       type="text"
@@ -1060,7 +1060,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   <label style={{ marginLeft: '23px' }}>After: </label>
                   <span>
                     <input
-                      className="spacinginput fontstyle"
+                      className="molsp-spacinginput molsp-fontstyle"
                       key="after"
                       onChange={this.onStyleClick.bind(this, 'after')}
                       type="text"
@@ -1070,9 +1070,9 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   <label style={{ marginLeft: '3px' }}>pts</label>
                 </div>
               </div>
-              <button className="licit-accordion accactive">
-                <div className="indentdiv">
-                  <span className="iconspan czi-icon account_tree">
+              <button className="molsp-licit-accordion molsp-accactive">
+                <div className="molsp-indentdiv">
+                  <span className="molsp-iconspan czi-icon account_tree">
                     account_tree
                   </span>
                   <label
@@ -1086,12 +1086,12 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </label>
                 </div>
               </button>
-              <div className="panel2 formp" style={{ maxHeight: '100%' }}>
-                <p className="formp">Level:</p>
-                <div className="hierarchydiv" style={{ display: 'flex' }}>
+              <div className="molsp-panel2 molsp-formp" style={{ maxHeight: '100%' }}>
+                <p className="molsp-formp">Level:</p>
+                <div className="molsp-hierarchydiv" style={{ display: 'flex' }}>
                   <div style={{ float: 'left', marginTop: '8px' }}>
                     <select
-                      className="leveltype fontstyle"
+                      className="molsp-leveltype molsp-fontstyle"
                       id="levelValue"
                       onChange={this.onLevelChange.bind(this)}
                       value={this.state.styles.styleLevel || ''}
@@ -1107,7 +1107,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     <label>
                       <input
                         checked={this.state.styles.hasNumbering}
-                        className="chknumbering"
+                        className="molsp-chknumbering"
                         disabled={this.state.styles.styleLevel ? false : true}
                         onChange={this.handleNumbering.bind(this)}
                         type="checkbox"
@@ -1117,7 +1117,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     <label>
                       <input
                         checked={this.state.styles.boldNumbering}
-                        className="chkboldnumbering"
+                        className="molsp-chkboldnumbering"
                         disabled={this.state.styles.hasNumbering ? false : true}
                         onChange={this.handleBoldNumbering.bind(this)}
                         type="checkbox"
@@ -1127,7 +1127,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     <label>
                       <input
                         checked={this.state.styles.hasBullet}
-                        className="chknumbering"
+                        className="molsp-chknumbering"
                         disabled={this.state.styles.styleLevel ? false : true}
                         onChange={this.handleBulletPoints.bind(this)}
                         type="checkbox"
@@ -1135,7 +1135,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       Bullet&nbsp;
                       <span>
                         <select
-                          className="fontstyle"
+                          className="molsp-fontstyle"
                           disabled={this.state.styles.hasBullet ? false : true}
                           id="bulletValue"
                           onChange={this.onBulletLevelChange.bind(this)}
@@ -1151,9 +1151,9 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     </label>
                   </div>
                 </div>
-                <p className="formp">Indenting:</p>
-                <div className="hierarchydiv">
-                  <div className="indentdiv">
+                <p className="molsp-formp">Indenting:</p>
+                <div className="molsp-hierarchydiv">
+                  <div className="molsp-indentdiv">
                     <input
                       checked={this.state.styles.isLevelbased}
                       name="indenting"
@@ -1171,7 +1171,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       Based On Level
                     </label>
                   </div>
-                  <div className="indentdiv">
+                  <div className="molsp-indentdiv">
                     <input
                       checked={!this.state.styles.isLevelbased}
                       name="indenting"
@@ -1190,7 +1190,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     </label>
                     <span>
                       <select
-                        className="leveltype specifiedindent fontstyle"
+                        className="molsp-leveltype molsp-specifiedindent molsp-fontstyle"
                         onChange={this.onIndentChange.bind(this)}
                         style={{ width: '99px !important' }}
                         value={this.state.styles.indent || ''}
@@ -1206,8 +1206,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                 </div>
               </div>
 
-              <button className="licit-accordion accactive">
-                <div className="indentdiv">
+              <button className="molsp-licit-accordion molsp-accactive">
+                <div className="molsp-indentdiv">
                   <label
                     style={{
                       marginLeft: '-7px',
@@ -1220,10 +1220,10 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                 </div>
               </button>
 
-              <div className="panel3 formp">
-                <p className="formp">Select style for next line:</p>
-                <div className="hierarchydiv">
-                  <div className="settingsdiv">
+              <div className="molsp-panel3 molsp-formp">
+                <p className="molsp-formp">Select style for next line:</p>
+                <div className="molsp-hierarchydiv">
+                  <div className="molsp-settingsdiv">
                     <input
                       checked={
                         this.state.styles.nextLineStyleName ===
@@ -1244,7 +1244,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       Continue this style
                     </label>
                   </div>
-                  <div className="settingsdiv">
+                  <div className="molsp-settingsdiv">
                     <input
                       checked={this.state.styles.nextLineStyleName === 'None'}
                       name="nextlinestyle"
@@ -1265,7 +1265,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       None
                     </label>
                   </div>
-                  <div className="indentdiv">
+                  <div className="molsp-indentdiv">
                     <input
                       checked={this.state.otherStyleSelected}
                       name="nextlinestyle"
@@ -1285,7 +1285,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     </label>
                     <span id="nextStyle" style={{ display: 'none' }}>
                       <select
-                        className="fontstyle stylenameinput"
+                        className="molsp-fontstyle molsp-stylenameinput"
                         // defaultValue={'DEFAULT'}
                         id="nextStyleValue"
                         onChange={this.onOtherStyleSelectionChanged.bind(this)}
@@ -1309,12 +1309,12 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
             </div>
           </div>
         </div>
-        <div className="btns">
-          <button className="buttonstyle" onClick={this._cancel}>
+        <div className="molsp-btns">
+          <button className="molsp-buttonstyle" onClick={this._cancel}>
             {this.state.mode === 3 ? 'Close' : 'Cancel'}
           </button>
           <button
-            className="btnsave buttonstyle"
+            className="molsp-btnsave molsp-buttonstyle"
             onClick={this._save.bind(this)}
             onKeyDown={this.handleKeyDown}
           >

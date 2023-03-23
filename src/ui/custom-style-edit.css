@@ -1,4 +1,4 @@
-.customedit-div {
+.czi-editor-frameset .molsp-customedit-div {
   background: #e6e6e6;
   border-color: #4a4949;
   border-style: solid;
@@ -12,7 +12,7 @@
   width: 510px;
 }
 
-.spacingdiv {
+.czi-editor-frameset .molsp-spacingdiv {
   border-color: gray;
   border-style: solid;
   border-width: 1px;
@@ -22,7 +22,7 @@
   width: auto;
 }
 
-.spacingdiv label {
+.czi-editor-frameset .molsp-spacingdiv label {
   color: #464343;
   font-size: 12px;
   margin-bottom: 4px;
@@ -31,7 +31,7 @@
   margin-top: 4px;
 }
 
-.formp {
+.czi-editor-frameset .molsp-formp {
   color: #464343;
   font-size: 12px;
   margin-bottom: 2px;
@@ -43,13 +43,13 @@
   padding-top: 1px;
 }
 
-.linespacing {
+.czi-editor-frameset .molsp-linespacing {
   height: 22px;
   margin-left: -4px;
   width: 140px;
 }
 
-.spacinginput {
+.czi-editor-frameset .molsp-spacinginput {
   box-sizing: content-box !important;
   font-family: inherit;
   font-size: 13px;
@@ -57,7 +57,7 @@
   width: 19px;
 }
 
-.customedit-head {
+.czi-editor-frameset .molsp-customedit-head {
   box-sizing: unset !important;
   color: #47adec;
   font-family: 'Arial', sans-serif;
@@ -70,7 +70,7 @@
   text-align: left;
 }
 
-.customedit-body {
+.czi-editor-frameset .molsp-customedit-body {
   background: transparent;
   color: #464343;
   display: grid;
@@ -83,11 +83,11 @@
   padding-top: 1px;
 }
 
-label {
+.czi-editor-frameset label {
   color: black;
 }
 
-.stylenameinput {
+.czi-editor-frameset .molsp-stylenameinput {
   box-sizing: unset !important;
   color: black;
   font-family: inherit !important;
@@ -101,7 +101,7 @@ label {
   width: 97%;
 }
 
-.sectiondiv {
+.czi-editor-frameset .molsp-sectiondiv {
   /* margin: 5px 0; */
   box-sizing: border-box;
   margin-left: 4px;
@@ -109,21 +109,17 @@ label {
   width: 240px;
 }
 
-.iconspan {
+.czi-editor-frameset .molsp-iconspan {
   margin-right: 10px;
   margin-top: 0;
 }
 
-.spanmargin {
-  margin-right: 10px;
-}
-
-.editorsection {
+.czi-editor-frameset .molsp-editorsection {
   box-sizing: border-box;
   padding-right: 5px;
 }
 
-.textareadiv {
+.czi-editor-frameset .molsp-textareadiv {
   background: white;
   border-color: grey;
   border-image: initial;
@@ -148,11 +144,11 @@ label {
   width: 95%;
 }
 
-.sampletext {
+.czi-editor-frameset .molsp-sampletext {
   color: gray;
 }
 
-.fontsize {
+.czi-editor-frameset .molsp-fontsize {
   box-sizing: border-box;
   height: 22px;
   margin-bottom: 4px;
@@ -163,7 +159,7 @@ label {
   width: 50px;
 }
 
-.fonttype {
+.czi-editor-frameset .molsp-fonttype {
   box-sizing: border-box;
   height: 22px;
   margin-bottom: 3px;
@@ -174,7 +170,7 @@ label {
   width: 153px;
 }
 
-.leveltype {
+.czi-editor-frameset .molsp-leveltype {
   box-sizing: border-box;
   height: 22px;
   margin-left: 0;
@@ -182,18 +178,7 @@ label {
   width: 83px;
 }
 
-.numbering {
-  box-sizing: border-box;
-  font-size: 13px;
-  height: 22px;
-  margin-bottom: 0;
-  margin-right: 5px;
-  padding-bottom: 0;
-  padding-right: 5px;
-  width: 500px;
-}
-
-.indenting {
+/* .indenting {
   box-sizing: border-box;
   font-size: 13px;
   height: 22px;
@@ -201,9 +186,9 @@ label {
   padding-bottom: 2px;
   padding-left: 0;
   width: 186px;
-}
+} */
 
-.btns {
+.czi-editor-frameset .molsp-btns {
   margin-bottom: 2px;
   margin-left: 28px;
   margin-right: 0;
@@ -213,58 +198,26 @@ label {
   text-align: right;
 }
 
-.btnsave {
+.czi-editor-frameset .molsp-btnsave {
   margin-left: 8px;
   margin-right: 7px;
   margin-top: 2px;
   padding-left: 6px;
 }
 
-.align-menu-button {
-  background: transparent;
-  border: none;
-  margin: 0;
-  margin-left: -3px;
-  white-space: nowrap;
-  width: 38px;
-}
 
-.align-menu-button-icon {
-  margin-left: -3px;
-}
-
-.align-menu-dropdown-icon {
-  margin-left: 0;
-}
-
-.dropdown-div {
-  background: #fff;
-  border-color: black;
-  border-style: solid;
-  border-width: 1px;
-  box-shadow: 0 1px 3px rgb(90 45 45 / 26%);
-}
-
-.dropdown-buttons {
-  margin-bottom: 5px;
-  margin-left: 8px;
-  margin-right: 8px;
-  margin-top: 5px;
-  padding-top: 5px;
-}
-
-.visible-sampletext {
+.czi-editor-frameset .molsp-visible-sampletext {
   color: black;
   display: block;
   margin-top: 1px;
   padding: 0;
 }
 
-.hide-sampletext {
+.czi-editor-frameset .molsp-hide-sampletext {
   display: none;
 }
 
-.licit-accordion {
+.czi-editor-frameset .molsp-licit-accordion {
   background-color: #ccc;
   border-color: lightgray;
   border-style: solid;
@@ -280,7 +233,7 @@ label {
   width: 100%;
 }
 
-.licit-accordion::after {
+.czi-editor-frameset .molsp-licit-accordion::after {
   color: #777;
   content: '\002B';
   float: right;
@@ -290,14 +243,14 @@ label {
   padding-top: 3px;
 }
 
-.accactive::after {
+.czi-editor-frameset .molsp-accactive::after {
   content: '\2212';
 }
 
-.panel,
-.panel1,
-.panel2,
-.panel3 {
+.czi-editor-frameset .molsp-panel,
+.czi-editor-frameset .molsp-panel1,
+.czi-editor-frameset .molsp-panel2,
+.czi-editor-frameset .molsp-panel3 {
   background-color: transparent;
   box-sizing: border-box;
   margin-bottom: 10px;
@@ -311,80 +264,82 @@ label {
   width: auto;
 }
 
-.chknumbering {
+.czi-editor-frameset .molsp-chknumbering {
   margin-left: 11px;
   margin-top: 2px;
   padding-top: 2px;
 }
 
-.chkboldnumbering {
+.czi-editor-frameset .molsp-chkboldnumbering {
   margin-left: 11px;
   margin-top: 2px;
   padding-top: 2px;
 }
 
-.czi-custom-buttons {
+.czi-editor-frameset .molsp-czi-custom-buttons {
   margin-left: -8px;
   margin-right: 2px;
   padding-left: 4px;
   padding-right: 2px;
 }
 
-.font-buttons {
+.czi-editor-frameset .molsp-font-buttons {
   margin-left: 0;
   margin-right: 2px;
   padding-left: 4px;
   padding-right: 2px;
 }
 
-.specifiedindent {
+.czi-editor-frameset .molsp-specifiedindent {
   margin-left: 10px;
   margin-top: -1px;
 }
 
-.alignbuttons {
+.czi-editor-frameset .molsp-alignbuttons {
   background-color: #f0f0f0;
   border-color: #555;
   outline: none;
   padding: 0;
   text-align: center;
   width: 50px;
+  border-radius: 0px;
 }
 
-.alignbuttons:focus,
-.alignbuttons:hover {
+.czi-editor-frameset .molsp-alignbuttons:focus,
+.czi-editor-frameset .molsp-alignbuttons:hover {
   background-color: #f0f0f0;
   border-color: #338eec;
   outline: none;
 }
 
-.activealignbuttons {
+.czi-editor-frameset .molsp-activealignbuttons {
   border-color: #338eec !important;
   outline: none;
   padding: 0;
   text-align: center;
   width: 50px;
+  border-radius: 0px;
 }
 
-.panel.hr {
+.czi-editor-frameset .molsp-panel.hr {
   margin-bottom: 0;
   margin-top: 0;
 }
 
-.markbuttons {
+.czi-editor-frameset .molsp-markbuttons {
   background: transparent;
 }
 
-.fontstyle {
+.czi-editor-frameset .molsp-fontstyle {
   font-size: 13px;
 }
 
-.buttonstyle {
+.czi-editor-frameset .molsp-buttonstyle {
   border-radius: initial;
   font-size: 13px;
 }
 
-.hierarchydiv {
+.czi-editor-frameset .molsp-hierarchydiv {
   border-color: gray;
   border-style: solid;
   border-width: 1px;
@@ -394,7 +349,7 @@ label {
   width: auto;
 }
 
-.hierarchydiv label {
+.czi-editor-frameset .molsp-hierarchydiv label {
   box-sizing: content-box !important;
   color: #464343;
   font-size: 12px;
@@ -404,24 +359,18 @@ label {
   margin-top: 4px;
 }
 
-.indentdiv {
+.czi-editor-frameset .molsp-indentdiv {
   display: inline-flex;
 }
 
-.settingsdiv {
+.czi-editor-frameset .molsp-settingsdiv {
   display: inline-flex;
   margin-left: -1px;
 }
 
-.markbutton-container {
+.czi-editor-frameset .molsp-markbutton-container {
   margin-left: 5px !important;
-  margin-right: 5px !important;
-}
-
-.editor-markbuttons {
-  margin-right: 0 !important;
-  text-align: center !important;
-  width: 25px;
+  /* margin-right: 5px !important; */
 }
 
 div[disabled='disabled'] {

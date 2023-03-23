@@ -133,8 +133,8 @@ class CustomMenuUI extends React.PureComponent<any, any> {
     });
     return (
       <div>
-        <div className="dropbtn" id={this._id}>
-          <div className="stylenames">{children}</div>
+        <div className="molsp-dropbtn" id={this._id}>
+          <div className="molsp-stylenames">{children}</div>
 
           <hr></hr>
           {children1}
@@ -144,7 +144,7 @@ class CustomMenuUI extends React.PureComponent<any, any> {
   }
 
   componentDidMount() {
-    const styleDiv = document.getElementsByClassName('stylenames')[0];
+    const styleDiv = document.getElementsByClassName('molsp-stylenames')[0];
     styleDiv.scrollTop =
       this._menuItemHeight * this._selectedIndex - this._menuItemHeight * 2 - 5;
   }

@@ -4,7 +4,8 @@ import type { Style, CSSStyle } from './StyleRuntime';
 import {
   RESERVED_STYLE_NONE_NUMBERING,
 } from './CustomStyleNodeSpec';
-let customStyles: Style[] = new Array<Style>(0);
+import { DEFAULT_NORMAL_STYLE } from './Constants';
+let customStyles: Style[] = new Array < Style > (0);
 let styleRuntime;
 let hideNumbering = false;
 
@@ -48,6 +49,8 @@ export function getCustomStyleByName(name: string): Style {
         has = true;
       }
     }
+  } else {
+    style = DEFAULT_NORMAL_STYLE;
   }
   return style;
 }

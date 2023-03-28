@@ -26,6 +26,7 @@ import type { StyleRuntime } from './StyleRuntime';
 import {
   saveStyle
 } from './customStyle';
+import { DEFAULT_NORMAL_STYLE } from './Constants';
 
 const ENTERKEYCODE = 13;
 const DELKEYCODE = 46;
@@ -77,28 +78,6 @@ export class CustomstylePlugin extends Plugin {
       },
 
       props: {
-        handlePaste(view, event, slice) {
-          const startPos = view.state.selection.$from.before(1);
-          const endPos = view.state.selection.$to.after(1) - 1;
-          if (slice.content && slice.content.content[0] && slice.content.content[0].attrs) {
-            const styleName = slice.content.content[0].attrs.styleName;
-            const node = view.state.tr.doc.nodeAt(startPos);
-            const newattrs = Object.assign({}, node.attrs);
-            newattrs.styleName = styleName;
-            const storedmarks = getMarkByStyleName(styleName, view.state.schema);
-            let tr = view.state.tr.setNodeMarkup(startPos, undefined, newattrs);
-            tr.storedMarks = storedmarks;
-            tr = applyLatestStyle(styleName, view.state, tr, node, startPos, endPos);
-
-            tr = applyNormalIfNoStyle(view.state, tr, node);
-
-            if (tr) {
-              view.dispatch(tr);
-            }
-          }
-          return false;
-
-        },
         handleDOMEvents: {
           keydown(view, event) {
             csview = view;
@@ -125,7 +104,7 @@ export class CustomstylePlugin extends Plugin {
             tr = manageHierarchyOnDelete(prevState, nextState, tr, csview);
           }
 
-          tr = applyStyleForEmptyParagraph(nextState, tr);
+          tr = applyStyleForParagraph(nextState, tr);
 
           firstTime = false;
           // custom style for next line
@@ -172,22 +151,7 @@ function remapCounterFlags(tr) {
 }
 
 function saveDefaultStyle() {
-  const styleObj = {
-    styleName: 'Normal',
-    mode: 0,
-    description: 'Normal',
-    styles: {
-      align: 'left',
-      boldNumbering: true,
-      boldSentence: true,
-      fontName: 'Tahoma',
-      fontSize: '12',
-      nextLineStyleName: 'Normal',
-      paragraphSpacingAfter: '3',
-      toc: false,
-    }
-  };
-  saveStyle(styleObj).then((result) => {
+  saveStyle(DEFAULT_NORMAL_STYLE).then((_result) => {
 
   });
 }
@@ -377,7 +341,7 @@ function applyLineStyleForBoldPartial(nextState, tr) {
 
 // [FS] IRAD-1474 2021-07-01
 // Select multiple paragraph with empty paragraph and apply style not working.
-function applyStyleForEmptyParagraph(nextState, tr) {
+function applyStyleForParagraph(nextState, tr) {
   const startPos = nextState.selection.$from.before(1);
   const endPos = nextState.selection.$to.after(1) - 1;
   if (null === tr) {
@@ -390,8 +354,7 @@ function applyStyleForEmptyParagraph(nextState, tr) {
       node.content &&
       node.content.content &&
       0 < node.content.content.length &&
-      node.content.content[0].marks &&
-      0 === node.content.content[0].marks.length
+      node.content.content[0].marks
     ) {
       tr = applyLatestStyle(
         node.attrs.styleName,

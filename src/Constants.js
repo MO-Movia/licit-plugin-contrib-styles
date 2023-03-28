@@ -9,6 +9,22 @@ export const ATTR_OVERRIDDEN = 'overridden';
 
 export type KeyValuePair = { [key: string]: any };
 
+export const DEFAULT_NORMAL_STYLE = {
+  styleName: 'Normal',
+  mode: 0,
+  description: 'Normal',
+  styles: {
+    align: 'left',
+    boldNumbering: true,
+    boldSentence: true,
+    fontName: 'Tahoma',
+    fontSize: '12',
+    nextLineStyleName: 'Normal',
+    paragraphSpacingAfter: '3',
+    toc: false,
+  }
+};
+
 //to get the selected node
 export function getNode(from: number, to: number, tr: Transform): Node {
   let selectedNode = null;

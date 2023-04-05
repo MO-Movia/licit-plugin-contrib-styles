@@ -4,19 +4,23 @@ import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
 import { Node, Fragment, Schema } from 'prosemirror-model';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
-import { atViewportCenter } from '@modusoperandi/licit-ui-commands';
-import { createPopUp } from '@modusoperandi/licit-ui-commands';
+import {
+  atViewportCenter,
+  createPopUp,
+  MarkToggleCommand,
+  TextColorCommand,
+  TextHighlightCommand,
+  FontTypeCommand,
+  FontSizeCommand,
+  TextLineSpacingCommand,
+  TextAlignCommand,
+  setTextAlign,
+  IndentCommand,
+  getLineSpacingValue,
+} from '@modusoperandi/licit-ui-commands';
 import AlertInfo from './ui/AlertInfo';
 import CustomStyleEditor from './ui/CustomStyleEditor';
-import { MarkToggleCommand } from '@modusoperandi/licit-ui-commands';
-import { TextColorCommand } from '@modusoperandi/licit-ui-commands';
-import { TextHighlightCommand } from '@modusoperandi/licit-ui-commands';
-import { FontTypeCommand } from '@modusoperandi/licit-ui-commands';
-import { FontSizeCommand } from '@modusoperandi/licit-ui-commands';
-import { TextLineSpacingCommand } from '@modusoperandi/licit-ui-commands';
-import { TextAlignCommand, setTextAlign } from '@modusoperandi/licit-ui-commands';
 import ParagraphSpacingCommand from './ParagraphSpacingCommand';
-import { IndentCommand } from '@modusoperandi/licit-ui-commands';
 import {
   removeTextAlignAndLineSpacing,
   clearCustomStyleAttribute,
@@ -42,7 +46,6 @@ import {
   MARK_UNDERLINE,
 } from './MarkNames';
 import { PARAGRAPH } from './NodeNames';
-import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
@@ -318,7 +321,9 @@ class CustomStyleCommand extends UICommand {
     if (isValidated) {
       tr = applyStyle(
         this._customStyle,
-        'Default' === this._customStyle.styleName ? 'None' : this._customStyle.styleName,
+        'Default' === this._customStyle.styleName
+          ? 'None'
+          : this._customStyle.styleName,
         state,
         tr
       );
@@ -364,7 +369,10 @@ class CustomStyleCommand extends UICommand {
     const to = selection.$to.after(1) - 1;
     let customStyleName = RESERVED_STYLE_NONE;
     doc.nodesBetween(from, to, (node, pos) => {
-      if (node.attrs.styleName && RESERVED_STYLE_NONE !== node.attrs.styleName) {
+      if (
+        node.attrs.styleName &&
+        RESERVED_STYLE_NONE !== node.attrs.styleName
+      ) {
         customStyleName = node.attrs.styleName;
         const storedmarks = getMarkByStyleName(
           customStyleName,
@@ -418,7 +426,6 @@ class CustomStyleCommand extends UICommand {
                   this.getCustomStyles(style, view);
                 });
               } else {
-
                 // new style
                 this.createNewStyle(val, tr, state, dispatch, doc);
               }
@@ -435,10 +442,7 @@ class CustomStyleCommand extends UICommand {
     // Issue: Allow to create custom style numbering level 2 without level 1
     if (
       styleHasNumbering(val) &&
-      !isValidHeirarchy(
-        val.styleName,
-        parseInt(val.styles.styleLevel)
-      )
+      !isValidHeirarchy(val.styleName, parseInt(val.styles.styleLevel))
     ) {
       this.showAlert();
     } else {
@@ -454,10 +458,7 @@ class CustomStyleCommand extends UICommand {
         // [FS] IRAD-1238 2021-03-08
         // Fix: Shows alert message 'This Numberings breaks hierarchy, Previous levels are missing' on create styles
         // if a numbering applied in editor.
-        if (
-          !styleHasNumbering(val) ||
-          isValidHeirarchy(val.styleName, 0)
-        ) {
+        if (!styleHasNumbering(val) || isValidHeirarchy(val.styleName, 0)) {
           // to add previous heirarchy levels
           hasMismatchHeirarchy(
             state,
@@ -476,10 +477,7 @@ class CustomStyleCommand extends UICommand {
 
   // [FS] IRAD-1231 2021-03-02
   // update the document with the edited styles list.
-  getCustomStyles(
-    styleName: string,
-    editorView: EditorView
-  ) {
+  getCustomStyles(styleName: string, editorView: EditorView) {
     getStylesAsync().then((result) => {
       if (styleName) {
         const { dispatch, state } = editorView;
@@ -508,7 +506,15 @@ class CustomStyleCommand extends UICommand {
   }
 }
 
-function compareMarkWithStyle(mark, style, tr, startPos, endPos, retObj, state) {
+function compareMarkWithStyle(
+  mark,
+  style,
+  tr,
+  startPos,
+  endPos,
+  retObj,
+  state
+) {
   let same = false;
   let overridden = false;
 
@@ -704,7 +710,14 @@ function applyStyleEx(
   } else {
     // [FS] IRAD-1087 2020-11-02
     // Issue fix: applied link is missing after applying a custom style.
-    tr = removeAllMarksExceptLink(startPos, endPos, tr, state.schema, styleProp, state);
+    tr = removeAllMarksExceptLink(
+      startPos,
+      endPos,
+      tr,
+      state.schema,
+      styleProp,
+      state
+    );
   }
 
   if (loading) {
@@ -974,7 +987,10 @@ function createEmptyElement(
                   hasNodeAfter = true;
                 }
               } else {
-                if (startPos !== 0 && RESERVED_STYLE_NONE === item.node.attrs.styleName) {
+                if (
+                  startPos !== 0 &&
+                  RESERVED_STYLE_NONE === item.node.attrs.styleName
+                ) {
                   newattrs = Object.assign({}, item.node.attrs);
                   posArray.push({
                     pos: startPos,
@@ -996,8 +1012,7 @@ function createEmptyElement(
               appliedLevel: appliedLevel,
               currentLevel: 0,
             });
-          }
-          else {
+          } else {
             newattrs = MISSED_HEIRACHY_ELEMENT.attrs;
             posArray.push({
               pos: startPos,
@@ -1433,7 +1448,12 @@ export function applyStyleToEachNode(
 }
 // [FS] IRAD-1468 2021-06-18
 // Fix: bold first sentence custom style not showing after reload editor.
-export function applyLineStyle(state: EditorState, tr: Transform, node: Node, startPos: number) {
+export function applyLineStyle(
+  state: EditorState,
+  tr: Transform,
+  node: Node,
+  startPos: number
+) {
   if (node) {
     if (node.attrs && node.attrs.styleName) {
       // if (node.attrs && node.attrs.styleName && RESERVED_STYLE_NONE !== node.attrs.styleName) {
@@ -1637,8 +1657,14 @@ export function isLevelUpdated(
     const currentLevel = getStyleLevel(styleName);
     // [FS] IRAD-1496 2021-06-25
     // Fix: warning message not showing if deselect numbering and save
-    if (style && style.styles && (currentLevel > 0 && !style.styles.hasNumbering) || (style.styles && undefined === style.styles.styleLevel ||
-      (style && style.styles && style.styles.styleLevel !== currentLevel))) {
+    if (
+      (style &&
+        style.styles &&
+        currentLevel > 0 &&
+        !style.styles.hasNumbering) ||
+      (style.styles && undefined === style.styles.styleLevel) ||
+      (style && style.styles && style.styles.styleLevel !== currentLevel)
+    ) {
       bOK = true;
     }
   }

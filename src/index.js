@@ -15,6 +15,7 @@ import {
   setStyleRuntime,
   setHidenumberingFlag,
   isStylesLoaded,
+  saveStyle,
 } from './customStyle';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
@@ -23,9 +24,6 @@ import { Node, Schema } from 'prosemirror-model';
 import CustomstyleDropDownCommand from './ui/CustomstyleDropDownCommand';
 import { applyEffectiveSchema } from './EditorSchema';
 import type { StyleRuntime } from './StyleRuntime';
-import {
-  saveStyle
-} from './customStyle';
 import { DEFAULT_NORMAL_STYLE } from './Constants';
 
 const ENTERKEYCODE = 13;
@@ -61,7 +59,7 @@ export class CustomstylePlugin extends Plugin {
           // save a Default style in server
           saveDefaultStyle();
         },
-        apply(tr, prev, oldState, newState) {
+        apply(tr, _prev, _oldState, _newState) {
           // [FS] IRAD-1202 2021-02-15
           remapCounterFlags(tr);
         },
@@ -72,14 +70,18 @@ export class CustomstylePlugin extends Plugin {
         // to apply styles after getting the styles.
         this.csview = view;
         return {
-          update: () => { },
-          destroy: () => { },
+          update: () => {
+            /* This is intentional */
+          },
+          destroy: () => {
+            /* This is intentional */
+          },
         };
       },
 
       props: {
         handleDOMEvents: {
-          keydown(view, event) {
+          keydown(view, _event) {
             csview = view;
           },
         },
@@ -87,34 +89,22 @@ export class CustomstylePlugin extends Plugin {
       },
       appendTransaction: (transactions, prevState, nextState) => {
         let tr = null;
+        const ref = { firstTime, loaded };
         if (!loaded) {
-          loaded = isStylesLoaded();
-          if (loaded) {
-            tr = updateStyleOverrideFlag(nextState, tr);
-            // do this only once when the document is loaded.
-            tr = applyStyles(nextState, tr);
-            if (firstTime) {
-              tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc);
-            }
-          }
+          tr = onInitAppendTransaction(ref, tr, nextState);
         } else if (isDocChanged(transactions)) {
-          if (!firstTime) {
-            // when user updates
-            tr = updateStyleOverrideFlag(nextState, tr);
-            tr = manageHierarchyOnDelete(prevState, nextState, tr, csview);
-          }
-
-          tr = applyStyleForParagraph(nextState, tr);
-
-          firstTime = false;
-          // custom style for next line
-          if (csview) {
-            if (ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$from.start() == tr.selection.$from.end()) {
-              tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
-            }
-          }
-          tr = applyLineStyleForBoldPartial(nextState, tr);
+          tr = onUpdateAppendTransaction(
+            ref,
+            tr,
+            nextState,
+            prevState,
+            csview,
+            transactions
+          );
         }
+        firstTime = ref.firstTime;
+        loaded = ref.loaded;
+
         return tr;
       },
     });
@@ -138,6 +128,54 @@ export class CustomstylePlugin extends Plugin {
   }
 }
 
+function onInitAppendTransaction(ref, tr, nextState) {
+  ref.loaded = isStylesLoaded();
+  if (ref.loaded) {
+    tr = updateStyleOverrideFlag(nextState, tr);
+    // do this only once when the document is loaded.
+    tr = applyStyles(nextState, tr);
+    if (ref.firstTime) {
+      tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc);
+    }
+  }
+
+  return tr;
+}
+
+function onUpdateAppendTransaction(
+  ref,
+  tr,
+  nextState,
+  prevState,
+  csview,
+  transactions
+) {
+  if (!ref.firstTime) {
+    // when user updates
+    tr = updateStyleOverrideFlag(nextState, tr);
+    tr = manageHierarchyOnDelete(prevState, nextState, tr, csview);
+  }
+
+  tr = applyStyleForEmptyParagraph(nextState, tr);
+
+  ref.firstTime = false;
+  // custom style for next line
+  if (csview) {
+    if (
+      ENTERKEYCODE === csview.input.lastKeyCode &&
+      tr.selection.$from.start() == tr.selection.$from.end()
+    ) {
+      tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
+    }
+  }
+  tr = applyLineStyleForBoldPartial(nextState, tr);
+  if (0 < transactions.length && transactions[0].getMeta('paste')) {
+    tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc);
+  }
+  tr = tr.scrollIntoView();
+  return tr;
+}
+
 // [FS] IRAD-1202 2021-02-15
 function remapCounterFlags(tr) {
   // Depending on the window variables,
@@ -152,7 +190,7 @@ function remapCounterFlags(tr) {
 
 function saveDefaultStyle() {
   saveStyle(DEFAULT_NORMAL_STYLE).then((_result) => {
-
+    /* This is intentional */
   });
 }
 
@@ -191,9 +229,7 @@ function validateStyleName(node) {
 // [FS] IRAD-1668 2022-01-21
 function refreshToApplyStyles() {
   if (this.csview) {
-    this.csview.dispatch(
-      this.csview.state.tr.scrollIntoView()
-    );
+    this.csview.dispatch(this.csview.state.tr.scrollIntoView());
   }
 }
 
@@ -206,7 +242,8 @@ function manageHierarchyOnDelete(prevState, nextState, tr, view) {
   if (prevState.doc !== nextState.doc) {
     if (
       view &&
-      (DELKEYCODE === view.input.lastKeyCode || BACKSPACEKEYCODE === view.input.lastKeyCode)
+      (DELKEYCODE === view.input.lastKeyCode ||
+        BACKSPACEKEYCODE === view.input.lastKeyCode)
     ) {
       const nextNodes = nodeAssignment(nextState);
       // seperating  the nodes to two arrays, ie selection before and after
@@ -219,7 +256,9 @@ function manageHierarchyOnDelete(prevState, nextState, tr, view) {
       });
       // for backspace and delete to get the correct node position
       selectedPos =
-        DELKEYCODE === view.input.lastKeyCode ? selectedPos - 1 : selectedPos + 1;
+        DELKEYCODE === view.input.lastKeyCode
+          ? selectedPos - 1
+          : selectedPos + 1;
       const selectedNode = prevState.doc.nodeAt(selectedPos);
       if (
         validateStyleName(selectedNode) &&
@@ -244,12 +283,7 @@ function manageHierarchyOnDelete(prevState, nextState, tr, view) {
           }
 
           if (nodesBeforeSelection.length > 0 && 0 !== prevNodeLevel) {
-            for (
-              let indexbefore = 0;
-              indexbefore < nodesBeforeSelection.length;
-              indexbefore++
-            ) {
-              const beforeitem = nodesBeforeSelection[indexbefore];
+            for (const beforeitem of nodesBeforeSelection) {
               subsequantLevel = Number(
                 getStyleLevel(beforeitem.node.attrs.styleName)
               );
@@ -268,8 +302,7 @@ function manageHierarchyOnDelete(prevState, nextState, tr, view) {
             }
           }
 
-          for (let index = 0; index < nodesAfterSelection.length; index++) {
-            const item = nodesAfterSelection[index];
+          for (const item of nodesAfterSelection) {
             subsequantLevel = Number(getStyleLevel(item.node.attrs.styleName));
 
             if (subsequantLevel !== 0) {
@@ -341,7 +374,7 @@ function applyLineStyleForBoldPartial(nextState, tr) {
 
 // [FS] IRAD-1474 2021-07-01
 // Select multiple paragraph with empty paragraph and apply style not working.
-function applyStyleForParagraph(nextState, tr) {
+function applyStyleForEmptyParagraph(nextState, tr) {
   const startPos = nextState.selection.$from.before(1);
   const endPos = nextState.selection.$to.after(1) - 1;
   if (null === tr) {
@@ -354,7 +387,8 @@ function applyStyleForParagraph(nextState, tr) {
       node.content &&
       node.content.content &&
       0 < node.content.content.length &&
-      node.content.content[0].marks
+      node.content.content[0].marks &&
+      0 === node.content.content[0].marks.length
     ) {
       tr = applyLatestStyle(
         node.attrs.styleName,
@@ -392,15 +426,15 @@ function applyStyleForNextParagraph(prevState, nextState, tr, view) {
         ) {
           IsActiveNode = true;
         }
-        if (
-          nextNode &&
-          IsActiveNode &&
-          nextNode.type.name === 'paragraph') {
+        if (nextNode && IsActiveNode && nextNode.type.name === 'paragraph') {
           const style = getCustomStyleByName(newattrs.styleName);
           if (style && style.styles && style.styles.nextLineStyleName) {
             // [FS] IRAD-1217 2021-02-24
             // Select style for next line not working continuously for more that 2 paragraphs
-            newattrs = setNodeAttrs(resetTheDefaultStyleNameToNone(style.styles.nextLineStyleName), newattrs);
+            newattrs = setNodeAttrs(
+              resetTheDefaultStyleNameToNone(style.styles.nextLineStyleName),
+              newattrs
+            );
             tr = tr.setNodeMarkup(nextNodePos, undefined, newattrs);
             // [FS] IRAD-1201 2021-02-18
             // get the nextLine Style from the current style object.
@@ -410,7 +444,7 @@ function applyStyleForNextParagraph(prevState, nextState, tr, view) {
                 : '',
               nextState.schema
             );
-            node.descendants((child, pos) => {
+            node.descendants((child, _pos) => {
               if (child.type.name === 'text') {
                 marks.forEach((mark) => {
                   tr = tr.addStoredMark(mark);
@@ -539,8 +573,6 @@ function updateStyleOverrideFlag(state, tr) {
 
 function haveEligibleChildren(node, contentLen) {
   return (
-    node instanceof Node &&
-    0 < contentLen &&
-    node.type.name === 'paragraph'
+    node instanceof Node && 0 < contentLen && node.type.name === 'paragraph'
   );
 }

@@ -399,6 +399,7 @@ class CustomMenuUI extends React.PureComponent<any, any> {
                     if (null != result) {
                       if (val.styleName === val.styles.nextLineStyleName) {
                         let tr;
+                        delete val.editorView;
                         saveStyle(val).then((result) => {
                           if (result) {
                             setStyles(result);

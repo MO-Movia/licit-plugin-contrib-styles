@@ -392,7 +392,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
         otherStyleSelected: false,
       });
       this.setState({
-        styles: { ...this.state.styles, nextLineStyleName: 'None' },
+        styles: { ...this.state.styles, nextLineStyleName: RESERVED_STYLE_NONE },
       });
     } else if (1 === selectedOption) {
       this.setState({
@@ -476,7 +476,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
   handleNumbering(val: any) {
     // if user select numbering, then always set nextLineStyle as continues this style.
     // [FS] IRAD-1221 2021-03-01
-    // Issue fix: The next line style not switch back to 'None' when disable the numbering.
+    // Issue fix: The next line style not switch back to RESERVED_STYLE_NONE when disable the numbering.
     this.setState({
       styles: {
         ...this.state.styles,
@@ -515,7 +515,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
     let chceked = false;
     if (this.state.styles.nextLineStyleName) {
       chceked =
-        this.state.styles.nextLineStyleName !== 'None' &&
+        this.state.styles.nextLineStyleName !== RESERVED_STYLE_NONE &&
         this.state.styles.nextLineStyleName !== this.state.styleName;
     }
     return chceked;
@@ -1246,7 +1246,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </div>
                   <div className="molsp-settingsdiv">
                     <input
-                      checked={this.state.styles.nextLineStyleName === 'None'}
+                      checked={this.state.styles.nextLineStyleName === RESERVED_STYLE_NONE}
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 0)}
                       style={{

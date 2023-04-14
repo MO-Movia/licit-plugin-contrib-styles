@@ -14,8 +14,7 @@ import {
   getCustomStyleByLevel,
   setStyleRuntime,
   setHidenumberingFlag,
-  isStylesLoaded,
-  saveStyle,
+  isStylesLoaded
 } from './customStyle';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
@@ -24,7 +23,6 @@ import { Node, Schema } from 'prosemirror-model';
 import CustomstyleDropDownCommand from './ui/CustomstyleDropDownCommand';
 import { applyEffectiveSchema } from './EditorSchema';
 import type { StyleRuntime } from './StyleRuntime';
-import { DEFAULT_NORMAL_STYLE } from './Constants';
 
 const ENTERKEYCODE = 13;
 const DELKEYCODE = 46;
@@ -56,8 +54,6 @@ export class CustomstylePlugin extends Plugin {
           firstTime = true;
           setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
           setHidenumberingFlag(hideNumbering ? hideNumbering : false);
-          // save a Default style in server
-          saveDefaultStyle();
         },
         apply(tr, _prev, _oldState, _newState) {
           // [FS] IRAD-1202 2021-02-15
@@ -186,12 +182,6 @@ function remapCounterFlags(tr) {
       window[key] = true;
     }
   }
-}
-
-function saveDefaultStyle() {
-  saveStyle(DEFAULT_NORMAL_STYLE).then((_result) => {
-    /* This is intentional */
-  });
 }
 
 function applyStyles(state, tr) {

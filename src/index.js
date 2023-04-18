@@ -230,86 +230,88 @@ function manageHierarchyOnDelete(prevState, nextState, tr, view) {
   const nodesBeforeSelection = [];
   let selectedPos = nextState.selection.from;
   if (prevState.doc !== nextState.doc) {
-    if (
-      view &&
-      (DELKEYCODE === view.input.lastKeyCode ||
-        BACKSPACEKEYCODE === view.input.lastKeyCode)
-    ) {
-      const nextNodes = nodeAssignment(nextState);
-      // seperating  the nodes to two arrays, ie selection before and after
-      nextNodes.forEach((element) => {
-        if (element.pos >= selectedPos) {
-          nodesAfterSelection.push({ pos: element.pos, node: element.node });
-        } else {
-          nodesBeforeSelection.push({ pos: element.pos, node: element.node });
-        }
-      });
-      // for backspace and delete to get the correct node position
-      selectedPos =
-        DELKEYCODE === view.input.lastKeyCode
-          ? selectedPos - 1
-          : selectedPos + 1;
-      const selectedNode = prevState.doc.nodeAt(selectedPos);
+    if (prevState.selection.from !== 1) {
       if (
-        validateStyleName(selectedNode) &&
-        0 !== Number(getStyleLevel(selectedNode.attrs.styleName))
+        view &&
+        (DELKEYCODE === view.input.lastKeyCode ||
+          BACKSPACEKEYCODE === view.input.lastKeyCode)
       ) {
-        if (nodesBeforeSelection.length > 0 || nodesAfterSelection.length > 0) {
-          // assigning transaction if tr is null
-          if (!tr) {
-            tr = nextState.tr;
+        const nextNodes = nodeAssignment(nextState);
+        // seperating  the nodes to two arrays, ie selection before and after
+        nextNodes.forEach((element) => {
+          if (element.pos >= selectedPos) {
+            nodesAfterSelection.push({ pos: element.pos, node: element.node });
+          } else {
+            nodesBeforeSelection.push({ pos: element.pos, node: element.node });
           }
+        });
+        // for backspace and delete to get the correct node position
+        selectedPos =
+          DELKEYCODE === view.input.lastKeyCode
+            ? selectedPos - 1
+            : selectedPos + 1;
+        const selectedNode = prevState.doc.nodeAt(selectedPos);
+        if (
+          validateStyleName(selectedNode) &&
+          0 !== Number(getStyleLevel(selectedNode.attrs.styleName))
+        ) {
+          if (nodesBeforeSelection.length > 0 || nodesAfterSelection.length > 0) {
+            // assigning transaction if tr is null
+            if (!tr) {
+              tr = nextState.tr;
+            }
 
-          let subsequantLevel = 0;
-          let levelCounter = 0;
-          let prevNode = null;
-          let prevNodeLevel = 0;
+            let subsequantLevel = 0;
+            let levelCounter = 0;
+            let prevNode = null;
+            let prevNodeLevel = 0;
 
-          if (nodesBeforeSelection.length > 0) {
-            prevNode = nodesBeforeSelection[nodesBeforeSelection.length - 1];
-            prevNodeLevel = Number(
-              getStyleLevel(prevNode.node.attrs.styleName)
-            );
-          }
-
-          if (nodesBeforeSelection.length > 0 && 0 !== prevNodeLevel) {
-            for (const beforeitem of nodesBeforeSelection) {
-              subsequantLevel = Number(
-                getStyleLevel(beforeitem.node.attrs.styleName)
+            if (nodesBeforeSelection.length > 0) {
+              prevNode = nodesBeforeSelection[nodesBeforeSelection.length - 1];
+              prevNodeLevel = Number(
+                getStyleLevel(prevNode.node.attrs.styleName)
               );
+            }
+
+            if (nodesBeforeSelection.length > 0 && 0 !== prevNodeLevel) {
+              for (const beforeitem of nodesBeforeSelection) {
+                subsequantLevel = Number(
+                  getStyleLevel(beforeitem.node.attrs.styleName)
+                );
+                if (subsequantLevel !== 0) {
+                  if (subsequantLevel > 1 && subsequantLevel - levelCounter > 1) {
+                    subsequantLevel = subsequantLevel - 1;
+                    const style = getCustomStyleByLevel(subsequantLevel);
+                    if (style) {
+                      const newattrs = Object.assign({}, beforeitem.node.attrs);
+                      newattrs.styleName = style.styleName;
+                      tr = tr.setNodeMarkup(beforeitem.pos, undefined, newattrs);
+                    }
+                  }
+                  levelCounter = subsequantLevel;
+                }
+              }
+            }
+
+            for (const item of nodesAfterSelection) {
+              subsequantLevel = Number(getStyleLevel(item.node.attrs.styleName));
+
               if (subsequantLevel !== 0) {
-                if (subsequantLevel > 1 && subsequantLevel - levelCounter > 1) {
-                  subsequantLevel = subsequantLevel - 1;
-                  const style = getCustomStyleByLevel(subsequantLevel);
-                  if (style) {
-                    const newattrs = Object.assign({}, beforeitem.node.attrs);
-                    newattrs.styleName = style.styleName;
-                    tr = tr.setNodeMarkup(beforeitem.pos, undefined, newattrs);
+                if (levelCounter !== subsequantLevel) {
+                  if (subsequantLevel - levelCounter > 1) {
+                    subsequantLevel = Number(subsequantLevel) - 1;
+                    if (subsequantLevel > 0) {
+                      const style = getCustomStyleByLevel(subsequantLevel);
+                      if (style) {
+                        const newattrs = Object.assign({}, item.node.attrs);
+                        newattrs.styleName = style.styleName;
+                        tr = tr.setNodeMarkup(item.pos, undefined, newattrs);
+                      }
+                    }
                   }
                 }
                 levelCounter = subsequantLevel;
               }
-            }
-          }
-
-          for (const item of nodesAfterSelection) {
-            subsequantLevel = Number(getStyleLevel(item.node.attrs.styleName));
-
-            if (subsequantLevel !== 0) {
-              if (levelCounter !== subsequantLevel) {
-                if (subsequantLevel - levelCounter > 1) {
-                  subsequantLevel = Number(subsequantLevel) - 1;
-                  if (subsequantLevel > 0) {
-                    const style = getCustomStyleByLevel(subsequantLevel);
-                    if (style) {
-                      const newattrs = Object.assign({}, item.node.attrs);
-                      newattrs.styleName = style.styleName;
-                      tr = tr.setNodeMarkup(item.pos, undefined, newattrs);
-                    }
-                  }
-                }
-              }
-              levelCounter = subsequantLevel;
             }
           }
         }

@@ -2,6 +2,7 @@
 // [FS] IRAD-1085 2020-10-09
 import type { Style, CSSStyle } from './StyleRuntime';
 import {
+  RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
 } from './CustomStyleNodeSpec';
 import { DEFAULT_NORMAL_STYLE } from './Constants';
@@ -73,9 +74,19 @@ export function setStyleRuntime(runtime: any, callback) {
   getStylesAsync().then((result) => {
     if (result) {
       setStyles(result);
+       // save a Default style in server
+       saveDefaultStyle();
       callback();
     }
   });
+}
+
+function saveDefaultStyle() {
+  if (!isCustomStyleExists(RESERVED_STYLE_NONE)) {
+    saveStyle(DEFAULT_NORMAL_STYLE).then((_result) => {
+      /* This is intentional */
+    });
+  }
 }
 
 export function isStylesLoaded() {

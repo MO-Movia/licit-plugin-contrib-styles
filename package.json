@@ -10,7 +10,9 @@
     "url": "git+https://github.com/MO-Movia/licit.git"
   },
   "scripts": {
-    "test": "jest --passWithNoTests",
+    "test": "jest",
+    "test:unit": "jest",
+    "test:coverage": "jest --coverage",
     "build:clean": "rm -rf dist/ && rm -f modusoperandi-licit-customstyles-*.*.*.tgz",
     "webpack": "webpack",
     "build:babel": "babel src --out-dir dist",
@@ -20,6 +22,9 @@
     "flow": "flow --show-all-errors",
     "lint:js": "eslint \"src/**/*.js\"",
     "lint:css": "stylelint \"**/*.css\"",
+    "lint": "npm run lint:css & npm run lint:js",
+    "ci:build": "npm run build:clean && npm run webpack && npm run build:babel && npm run build:css && npm run build:flow",
+    "ci:bom": "cyclonedx-npm --ignore-npm-errors --short-PURLs --output-format XML --output-file dist/bom.xml",
     "prepare": "npm run build:dist"
   },
   "devDependencies": {
@@ -43,6 +48,7 @@
     "@babel/preset-env": "^7.11.5",
     "@babel/preset-flow": "^7.10.4",
     "@babel/preset-react": "^7.16.0",
+    "@cyclonedx/cyclonedx-npm": "^1.11.0",
     "babel-eslint": "10.1.0",
     "babel-jest": "^27.0.2",
     "babel-loader": "8.1.0",

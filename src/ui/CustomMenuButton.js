@@ -52,7 +52,7 @@ class CustomMenuButton extends React.PureComponent<any, any> {
         id={this._id}
         label={label}
         onClick={this._onClick}
-        title={label}
+        title={'Style: ' + label}
       />
     );
   }

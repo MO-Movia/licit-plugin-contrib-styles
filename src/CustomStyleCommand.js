@@ -695,9 +695,12 @@ function applyStyleEx(
   tr: Transform,
   node: Node,
   startPos: number,
-  endPos: number
+  endPos: number, 
+  way: number,
+  opt: number
 ) {
   const loading = !styleProp;
+  if(!opt){
   if (loading) {
     tr = onLoadRemoveAllMarksExceptOverridden(
       node,
@@ -710,6 +713,7 @@ function applyStyleEx(
   } else {
     // [FS] IRAD-1087 2020-11-02
     // Issue fix: applied link is missing after applying a custom style.
+    if (way === 0) {
     tr = removeAllMarksExceptLink(
       startPos,
       endPos,
@@ -718,9 +722,11 @@ function applyStyleEx(
       styleProp,
       state
     );
+    }
   }
+}
 
-  if (loading) {
+  if (loading || !opt) {
     styleProp = getCustomStyleByName(styleName);
   }
 
@@ -772,7 +778,7 @@ function applyStyleEx(
         typeof element.executeCustom === 'function'
       ) {
         const returnVal = element.executeCustom(state, tr, startPos, endPos);
-        if (typeof returnVal != 'boolean') {
+        if (typeof returnVal !== 'boolean') {
           tr = returnVal;
         }
         // tr = element.executeCustom(state, tr, startPos, endPos);
@@ -1318,9 +1324,11 @@ export function applyLatestStyle(
   node: Node,
   startPos: number,
   endPos: number,
-  style: ?Style
+  style: ?Style,
+  opt: number
 ) {
-  tr = applyStyleEx(style, styleName, state, tr, node, startPos, endPos);
+  let way = 1;
+  tr = applyStyleEx(style, styleName, state, tr, node, startPos, endPos, way, opt);
   // apply bold first word/sentence custom style
   tr = applyLineStyle(state, tr, node, startPos);
   return tr;
@@ -1431,12 +1439,13 @@ export function applyStyleToEachNode(
   style: Style,
   styleName: string
 ) {
+  let way = 0;
   let _node = null;
   tr.doc.nodesBetween(from, to, (node, startPos) => {
     if (node.type.name === 'paragraph') {
       // [FS] IRAD-1182 2021-02-11
       // Issue fix: When style applied to multiple paragraphs, some of the paragraph's objectId found in deletedObjectId's
-      tr = applyStyleEx(style, styleName, state, tr, node, startPos, to);
+      tr = applyStyleEx(style, styleName, state, tr, node, startPos, to, way);
       _node = node;
     }
   });

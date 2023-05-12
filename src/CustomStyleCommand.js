@@ -322,7 +322,7 @@ class CustomStyleCommand extends UICommand {
       tr = applyStyle(
         this._customStyle,
         'Default' === this._customStyle.styleName
-          ? 'None'
+          ? 'Normal'
           : this._customStyle.styleName,
         state,
         tr
@@ -529,6 +529,14 @@ function compareMarkWithStyle(
       case MARK_TEXT_COLOR:
         same = mark.attrs['color'] === style[COLOR];
         break;
+      case MARK_TEXT_HIGHLIGHT:
+        if (undefined !== style[TEXTHL]) {
+          same = mark.attrs['highlightColor'] === style[TEXTHL];
+        }
+        else {
+          same = true;
+        }
+        break;
       case MARK_FONT_SIZE:
         same = mark.attrs['pt'] === Number(style[FONTSIZE]);
         break;
@@ -695,12 +703,12 @@ function applyStyleEx(
   tr: Transform,
   node: Node,
   startPos: number,
-  endPos: number, 
+  endPos: number,
   way: number,
   opt: number
 ) {
   const loading = !styleProp;
-  if(!opt){
+  if(opt !== 1){
   if (loading) {
     tr = onLoadRemoveAllMarksExceptOverridden(
       node,
@@ -726,7 +734,7 @@ function applyStyleEx(
   }
 }
 
-  if (loading || !opt) {
+  if (loading || (opt !== 1)) {
     styleProp = getCustomStyleByName(styleName);
   }
 
@@ -736,19 +744,23 @@ function applyStyleEx(
     // [FS] IRAD-1074 2020-10-22
     // Issue fix on not removing center alignment when switch style with center
     // alignment to style with left alignment
-    newattrs.align = null;
+    // newattrs.align = null;
     newattrs.lineSpacing = null;
 
     // [FS] IRAD-1131 2021-01-12
     // Indent overriding not working on a paragraph where custom style is applied
     newattrs.indent = null;
     newattrs.styleName = styleName;
-
+    if (loading) {
+      newattrs.align = node.attrs.align;
+    }
     _commands.forEach((element) => {
       if (styleProp && styleProp.styles) {
         // to set the node attribute for text-align
         if (element instanceof TextAlignCommand) {
-          newattrs.align = styleProp.styles.align;
+          if (way !== 1) {
+            newattrs.align = styleProp.styles.align;
+          }
           // to set the node attribute for line-height
         } else if (element instanceof TextLineSpacingCommand) {
           // [FS] IRAD-1104 2020-11-13
@@ -1327,7 +1339,7 @@ export function applyLatestStyle(
   style: ?Style,
   opt: number
 ) {
-  let way = 1;
+  const way = 1;
   tr = applyStyleEx(style, styleName, state, tr, node, startPos, endPos, way, opt);
   // apply bold first word/sentence custom style
   tr = applyLineStyle(state, tr, node, startPos);
@@ -1425,8 +1437,13 @@ export function applyStyle(
   tr: Transform
 ) {
   const { selection } = state;
-  const startPos = selection.$from.before(1);
-  const endPos = selection.$to.after(1) - 1;
+  let startPos = selection.$from.before(1);
+  let endPos = selection.$to.after(1) - 1;
+  const n = state.doc.nodeAt(startPos);
+  if (n && n.type.name === 'table') {
+    startPos = selection.$from.pos;
+    endPos = selection.$to.pos;
+  }
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
 
@@ -1439,7 +1456,7 @@ export function applyStyleToEachNode(
   style: Style,
   styleName: string
 ) {
-  let way = 0;
+  const way = 0;
   let _node = null;
   tr.doc.nodesBetween(from, to, (node, startPos) => {
     if (node.type.name === 'paragraph') {

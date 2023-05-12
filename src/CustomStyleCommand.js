@@ -14,7 +14,6 @@ import {
   FontSizeCommand,
   TextLineSpacingCommand,
   TextAlignCommand,
-  setTextAlign,
   IndentCommand,
   getLineSpacingValue,
 } from '@modusoperandi/licit-ui-commands';
@@ -1424,7 +1423,7 @@ function handleRemoveMarks(
       tr = tr.removeMark(from, to, mark.type);
     }
   });
-  tr = setTextAlign(tr, schema, null);
+  // tr = setTextAlign(tr, schema, null);
   return tr;
 }
 

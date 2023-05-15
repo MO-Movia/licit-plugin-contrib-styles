@@ -757,7 +757,7 @@ function applyStyleEx(
       if (styleProp && styleProp.styles) {
         // to set the node attribute for text-align
         if (element instanceof TextAlignCommand) {
-          if (way !== 1) {
+          if (!loading) {
             newattrs.align = styleProp.styles.align;
           }
           // to set the node attribute for line-height

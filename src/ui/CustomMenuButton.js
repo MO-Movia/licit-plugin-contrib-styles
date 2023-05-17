@@ -27,7 +27,7 @@ class CustomMenuButton extends React.PureComponent<any, any> {
     icon?: string | React.Element<any> | null,
     label?: string | React.Element<any> | null,
     title?: ?string,
-  };
+   };
 
   _menu = null;
   _id = uuid();

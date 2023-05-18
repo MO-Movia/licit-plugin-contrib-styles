@@ -129,7 +129,8 @@ function getStyleEx(align, lineSpacing, styleName) {
       `--czi-content-line-height: ${cssLineSpacing};`;
   }
 
-  if (null !== styleName && 'Normal' !== styleName) {
+  // if (null !== styleName && 'Normal' !== styleName) {
+  if (null !== styleName) {
     // to get the styles of the corresponding style name
     const styleProps = getCustomStyleByName(styleName);
     if (null !== styleProps && styleProps.styles) {

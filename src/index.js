@@ -59,7 +59,7 @@ export class CustomstylePlugin extends Plugin {
           setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
           setHidenumberingFlag(hideNumbering ? hideNumbering : false);
           // save a Default style in server
-          saveDefaultStyle();
+        //  saveDefaultStyle();
         },
         apply(tr, _prev, _oldState, _newState) {
           // [FS] IRAD-1202 2021-02-15

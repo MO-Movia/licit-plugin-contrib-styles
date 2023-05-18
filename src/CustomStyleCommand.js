@@ -544,7 +544,6 @@ function compareMarkWithStyle(
         break;
       case MARK_STRIKE:
       case MARK_SUPER:
-      case MARK_TEXT_HIGHLIGHT:
         break;
       case MARK_UNDERLINE:
         same = undefined !== style[UNDERLINE];
@@ -703,10 +702,11 @@ function applyStyleEx(
   node: Node,
   startPos: number,
   endPos: number,
-  opt: number,
+  opt: ?Boolean,
 ) {
   const loading = !styleProp;
-  if(opt !== 1){
+  // opt is passed in the function when removing of marks are not necessary. 
+  if (opt !== true) {
   if (loading) {
     tr = onLoadRemoveAllMarksExceptOverridden(
       node,
@@ -730,7 +730,7 @@ function applyStyleEx(
   }
 }
 
-  if (loading || (opt !== 1)) {
+  if (loading || (opt !== true)) {
     styleProp = getCustomStyleByName(styleName);
   }
 
@@ -740,7 +740,6 @@ function applyStyleEx(
     // [FS] IRAD-1074 2020-10-22
     // Issue fix on not removing center alignment when switch style with center
     // alignment to style with left alignment
-    // newattrs.align = null;
     newattrs.lineSpacing = null;
 
     // [FS] IRAD-1131 2021-01-12
@@ -1333,7 +1332,7 @@ export function applyLatestStyle(
   startPos: number,
   endPos: number,
   style: ?Style,
-  opt: number
+  opt: ?Boolean
 ) {
   tr = applyStyleEx(style, styleName, state, tr, node, startPos, endPos, opt);
   // apply bold first word/sentence custom style

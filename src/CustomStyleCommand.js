@@ -703,8 +703,7 @@ function applyStyleEx(
   node: Node,
   startPos: number,
   endPos: number,
-  way: number,
-  opt: number
+  opt: number,
 ) {
   const loading = !styleProp;
   if(opt !== 1){
@@ -720,7 +719,6 @@ function applyStyleEx(
   } else {
     // [FS] IRAD-1087 2020-11-02
     // Issue fix: applied link is missing after applying a custom style.
-    if (way === 0) {
     tr = removeAllMarksExceptLink(
       startPos,
       endPos,
@@ -729,7 +727,6 @@ function applyStyleEx(
       styleProp,
       state
     );
-    }
   }
 }
 
@@ -1338,8 +1335,7 @@ export function applyLatestStyle(
   style: ?Style,
   opt: number
 ) {
-  const way = 1;
-  tr = applyStyleEx(style, styleName, state, tr, node, startPos, endPos, way, opt);
+  tr = applyStyleEx(style, styleName, state, tr, node, startPos, endPos, opt);
   // apply bold first word/sentence custom style
   tr = applyLineStyle(state, tr, node, startPos);
   return tr;
@@ -1455,13 +1451,12 @@ export function applyStyleToEachNode(
   style: Style,
   styleName: string
 ) {
-  const way = 0;
   let _node = null;
   tr.doc.nodesBetween(from, to, (node, startPos) => {
     if (node.type.name === 'paragraph') {
       // [FS] IRAD-1182 2021-02-11
       // Issue fix: When style applied to multiple paragraphs, some of the paragraph's objectId found in deletedObjectId's
-      tr = applyStyleEx(style, styleName, state, tr, node, startPos, to, way);
+      tr = applyStyleEx(style, styleName, state, tr, node, startPos, to);
       _node = node;
     }
   });

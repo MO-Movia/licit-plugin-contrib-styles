@@ -702,35 +702,35 @@ function applyStyleEx(
   node: Node,
   startPos: number,
   endPos: number,
-  opt: ?Boolean,
+  keepMarks: ?Boolean,
 ) {
   const loading = !styleProp;
-  // opt is passed in the function when removing of marks are not necessary. 
-  if (opt !== true) {
-  if (loading) {
-    tr = onLoadRemoveAllMarksExceptOverridden(
-      node,
-      state.schema,
-      startPos,
-      endPos,
-      tr,
-      state
-    );
-  } else {
-    // [FS] IRAD-1087 2020-11-02
-    // Issue fix: applied link is missing after applying a custom style.
-    tr = removeAllMarksExceptLink(
-      startPos,
-      endPos,
-      tr,
-      state.schema,
-      styleProp,
-      state
-    );
+  // keepMarks is passed in the function when removing of marks are not necessary. 
+  if (keepMarks !== true) {
+    if (loading) {
+      tr = onLoadRemoveAllMarksExceptOverridden(
+        node,
+        state.schema,
+        startPos,
+        endPos,
+        tr,
+        state
+      );
+    } else {
+      // [FS] IRAD-1087 2020-11-02
+      // Issue fix: applied link is missing after applying a custom style.
+      tr = removeAllMarksExceptLink(
+        startPos,
+        endPos,
+        tr,
+        state.schema,
+        styleProp,
+        state
+      );
+    }
   }
-}
 
-  if (loading || (opt !== true)) {
+  if (loading || (keepMarks !== true)) {
     styleProp = getCustomStyleByName(styleName);
   }
 
@@ -1332,9 +1332,9 @@ export function applyLatestStyle(
   startPos: number,
   endPos: number,
   style: ?Style,
-  opt: ?Boolean
+  keepMarks: ?Boolean
 ) {
-  tr = applyStyleEx(style, styleName, state, tr, node, startPos, endPos, opt);
+  tr = applyStyleEx(style, styleName, state, tr, node, startPos, endPos, keepMarks);
   // apply bold first word/sentence custom style
   tr = applyLineStyle(state, tr, node, startPos);
   return tr;

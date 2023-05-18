@@ -156,7 +156,7 @@ function onUpdateAppendTransaction(
   transactions,
   slice1
 ) {
-  const opt = true;
+  const keepMarks = true;
   if (!ref.firstTime) {
     // when user updates
     if (!(slice1)) {
@@ -179,7 +179,7 @@ function onUpdateAppendTransaction(
   }
   tr = applyLineStyleForBoldPartial(nextState, tr);
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
-    tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc, opt);
+    tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc, keepMarks);
     for (let index = 0; index < slice1.content.childCount; index++) {
       if ((!(slice1.content.content[index].type.name === 'table' || slice1.content.content[index].type.name === 'doc')) && index === 0) {
         if (!(slice1.content.content[index].content.size === 0)) {
@@ -189,14 +189,14 @@ function onUpdateAppendTransaction(
           const node1 = prevState.doc.resolve(demoPos).parent;
           const curPos = nextState.tr.curSelection.from;
           if (!(node1.content && node1.content.content[0] && node1.content.content[0].attrs)) {
-            const opt = true;
+            const keepMarks = true;
             if (node2.type.name === 'table') {
               const startPos = demoPos;
               const styleName = slice1.content.content[index].attrs.styleName;
               const node = nextState.tr.doc.nodeAt(startPos);
               const len = node.nodeSize;
               const endPos = startPos + len;
-              tr = applyLatestStyle(styleName, nextState, tr, node, startPos, endPos, null, opt);
+              tr = applyLatestStyle(styleName, nextState, tr, node, startPos, endPos, null, keepMarks);
               tr = tr.setSelection(TextSelection.create(tr.doc, curPos, curPos));
             } else {
               const startPos = csview.state.selection.$to.after(1) - 1;
@@ -204,7 +204,7 @@ function onUpdateAppendTransaction(
               const node = nextState.tr.doc.nodeAt(startPos);
               const len = node.nodeSize;
               const endPos = startPos + len;
-              tr = applyLatestStyle(styleName, nextState, tr, node, startPos, endPos, null, opt);
+              tr = applyLatestStyle(styleName, nextState, tr, node, startPos, endPos, null, keepMarks);
               tr = tr.setSelection(TextSelection.create(tr.doc, curPos, curPos));
             }
           }
@@ -431,7 +431,7 @@ function applyLineStyleForBoldPartial(nextState, tr) {
 // [FS] IRAD-1474 2021-07-01
 // Select multiple paragraph with empty paragraph and apply style not working.
 function applyStyleForEmptyParagraph(nextState, tr) {
-  const opt = true;
+  const keepMarks = true;
   const startPos = nextState.selection.$from.before(1);
   const endPos = nextState.selection.$to.after(1) - 1;
   if (null === tr) {
@@ -455,7 +455,7 @@ function applyStyleForEmptyParagraph(nextState, tr) {
         startPos,
         endPos,
         null,
-        opt,
+        keepMarks,
       );
     }
   }
@@ -579,7 +579,7 @@ function isDocChanged(transactions) {
   return transactions.some((transaction) => transaction.docChanged);
 }
 
-function applyNormalIfNoStyle(nextState, tr, node, opt) {
+function applyNormalIfNoStyle(nextState, tr, node, keepMarks) {
   if (!tr) {
     tr = nextState.tr;
   }
@@ -598,7 +598,7 @@ function applyNormalIfNoStyle(nextState, tr, node, opt) {
         child.attrs.styleName = RESERVED_STYLE_NONE;
         styleName = RESERVED_STYLE_NONE;
       }
-      tr = applyLatestStyle(styleName, nextState, tr, child, pos, end + 1, null, opt);
+      tr = applyLatestStyle(styleName, nextState, tr, child, pos, end + 1, null, keepMarks);
     }
   });
   return tr;

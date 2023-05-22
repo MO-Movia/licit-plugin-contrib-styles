@@ -64,7 +64,7 @@ export class CustomstylePlugin extends Plugin {
         // [FS] IRAD-1668 2022-01-21
         // dummy plugin view so that EditorView is accessible when refreshing the document
         // to apply styles after getting the styles.
-        this.csview = view;
+        csview = view;
         return {
           update: () => {
             /* This is intentional */

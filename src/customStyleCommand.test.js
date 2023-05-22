@@ -108,7 +108,7 @@ describe('CustomStyleCommand', () => {
               }
             }
           });
-         
+          //const content = DOMParser.fromSchema(schema).parse(document.createElement('div').appendChild(document.createElement('img')));
           const editorState = EditorState.create({
             schema:mockSchema,
             plugins: []

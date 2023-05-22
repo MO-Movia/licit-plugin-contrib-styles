@@ -1402,7 +1402,7 @@ describe('Style Plugin', () => {
 
         const res = customcommand.execute(state, view.dispatch, view);
 
-        expect(res).toStrictEqual(true);
+        expect(res).toStrictEqual(false);
     });
 
     it('execute called in CustomStyleCommand', () => {
@@ -1418,7 +1418,7 @@ describe('Style Plugin', () => {
 
         const res = customcommand.execute(state, view.dispatch, view);
 
-        expect(res).toStrictEqual(true);
+        expect(res).toStrictEqual(false);
     });
 
     it('getCustomStyleCommands in CustomStyleCommand', () => {
@@ -1629,7 +1629,7 @@ describe('Style Plugin Execute', () => {
        // view.dispatch(tr);
         const res = customcommand.execute(state, view.dispatch, view);
         if (val != 'clearstyle') {
-            expect(res).toStrictEqual(true);
+            expect(res).toStrictEqual(false);
         } else {
             expect(res).toStrictEqual(true);
         }

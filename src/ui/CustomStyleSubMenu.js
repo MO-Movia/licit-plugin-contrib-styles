@@ -30,6 +30,7 @@ class CustomStyleSubMenu extends React.PureComponent<any, any> {
             type: 'rename',
             command: command,
           })}
+          style={{ pointerEvents: command._customStyleName==='Normal'? 'none':'auto' }}
         >
           Rename Style..
         </a>
@@ -39,7 +40,7 @@ class CustomStyleSubMenu extends React.PureComponent<any, any> {
             command: command,
           })}
         >
-          Reset Style to Normal..
+          Delete Style..
         </a>
       </div>
     );

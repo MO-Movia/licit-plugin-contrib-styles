@@ -116,7 +116,7 @@ function getStyleEx(align, lineSpacing, styleName) {
   let styleLevel = 0;
   let indentOverriden = '';
   let bulletDetails = {};
-  if (align && align !== 'left') {
+  if (align) {
     style += `text-align: ${align};`;
   }
 
@@ -129,7 +129,8 @@ function getStyleEx(align, lineSpacing, styleName) {
       `--czi-content-line-height: ${cssLineSpacing};`;
   }
 
-  if (null !== styleName && 'None' !== styleName) {
+  // if (null !== styleName && 'Normal' !== styleName) {
+  if (null !== styleName) {
     // to get the styles of the corresponding style name
     const styleProps = getCustomStyleByName(styleName);
     if (null !== styleProps && styleProps.styles) {
@@ -137,6 +138,10 @@ function getStyleEx(align, lineSpacing, styleName) {
       if (styleProps.styles.hasBullet) {
         bulletDetails = getBulletDetails(styleProps.styles.bulletLevel);
         styleLevel = parseInt(styleProps.styles.styleLevel);
+      }
+
+      if (null=== align && styleProps.styles.align) {
+        style += `text-align: ${styleProps.styles.align};`;
       }
 
       // [FS] IRAD-1100 2020-11-04

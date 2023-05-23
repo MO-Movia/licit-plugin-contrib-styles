@@ -1231,6 +1231,9 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 1)}
+                      style={{
+                        marginLeft: '10px',
+                      }}
                       type="radio"
                       value="1"
                     />
@@ -1250,7 +1253,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 0)}
                       style={{
-                        marginLeft: '20px',
+                        marginLeft: '10px',
                       }}
                       type="radio"
                       value="2"
@@ -1262,7 +1265,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                         marginBottom: '0',
                       }}
                     >
-                      None
+                      Normal
                     </label>
                   </div>
                   <div className="molsp-indentdiv">

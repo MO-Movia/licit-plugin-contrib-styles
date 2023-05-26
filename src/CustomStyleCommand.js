@@ -467,7 +467,7 @@ class CustomStyleCommand extends UICommand {
             endPos,
             val.styleName
           );
-          tr = applyStyle(val, val.styleName, state, tr);
+          tr = updateDocument(state, tr, val.styleName, val.styles);
           dispatch(tr);
         }
       });

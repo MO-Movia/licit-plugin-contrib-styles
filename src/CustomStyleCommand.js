@@ -467,7 +467,7 @@ class CustomStyleCommand extends UICommand {
             endPos,
             val.styleName
           );
-          tr = applyStyle(val, val.styleName, state, tr);
+          tr = updateDocument(state, tr, val.styleName, val.styles);
           dispatch(tr);
         }
       });
@@ -793,6 +793,9 @@ function applyStyleEx(
     });
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
+    if (node.attrs.align === 'justify' && node.attrs.styleName === 'Normal' && node.content.content[0].type.name === 'image') {
+      newattrs.align = 'center';
+    }
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     tr.storedMarks = storedmarks;
   }

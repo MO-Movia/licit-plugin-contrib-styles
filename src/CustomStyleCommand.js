@@ -705,7 +705,7 @@ function applyStyleEx(
   keepMarks: ?Boolean,
 ) {
   const loading = !styleProp;
-  // keepMarks is passed in the function when removing of marks are not necessary. 
+  // keepMarks is passed in the function when removing of marks are not necessary.
   if (keepMarks !== true) {
     if (loading) {
       tr = onLoadRemoveAllMarksExceptOverridden(

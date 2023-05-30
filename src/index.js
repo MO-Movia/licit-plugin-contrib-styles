@@ -15,7 +15,8 @@ import {
   getCustomStyleByLevel,
   setStyleRuntime,
   setHidenumberingFlag,
-  isStylesLoaded
+  isStylesLoaded,
+  setStyles,
 } from './customStyle';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
@@ -54,6 +55,8 @@ export class CustomstylePlugin extends Plugin {
         init(config, state) {
           loaded = false;
           firstTime = true;
+          setStyles([]);
+          // await setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
           setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
           setHidenumberingFlag(hideNumbering ? hideNumbering : false);
         },

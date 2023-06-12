@@ -52,7 +52,9 @@ class CustomMenuUI extends React.PureComponent<any, any> {
     label?: string | React.Element<any> | null,
     title?: ?string,
     _style?: ?any,
+    updated?: ?boolean
   };
+
 
   _id = uuid();
   _selectedIndex = 0;
@@ -75,6 +77,7 @@ class CustomMenuUI extends React.PureComponent<any, any> {
       staticCommand,
       onCommand,
     } = this.props;
+
     const children = [];
     const children1 = [];
     let counter = 0;
@@ -396,35 +399,37 @@ class CustomMenuUI extends React.PureComponent<any, any> {
                     // [FS] IRAD-1133 2021-01-06
                     // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
 
-                    if (null != result) {
-                      if (val.styleName === val.styles.nextLineStyleName) {
-                        let tr;
-                        delete val.editorView;
-                        saveStyle(val).then((result) => {
-                          if (result) {
-                            setStyles(result);
-                            result.forEach((obj) => {
-                              if (val.styleName === obj.styleName) {
-                                tr = this.renameStyleInDocument(
-                                  this.props.editorState,
-                                  this.props.editorState.tr,
-                                  this._styleName,
-                                  val.styleName,
-                                  obj.styles
-                                );
-                              }
-                            });
-                            if (tr) {
-                              dispatch(tr);
-                            }
-                          }
-                          this.props.editorView.focus();
-                          this._stylePopup.close();
-                          this._stylePopup = null;
-                        });
-
+                    if (null !== result) {
+                      // if (val.styleName === val.styles.nextLineStyleName) {
+                      let tr;
+                      // delete val.editorView;
+                      // saveStyle(val).then((result) => {
+                      //   if (result) {
+                      setStyles(result);
+                      result.forEach((obj) => {
+                        if (val.styleName === obj.styleName) {
+                          tr = this.renameStyleInDocument(
+                            this.props.editorState,
+                            this.props.editorState.tr,
+                            this._styleName,
+                            val.styleName,
+                            obj.styles
+                          );
+                        }
+                      });
+                      if (tr) {
+                        dispatch(tr);
                       }
                     }
+                    this.props.editorView.focus();
+                    this._stylePopup.close();
+                    this._stylePopup = null;
+
+                    // });
+
+                    // }
+                    this.props.updateListCallback();
+                    //   }
                   });
               }
             }

@@ -14,7 +14,6 @@ import {
   FontSizeCommand,
   TextLineSpacingCommand,
   TextAlignCommand,
-  setTextAlign,
   IndentCommand,
   getLineSpacingValue,
 } from '@modusoperandi/licit-ui-commands';
@@ -322,7 +321,7 @@ class CustomStyleCommand extends UICommand {
       tr = applyStyle(
         this._customStyle,
         'Default' === this._customStyle.styleName
-          ? 'None'
+          ? 'Normal'
           : this._customStyle.styleName,
         state,
         tr
@@ -468,7 +467,7 @@ class CustomStyleCommand extends UICommand {
             endPos,
             val.styleName
           );
-          tr = applyStyle(val, val.styleName, state, tr);
+          tr = updateDocument(state, tr, val.styleName, val.styles);
           dispatch(tr);
         }
       });
@@ -529,6 +528,14 @@ function compareMarkWithStyle(
       case MARK_TEXT_COLOR:
         same = mark.attrs['color'] === style[COLOR];
         break;
+      case MARK_TEXT_HIGHLIGHT:
+        if (undefined !== style[TEXTHL]) {
+          same = mark.attrs['highlightColor'] === style[TEXTHL];
+        }
+        else {
+          same = true;
+        }
+        break;
       case MARK_FONT_SIZE:
         same = mark.attrs['pt'] === Number(style[FONTSIZE]);
         break;
@@ -537,7 +544,6 @@ function compareMarkWithStyle(
         break;
       case MARK_STRIKE:
       case MARK_SUPER:
-      case MARK_TEXT_HIGHLIGHT:
         break;
       case MARK_UNDERLINE:
         same = undefined !== style[UNDERLINE];
@@ -695,32 +701,36 @@ function applyStyleEx(
   tr: Transform,
   node: Node,
   startPos: number,
-  endPos: number
+  endPos: number,
+  keepMarks: ?Boolean,
 ) {
   const loading = !styleProp;
-  if (loading) {
-    tr = onLoadRemoveAllMarksExceptOverridden(
-      node,
-      state.schema,
-      startPos,
-      endPos,
-      tr,
-      state
-    );
-  } else {
-    // [FS] IRAD-1087 2020-11-02
-    // Issue fix: applied link is missing after applying a custom style.
-    tr = removeAllMarksExceptLink(
-      startPos,
-      endPos,
-      tr,
-      state.schema,
-      styleProp,
-      state
-    );
+  // keepMarks is passed in the function when removing of marks are not necessary.
+  if (keepMarks !== true) {
+    if (loading) {
+      tr = onLoadRemoveAllMarksExceptOverridden(
+        node,
+        state.schema,
+        startPos,
+        endPos,
+        tr,
+        state
+      );
+    } else {
+      // [FS] IRAD-1087 2020-11-02
+      // Issue fix: applied link is missing after applying a custom style.
+      tr = removeAllMarksExceptLink(
+        startPos,
+        endPos,
+        tr,
+        state.schema,
+        styleProp,
+        state
+      );
+    }
   }
 
-  if (loading) {
+  if (loading || (keepMarks !== true)) {
     styleProp = getCustomStyleByName(styleName);
   }
 
@@ -730,19 +740,22 @@ function applyStyleEx(
     // [FS] IRAD-1074 2020-10-22
     // Issue fix on not removing center alignment when switch style with center
     // alignment to style with left alignment
-    newattrs.align = null;
     newattrs.lineSpacing = null;
 
     // [FS] IRAD-1131 2021-01-12
     // Indent overriding not working on a paragraph where custom style is applied
     newattrs.indent = null;
     newattrs.styleName = styleName;
-
+    if (loading) {
+      newattrs.align = node.attrs.align;
+    }
     _commands.forEach((element) => {
       if (styleProp && styleProp.styles) {
         // to set the node attribute for text-align
         if (element instanceof TextAlignCommand) {
-          newattrs.align = styleProp.styles.align;
+          if (!loading) {
+            newattrs.align = styleProp.styles.align;
+          }
           // to set the node attribute for line-height
         } else if (element instanceof TextLineSpacingCommand) {
           // [FS] IRAD-1104 2020-11-13
@@ -772,7 +785,7 @@ function applyStyleEx(
         typeof element.executeCustom === 'function'
       ) {
         const returnVal = element.executeCustom(state, tr, startPos, endPos);
-        if (typeof returnVal != 'boolean') {
+        if (typeof returnVal !== 'boolean') {
           tr = returnVal;
         }
         // tr = element.executeCustom(state, tr, startPos, endPos);
@@ -780,6 +793,9 @@ function applyStyleEx(
     });
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
+    if (node.attrs.align === 'justify' && node.attrs.styleName === 'Normal' && node.content.content[0].type.name === 'image') {
+      newattrs.align = 'center';
+    }
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     tr.storedMarks = storedmarks;
   }
@@ -1318,9 +1334,10 @@ export function applyLatestStyle(
   node: Node,
   startPos: number,
   endPos: number,
-  style: ?Style
+  style: ?Style,
+  keepMarks: ?Boolean
 ) {
-  tr = applyStyleEx(style, styleName, state, tr, node, startPos, endPos);
+  tr = applyStyleEx(style, styleName, state, tr, node, startPos, endPos, keepMarks);
   // apply bold first word/sentence custom style
   tr = applyLineStyle(state, tr, node, startPos);
   return tr;
@@ -1404,7 +1421,7 @@ function handleRemoveMarks(
       tr = tr.removeMark(from, to, mark.type);
     }
   });
-  tr = setTextAlign(tr, schema, null);
+  // tr = setTextAlign(tr, schema, null);
   return tr;
 }
 
@@ -1417,8 +1434,13 @@ export function applyStyle(
   tr: Transform
 ) {
   const { selection } = state;
-  const startPos = selection.$from.before(1);
-  const endPos = selection.$to.after(1) - 1;
+  let startPos = selection.$from.before(1);
+  let endPos = selection.$to.after(1) - 1;
+  const n = state.doc.nodeAt(startPos);
+  if (n && n.type.name === 'table') {
+    startPos = selection.$from.pos;
+    endPos = selection.$to.pos;
+  }
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
 

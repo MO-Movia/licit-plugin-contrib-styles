@@ -996,7 +996,7 @@ describe('customstyledropdowncommand 1', () => {
   };
   jest.spyOn(cusstyles, 'hasStyleRuntime').mockReturnValue(false);
   const customstyledropdowncommand = new CustomstyleDropDownCommand(props);
-  customstyledropdowncommand.update_me();
+  customstyledropdowncommand.updateDropdownItems();
   it('should handle getCommandGroups when hasStyleRuntime is false ', async () => {
     jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([]);
     const commandGroups = await customstyledropdowncommand.getCommandGroups();

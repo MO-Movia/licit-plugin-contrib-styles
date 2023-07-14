@@ -191,12 +191,11 @@ class CustomStyleCommand extends UICommand {
   };
 
   isEmpty = (obj: Object) => {
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        return false;
-      }
+    if (Object.keys(obj).length === 0) {  
+      return true;
+    } else {
+      return false;
     }
-    return true;
   };
 
   isEnabled = (
@@ -505,7 +504,7 @@ class CustomStyleCommand extends UICommand {
   }
 }
 
-function compareMarkWithStyle(
+export function compareMarkWithStyle(
   mark,
   style,
   tr,
@@ -750,34 +749,34 @@ function applyStyleEx(
       newattrs.align = node.attrs.align;
     }
     _commands.forEach((element) => {
-      if (styleProp && styleProp.styles) {
-        // to set the node attribute for text-align
-        if (element instanceof TextAlignCommand) {
-          if (!loading) {
-            newattrs.align = styleProp.styles.align;
-          }
-          // to set the node attribute for line-height
-        } else if (element instanceof TextLineSpacingCommand) {
-          // [FS] IRAD-1104 2020-11-13
-          // Issue fix : Linespacing Double and Single not applied in the sample text paragraph
-          newattrs.lineSpacing = getLineSpacingValue(
-            styleProp.styles.lineHeight || ''
-          );
-        } else if (element instanceof ParagraphSpacingCommand) {
-          // [FS] IRAD-1100 2020-11-05
-          // Add in leading and trailing spacing (before and after a paragraph)
-          newattrs.paragraphSpacingAfter =
-            styleProp.styles.paragraphSpacingAfter || null;
-          newattrs.paragraphSpacingBefore =
-            styleProp.styles.paragraphSpacingBefore || null;
-        } else if (element instanceof IndentCommand) {
-          // [FS] IRAD-1162 2021-1-25
-          // Bug fix: indent not working along with level
-          newattrs.indent = styleProp.styles.isLevelbased
-            ? styleProp.styles.styleLevel
-            : styleProp.styles.indent;
+      //if (styleProp && styleProp.styles) {            
+      // to set the node attribute for text-align
+      if (element instanceof TextAlignCommand) {
+        if (!loading) {
+          newattrs.align = styleProp.styles.align;
         }
+        // to set the node attribute for line-height
+      } else if (element instanceof TextLineSpacingCommand) {
+        // [FS] IRAD-1104 2020-11-13
+        // Issue fix : Linespacing Double and Single not applied in the sample text paragraph
+        newattrs.lineSpacing = getLineSpacingValue(
+          styleProp.styles.lineHeight || ''
+        );
+      } else if (element instanceof ParagraphSpacingCommand) {
+        // [FS] IRAD-1100 2020-11-05
+        // Add in leading and trailing spacing (before and after a paragraph)
+        newattrs.paragraphSpacingAfter =
+          styleProp.styles.paragraphSpacingAfter || null;
+        newattrs.paragraphSpacingBefore =
+          styleProp.styles.paragraphSpacingBefore || null;
+      } else if (element instanceof IndentCommand) {
+        // [FS] IRAD-1162 2021-1-25
+        // Bug fix: indent not working along with level
+        newattrs.indent = styleProp.styles.isLevelbased
+          ? styleProp.styles.styleLevel
+          : styleProp.styles.indent;
       }
+      //}
 
       // to set the marks for the node
       if (
@@ -1141,7 +1140,7 @@ export function allowCustomLevelIndent(
 }
 
 // Mange heirarchy for the elements after selection
-function manageElementsAfterSelection(nodeArray, state, tr) {
+export function manageElementsAfterSelection(nodeArray, state, tr) {
   let selectedLevel = Number(MISSED_HEIRACHY_ELEMENT.previousLevel);
   let subsequantLevel = 0;
   let counter = 0;
@@ -1202,7 +1201,7 @@ function setNewElementObject(attrs, startPos, previousLevel, isAfter) {
   MISSED_HEIRACHY_ELEMENT.previousLevel = previousLevel;
 }
 
-function insertParagraph(nodeAttrs, startPos, tr, index, state) {
+export function insertParagraph(nodeAttrs, startPos, tr, index, state) {
   if (state && state.schema && nodeAttrs) {
     const paragraph = state.schema.nodes[PARAGRAPH];
     // [FS] IRAD-1202 2021-02-15
@@ -1227,7 +1226,7 @@ function resetNodeAttrs(nodeAttrs, customStyle) {
   return nodeAttrs;
 }
 
-function addElementEx(
+export function addElementEx(
   nodeAttrs,
   state,
   tr,
@@ -1253,7 +1252,7 @@ function addElementEx(
   return { tr, level, counter };
 }
 
-function addElement(
+export function addElement(
   nodeAttrs,
   state,
   tr,
@@ -1366,7 +1365,7 @@ function _setNodeAttribute(
 
 // [FS] IRAD-1087 2020-11-02
 // Issue fix: Missing the applied link after applying a style
-function removeAllMarksExceptLink(
+export function removeAllMarksExceptLink(
   from: number,
   to: number,
   tr: Transform,
@@ -1394,7 +1393,7 @@ function removeAllMarksExceptLink(
   return handleRemoveMarks(tr, tasks, from, to, schema, styleProp, state);
 }
 
-function handleRemoveMarks(
+export function handleRemoveMarks(
   tr: Transform,
   tasks: any,
   from: number,
@@ -1536,7 +1535,7 @@ export function applyLineStyle(
   return tr;
 }
 // add bold marks to node
-function addMarksToLine(tr, state, node, pos, boldSentence) {
+export function addMarksToLine(tr, state, node, pos, boldSentence) {
   const markType = state.schema.marks[MARK_STRONG];
   let textContent = getNodeText(node);
   const endPos = textContent.length;
@@ -1597,9 +1596,8 @@ export function getNode(
   selectedNodes.splice(0);
   tr.doc.nodesBetween(from, to, (node, startPos) => {
     if (node.type.name === 'paragraph') {
-      if (null == selectedNode) {
-        selectedNode = node;
-      }
+      selectedNode = node;
+
       selectedNodes.push({ pos: startPos, node });
     }
   });
@@ -1651,7 +1649,7 @@ export function isCustomStyleAlreadyApplied(
   return found;
 }
 
-function haveEligibleChildren(
+export function haveEligibleChildren(
   node: Node,
   contentLen: number,
   styleName: string

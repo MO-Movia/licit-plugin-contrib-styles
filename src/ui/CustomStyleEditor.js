@@ -190,10 +190,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
       style.color = this.state.styles.color;
     }
     if (this.state.styles.underline) {
-      style.textDecoration =
-        undefined !== style.textDecoration
-          ? `${style.textDecoration}${' underline'}`
-          : 'underline';
+      style.textDecoration = 'underline';
     }
     if (this.state.styles.strike) {
       style.textDecoration =
@@ -263,17 +260,14 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
       if (this.state.styles.styleLevel && this.state.styles.hasNumbering) {
         // [FS] IRAD-1137 2021-01-11
         // Issue fix : The Preview text is not showing the numbering in bold after Bold Numbering is enabled.
-        const sampleDiv = document.getElementById('sampletextdiv');
-        if (sampleDiv) {
-          if (this.state.styles.boldNumbering) {
-            sampleDiv.innerHTML = `<strong>${this.getNumberingLevel(
-              this.state.styles.styleLevel
-            )}</strong>${textSample}`;
-          } else {
-            sampleDiv.innerText = `${this.getNumberingLevel(
-              this.state.styles.styleLevel
-            )}${textSample}`;
-          }
+        if (this.state.styles.boldNumbering) {
+          sampleDiv.innerHTML = `<strong>${this.getNumberingLevel(
+            this.state.styles.styleLevel
+          )}</strong>${textSample}`;
+        } else {
+          sampleDiv.innerText = `${this.getNumberingLevel(
+            this.state.styles.styleLevel
+          )}${textSample}`;
         }
       } else {
         sampleDiv.innerText = `${SAMPLE_TEXT}`;

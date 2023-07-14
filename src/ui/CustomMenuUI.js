@@ -168,11 +168,9 @@ class CustomMenuUI extends React.PureComponent<any, any> {
   };
 
   _execute = (command: UICommand, e: SyntheticEvent<*>) => {
-    if (undefined !== command) {
-      const { dispatch, editorState, editorView, onCommand } = this.props;
-      command.execute(editorState, dispatch, editorView, e);
-      onCommand && onCommand();
-    }
+    const { dispatch, editorState, editorView, onCommand } = this.props;
+    command.execute(editorState, dispatch, editorView, e);
+    onCommand && onCommand();
   };
 
   //shows the alignment and line spacing option

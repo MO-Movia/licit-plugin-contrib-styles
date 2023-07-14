@@ -1,6 +1,6 @@
 // @flow
 
-const cached = {};
+export const cached = {};
 
 export default function canUseCSSFont(fontName: string): Promise<boolean> {
   const doc: any = document;

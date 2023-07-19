@@ -869,7 +869,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       disabled={this.state.styles.boldPartial ? false : true}
                       name="boldscentence"
                       onChange={this.onScentenceRadioChanged.bind(this)}
-                      style={{ marginLeft: '20px' }}
+                      style={{ marginLeft: '21px' }}
                       type="radio"
                       value="0"
                     />
@@ -887,7 +887,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       disabled={this.state.styles.boldPartial ? false : true}
                       name="boldscentence"
                       onChange={this.onScentenceRadioChanged.bind(this)}
-                      style={{ marginLeft: '20px' }}
+                      style={{ marginLeft: '21px' }}
                       type="radio"
                       value="1"
                     />
@@ -1108,7 +1108,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       <input
                         checked={this.state.styles.hasNumbering}
                         className="molsp-chknumbering"
-                        disabled={this.state.styles.styleLevel ? false : true}
+                        disabled={this.state.styles.styleLevel !== 'None' ? false : true}
                         onChange={this.handleNumbering.bind(this)}
                         type="checkbox"
                       />
@@ -1118,7 +1118,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       <input
                         checked={this.state.styles.boldNumbering}
                         className="molsp-chkboldnumbering"
-                        disabled={this.state.styles.hasNumbering ? false : true}
+                        disabled={(this.state.styles.hasNumbering && this.state.styles.styleLevel !== 'None') ? false : true}
                         onChange={this.handleBoldNumbering.bind(this)}
                         type="checkbox"
                       />
@@ -1128,7 +1128,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       <input
                         checked={this.state.styles.hasBullet}
                         className="molsp-chknumbering"
-                        disabled={this.state.styles.styleLevel ? false : true}
+                        disabled={this.state.styles.styleLevel !== 'None' ? false : true}
                         onChange={this.handleBulletPoints.bind(this)}
                         type="checkbox"
                       />
@@ -1273,6 +1273,9 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       checked={this.state.otherStyleSelected}
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 2)}
+                      style={{
+                        marginLeft: '9px',
+                      }}
                       type="radio"
                       value="0"
                     />
@@ -1428,6 +1431,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
     const hiddenDiv = document.getElementById('nextStyle');
     if (hiddenDiv && hiddenDiv.style) {
       hiddenDiv.style.display = display;
+      hiddenDiv.style.marginBottom = '-7px';
     }
   }
 

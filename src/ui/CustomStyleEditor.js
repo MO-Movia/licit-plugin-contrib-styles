@@ -336,8 +336,12 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
   }
   // handles Level drop down change
   onLevelChange(e: any) {
+    let isCheckboxDisabled;
     const val = RESERVED_STYLE_NONE === e.target.value ? null : e.target.value;
-    this.setState({ styles: { ...this.state.styles, styleLevel: val } });
+    if (this.state.styles.styleLevel === 'None') {
+    isCheckboxDisabled = true;
+    }
+    this.setState({ styles: { ...this.state.styles, styleLevel: val, hasNumbering: isCheckboxDisabled ? false : this.state.styles.hasNumbering, hasBullet: isCheckboxDisabled ? false : this.state.styles.hasBullet}});
   }
 
   // handles Bullet Level drop down change
@@ -1108,7 +1112,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       <input
                         checked={this.state.styles.hasNumbering}
                         className="molsp-chknumbering"
-                        disabled={this.state.styles.styleLevel !== 'None' ? false : true}
+                        disabled={(this.state.styles.styleLevel === 'None' || this.state.styles.styleLevel === undefined) ? true: false}
                         onChange={this.handleNumbering.bind(this)}
                         type="checkbox"
                       />
@@ -1118,7 +1122,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       <input
                         checked={this.state.styles.boldNumbering}
                         className="molsp-chkboldnumbering"
-                        disabled={(this.state.styles.hasNumbering && this.state.styles.styleLevel !== 'None') ? false : true}
+                        disabled={!(this.state.styles.hasNumbering) || (this.state.styles.styleLevel === 'None' || this.state.styles.styleLevel === undefined) ? true : false}
                         onChange={this.handleBoldNumbering.bind(this)}
                         type="checkbox"
                       />
@@ -1128,7 +1132,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       <input
                         checked={this.state.styles.hasBullet}
                         className="molsp-chknumbering"
-                        disabled={this.state.styles.styleLevel !== 'None' ? false : true}
+                        disabled={(this.state.styles.styleLevel === 'None' || this.state.styles.styleLevel === undefined) ? true : false}
                         onChange={this.handleBulletPoints.bind(this)}
                         type="checkbox"
                       />
@@ -1136,7 +1140,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       <span>
                         <select
                           className="molsp-fontstyle"
-                          disabled={this.state.styles.hasBullet ? false : true}
+                          disabled={!(this.state.styles.hasBullet) || (this.state.styles.styleLevel === 'None' || this.state.styles.styleLevel === undefined) ? true : false}
                           id="bulletValue"
                           onChange={this.onBulletLevelChange.bind(this)}
                           style={{ textAlign: 'center' }}

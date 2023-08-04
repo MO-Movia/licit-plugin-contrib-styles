@@ -338,7 +338,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
   onLevelChange(e: any) {
     let isCheckboxDisabled;
     const val = RESERVED_STYLE_NONE === e.target.value ? null : e.target.value;
-    if (this.state.styles.styleLevel === 'None') {
+    if (val === 'None') {
     isCheckboxDisabled = true;
     }
     this.setState({ styles: { ...this.state.styles, styleLevel: val, hasNumbering: isCheckboxDisabled ? false : this.state.styles.hasNumbering, hasBullet: isCheckboxDisabled ? false : this.state.styles.hasBullet}});

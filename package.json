@@ -11,8 +11,8 @@
   },
   "scripts": {
     "test": "jest",
-    "test:unit": "jest",
-    "test:coverage": "jest --coverage",
+    "test:unit": "jest --passWithNoTests",
+    "test:coverage": "jest --coverage --passWithNoTests",
     "build:clean": "rm -rf dist/ && rm -f modusoperandi-licit-customstyles-*.*.*.tgz",
     "webpack": "webpack",
     "build:babel": "babel src --out-dir dist",

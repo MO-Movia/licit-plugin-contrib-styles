@@ -125,7 +125,10 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
           selectedStyleCount++;
           // [FS] IRAD-1100 2020-10-30
           // Issue fix: style name shows blank when select multiple paragraph with same custom style applied
-          if ( 1 === selectedStyleCount) {
+          if (
+            1 === selectedStyleCount ||
+            (1 < selectedStyleCount && node.attrs.styleName === customStyleName)
+          ) {
             customStyleName = node.attrs.styleName.includes(
               RESERVED_STYLE_NONE_NUMBERING
             )

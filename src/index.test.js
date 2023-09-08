@@ -1,8 +1,5 @@
 import { createEditor, doc, p } from 'jest-prosemirror';
-
-//import { EditorState, TextSelection } from 'prosemirror-state';
 import CustomstyleDropDownCommand from './ui/CustomstyleDropDownCommand';
-//import { CustomstylePlugin } from './index';
 import uuid from './ui/Uuid';
 import {
     CustomstylePlugin, resetTheDefaultStyleNameToNone, setNodeAttrs, applyStyleForNextParagraph, nodeAssignment, manageHierarchyOnDelete,
@@ -35,12 +32,8 @@ import * as CustomStylNodeSpec from './CustomStyleNodeSpec';
 
 import sanitizeURL from './sanitizeURL';
 import CustomStyleCommand from './CustomStyleCommand';
-import {
-    getCustomStyleCommands,
-    getMarkByStyleName,
-} from './CustomStyleCommand';
 import * as ccommand from './CustomStyleCommand';
-//import { Schema } from 'prosemirror-model';
+
 const attrs = {
     align: { default: null },
     capco: { default: null },
@@ -775,21 +768,6 @@ describe('Style Plugin', () => {
 
         expect(bok).toEqual(true);
     });
-    xit('should get Style', () => {
-        const arg = {
-            align: 'left',
-            capco: null,
-            color: null,
-            id: null,
-            indent: 0,
-            lineSpacing: null,
-            paddingBottom: null,
-            paddingTop: null,
-            styleName: 'FS_Paragraphss',
-        };
-        const res = CustomStylNodeSpec.getStyle(arg);
-        expect(res).toBeTruthy;
-    });
 
     it('Remove CustomStyleByName if slice content is null', () => {
 
@@ -867,7 +845,6 @@ describe('Style Plugin', () => {
     });
 
     it('getCustomStyleCommands in CustomStyleCommand', () => {
-        new CustomStyleCommand('None', 'None');
         const selection = TextSelection.create(view.state.doc, 1, 2);
         const tr = view.state.tr.setSelection(selection);
         view.updateState(
@@ -897,7 +874,7 @@ describe('Style Plugin', () => {
             isLevelbased: true,
             lineHeight: '1.5',
         };
-        expect(getCustomStyleCommands(styleprops)).toBeDefined();
+        expect(ccommand.getCustomStyleCommands(styleprops)).toBeDefined();
 
         const styleprops1 = {
             align: 'left',
@@ -922,11 +899,11 @@ describe('Style Plugin', () => {
             lineHeight: '1.5',
             styleLevel: false
         };
-        expect(getCustomStyleCommands(styleprops1)).toBeDefined();
+        expect(ccommand.getCustomStyleCommands(styleprops1)).toBeDefined();
     });
 
     it('getMarkByStyleName in CustomStyleCommand', () => {
-        new CustomStyleCommand('None', 'None');
+
         const attrs = {
             align: { default: null },
             capco: { default: null },
@@ -957,7 +934,7 @@ describe('Style Plugin', () => {
         view.updateState(
             view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
         );
-        expect(getMarkByStyleName('BIU', effSchema)).toBeDefined();
+        expect(ccommand.getMarkByStyleName('BIU', effSchema)).toBeDefined();
     });
 });
 describe('UI', () => {
@@ -1012,7 +989,6 @@ describe('Style Plugin Execute', () => {
             return ['p', attrs, 0];
         });
         const plugin = new CustomstylePlugin(TestCustomStyleRuntime, false);
-        //const effSchema = plugin.getEffectiveSchema(nodeSchema);
         const effSchema = mockSchema;
         const { doc, p } = builders(effSchema, { p: { nodeType: 'paragraph' } });
         const state = EditorState.create({
@@ -1023,12 +999,7 @@ describe('Style Plugin Execute', () => {
         const view = new EditorView(document.querySelector('#editor'), {
             state,
         });
-        // const view = new EditorView(
-        //     { mount: dom },
-        //     {
-        //         state: state,
-        //     }
-        // );
+
         if (val != 'none') {
             const customcommand = new CustomStyleCommand(val, val);
             const selection = TextSelection.create(view.state.doc, 1, 2);
@@ -1036,7 +1007,6 @@ describe('Style Plugin Execute', () => {
             view.updateState(
                 view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
             );
-            // view.dispatch(tr);
             const res = customcommand.execute(state, view.dispatch, view);
             if (val != 'clearstyle') {
                 expect(res).toStrictEqual(false);
@@ -1670,9 +1640,6 @@ describe('Cus Style Plugin-Pass', () => {
     });
     it('should handle initButtonCommands', () => {
         expect(plugin.initButtonCommands()).toBeDefined();
-    });
-    xit('should handle getEffectiveSchema', () => {
-        expect(plugin.getEffectiveSchema(mockSchema)).toBeDefined();
     });
 
     it('resetTheDefaultStyleNameToNone should return RESERVED_STYLE_NONE when styleName is default', () => {
@@ -2507,7 +2474,6 @@ describe('Cus Style Plugin-Pass', () => {
         jest.spyOn(CustStyl, 'getCustomStyleByLevel').mockReturnValue({ styles: { indent: 10, align: 'left', lineHeight: null, nextLineStyleName: 'Normal' } });
         expect(manageHierarchyOnDelete(prevstatemhod, nextstate, null, mockview1)).toBeDefined();
         spymhod.mockClear();
-        //const spymhod2 = jest.spyOn(ccommand,'getStyleLevel').mockReturnValue('0');
         const mockview2 = {
             state: mockState,
             input: { lastKeyCode: 8 }
@@ -2666,7 +2632,6 @@ describe('onInitAppendTransaction', () => {
         jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(false);
         expect(onInitAppendTransaction({ loaded: false }, {}, {})).toStrictEqual({});
     });
-
 });
 
 describe('onUpdateAppendTransaction', () => {

@@ -191,7 +191,7 @@ class CustomStyleCommand extends UICommand {
   };
 
   isEmpty = (obj: Object) => {
-    if (Object.keys(obj).length === 0) {  
+    if (Object.keys(obj).length === 0) {
       return true;
     } else {
       return false;
@@ -638,46 +638,36 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
       switch (property) {
         case STRONG:
         case BOLDPARTIAL:
-          if (styleProp.styles[property]) {
-            markType = schema.marks[MARK_STRONG];
-            marks.push(markType.create(attrs));
-          }
+          markType = schema.marks[MARK_STRONG];
+          marks.push(markType.create(attrs));
           break;
 
         case EM:
           markType = schema.marks[MARK_EM];
-          if (styleProp.styles[property]) marks.push(markType.create(attrs));
+          marks.push(markType.create(attrs));
           break;
 
         case COLOR:
           markType = schema.marks[MARK_TEXT_COLOR];
-          attrs = styleProp.styles[property]
-            ? { color: styleProp.styles[property] }
-            : null;
+          attrs = { color: styleProp.styles[property] };
           marks.push(markType.create(attrs));
           break;
 
         case FONTSIZE:
           markType = schema.marks[MARK_FONT_SIZE];
-          attrs = styleProp.styles[property]
-            ? { pt: styleProp.styles[property] }
-            : null;
+          attrs = { pt: styleProp.styles[property] };
           marks.push(markType.create(attrs));
           break;
 
         case FONTNAME:
           markType = schema.marks[MARK_FONT_TYPE];
-          attrs = styleProp.styles[property]
-            ? { name: styleProp.styles[property] }
-            : null;
+          attrs = { name: styleProp.styles[property] };
           marks.push(markType.create(attrs));
           break;
 
         case TEXTHL:
           markType = schema.marks[MARK_TEXT_HIGHLIGHT];
-          attrs = styleProp.styles[property]
-            ? { highlightColor: styleProp.styles[property] }
-            : null;
+          attrs = { highlightColor: styleProp.styles[property] };
           marks.push(markType.create(attrs));
           break;
 
@@ -740,7 +730,6 @@ function applyStyleEx(
     // Issue fix on not removing center alignment when switch style with center
     // alignment to style with left alignment
     newattrs.lineSpacing = null;
-
     // [FS] IRAD-1131 2021-01-12
     // Indent overriding not working on a paragraph where custom style is applied
     newattrs.indent = null;
@@ -749,7 +738,7 @@ function applyStyleEx(
       newattrs.align = node.attrs.align;
     }
     _commands.forEach((element) => {
-      //if (styleProp && styleProp.styles) {            
+
       // to set the node attribute for text-align
       if (element instanceof TextAlignCommand) {
         if (!loading) {
@@ -776,7 +765,6 @@ function applyStyleEx(
           ? styleProp.styles.styleLevel
           : styleProp.styles.indent;
       }
-      //}
 
       // to set the marks for the node
       if (
@@ -787,7 +775,6 @@ function applyStyleEx(
         if (typeof returnVal !== 'boolean') {
           tr = returnVal;
         }
-        // tr = element.executeCustom(state, tr, startPos, endPos);
       }
     });
     const storedmarks = getMarkByStyleName(styleName, state.schema);
@@ -834,10 +821,10 @@ function hasMismatchHeirarchy(
   styleName /* New style to be applied */
 ) {
   const styleLevel = Number(getStyleLevel(styleName ? styleName : ''));
-  const currentLevel = getStyleLevel(node.attrs.styleName);
+  const currentLevel = getStyleLevel(node?.attrs?.styleName);
   nodesBeforeSelection.splice(0);
   nodesAfterSelection.splice(0);
-  const attrs = Object.assign({}, node.attrs);
+  const attrs = Object.assign({}, node?.attrs);
   attrs['styleName'] = styleName;
   let previousLevel = null;
   let levelDiff = 0;
@@ -1289,8 +1276,7 @@ export function getStyleLevel(styleName: string) {
   if (undefined !== styleName && styleName) {
     const styleProp = getCustomStyleByName(styleName);
     if (
-      null !== styleProp &&
-      styleProp.styles &&
+      styleProp && styleProp.styles &&
       styleProp.styles.styleLevel &&
       styleProp.styles.hasNumbering
     ) {
@@ -1613,7 +1599,7 @@ export function updateDocument(
   style: Style
 ) {
   const { doc } = state;
-  doc.descendants(function (child, pos) {
+  doc?.descendants(function (child, pos) {
     const contentLen = child.content.size;
     if (haveEligibleChildren(child, contentLen, styleName)) {
       tr = applyLatestStyle(

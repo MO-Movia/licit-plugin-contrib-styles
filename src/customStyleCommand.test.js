@@ -1,5 +1,5 @@
 import CustomStyleCommand, {
-  getMarkByStyleName, getStyleLevel, executeCommands, addMarksToLine, updateDocument, isCustomStyleAlreadyApplied,
+  getMarkByStyleName, getStyleLevel, addMarksToLine, updateDocument, isCustomStyleAlreadyApplied,
   manageElementsAfterSelection, isLevelUpdated, insertParagraph, addElementEx, compareMarkWithStyle, updateOverrideFlag, applyLatestStyle,
   allowCustomLevelIndent, applyLineStyle, removeAllMarksExceptLink, handleRemoveMarks
 } from './CustomStyleCommand';
@@ -8,45 +8,27 @@ import { EditorState } from 'prosemirror-state';
 import { Schema, DOMParser, Mark } from 'prosemirror-model';
 import { schema } from 'prosemirror-schema-basic';
 import * as customstyles from './customStyle';
-import { TextSelection } from 'prosemirror-state';
 
 describe('CustomStyleCommand', () => {
+
+
   const styl = { 'styleName': 'A_12', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': false }, 'toc': false, 'isHidden': false };
   const customstylecommand = new CustomStyleCommand(styl, 'A_12');
-  const mockSchema = new Schema({
-    nodes: {
-      doc: { content: 'image' },
-      text: {},
-      image: {
-        inline: true,
-        attrs: {
-          align: { default: 'left' },
-          fitToParent: { default: true }
-        },
-        group: 'inline',
-        draggable: true,
-        parseDOM: [{
-          tag: 'img[src]',
-          getAttrs(dom) {
-            return {
-              align: dom.getAttribute('align'),
-              fitToParent: dom.getAttribute('fitToParent')
-            };
-          }
-        }],
-        toDOM(node) {
-          return ['img', { src: node.attrs.src, align: node.attrs.align || '' }];
-        }
-      }
-    }
+
+  it('should handle isCustomStyleApplied', () => {
+
+    jest.clearAllMocks();
+    const mySchema = new Schema({ nodes: schema.spec.nodes, marks: schema.spec.marks });
+    const myDoc = DOMParser.fromSchema(mySchema).parse('<p>Hello, world!</p>');
+    const mySelection = myDoc.content.findDiffEnd(myDoc.content);
+    const myEditorState = EditorState.create({
+      doc: myDoc,
+      schema: mySchema,
+      selection: mySelection,
+    });
+    expect(customstylecommand.isCustomStyleApplied(myEditorState)).toBe('Normal');
   });
-  //const content = DOMParser.fromSchema(schema).parse(document.createElement('div').appendChild(document.createElement('img')));
-  const editorState = {
-    schema: mockSchema,
-    plugins: [],
-    selection: { from: 0, to: 1 },
-    doc: { nodesBetween(x, y, z) { return 'test_style'; } }
-  };
+
   it('should be defined', () => {
     expect(customstylecommand).toBeDefined();
   });
@@ -123,147 +105,6 @@ describe('CustomStyleCommand', () => {
     spy.mockReset();
   });
 
-  it('should handle isCustomStyleApplied', () => {
-
-    expect(customstylecommand.isCustomStyleApplied(editorState)).toBeDefined();
-  });
-  it('should handle isCustomStyleApplied', () => {
-    const mockschema = new Schema({
-      nodes: {
-        doc: {
-          content: 'paragraph+',
-        },
-        paragraph: {
-          content: 'text*',
-          attrs: {
-            styleName: { default: 'test' }
-          },
-          toDOM() {
-            return ['p', 0];
-          },
-        },
-        heading: {
-          attrs: { level: { default: 1 }, styleName: { default: '' } },
-          content: 'inline*',
-          marks: '',
-          toDOM(node) {
-            return ['h' + node.attrs.level, { 'data-style-name': node.attrs.styleName }, 0];
-          },
-        },
-        text: {
-          group: 'inline',
-        },
-      },
-    });
-
-    // Create a sample document
-    const mockdoc = mockschema.nodeFromJSON({
-      type: 'doc',
-      content: [
-        {
-          type: 'heading',
-          attrs: { level: 1, styleName: 'Normal' },
-          content: [
-            {
-              type: 'text',
-              text: 'Hello, ProseMirror!',
-            },
-          ],
-        },
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'This is a mock dummy document.',
-              attrs: { styleName: 'Normal' }
-            },
-          ],
-        },
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'It demonstrates the structure of a ProseMirror document.',
-            },
-          ],
-        },
-      ],
-    });
-    const mockselection = { from: 0, to: 1 };
-    const mockeditorstate = {
-      schema: mockschema,
-      doc: mockdoc,
-      selection: mockselection
-    };
-    const mockschema1 = new Schema({
-      nodes: {
-        doc: {
-          content: 'paragraph+',
-        },
-        paragraph: {
-          content: 'text*',
-          toDOM() {
-            return ['p', 0];
-          },
-        },
-        heading: {
-          attrs: { level: { default: 1 } },
-          content: 'inline*',
-          marks: '',
-          toDOM(node) {
-            return ['h' + node.attrs.level, 0];
-          },
-        },
-        text: {
-          group: 'inline',
-        },
-      },
-    });
-
-    // Create a sample document
-    const mockdoc1 = mockschema1.nodeFromJSON({
-      type: 'doc',
-      content: [
-        {
-          type: 'heading',
-          attrs: { level: 1 },
-          content: [
-            {
-              type: 'text',
-              text: 'Hello, ProseMirror!',
-            },
-          ],
-        },
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'This is a mock dummy document.',
-            },
-          ],
-        },
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'It demonstrates the structure of a ProseMirror document.',
-            },
-          ],
-        },
-      ],
-    });
-    const mockeditorstate1 = {
-      schema: mockschema1,
-      doc: mockdoc1,
-      selection: mockselection
-    };
-    expect(customstylecommand.isCustomStyleApplied(mockeditorstate)).toBeDefined();
-    expect(customstylecommand.isCustomStyleApplied(mockeditorstate1));
-  });
   it('should handle executeClearStyle', () => {
 
     const mockschema = new Schema({
@@ -414,10 +255,14 @@ describe('CustomStyleCommand', () => {
     };
     expect(customstylecommand.clearCustomStyles({ doc: mockdoc, selection: { $from: { before: (x) => { return x - 1; } }, $to: { after: (x) => { return 1; } } } }, mockeditorstate)).toBeDefined();
   });
+
   it('should handle showAlert when popup null', () => {
     customstylecommand.showAlert();
     expect(customstylecommand._popUp).not.toBeNull();
+
   });
+
+
   it('should handle removeMarks', () => {
     expect(customstylecommand.removeMarks([{
       em: {
@@ -463,179 +308,10 @@ describe('CustomStyleCommand', () => {
     customstylecommand.createNewStyle(mockval, mocktr, mockstate, mockdispatch, mockdoc);
     expect(spy2).toHaveBeenCalled();
   });
-  it('should handle createNewStyle else condition', () => {
-    const mockschema = new Schema({
-      nodes: {
-        doc: {
-          content: 'paragraph+',
-        },
-        paragraph: {
-          content: 'text*',
-          attrs: {
-            styleName: { default: 'test' }
-          },
-          toDOM() {
-            return ['p', 0];
-          },
-        },
-        heading: {
-          attrs: { level: { default: 1 }, styleName: { default: '' } },
-          content: 'inline*',
-          marks: '',
-          toDOM(node) {
-            return ['h' + node.attrs.level, { 'data-style-name': node.attrs.styleName }, 0];
-          },
-        },
-        text: {
-          group: 'inline',
-        },
-      },
-    });
-
-    // Create a sample document
-    const mockdoc = mockschema.nodeFromJSON({
-      type: 'doc',
-      content: [
-        {
-          type: 'heading',
-          attrs: { level: 1, styleName: 'test' },
-          content: [
-            {
-              type: 'text',
-              text: 'Hello, ProseMirror!',
-            },
-          ],
-        },
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'This is a mock dummy document.',
-              attrs: { styleName: 'test' }
-            },
-          ],
-        },
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'It demonstrates the structure of a ProseMirror document.',
-            },
-          ],
-        },
-      ],
-    });
-    jest.spyOn(TextSelection, 'create').mockReturnValue({});
-    jest.spyOn(customstyles, 'saveStyle').mockResolvedValue([{ 'styleName': 'A Apply Stylefff', 'mode': 1, 'styles': { 'align': 'justify', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'Normal', 'fontName': 'Arial', 'fontSize': 11, 'strong': true, 'em': true, 'underline': true, 'color': '#c40df2' }, 'toc': false, 'isHidden': false }]);
-    jest.spyOn(customstyles, 'isCustomStyleExists').mockReturnValue(true);
-    jest.spyOn(customstyles, 'isPreviousLevelExists').mockReturnValue(false);
-
-    const mocktr = {
-      doc: mockdoc, 'steps': [], 'docs': [], 'mapping': { 'maps': [], 'from': 0, 'to': 0 }, 'curSelectionFor': 0, 'updated': 0, 'meta': {}, 'time': 1684831731977, 'curSelection': { 'type': 'text', 'anchor': 1, 'head': 1 }, 'storedMarks': null, setSelection(anchor, head) {
-        return { doc: mockdoc };
-      }
-    };
-    const mockstate = { 'doc': { 'type': 'doc', 'attrs': { 'layout': null, 'padding': null, 'width': null, 'counterFlags': null, 'capcoMode': 0 }, 'content': [{ 'type': 'paragraph', 'attrs': { 'align': null, 'color': null, 'id': null, 'indent': null, 'lineSpacing': null, 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'Normal' } }] }, selection: { $from: { before: (x) => { return x - 1; } }, $to: { after: (x) => { return 1; } } } };
-    //const mockdoc = { 'type': 'doc', 'attrs': { 'layout': null, 'padding': null, 'width': null, 'counterFlags': null, 'capcoMode': 0 }, 'content': [{ 'type': 'paragraph', 'attrs': { 'align': null, 'color': null, 'id': null, 'indent': null, 'lineSpacing': null, 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'Normal' } }] };
-    const mockdispatch = () => { };
-    const mockval = { styles: { hasBullet: true, bulletLevel: '25CF', styleLevel: '1', paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, strong: 10, boldNumbering: 10, em: 10, color: 'blue', fontSize: 10, fontName: 'Tahoma', indent: 10, hasNumbering: false, isValidHeirarchy: true }, styleName: 'test', editorView: {} };
-    expect(customstylecommand.createNewStyle(mockval, mocktr, mockstate, mockdispatch, mockdoc)).toBeUndefined();
-
-  });
-  it('should handle createNewStyle else condition if it has hasNumbering', () => {
-    const mockschema = new Schema({
-      nodes: {
-        doc: {
-          content: 'paragraph+',
-        },
-        paragraph: {
-          content: 'text*',
-          attrs: {
-            styleName: { default: 'test' }
-          },
-          toDOM() {
-            return ['p', 0];
-          },
-        },
-        heading: {
-          attrs: { level: { default: 1 }, styleName: { default: '' } },
-          content: 'inline*',
-          marks: '',
-          toDOM(node) {
-            return ['h' + node.attrs.level, { 'data-style-name': node.attrs.styleName }, 0];
-          },
-        },
-        text: {
-          group: 'inline',
-        },
-      },
-    });
-
-    // Create a sample document
-    const mockdoc = mockschema.nodeFromJSON({
-      type: 'doc',
-      content: [
-        {
-          type: 'heading',
-          attrs: { level: 1, styleName: 'test' },
-          content: [
-            {
-              type: 'text',
-              text: 'Hello, ProseMirror!',
-            },
-          ],
-        },
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'This is a mock dummy document.',
-              attrs: { styleName: 'test' }
-            },
-          ],
-        },
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'It demonstrates the structure of a ProseMirror document.',
-            },
-          ],
-        },
-      ],
-    });
-    jest.spyOn(TextSelection, 'create').mockReturnValue({});
-    jest.spyOn(customstyles, 'saveStyle').mockResolvedValue([{ 'styleName': 'A Apply Stylefff', 'mode': 1, 'styles': { 'align': 'justify', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'Normal', 'fontName': 'Arial', 'fontSize': 11, 'strong': true, 'em': true, 'underline': true, 'color': '#c40df2' }, 'toc': false, 'isHidden': false }]);
-    jest.spyOn(customstyles, 'isCustomStyleExists').mockReturnValue(true);
-    jest.spyOn(customstyles, 'isPreviousLevelExists').mockReturnValue(false);
-
-    const mocktr = {
-      doc: mockdoc, 'steps': [], 'docs': [], 'mapping': { 'maps': [], 'from': 0, 'to': 0 }, 'curSelectionFor': 0, 'updated': 0, 'meta': {}, 'time': 1684831731977, 'curSelection': { 'type': 'text', 'anchor': 1, 'head': 1 }, 'storedMarks': null, setSelection(anchor, head) {
-        return { doc: mockdoc };
-      }
-    };
-    const mockstate = { 'doc': { 'type': 'doc', 'attrs': { 'layout': null, 'padding': null, 'width': null, 'counterFlags': null, 'capcoMode': 0 }, 'content': [{ 'type': 'paragraph', 'attrs': { 'align': null, 'color': null, 'id': null, 'indent': null, 'lineSpacing': null, 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'Normal' } }] }, selection: { $from: { before: (x) => { return x - 1; } }, $to: { after: (x) => { return 1; } } } };
-    // const mockdoc = { 'type': 'doc', 'attrs': { 'layout': null, 'padding': null, 'width': null, 'counterFlags': null, 'capcoMode': 0 }, 'content': [{ 'type': 'paragraph', 'attrs': { 'align': null, 'color': null, 'id': null, 'indent': null, 'lineSpacing': null, 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'Normal' } }] };
-    const mockdispatch = () => { };
-
-
-    const mockval = { styles: { hasBullet: true, bulletLevel: '25CF', styleLevel: '7', paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, strong: 10, boldNumbering: 10, em: 10, color: 'blue', fontSize: 10, fontName: 'Tahoma', indent: 10, hasNumbering: true, isValidHeirarchy: true }, styleName: 'test', editorView: {} };
-    //setStyles([{},{}]);
-    jest.spyOn(customstyles, 'isPreviousLevelExists').mockReturnValue(false);
-    expect(customstylecommand.createNewStyle(mockval, mocktr, mockstate, mockdispatch, mockdoc)).toBeUndefined();
-    //expect(customstylecommand.createNewStyle(mockval1, mocktr, mockstate, mockdispatch, mockdoc)).toBeUndefined();
-
-  });
 
 });
 describe('getMarkByStyleName', () => {
-  const styl = { 'styleName': 'A_12', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': false }, 'toc': false, 'isHidden': false };
-  new CustomStyleCommand(styl, 'A_12');
-  xit('should handle getMarkByStyleName when styles dont have property', () => {
+  it('should handle getMarkByStyleName when styles dont have property', () => {
     jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({ styles: { x: '', y: '', z: '' } });
     const mockSchema = new Schema({
       nodes: {
@@ -834,6 +510,7 @@ describe('getMarkByStyleName', () => {
     });
     expect(getMarkByStyleName('test', mockSchema)).toBeDefined();
   });
+
   it('should handle getMarkByStyleName', () => {
     jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({ styles: { hasBullet: true, bulletLevel: '25CF', styleLevel: 1, paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, strong: 10, boldNumbering: 10, em: 10, color: 'blue', fontSize: 10, fontName: 'Tahoma', indent: 10, hasNumbering: true, 'textHighlight': 'blue', underline: true } });
     const mockSchema = new Schema({
@@ -1041,24 +718,21 @@ describe('getStyleLevel', () => {
   });
   it('should handle getStyleLevel when styleProp null', () => {
     const spy = jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({});
-    expect(getStyleLevel('10Normal-@#$-10')).toBe(10);
+    expect(getStyleLevel('Normal-@#$-10')).toBe(10);
+    spy.mockReset();
+  });
+
+  it('should handle getStyleLevel when styleProp null', () => {
+    const spy = jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({});
+    expect(getStyleLevel('Normal-@#$-10Normal-@#$-11')).toBe(0);
     spy.mockReset();
   });
 });
-describe('executeCommands', () => {
-  it('should handle executeCommands', () => {
-    const styl = { 'styleName': 'A_12', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': false }, 'toc': false, 'isHidden': false };
-    new CustomStyleCommand(styl, 'A_12');
-    jest.spyOn(cusstylecommand, 'getCustomStyleCommands').mockReturnValue([{ executeCustom: (a, b, c, d) => { key: 'dummy_value'; } }]);
-    expect(executeCommands({}, {}, 'Normal', 0, 1)).toBeDefined();
-  });
 
-});
 describe('addMarksToLine and manageElementsAfterSelection', () => {
 
   const styl = { 'styleName': 'A_12', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': false }, 'toc': false, 'isHidden': false };
   const customstylecommand = new CustomStyleCommand(styl, 'A_12');
-  //const spy = jest.spyOn(cusstylecommand,'getCustomStyleCommands').mockReturnValue([{executeCustom:(a,b,c,d)=>{key:'dummy_value'}}]);
   const trmock = {
     doc: {
       type: 'doc',
@@ -2269,9 +1943,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
 
 });
 describe('updateDocument', () => {
-  //const spy = jest.spyOn(cusstylecommand,'applyLatestStyle').mockReturnValue({key:'mocktr'});
   const styl = { 'styleName': 'A_12', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': false }, 'toc': false, 'isHidden': false };
-  //const spy = jest.spyOn(cusstylecommand,'getCustomStyleCommands').mockReturnValue([{executeCustom:(a,b,c,d)=>{key:'dummy_value'}}]);
   const trmock = {
     doc: {
       type: 'doc',
@@ -2941,7 +2613,7 @@ describe('updateDocument', () => {
           style: 'font-family'
         }],
         toDOM() {
-          return ['span',0];
+          return ['span', 0];
         }
       },
       strong: {

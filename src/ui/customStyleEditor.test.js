@@ -310,10 +310,7 @@ describe('CustomStyleEditor', () => {
         jest.spyOn(document, 'getElementById').mockReturnValue(dom);
         expect(customstyleeditor.onNextLineStyleSelected(2)).toBeUndefined();
     });
-    xit('should handle onSelectCustomStyle', () => {
-        const event = { target: { value: 'strong' } };
-        expect(customstyleeditor.onSelectCustomStyle(event)).toBeUndefined();
-    });
+
     it('should handle showColorDialog', () => {
         customstyleeditor._popUp = {};
         const event = { target: { value: 'strong' } };

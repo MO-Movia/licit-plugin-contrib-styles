@@ -95,7 +95,9 @@ function getCustomStyleCommandsEx(
       break;
 
     case COLOR:
-      commands.push(new TextColorCommand(customStyle[property]));
+      if (customStyle[property] && customStyle[property] !== '#151515') {
+        commands.push(new TextColorCommand(customStyle[property]));
+      }
       break;
 
     case FONTSIZE:
@@ -118,7 +120,9 @@ function getCustomStyleCommandsEx(
       break;
 
     case TEXTHL:
-      commands.push(new TextHighlightCommand(customStyle[property]));
+      if (customStyle[property] && customStyle[property] !== 'rgba(0,0,0,0)') {
+        commands.push(new TextHighlightCommand(customStyle[property]));
+      }
       break;
 
     case UNDERLINE:
@@ -519,21 +523,16 @@ export function compareMarkWithStyle(
   if (style) {
     switch (mark.type.name) {
       case MARK_STRONG:
-        same = undefined !== style[STRONG];
+        same = true === style[STRONG];
         break;
       case MARK_EM:
-        same = undefined !== style[EM];
+        same = true === style[EM];
         break;
       case MARK_TEXT_COLOR:
         same = mark.attrs['color'] === style[COLOR];
         break;
       case MARK_TEXT_HIGHLIGHT:
-        if (undefined !== style[TEXTHL]) {
-          same = mark.attrs['highlightColor'] === style[TEXTHL];
-        }
-        else {
-          same = true;
-        }
+        same = mark.attrs['highlightColor'] === style[TEXTHL];
         break;
       case MARK_FONT_SIZE:
         same = mark.attrs['pt'] === Number(style[FONTSIZE]);
@@ -545,7 +544,7 @@ export function compareMarkWithStyle(
       case MARK_SUPER:
         break;
       case MARK_UNDERLINE:
-        same = undefined !== style[UNDERLINE];
+        same = true === style[UNDERLINE];
         break;
       default:
         break;
@@ -638,42 +637,60 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
       switch (property) {
         case STRONG:
         case BOLDPARTIAL:
-          markType = schema.marks[MARK_STRONG];
-          marks.push(markType.create(attrs));
+          if (styleProp.styles[property]) {
+            markType = schema.marks[MARK_STRONG];
+            marks.push(markType.create(attrs));
+          }
           break;
 
         case EM:
           markType = schema.marks[MARK_EM];
-          marks.push(markType.create(attrs));
+          if (styleProp.styles[property]) marks.push(markType.create(attrs));
           break;
 
         case COLOR:
           markType = schema.marks[MARK_TEXT_COLOR];
-          attrs = { color: styleProp.styles[property] };
-          marks.push(markType.create(attrs));
+          attrs = styleProp.styles[property]
+            ? { color: styleProp.styles[property] }
+            : null;
+          if (
+            styleProp.styles[property] &&
+            styleProp.styles[property] !== '#151515'
+          )
+            marks.push(markType.create(attrs));
           break;
 
         case FONTSIZE:
           markType = schema.marks[MARK_FONT_SIZE];
-          attrs = { pt: styleProp.styles[property] };
+          attrs = styleProp.styles[property]
+            ? { pt: styleProp.styles[property] }
+            : null;
           marks.push(markType.create(attrs));
           break;
 
         case FONTNAME:
           markType = schema.marks[MARK_FONT_TYPE];
-          attrs = { name: styleProp.styles[property] };
+          attrs = styleProp.styles[property]
+            ? { name: styleProp.styles[property] }
+            : null;
           marks.push(markType.create(attrs));
           break;
 
         case TEXTHL:
           markType = schema.marks[MARK_TEXT_HIGHLIGHT];
-          attrs = { highlightColor: styleProp.styles[property] };
-          marks.push(markType.create(attrs));
+          attrs = styleProp.styles[property]
+            ? { highlightColor: styleProp.styles[property] }
+            : null;
+          if (
+            styleProp.styles[property] &&
+            styleProp.styles[property] !== 'rgba(0,0,0,0)'
+          )
+            marks.push(markType.create(attrs));
           break;
 
         case UNDERLINE:
           markType = schema.marks[MARK_UNDERLINE];
-          marks.push(markType.create(attrs));
+          if (styleProp.styles[property]) marks.push(markType.create(attrs));
           break;
 
         default:
@@ -691,7 +708,7 @@ function applyStyleEx(
   node: Node,
   startPos: number,
   endPos: number,
-  keepMarks: ?Boolean,
+  keepMarks: ?Boolean
 ) {
   const loading = !styleProp;
   // keepMarks is passed in the function when removing of marks are not necessary.

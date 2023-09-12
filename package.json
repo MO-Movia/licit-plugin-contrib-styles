@@ -118,6 +118,9 @@
     "smooth-scroll-into-view-if-needed": "1.1.28",
     "stable": "0.1.8"
   },
+  "overrides": {
+    "semver": "^7.5.2"
+  },
   "importSort": {
     ".js": {
       "parser": "babylon",

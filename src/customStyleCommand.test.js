@@ -2939,6 +2939,9 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
     const styl = { 'styleName': 'A_12', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': true }, 'toc': false, 'isHidden': false };
     expect(isLevelUpdated(statemock, '10Normal-@#$-10', styl)).toBeTruthy();
   });
+  it('should handle isLevelUpdated branch coverage when style undefined', () => {
+    expect(isLevelUpdated(statemock, '10Normal-@#$-10', undefined)).toBeFalsy();
+  });
 });
 
 describe('updateOverrideFlag', () => {
@@ -3411,5 +3414,6 @@ describe('handleRemoveMarks', () => {
     expect(handleRemoveMarks({ removeMark: () => { return {}; } }, [{ mark: { type: { name: 'mark-text-highlight' }, attrs: { 'overridden': true } } }], 0, 1, {}, null, {})).toBeDefined();
   });
 });
+
 
 

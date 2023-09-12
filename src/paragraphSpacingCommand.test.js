@@ -113,4 +113,12 @@ jest.spyOn(paragraphspacingcommand, 'setParagraphSpacing').mockReturnValue({ doc
         const psc = new ParagraphSpacingCommand('', true).execute(mockstate, dispatch, mockview);
         expect(psc).toBeDefined();
     });
+
+    it('should handle execute when tr.docChanged is true', () => {
+        const mockstate = {
+            schema: {}, selection: {}, tr:{setSelection:()=>{return {docChanged:true};}}
+        };
+         const psc = new ParagraphSpacingCommand().execute(mockstate,()=>{return true;});
+         expect(psc).toBeTruthy();
+    });
 });

@@ -165,6 +165,7 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
         editorView={editorView}
         label={customStyleName}
         parent={this}
+        samplecallback={this.update_me}
         staticCommand={this.staticCommands()}
         updateListCallback={this.updateDropdownItems}
         updated={this.state.hasUpdated}

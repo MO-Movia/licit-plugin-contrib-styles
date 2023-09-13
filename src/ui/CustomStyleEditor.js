@@ -4,11 +4,22 @@
 //Need to change the button binding implementation
 import * as React from 'react';
 import './custom-style-edit.css';
-import { ColorEditor } from '@modusoperandi/licit-ui-commands';
-import { createPopUp } from '@modusoperandi/licit-ui-commands';
-import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
-import { isCustomStyleExists, setStyles, saveStyle, getStylesAsync } from '../customStyle';
-import { RESERVED_STYLE_NONE, getDetailsBullet, BULLET_POINTS } from '../CustomStyleNodeSpec';
+import {
+  ColorEditor,
+  getLineSpacingValue,
+  createPopUp,
+} from '@modusoperandi/licit-ui-commands';
+import {
+  isCustomStyleExists,
+  setStyles,
+  saveStyle,
+  getStylesAsync,
+} from '../customStyle';
+import {
+  RESERVED_STYLE_NONE,
+  getDetailsBullet,
+  BULLET_POINTS,
+} from '../CustomStyleNodeSpec';
 import { EditorState } from 'prosemirror-state';
 import type { Style } from '../StyleRuntime';
 
@@ -16,22 +27,7 @@ let customStyles: Style[] = [];
 const otherStyleSelected = false;
 const editedStyles = [];
 
-const FONT_PT_SIZES = [
-  8,
-  9,
-  10,
-  11,
-  12,
-  14,
-  18,
-  24,
-  30,
-  36,
-  48,
-  60,
-  72,
-  90,
-];
+const FONT_PT_SIZES = [8, 9, 10, 11, 12, 14, 18, 24, 30, 36, 48, 60, 72, 90];
 
 const FONT_TYPE_NAMES = [
   // SERIF
@@ -149,8 +145,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
           state = {
             styles: {
               ...this.state.styles,
-              paragraphSpacingBefore: event.target.value
-            }
+              paragraphSpacingBefore: event.target.value,
+            },
           };
         }
         break;
@@ -159,8 +155,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
           state = {
             styles: {
               ...this.state.styles,
-              paragraphSpacingAfter: event.target.value
-            }
+              paragraphSpacingAfter: event.target.value,
+            },
           };
         }
         break;
@@ -617,9 +613,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
               <input
                 autoFocus
                 className="molsp-stylenameinput molsp-fontstyle"
-                disabled={
-                  this.state.mode === 1 || this.state.mode === 3 ? true : false
-                }
+                disabled={this.state.mode === 1 || this.state.mode === 3}
                 id="txtName"
                 key="name"
                 onChange={this.onStyleClick.bind(this, 'name')}
@@ -643,7 +637,9 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
               className="molsp-textareadiv"
               name="body"
               style={
-                3 === this.props.mode ? { height: '164px' } : { height: '215px' }
+                3 === this.props.mode
+                  ? { height: '164px' }
+                  : { height: '215px' }
               }
             >
               <div className="molsp-sampletext">
@@ -694,7 +690,10 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                 border: '1px solid',
               }}
             >
-              <button className="molsp-licit-accordion molsp-accactive" id="accordion1">
+              <button
+                className="molsp-licit-accordion molsp-accactive"
+                id="accordion1"
+              >
                 <div className="molsp-indentdiv">
                   <span
                     className="molsp-iconspan czi-icon text_format"
@@ -883,7 +882,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   <span>
                     <input
                       checked={this.state.styles.boldSentence}
-                      disabled={this.state.styles.boldPartial ? false : true}
+                      disabled={!this.state.styles.boldPartial}
                       name="boldscentence"
                       onChange={this.onScentenceRadioChanged.bind(this)}
                       style={{ marginLeft: '21px' }}
@@ -901,7 +900,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     </label>
                     <input
                       checked={!this.state.styles.boldSentence}
-                      disabled={this.state.styles.boldPartial ? false : true}
+                      disabled={!this.state.styles.boldPartial}
                       name="boldscentence"
                       onChange={this.onScentenceRadioChanged.bind(this)}
                       style={{ marginLeft: '21px' }}
@@ -1103,7 +1102,10 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </label>
                 </div>
               </button>
-              <div className="molsp-panel2 molsp-formp" style={{ maxHeight: '100%' }}>
+              <div
+                className="molsp-panel2 molsp-formp"
+                style={{ maxHeight: '100%' }}
+              >
                 <p className="molsp-formp">Level:</p>
                 <div className="molsp-hierarchydiv" style={{ display: 'flex' }}>
                   <div style={{ float: 'left', marginTop: '8px' }}>
@@ -1259,7 +1261,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     <input
                       checked={
                         this.state.styles.nextLineStyleName ===
-                        this.state.styleName && !this.state.otherStyleSelected
+                          this.state.styleName && !this.state.otherStyleSelected
                       }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 1)}
@@ -1281,7 +1283,10 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   </div>
                   <div className="molsp-settingsdiv">
                     <input
-                      checked={this.state.styles.nextLineStyleName === RESERVED_STYLE_NONE}
+                      checked={
+                        this.state.styles.nextLineStyleName ===
+                        RESERVED_STYLE_NONE
+                      }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 0)}
                       style={{
@@ -1380,7 +1385,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
     // FIX: able to save a custom style name with already exist style name
     if (0 === this.state.mode && isCustomStyleExists(this.state.styleName)) {
       const errMsg = document.getElementById('errormsg');
-      if (errMsg && errMsg.style) {
+      if (errMsg?.style) {
         errMsg.style.display = '';
       }
 
@@ -1411,7 +1416,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
       styleName: val.styleName,
       mode: val.mode,
       description: val.description,
-      styles: val.styles
+      styles: val.styles,
     };
     saveStyle(styleObj).then((result) => {
       setStyles(result);

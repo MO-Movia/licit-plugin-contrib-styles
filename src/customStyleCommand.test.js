@@ -1,7 +1,20 @@
 import CustomStyleCommand, {
-  getMarkByStyleName, getStyleLevel, addMarksToLine, updateDocument, isCustomStyleAlreadyApplied,
-  manageElementsAfterSelection, isLevelUpdated, insertParagraph, addElementEx, compareMarkWithStyle, updateOverrideFlag, applyLatestStyle,
-  allowCustomLevelIndent, applyLineStyle, removeAllMarksExceptLink, handleRemoveMarks
+  getMarkByStyleName,
+  getStyleLevel,
+  addMarksToLine,
+  updateDocument,
+  isCustomStyleAlreadyApplied,
+  manageElementsAfterSelection,
+  isLevelUpdated,
+  insertParagraph,
+  addElementEx,
+  compareMarkWithStyle,
+  updateOverrideFlag,
+  applyLatestStyle,
+  allowCustomLevelIndent,
+  applyLineStyle,
+  removeAllMarksExceptLink,
+  handleRemoveMarks,
 } from './CustomStyleCommand';
 import * as cusstylecommand from './CustomStyleCommand';
 import { EditorState } from 'prosemirror-state';
@@ -10,15 +23,35 @@ import { schema } from 'prosemirror-schema-basic';
 import * as customstyles from './customStyle';
 
 describe('CustomStyleCommand', () => {
-
-
-  const styl = { 'styleName': 'A_12', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': false }, 'toc': false, 'isHidden': false };
+  const styl = {
+    styleName: 'A_12',
+    mode: 1,
+    styles: {
+      align: 'left',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'A_12',
+      fontName: 'Aclonica',
+      fontSize: '14',
+      strong: true,
+      styleLevel: '2',
+      hasBullet: true,
+      bulletLevel: '272A',
+      hasNumbering: false,
+    },
+    toc: false,
+    isHidden: false,
+  };
   const customstylecommand = new CustomStyleCommand(styl, 'A_12');
 
   it('should handle isCustomStyleApplied', () => {
-
     jest.clearAllMocks();
-    const mySchema = new Schema({ nodes: schema.spec.nodes, marks: schema.spec.marks });
+    const mySchema = new Schema({
+      nodes: schema.spec.nodes,
+      marks: schema.spec.marks,
+    });
     const myDoc = DOMParser.fromSchema(mySchema).parse('<p>Hello, world!</p>');
     const mySelection = myDoc.content.findDiffEnd(myDoc.content);
     const myEditorState = EditorState.create({
@@ -26,16 +59,19 @@ describe('CustomStyleCommand', () => {
       schema: mySchema,
       selection: mySelection,
     });
-    expect(customstylecommand.isCustomStyleApplied(myEditorState)).toBe('Normal');
+    expect(customstylecommand.isCustomStyleApplied(myEditorState)).toBe(
+      'Normal'
+    );
   });
 
   it('should be defined', () => {
     expect(customstylecommand).toBeDefined();
   });
   it('should handle renderLabel ', () => {
-
-
-    const mySchema = new Schema({ nodes: schema.spec.nodes, marks: schema.spec.marks });
+    const mySchema = new Schema({
+      nodes: schema.spec.nodes,
+      marks: schema.spec.marks,
+    });
     const myDoc = DOMParser.fromSchema(mySchema).parse('<p>Hello, world!</p>');
     const mySelection = myDoc.content.findDiffEnd(myDoc.content);
     const myEditorState = EditorState.create({
@@ -61,52 +97,59 @@ describe('CustomStyleCommand', () => {
           inline: true,
           attrs: {
             align: { default: 'left' },
-            fitToParent: { default: true }
+            fitToParent: { default: true },
           },
           group: 'inline',
           draggable: true,
-          parseDOM: [{
-            tag: 'img[src]',
-            getAttrs(dom) {
-              return {
-                align: dom.getAttribute('align'),
-                fitToParent: dom.getAttribute('fitToParent')
-              };
-            }
-          }],
+          parseDOM: [
+            {
+              tag: 'img[src]',
+              getAttrs(dom) {
+                return {
+                  align: dom.getAttribute('align'),
+                  fitToParent: dom.getAttribute('fitToParent'),
+                };
+              },
+            },
+          ],
           toDOM(node) {
-            return ['img', { src: node.attrs.src, align: node.attrs.align || '' }];
-          }
-        }
-      }
+            return [
+              'img',
+              { src: node.attrs.src, align: node.attrs.align || '' },
+            ];
+          },
+        },
+      },
     });
     //const content = DOMParser.fromSchema(schema).parse(document.createElement('div').appendChild(document.createElement('img')));
     const editorState = EditorState.create({
       schema: mockSchema,
-      plugins: []
+      plugins: [],
     });
     const el = document.createElement('div');
     const mockEditorView = {
       state: editorState,
       dispatch: jest.fn(),
-      posAtCoords: ({ left,
-        top }) => {
+      posAtCoords: ({ left, top }) => {
         return {
           pos: 1,
           inside: 1,
         };
       },
       destroy: jest.fn(),
-      dom: el
+      dom: el,
     };
-    const spy = jest.spyOn(customstylecommand, 'isCustomStyleApplied').mockReturnValue('Normal');
+    const spy = jest
+      .spyOn(customstylecommand, 'isCustomStyleApplied')
+      .mockReturnValue('Normal');
 
-    expect(customstylecommand.isEnabled(editorState, mockEditorView, 'clearstyle')).toBeFalsy();
+    expect(
+      customstylecommand.isEnabled(editorState, mockEditorView, 'clearstyle')
+    ).toBeFalsy();
     spy.mockReset();
   });
 
   it('should handle executeClearStyle', () => {
-
     const mockschema = new Schema({
       nodes: {
         doc: {
@@ -115,7 +158,7 @@ describe('CustomStyleCommand', () => {
         paragraph: {
           content: 'text*',
           attrs: {
-            styleName: { default: 'test' }
+            styleName: { default: 'test' },
           },
           toDOM() {
             return ['p', 0];
@@ -126,7 +169,11 @@ describe('CustomStyleCommand', () => {
           content: 'inline*',
           marks: '',
           toDOM(node) {
-            return ['h' + node.attrs.level, { 'data-style-name': node.attrs.styleName }, 0];
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
           },
         },
         text: {
@@ -155,7 +202,7 @@ describe('CustomStyleCommand', () => {
             {
               type: 'text',
               text: 'This is a mock dummy document.',
-              attrs: { styleName: 'test' }
+              attrs: { styleName: 'test' },
             },
           ],
         },
@@ -170,17 +217,67 @@ describe('CustomStyleCommand', () => {
         },
       ],
     });
-    const mockselection = { $from: { before: (x) => { return x - 1; } }, $to: { after: (x) => { return x + 1; } } };
+    const mockselection = {
+      $from: {
+        before: (x) => {
+          return x - 1;
+        },
+      },
+      $to: {
+        after: (x) => {
+          return x + 1;
+        },
+      },
+    };
     const mockeditorstate = {
       schema: mockschema,
       doc: mockdoc,
       selection: mockselection,
-      tr: { setSelection: () => { return { setNodeMarkup: () => { return { removeTextAlignAndLineSpacing: () => { return { createEmptyElement: () => { return {}; } }; } }; }, doc: mockdoc, selection: { $from: { before: (x) => { return x - 1; } }, $to: { after: (x) => { return 1; } } } }; } }
+      tr: {
+        setSelection: () => {
+          return {
+            setNodeMarkup: () => {
+              return {
+                removeTextAlignAndLineSpacing: () => {
+                  return {
+                    createEmptyElement: () => {
+                      return {};
+                    },
+                  };
+                },
+              };
+            },
+            doc: mockdoc,
+            selection: {
+              $from: {
+                before: (x) => {
+                  return x - 1;
+                },
+              },
+              $to: {
+                after: (x) => {
+                  return 1;
+                },
+              },
+            },
+          };
+        },
+      },
     };
     jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue(null);
-    expect(customstylecommand.executeClearStyle(mockeditorstate, () => { }, { attrs: { styleName: 'test' } }, 0, 1, {}, {})).toBeFalsy();
-    expect(customstylecommand.executeClearStyle(mockeditorstate, null, { attrs: { styleName: 'test' } }, 0, 1, {}, {})).toBeFalsy();
-
+    expect(
+      customstylecommand.executeClearStyle(
+        mockeditorstate,
+        () => {},
+        0,
+        1,
+        {},
+        {}
+      )
+    ).toBeFalsy();
+    expect(
+      customstylecommand.executeClearStyle(mockeditorstate, null, 0, 1, {}, {})
+    ).toBeFalsy();
   });
   it('should handle clearCustomStyles', () => {
     const mockschema = new Schema({
@@ -191,7 +288,7 @@ describe('CustomStyleCommand', () => {
         paragraph: {
           content: 'text*',
           attrs: {
-            styleName: { default: 'test' }
+            styleName: { default: 'test' },
           },
           toDOM() {
             return ['p', 0];
@@ -202,7 +299,11 @@ describe('CustomStyleCommand', () => {
           content: 'inline*',
           marks: '',
           toDOM(node) {
-            return ['h' + node.attrs.level, { 'data-style-name': node.attrs.styleName }, 0];
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
           },
         },
         text: {
@@ -231,7 +332,7 @@ describe('CustomStyleCommand', () => {
             {
               type: 'text',
               text: 'This is a mock dummy document.',
-              attrs: { styleName: 'test' }
+              attrs: { styleName: 'test' },
             },
           ],
         },
@@ -246,73 +347,271 @@ describe('CustomStyleCommand', () => {
         },
       ],
     });
-    const mockselection = { $from: { before: (x) => { return x - 1; } }, $to: { after: (x) => { return x + 1; } } };
+    const mockselection = {
+      $from: {
+        before: (x) => {
+          return x - 1;
+        },
+      },
+      $to: {
+        after: (x) => {
+          return x + 1;
+        },
+      },
+    };
     const mockeditorstate = {
       schema: mockschema,
       doc: mockdoc,
       selection: mockselection,
-      tr: { setSelection: () => { return { setNodeMarkup: () => { return { removeTextAlignAndLineSpacing: () => { return { createEmptyElement: () => { return {}; } }; } }; }, doc: mockdoc }; } }
+      tr: {
+        setSelection: () => {
+          return {
+            setNodeMarkup: () => {
+              return {
+                removeTextAlignAndLineSpacing: () => {
+                  return {
+                    createEmptyElement: () => {
+                      return {};
+                    },
+                  };
+                },
+              };
+            },
+            doc: mockdoc,
+          };
+        },
+      },
     };
-    expect(customstylecommand.clearCustomStyles({ doc: mockdoc, selection: { $from: { before: (x) => { return x - 1; } }, $to: { after: (x) => { return 1; } } } }, mockeditorstate)).toBeDefined();
+    expect(
+      customstylecommand.clearCustomStyles(
+        {
+          doc: mockdoc,
+          selection: {
+            $from: {
+              before: (x) => {
+                return x - 1;
+              },
+            },
+            $to: {
+              after: (x) => {
+                return 1;
+              },
+            },
+          },
+        },
+        mockeditorstate
+      )
+    ).toBeDefined();
   });
 
   it('should handle showAlert when popup null', () => {
     customstylecommand.showAlert();
     expect(customstylecommand._popUp).not.toBeNull();
-
   });
 
-
   it('should handle removeMarks', () => {
-    expect(customstylecommand.removeMarks([{
-      em: {
-        parseDOM: [{
-          tag: 'i'
-        }, {
-          tag: 'em'
-        }, {
-          style: 'font-style=italic'
-        }],
-        attrs: {
-          overridden: {
-            hasDefault: true,
-            default: false
-          }
+    expect(
+      customstylecommand.removeMarks(
+        [
+          {
+            em: {
+              parseDOM: [
+                {
+                  tag: 'i',
+                },
+                {
+                  tag: 'em',
+                },
+                {
+                  style: 'font-style=italic',
+                },
+              ],
+              attrs: {
+                overridden: {
+                  hasDefault: true,
+                  default: false,
+                },
+              },
+            },
+            type: 'mark',
+          },
+        ],
+        {
+          selection: { $from: { before: () => 0 }, $to: { after: () => 1 } },
+          removeMark: () => {
+            key: 'markremoved tr';
+          },
+        },
+        {
+          content: 'text*',
+          group: 'block',
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
         }
-      }, type: 'mark'
-    },
-    ], { selection: { $from: { before: () => 0 }, $to: { after: () => 1 } }, removeMark: () => { key: 'markremoved tr'; } }, {
-      content: 'text*',
-      group: 'block',
-      parseDOM: [{ tag: 'p' }],
-      toDOM() {
-        return ['p', 0];
-      },
-    })).toBeUndefined();
+      )
+    ).toBeUndefined();
   });
 
   it('should handle createNewStyle', () => {
     const spy2 = jest.spyOn(customstylecommand, 'showAlert');
-    jest.spyOn(customstyles, 'saveStyle').mockResolvedValue([{ 'styleName': 'A Apply Stylefff', 'mode': 1, 'styles': { 'align': 'justify', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'Normal', 'fontName': 'Arial', 'fontSize': 11, 'strong': true, 'em': true, 'underline': true, 'color': '#c40df2' }, 'toc': false, 'isHidden': false }]);
+    jest
+      .spyOn(customstyles, 'saveStyle')
+      .mockResolvedValue([
+        {
+          styleName: 'A Apply Stylefff',
+          mode: 1,
+          styles: {
+            align: 'justify',
+            boldNumbering: true,
+            toc: false,
+            isHidden: false,
+            boldSentence: true,
+            nextLineStyleName: 'Normal',
+            fontName: 'Arial',
+            fontSize: 11,
+            strong: true,
+            em: true,
+            underline: true,
+            color: '#c40df2',
+          },
+          toc: false,
+          isHidden: false,
+        },
+      ]);
     jest.spyOn(customstyles, 'isCustomStyleExists').mockReturnValue(true);
     jest.spyOn(customstyles, 'isPreviousLevelExists').mockReturnValue(false);
     const mocktr = {
-      'doc': { 'type': 'doc', 'attrs': { 'layout': null, 'padding': null, 'width': null, 'counterFlags': null, 'capcoMode': 0 }, 'content': [{ 'type': 'paragraph', 'attrs': { 'align': null, 'color': null, 'id': null, 'indent': null, 'lineSpacing': null, 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'Normal' } }] }, 'steps': [], 'docs': [], 'mapping': { 'maps': [], 'from': 0, 'to': 0 }, 'curSelectionFor': 0, 'updated': 0, 'meta': {}, 'time': 1684831731977, 'curSelection': { 'type': 'text', 'anchor': 1, 'head': 1 }, 'storedMarks': null, setSelection(anchor, head) {
+      doc: {
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: null,
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'Normal',
+            },
+          },
+        ],
+      },
+      steps: [],
+      docs: [],
+      mapping: { maps: [], from: 0, to: 0 },
+      curSelectionFor: 0,
+      updated: 0,
+      meta: {},
+      time: 1684831731977,
+      curSelection: { type: 'text', anchor: 1, head: 1 },
+      storedMarks: null,
+      setSelection(anchor, head) {
         return true;
-      }
+      },
     };
-    const mockstate = { 'doc': { 'type': 'doc', 'attrs': { 'layout': null, 'padding': null, 'width': null, 'counterFlags': null, 'capcoMode': 0 }, 'content': [{ 'type': 'paragraph', 'attrs': { 'align': null, 'color': null, 'id': null, 'indent': null, 'lineSpacing': null, 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'Normal' } }] }, 'selection': { 'type': 'text', 'anchor': 1, 'head': 1 } };
-    const mockdoc = { 'type': 'doc', 'attrs': { 'layout': null, 'padding': null, 'width': null, 'counterFlags': null, 'capcoMode': 0 }, 'content': [{ 'type': 'paragraph', 'attrs': { 'align': null, 'color': null, 'id': null, 'indent': null, 'lineSpacing': null, 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'Normal' } }] };
-    const mockdispatch = () => { };
-    const mockval = { styles: { hasBullet: true, bulletLevel: '25CF', styleLevel: '1', paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, strong: 10, boldNumbering: 10, em: 10, color: 'blue', fontSize: 10, fontName: 'Tahoma', indent: 10, hasNumbering: true }, styleName: 'test', editorView: {} };
-    customstylecommand.createNewStyle(mockval, mocktr, mockstate, mockdispatch, mockdoc);
+    const mockstate = {
+      doc: {
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: null,
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'Normal',
+            },
+          },
+        ],
+      },
+      selection: { type: 'text', anchor: 1, head: 1 },
+    };
+    const mockdoc = {
+      type: 'doc',
+      attrs: {
+        layout: null,
+        padding: null,
+        width: null,
+        counterFlags: null,
+        capcoMode: 0,
+      },
+      content: [
+        {
+          type: 'paragraph',
+          attrs: {
+            align: null,
+            color: null,
+            id: null,
+            indent: null,
+            lineSpacing: null,
+            paddingBottom: null,
+            paddingTop: null,
+            capco: null,
+            styleName: 'Normal',
+          },
+        },
+      ],
+    };
+    const mockdispatch = () => {};
+    const mockval = {
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: '1',
+        paragraphSpacingBefore: 10,
+        paragraphSpacingAfter: 10,
+        strong: 10,
+        boldNumbering: 10,
+        em: 10,
+        color: 'blue',
+        fontSize: 10,
+        fontName: 'Tahoma',
+        indent: 10,
+        hasNumbering: true,
+      },
+      styleName: 'test',
+      editorView: {},
+    };
+    customstylecommand.createNewStyle(
+      mockval,
+      mocktr,
+      mockstate,
+      mockdispatch,
+      mockdoc
+    );
     expect(spy2).toHaveBeenCalled();
   });
-
 });
 describe('getMarkByStyleName', () => {
   it('should handle getMarkByStyleName when styles dont have property', () => {
-    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({ styles: { x: '', y: '', z: '' } });
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValue({ styles: { x: '', y: '', z: '' } });
     const mockSchema = new Schema({
       nodes: {
         doc: {
@@ -326,7 +625,7 @@ describe('getMarkByStyleName', () => {
             return ['p', 0];
           },
         },
-        text: { inline: true }
+        text: { inline: true },
       },
       // marks1: {
       //     link: {
@@ -338,78 +637,92 @@ describe('getMarkByStyleName', () => {
       marks: {
         link: {
           attrs: {
-            href: 'test_href'
-          }
+            href: 'test_href',
+          },
         },
         em: {
-          parseDOM: [{
-            tag: 'i'
-          }, {
-            tag: 'em'
-          }, {
-            style: 'font-style=italic'
-          }],
+          parseDOM: [
+            {
+              tag: 'i',
+            },
+            {
+              tag: 'em',
+            },
+            {
+              style: 'font-style=italic',
+            },
+          ],
           toDOM() {
             return ['em', 0];
           },
           attrs: {
             overridden: {
               hasDefault: true,
-              default: false
-            }
-          }
+              default: false,
+            },
+          },
         },
         strong: {
-          parseDOM: [{
-            tag: 'strong'
-          }, {
-            tag: 'b'
-          }, {
-            style: 'font-weight'
-          }],
+          parseDOM: [
+            {
+              tag: 'strong',
+            },
+            {
+              tag: 'b',
+            },
+            {
+              style: 'font-weight',
+            },
+          ],
           toDOM() {
             return ['strong', 0];
           },
           attrs: {
             overridden: {
               hasDefault: true,
-              default: false
-            }
-          }
+              default: false,
+            },
+          },
         },
         underline: {
-          parseDOM: [{
-            tag: 'u'
-          }, {
-            style: 'text-decoration-line'
-          }, {
-            style: 'text-decoration'
-          }],
+          parseDOM: [
+            {
+              tag: 'u',
+            },
+            {
+              style: 'text-decoration-line',
+            },
+            {
+              style: 'text-decoration',
+            },
+          ],
           toDOM() {
             return ['u', 0];
           },
           attrs: {
             overridden: {
               hasDefault: true,
-              default: false
-            }
-          }
+              default: false,
+            },
+          },
         },
         'mark-text-color': {
           attrs: {
             color: '',
             overridden: {
               hasDefault: true,
-              default: false
-            }
+              default: false,
+            },
           },
           inline: true,
           group: 'inline',
-          parseDOM: [{
-            style: 'color'
-          }],
+          parseDOM: [
+            {
+              style: 'color',
+            },
+          ],
           toDOM() {
-            return ['span', { 'color': '' }, 0];
+            return ['span', { color: '' }, 0];
           },
         },
         'mark-text-highlight': {
@@ -417,66 +730,74 @@ describe('getMarkByStyleName', () => {
             highlightColor: '',
             overridden: {
               hasDefault: true,
-              default: false
-            }
+              default: false,
+            },
           },
           inline: true,
           group: 'inline',
-          parseDOM: [{
-            tag: 'span[style*=background-color]'
-          }],
+          parseDOM: [
+            {
+              tag: 'span[style*=background-color]',
+            },
+          ],
           toDOM() {
             return {
-              highlightColor: ''
+              highlightColor: '',
             };
           },
-
         },
         'mark-font-size': {
           attrs: {
             pt: {
-              default: null
+              default: null,
             },
             overridden: {
               hasDefault: true,
-              default: false
-            }
+              default: false,
+            },
           },
           inline: true,
           group: 'inline',
-          parseDOM: [{
-            style: 'font-size'
-          }],
+          parseDOM: [
+            {
+              style: 'font-size',
+            },
+          ],
           toDOM(mark, inline) {
             return ['Test Mark'];
-          }
-
+          },
         },
         'mark-font-type': {
           attrs: {
             name: '',
             overridden: {
               hasDefault: true,
-              default: false
-            }
+              default: false,
+            },
           },
           inline: true,
           group: 'inline',
-          parseDOM: [{
-            style: 'font-family'
-          }],
+          parseDOM: [
+            {
+              style: 'font-family',
+            },
+          ],
           toDOM() {
             return ['span', 0];
-          }
+          },
         },
         strong: {
-          parseDOM: [{
-            tag: 'strong'
-          }, {
-            tag: 'b'
-          }, {
-            style: 'font-weight'
-          }],
+          parseDOM: [
+            {
+              tag: 'strong',
+            },
+            {
+              tag: 'b',
+            },
+            {
+              style: 'font-weight',
+            },
+          ],
 
           toDOM() {
             return ['strong', 0];
@@ -484,11 +805,10 @@ describe('getMarkByStyleName', () => {
           attrs: {
             overridden: {
               hasDefault: true,
-              default: false
-            }
-          }
-        }
-
+              default: false,
+            },
+          },
+        },
       },
       spec: {
         nodes: {
@@ -504,15 +824,34 @@ describe('getMarkByStyleName', () => {
               return ['p', 0];
             },
           },
-        }
-
+        },
       },
     });
     expect(getMarkByStyleName('test', mockSchema)).toBeDefined();
   });
 
   it('should handle getMarkByStyleName', () => {
-    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({ styles: { hasBullet: true, bulletLevel: '25CF', styleLevel: 1, paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, strong: 10, boldNumbering: 10, em: 10, color: 'blue', fontSize: 10, fontName: 'Tahoma', indent: 10, hasNumbering: true, 'textHighlight': 'blue', underline: true } });
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValue({
+        styles: {
+          hasBullet: true,
+          bulletLevel: '25CF',
+          styleLevel: 1,
+          paragraphSpacingBefore: 10,
+          paragraphSpacingAfter: 10,
+          strong: 10,
+          boldNumbering: 10,
+          em: 10,
+          color: 'blue',
+          fontSize: 10,
+          fontName: 'Tahoma',
+          indent: 10,
+          hasNumbering: true,
+          textHighlight: 'blue',
+          underline: true,
+        },
+      });
     const mockSchema = new Schema({
       nodes: {
         doc: {
@@ -526,7 +865,7 @@ describe('getMarkByStyleName', () => {
             return ['p', 0];
           },
         },
-        text: { inline: true }
+        text: { inline: true },
       },
       // marks1: {
       //     link: {
@@ -538,78 +877,92 @@ describe('getMarkByStyleName', () => {
       marks: {
         link: {
           attrs: {
-            href: 'test_href'
-          }
+            href: 'test_href',
+          },
         },
         em: {
-          parseDOM: [{
-            tag: 'i'
-          }, {
-            tag: 'em'
-          }, {
-            style: 'font-style=italic'
-          }],
+          parseDOM: [
+            {
+              tag: 'i',
+            },
+            {
+              tag: 'em',
+            },
+            {
+              style: 'font-style=italic',
+            },
+          ],
           toDOM() {
             return ['em', 0];
           },
           attrs: {
             overridden: {
               hasDefault: true,
-              default: false
-            }
-          }
+              default: false,
+            },
+          },
         },
         strong: {
-          parseDOM: [{
-            tag: 'strong'
-          }, {
-            tag: 'b'
-          }, {
-            style: 'font-weight'
-          }],
+          parseDOM: [
+            {
+              tag: 'strong',
+            },
+            {
+              tag: 'b',
+            },
+            {
+              style: 'font-weight',
+            },
+          ],
           toDOM() {
             return ['strong', 0];
           },
           attrs: {
             overridden: {
               hasDefault: true,
-              default: false
-            }
-          }
+              default: false,
+            },
+          },
         },
         underline: {
-          parseDOM: [{
-            tag: 'u'
-          }, {
-            style: 'text-decoration-line'
-          }, {
-            style: 'text-decoration'
-          }],
+          parseDOM: [
+            {
+              tag: 'u',
+            },
+            {
+              style: 'text-decoration-line',
+            },
+            {
+              style: 'text-decoration',
+            },
+          ],
           toDOM() {
             return ['u', 0];
           },
           attrs: {
             overridden: {
               hasDefault: true,
-              default: false
-            }
-          }
+              default: false,
+            },
+          },
         },
         'mark-text-color': {
           attrs: {
             color: '',
             overridden: {
               hasDefault: true,
-              default: false
-            }
+              default: false,
+            },
           },
           inline: true,
           group: 'inline',
-          parseDOM: [{
-            style: 'color'
-          }],
+          parseDOM: [
+            {
+              style: 'color',
+            },
+          ],
           toDOM() {
-            return ['span', { 'color': '' }, 0];
+            return ['span', { color: '' }, 0];
           },
         },
         'mark-text-highlight': {
@@ -617,66 +970,74 @@ describe('getMarkByStyleName', () => {
             highlightColor: '',
             overridden: {
               hasDefault: true,
-              default: false
-            }
+              default: false,
+            },
           },
           inline: true,
           group: 'inline',
-          parseDOM: [{
-            tag: 'span[style*=background-color]'
-          }],
+          parseDOM: [
+            {
+              tag: 'span[style*=background-color]',
+            },
+          ],
           toDOM() {
             return {
-              highlightColor: ''
+              highlightColor: '',
             };
           },
-
         },
         'mark-font-size': {
           attrs: {
             pt: {
-              default: null
+              default: null,
             },
             overridden: {
               hasDefault: true,
-              default: false
-            }
+              default: false,
+            },
           },
           inline: true,
           group: 'inline',
-          parseDOM: [{
-            style: 'font-size'
-          }],
+          parseDOM: [
+            {
+              style: 'font-size',
+            },
+          ],
           toDOM(mark, inline) {
             return ['Test Mark'];
-          }
-
+          },
         },
         'mark-font-type': {
           attrs: {
             name: '',
             overridden: {
               hasDefault: true,
-              default: false
-            }
+              default: false,
+            },
           },
           inline: true,
           group: 'inline',
-          parseDOM: [{
-            style: 'font-family'
-          }],
+          parseDOM: [
+            {
+              style: 'font-family',
+            },
+          ],
           toDOM() {
             return ['span', 0];
-          }
+          },
         },
         strong: {
-          parseDOM: [{
-            tag: 'strong'
-          }, {
-            tag: 'b'
-          }, {
-            style: 'font-weight'
-          }],
+          parseDOM: [
+            {
+              tag: 'strong',
+            },
+            {
+              tag: 'b',
+            },
+            {
+              style: 'font-weight',
+            },
+          ],
 
           toDOM() {
             return ['strong', 0];
@@ -684,11 +1045,10 @@ describe('getMarkByStyleName', () => {
           attrs: {
             overridden: {
               hasDefault: true,
-              default: false
-            }
-          }
-        }
-
+              default: false,
+            },
+          },
+        },
       },
       spec: {
         nodes: {
@@ -704,34 +1064,55 @@ describe('getMarkByStyleName', () => {
               return ['p', 0];
             },
           },
-        }
-
+        },
       },
     });
     expect(getMarkByStyleName('test', mockSchema)).toBeDefined();
   });
-
 });
 describe('getStyleLevel', () => {
   it('should handle getStyleLevel', () => {
     expect(getStyleLevel('Normal')).toBe(1);
   });
   it('should handle getStyleLevel when styleProp null', () => {
-    const spy = jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({});
+    const spy = jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValue({});
     expect(getStyleLevel('Normal-@#$-10')).toBe(10);
     spy.mockReset();
   });
 
   it('should handle getStyleLevel when styleProp null', () => {
-    const spy = jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({});
+    const spy = jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValue({});
     expect(getStyleLevel('Normal-@#$-10Normal-@#$-11')).toBe(0);
     spy.mockReset();
   });
 });
 
 describe('addMarksToLine and manageElementsAfterSelection', () => {
-
-  const styl = { 'styleName': 'A_12', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': false }, 'toc': false, 'isHidden': false };
+  const styl = {
+    styleName: 'A_12',
+    mode: 1,
+    styles: {
+      align: 'left',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'A_12',
+      fontName: 'Aclonica',
+      fontSize: '14',
+      strong: true,
+      styleLevel: '2',
+      hasBullet: true,
+      bulletLevel: '272A',
+      hasNumbering: false,
+    },
+    toc: false,
+    isHidden: false,
+  };
   const customstylecommand = new CustomStyleCommand(styl, 'A_12');
   const trmock = {
     doc: {
@@ -741,7 +1122,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         padding: null,
         width: null,
         counterFlags: null,
-        capcoMode: 0
+        capcoMode: 0,
       },
       content: [
         {
@@ -755,7 +1136,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
             paddingBottom: null,
             paddingTop: null,
             capco: null,
-            styleName: 'FM_chpara'
+            styleName: 'FM_chpara',
           },
           content: [
             {
@@ -765,28 +1146,28 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
                   type: 'mark-font-size',
                   attrs: {
                     pt: 18,
-                    overridden: false
-                  }
+                    overridden: false,
+                  },
                 },
                 {
                   type: 'mark-font-type',
                   attrs: {
                     name: 'Times New Roman',
-                    overridden: false
-                  }
+                    overridden: false,
+                  },
                 },
                 {
                   type: 'mark-text-color',
                   attrs: {
                     color: '#0d69f2',
-                    overridden: false
-                  }
-                }
+                    overridden: false,
+                  },
+                },
               ],
-              text: 'fggfdfgfghfghfgh'
-            }
-          ]
-        }
+              text: 'fggfdfgfghfghfgh',
+            },
+          ],
+        },
       ],
       descendants: jest.fn(() => []),
     },
@@ -797,11 +1178,11 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           type: 'mark-font-size',
           attrs: {
             pt: 14,
-            overridden: false
-          }
+            overridden: false,
+          },
         },
         from: 1,
-        to: 17
+        to: 17,
       },
       {
         stepType: 'removeMark',
@@ -809,11 +1190,11 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           type: 'mark-font-type',
           attrs: {
             name: 'Arial Black',
-            overridden: false
-          }
+            overridden: false,
+          },
         },
         from: 1,
-        to: 17
+        to: 17,
       },
       {
         stepType: 'addMark',
@@ -821,11 +1202,11 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           type: 'mark-font-type',
           attrs: {
             name: 'Times New Roman',
-            overridden: false
-          }
+            overridden: false,
+          },
         },
         from: 1,
-        to: 17
+        to: 17,
       },
       {
         stepType: 'addMark',
@@ -833,11 +1214,11 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           type: 'mark-font-size',
           attrs: {
             pt: 18,
-            overridden: false
-          }
+            overridden: false,
+          },
         },
         from: 1,
-        to: 17
+        to: 17,
       },
       {
         stepType: 'replaceAround',
@@ -859,12 +1240,12 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
                 paddingBottom: null,
                 paddingTop: null,
                 capco: null,
-                styleName: 'A11-Rename'
-              }
-            }
-          ]
+                styleName: 'A11-Rename',
+              },
+            },
+          ],
         },
-        structure: true
+        structure: true,
       },
       {
         stepType: 'addMark',
@@ -872,11 +1253,11 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           type: 'mark-text-color',
           attrs: {
             color: '#0d69f2',
-            overridden: false
-          }
+            overridden: false,
+          },
         },
         from: 1,
-        to: 17
+        to: 17,
       },
       {
         stepType: 'replaceAround',
@@ -898,13 +1279,13 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
                 paddingBottom: null,
                 paddingTop: null,
                 capco: null,
-                styleName: 'FM_chpara'
-              }
-            }
-          ]
+                styleName: 'FM_chpara',
+              },
+            },
+          ],
         },
-        structure: true
-      }
+        structure: true,
+      },
     ],
     docs: [
       {
@@ -914,7 +1295,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           padding: null,
           width: null,
           counterFlags: null,
-          capcoMode: 0
+          capcoMode: 0,
         },
         content: [
           {
@@ -928,7 +1309,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'A11-Rename'
+              styleName: 'A11-Rename',
             },
             content: [
               {
@@ -938,22 +1319,22 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
                     type: 'mark-font-size',
                     attrs: {
                       pt: 14,
-                      overridden: false
-                    }
+                      overridden: false,
+                    },
                   },
                   {
                     type: 'mark-font-type',
                     attrs: {
                       name: 'Arial Black',
-                      overridden: false
-                    }
-                  }
+                      overridden: false,
+                    },
+                  },
                 ],
-                text: 'fggfdfgfghfghfgh'
-              }
-            ]
-          }
-        ]
+                text: 'fggfdfgfghfghfgh',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'doc',
@@ -962,7 +1343,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           padding: null,
           width: null,
           counterFlags: null,
-          capcoMode: 0
+          capcoMode: 0,
         },
         content: [
           {
@@ -976,7 +1357,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'A11-Rename'
+              styleName: 'A11-Rename',
             },
             content: [
               {
@@ -986,15 +1367,15 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
                     type: 'mark-font-type',
                     attrs: {
                       name: 'Arial Black',
-                      overridden: false
-                    }
-                  }
+                      overridden: false,
+                    },
+                  },
                 ],
-                text: 'fggfdfgfghfghfgh'
-              }
-            ]
-          }
-        ]
+                text: 'fggfdfgfghfghfgh',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'doc',
@@ -1003,7 +1384,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           padding: null,
           width: null,
           counterFlags: null,
-          capcoMode: 0
+          capcoMode: 0,
         },
         content: [
           {
@@ -1017,16 +1398,16 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'A11-Rename'
+              styleName: 'A11-Rename',
             },
             content: [
               {
                 type: 'text',
-                text: 'fggfdfgfghfghfgh'
-              }
-            ]
-          }
-        ]
+                text: 'fggfdfgfghfghfgh',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'doc',
@@ -1035,7 +1416,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           padding: null,
           width: null,
           counterFlags: null,
-          capcoMode: 0
+          capcoMode: 0,
         },
         content: [
           {
@@ -1049,7 +1430,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'A11-Rename'
+              styleName: 'A11-Rename',
             },
             content: [
               {
@@ -1059,15 +1440,15 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
                     type: 'mark-font-type',
                     attrs: {
                       name: 'Times New Roman',
-                      overridden: false
-                    }
-                  }
+                      overridden: false,
+                    },
+                  },
                 ],
-                text: 'fggfdfgfghfghfgh'
-              }
-            ]
-          }
-        ]
+                text: 'fggfdfgfghfghfgh',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'doc',
@@ -1076,7 +1457,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           padding: null,
           width: null,
           counterFlags: null,
-          capcoMode: 0
+          capcoMode: 0,
         },
         content: [
           {
@@ -1090,7 +1471,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'A11-Rename'
+              styleName: 'A11-Rename',
             },
             content: [
               {
@@ -1100,22 +1481,22 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
                     type: 'mark-font-size',
                     attrs: {
                       pt: 18,
-                      overridden: false
-                    }
+                      overridden: false,
+                    },
                   },
                   {
                     type: 'mark-font-type',
                     attrs: {
                       name: 'Times New Roman',
-                      overridden: false
-                    }
-                  }
+                      overridden: false,
+                    },
+                  },
                 ],
-                text: 'fggfdfgfghfghfgh'
-              }
-            ]
-          }
-        ]
+                text: 'fggfdfgfghfghfgh',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'doc',
@@ -1124,7 +1505,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           padding: null,
           width: null,
           counterFlags: null,
-          capcoMode: 0
+          capcoMode: 0,
         },
         content: [
           {
@@ -1138,7 +1519,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'A11-Rename'
+              styleName: 'A11-Rename',
             },
             content: [
               {
@@ -1148,64 +1529,64 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
                     type: 'mark-font-size',
                     attrs: {
                       pt: 18,
-                      overridden: false
-                    }
+                      overridden: false,
+                    },
                   },
                   {
                     type: 'mark-font-type',
                     attrs: {
                       name: 'Times New Roman',
-                      overridden: false
-                    }
+                      overridden: false,
+                    },
                   },
                   {
                     type: 'mark-text-color',
                     attrs: {
                       color: '#0d69f2',
-                      overridden: false
-                    }
-                  }
+                      overridden: false,
+                    },
+                  },
                 ],
-                text: 'fggfdfgfghfghfgh'
-              }
-            ]
-          }
-        ]
-      }
+                text: 'fggfdfgfghfghfgh',
+              },
+            ],
+          },
+        ],
+      },
     ],
     mapping: {
       maps: [
         {
           ranges: [],
-          inverted: false
+          inverted: false,
         },
         {
           ranges: [],
-          inverted: false
+          inverted: false,
         },
         {
           ranges: [],
-          inverted: false
+          inverted: false,
         },
         {
           ranges: [],
-          inverted: false
+          inverted: false,
         },
         {
           ranges: [0, 1, 1, 17, 1, 1],
-          inverted: false
+          inverted: false,
         },
         {
           ranges: [],
-          inverted: false
+          inverted: false,
         },
         {
           ranges: [0, 1, 1, 17, 1, 1],
-          inverted: false
-        }
+          inverted: false,
+        },
       ],
       from: 0,
-      to: 7
+      to: 7,
     },
     curSelectionFor: 5,
     updated: 1,
@@ -1214,37 +1595,44 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
     curSelection: {
       type: 'text',
       anchor: 0,
-      head: 17
+      head: 17,
     },
     storedMarks: [
       {
         type: 'mark-font-type',
         attrs: {
           name: 'Times New Roman',
-          overridden: false
-        }
+          overridden: false,
+        },
       },
       {
         type: 'mark-font-size',
         attrs: {
           pt: '18',
-          overridden: false
-        }
+          overridden: false,
+        },
       },
       {
         type: 'mark-text-color',
         attrs: {
           color: '#0d69f2',
-          overridden: false
-        }
-      }
+          overridden: false,
+        },
+      },
     ],
-    addMark: (x, y, z) => { return { removeMark: (x, y, z) => { } }; },
-    removeMark: (x, y, z) => { return { key: 'mocktr' }; },
-    insert: (a, b) => { return { key: 'mocktr' }; },
-    setSelection: (a) => { return {}; }
+    addMark: (x, y, z) => {
+      return { removeMark: (x, y, z) => {} };
+    },
+    removeMark: (x, y, z) => {
+      return { key: 'mocktr' };
+    },
+    insert: (a, b) => {
+      return { key: 'mocktr' };
+    },
+    setSelection: (a) => {
+      return {};
+    },
   };
-
 
   const schema = new Schema({
     nodes: {
@@ -1277,78 +1665,92 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
     marks: {
       link: {
         attrs: {
-          href: 'test_href'
-        }
+          href: 'test_href',
+        },
       },
       em: {
-        parseDOM: [{
-          tag: 'i'
-        }, {
-          tag: 'em'
-        }, {
-          style: 'font-style=italic'
-        }],
+        parseDOM: [
+          {
+            tag: 'i',
+          },
+          {
+            tag: 'em',
+          },
+          {
+            style: 'font-style=italic',
+          },
+        ],
         toDOM() {
           return ['em', 0];
         },
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
+            default: false,
+          },
+        },
       },
       strong: {
-        parseDOM: [{
-          tag: 'strong'
-        }, {
-          tag: 'b'
-        }, {
-          style: 'font-weight'
-        }],
+        parseDOM: [
+          {
+            tag: 'strong',
+          },
+          {
+            tag: 'b',
+          },
+          {
+            style: 'font-weight',
+          },
+        ],
         toDOM() {
           return ['strong', 0];
         },
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
+            default: false,
+          },
+        },
       },
       underline: {
-        parseDOM: [{
-          tag: 'u'
-        }, {
-          style: 'text-decoration-line'
-        }, {
-          style: 'text-decoration'
-        }],
+        parseDOM: [
+          {
+            tag: 'u',
+          },
+          {
+            style: 'text-decoration-line',
+          },
+          {
+            style: 'text-decoration',
+          },
+        ],
         toDOM() {
           return ['u', 0];
         },
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
+            default: false,
+          },
+        },
       },
       'mark-text-color': {
         attrs: {
           color: '',
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          style: 'color'
-        }],
+        parseDOM: [
+          {
+            style: 'color',
+          },
+        ],
         toDOM() {
-          return ['span', { 'color': '' }, 0];
+          return ['span', { color: '' }, 0];
         },
       },
       'mark-text-highlight': {
@@ -1356,66 +1758,74 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           highlightColor: '',
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          tag: 'span[style*=background-color]'
-        }],
+        parseDOM: [
+          {
+            tag: 'span[style*=background-color]',
+          },
+        ],
         toDOM() {
           return {
-            highlightColor: ''
+            highlightColor: '',
           };
         },
-
       },
       'mark-font-size': {
         attrs: {
           pt: {
-            default: null
+            default: null,
           },
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          style: 'font-size'
-        }],
+        parseDOM: [
+          {
+            style: 'font-size',
+          },
+        ],
         toDOM(mark, inline) {
           return ['Test Mark'];
-        }
-
+        },
       },
       'mark-font-type': {
         attrs: {
           name: '',
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          style: 'font-family'
-        }],
+        parseDOM: [
+          {
+            style: 'font-family',
+          },
+        ],
         toDOM() {
           return ['span', 0];
-        }
+        },
       },
       strong: {
-        parseDOM: [{
-          tag: 'strong'
-        }, {
-          tag: 'b'
-        }, {
-          style: 'font-weight'
-        }],
+        parseDOM: [
+          {
+            tag: 'strong',
+          },
+          {
+            tag: 'b',
+          },
+          {
+            style: 'font-weight',
+          },
+        ],
 
         toDOM() {
           return ['strong', 0];
@@ -1423,11 +1833,10 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
-      }
-
+            default: false,
+          },
+        },
+      },
     },
   });
 
@@ -1470,14 +1879,10 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
             ],
             text: 'fggfdfgfghfghfgh',
           },
-
         ],
       },
     ],
-  },
-
-  );
-
+  });
 
   // Create the EditorState
   const statemock = { schema: schema, doc: doc, selection: { from: 0, to: 1 } };
@@ -1497,7 +1902,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           styleName: { default: '10Normal-@#$-10' },
         },
       },
-      text: { inline: true }
+      text: { inline: true },
     },
     // marks1: {
     //     link: {
@@ -1509,78 +1914,92 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
     marks: {
       link: {
         attrs: {
-          href: 'test_href'
-        }
+          href: 'test_href',
+        },
       },
       em: {
-        parseDOM: [{
-          tag: 'i'
-        }, {
-          tag: 'em'
-        }, {
-          style: 'font-style=italic'
-        }],
+        parseDOM: [
+          {
+            tag: 'i',
+          },
+          {
+            tag: 'em',
+          },
+          {
+            style: 'font-style=italic',
+          },
+        ],
         toDOM() {
           return ['em', 0];
         },
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
+            default: false,
+          },
+        },
       },
       strong: {
-        parseDOM: [{
-          tag: 'strong'
-        }, {
-          tag: 'b'
-        }, {
-          style: 'font-weight'
-        }],
+        parseDOM: [
+          {
+            tag: 'strong',
+          },
+          {
+            tag: 'b',
+          },
+          {
+            style: 'font-weight',
+          },
+        ],
         toDOM() {
           return ['strong', 0];
         },
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
+            default: false,
+          },
+        },
       },
       underline: {
-        parseDOM: [{
-          tag: 'u'
-        }, {
-          style: 'text-decoration-line'
-        }, {
-          style: 'text-decoration'
-        }],
+        parseDOM: [
+          {
+            tag: 'u',
+          },
+          {
+            style: 'text-decoration-line',
+          },
+          {
+            style: 'text-decoration',
+          },
+        ],
         toDOM() {
           return ['u', 0];
         },
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
+            default: false,
+          },
+        },
       },
       'mark-text-color': {
         attrs: {
           color: '',
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          style: 'color'
-        }],
+        parseDOM: [
+          {
+            style: 'color',
+          },
+        ],
         toDOM() {
-          return ['span', { 'color': '' }, 0];
+          return ['span', { color: '' }, 0];
         },
       },
       'mark-text-highlight': {
@@ -1588,66 +2007,74 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           highlightColor: '',
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          tag: 'span[style*=background-color]'
-        }],
+        parseDOM: [
+          {
+            tag: 'span[style*=background-color]',
+          },
+        ],
         toDOM() {
           return {
-            highlightColor: ''
+            highlightColor: '',
           };
         },
-
       },
       'mark-font-size': {
         attrs: {
           pt: {
-            default: null
+            default: null,
           },
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          style: 'font-size'
-        }],
+        parseDOM: [
+          {
+            style: 'font-size',
+          },
+        ],
         toDOM(mark, inline) {
           return ['Test Mark'];
-        }
-
+        },
       },
       'mark-font-type': {
         attrs: {
           name: '',
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          style: 'font-family'
-        }],
+        parseDOM: [
+          {
+            style: 'font-family',
+          },
+        ],
         toDOM() {
           return ['span', 0];
-        }
+        },
       },
       strong: {
-        parseDOM: [{
-          tag: 'strong'
-        }, {
-          tag: 'b'
-        }, {
-          style: 'font-weight'
-        }],
+        parseDOM: [
+          {
+            tag: 'strong',
+          },
+          {
+            tag: 'b',
+          },
+          {
+            style: 'font-weight',
+          },
+        ],
 
         toDOM() {
           return ['strong', 0];
@@ -1655,11 +2082,10 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
-      }
-
+            default: false,
+          },
+        },
+      },
     },
     spec: {
       nodes: {
@@ -1675,8 +2101,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
             return ['p', 0];
           },
         },
-      }
-
+      },
     },
   });
 
@@ -1720,9 +2145,10 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
   const nodemock = schema1.nodeFromJSON(json);
   //const nodemock = {type:'paragraph',attrs:{align:'left',color:null,id:null,indent:0,lineSpacing:null,paddingBottom:null,paddingTop:null,capco:null,styleName:'FM_chpara'},content:[{type:'text',marks:[{type:'mark-font-size',attrs:{pt:18,overridden:false}},{type:'mark-font-type',attrs:{name:'Times New Roman',overridden:false}},{type:'mark-text-color',attrs:{color:'#0d69f2',overridden:false}}],text:'fggfdfgfghfghfgh'}]}
   it('should handle addMarksToLine', () => {
-    expect(addMarksToLine(trmock, statemock, nodemock, 0, true)).toBeUndefined();
+    expect(
+      addMarksToLine(trmock, statemock, nodemock, 0, true)
+    ).toBeUndefined();
   });
-
 
   it('should handle addMarksToLine when boldSentence is false', () => {
     const json = {
@@ -1762,22 +2188,50 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
 
     // Create the ProseMirror node from JSON
     const nodemock = schema1.nodeFromJSON(json);
-    expect(addMarksToLine(trmock, statemock, nodemock, 0, false)).toBeUndefined();
+    expect(
+      addMarksToLine(trmock, statemock, nodemock, 0, false)
+    ).toBeUndefined();
   });
   it('should handle manageElementsAfterSelection', () => {
-    expect(manageElementsAfterSelection([{ node: nodemock }], statemock, trmock)).toBeDefined();
+    expect(
+      manageElementsAfterSelection([{ node: nodemock }], statemock, trmock)
+    ).toBeDefined();
   });
   it('should handle manageElementsAfterSelection', () => {
-    expect(manageElementsAfterSelection([{ node: nodemock }], statemock, trmock)).toBeDefined();
+    expect(
+      manageElementsAfterSelection([{ node: nodemock }], statemock, trmock)
+    ).toBeDefined();
   });
 
   it('should handle insertParagraph', () => {
-    const nodeattrs = { 'align': 'left', 'color': null, 'id': null, 'indent': null, 'lineSpacing': '125%', 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'FM_chsubpara1' };
+    const nodeattrs = {
+      align: 'left',
+      color: null,
+      id: null,
+      indent: null,
+      lineSpacing: '125%',
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'FM_chsubpara1',
+    };
     expect(insertParagraph(nodeattrs, 0, trmock, 1, statemock)).toBeDefined();
   });
   it('should handle addElementEx', () => {
-    const nodeattrs = { 'align': 'left', 'color': null, 'id': null, 'indent': null, 'lineSpacing': '125%', 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'FM_chsubpara1' };
-    expect(addElementEx(nodeattrs, statemock, trmock, 0, false, 2)).toBeDefined();
+    const nodeattrs = {
+      align: 'left',
+      color: null,
+      id: null,
+      indent: null,
+      lineSpacing: '125%',
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'FM_chsubpara1',
+    };
+    expect(
+      addElementEx(nodeattrs, statemock, trmock, 0, false, 2)
+    ).toBeDefined();
   });
   it('should handle getCustomStyles', () => {
     //const nodeattrs = { 'align': 'left', 'color': null, 'id': null, 'indent': null, 'lineSpacing': '125%', 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'FM_chsubpara1' };
@@ -1789,7 +2243,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         paragraph: {
           content: 'text*',
           attrs: {
-            styleName: { default: 'test' }
+            styleName: { default: 'test' },
           },
           toDOM() {
             return ['p', 0];
@@ -1800,7 +2254,11 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           content: 'inline*',
           marks: '',
           toDOM(node) {
-            return ['h' + node.attrs.level, { 'data-style-name': node.attrs.styleName }, 0];
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
           },
         },
         text: {
@@ -1829,7 +2287,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
             {
               type: 'text',
               text: 'This is a mock dummy document.',
-              attrs: { styleName: 'test' }
+              attrs: { styleName: 'test' },
             },
           ],
         },
@@ -1844,106 +2302,339 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         },
       ],
     });
-    const mockselection = { $from: { before: (x) => { return x - 1; } }, $to: { after: (x) => { return x + 1; } } };
+    const mockselection = {
+      $from: {
+        before: (x) => {
+          return x - 1;
+        },
+      },
+      $to: {
+        after: (x) => {
+          return x + 1;
+        },
+      },
+    };
     const mockeditorstate = {
       schema: mockschema,
       doc: mockdoc,
       selection: mockselection,
-      tr: { setSelection: () => { return { setNodeMarkup: () => { return { removeTextAlignAndLineSpacing: () => { return { createEmptyElement: () => { return {}; } }; } }; }, doc: mockdoc }; } }
+      tr: {
+        setSelection: () => {
+          return {
+            setNodeMarkup: () => {
+              return {
+                removeTextAlignAndLineSpacing: () => {
+                  return {
+                    createEmptyElement: () => {
+                      return {};
+                    },
+                  };
+                },
+              };
+            },
+            doc: mockdoc,
+          };
+        },
+      },
     };
-    const styl = { 'styleName': 'Normal', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': false }, 'toc': false, 'isHidden': false };
+    const styl = {
+      styleName: 'Normal',
+      mode: 1,
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A_12',
+        fontName: 'Aclonica',
+        fontSize: '14',
+        strong: true,
+        styleLevel: '2',
+        hasBullet: true,
+        bulletLevel: '272A',
+        hasNumbering: false,
+      },
+      toc: false,
+      isHidden: false,
+    };
     jest.spyOn(customstyles, 'getStylesAsync').mockResolvedValue([styl]);
-    jest.spyOn(cusstylecommand, 'updateDocument').mockReturnValue({ key: 'mocktr' });
+    jest
+      .spyOn(cusstylecommand, 'updateDocument')
+      .mockReturnValue({ key: 'mocktr' });
     const customstylecommand = new CustomStyleCommand(styl, 'A_12');
 
     const editorview = {
       state: mockeditorstate,
-      dispatch: () => { return {}; }
+      dispatch: () => {
+        return {};
+      },
     };
-    expect(customstylecommand.getCustomStyles('Normal', editorview)).toBeUndefined();
+    expect(
+      customstylecommand.getCustomStyles('Normal', editorview)
+    ).toBeUndefined();
   });
   it('should handle getCustomStyles when styleName null', () => {
-
     const editorview = {
       state: statemock,
-      dispatch: () => { return {}; }
+      dispatch: () => {
+        return {};
+      },
     };
-    expect(customstylecommand.getCustomStyles(null, editorview)).toBeUndefined();
+    expect(
+      customstylecommand.getCustomStyles(null, editorview)
+    ).toBeUndefined();
   });
   it('should handle getCustomStyles when styleName not equal obj.styleName', () => {
     //const nodeattrs = { 'align': 'left', 'color': null, 'id': null, 'indent': null, 'lineSpacing': '125%', 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'FM_chsubpara1' };
-    const styl = { 'styleName': 'test', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': false }, 'toc': false, 'isHidden': false };
+    const styl = {
+      styleName: 'test',
+      mode: 1,
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A_12',
+        fontName: 'Aclonica',
+        fontSize: '14',
+        strong: true,
+        styleLevel: '2',
+        hasBullet: true,
+        bulletLevel: '272A',
+        hasNumbering: false,
+      },
+      toc: false,
+      isHidden: false,
+    };
     jest.spyOn(customstyles, 'getStylesAsync').mockResolvedValue([styl]);
-    jest.spyOn(cusstylecommand, 'updateDocument').mockReturnValue({ key: 'mocktr' });
+    jest
+      .spyOn(cusstylecommand, 'updateDocument')
+      .mockReturnValue({ key: 'mocktr' });
     const customstylecommand = new CustomStyleCommand(styl, 'A_12');
 
     const editorview = {
       state: statemock,
-      dispatch: () => { return {}; }
+      dispatch: () => {
+        return {};
+      },
     };
-    expect(customstylecommand.getCustomStyles('Normal', editorview)).toBeUndefined();
+    expect(
+      customstylecommand.getCustomStyles('Normal', editorview)
+    ).toBeUndefined();
   });
 
   it('should handle compareMarkWithStyle when type = mark-font-size ', () => {
-    const mark = { 'type': 'mark-font-size', 'attrs': { 'pt': 11, 'overridden': false } };
-    const style1 = { 'align': 'justify', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'Normal', 'fontName': 'Arial', 'fontSize': 11, 'strong': true, 'em': true, 'underline': true, 'color': '#c40df2' };
-    const retobj = { 'modified': false };
-    expect(compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})).toBeDefined();
+    const mark = {
+      type: 'mark-font-size',
+      attrs: { pt: 11, overridden: false },
+    };
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})
+    ).toBeDefined();
   });
   it('should handle compareMarkWithStyle when type = em ', () => {
     const mark = { type: { name: 'em' }, attrs: { overridden: false } };
-    const style1 = { 'align': 'justify', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'Normal', 'fontName': 'Arial', 'fontSize': 11, 'strong': true, 'em': true, 'underline': true, 'color': '#c40df2' };
-    const retobj = { 'modified': false };
-    expect(compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})).toBeDefined();
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})
+    ).toBeDefined();
   });
   it('should handle compareMarkWithStyle when type = strong ', () => {
     const mark = { type: { name: 'strong' }, attrs: { overridden: false } };
-    const style1 = { 'align': 'justify', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'Normal', 'fontName': 'Arial', 'fontSize': 11, 'strong': true, 'em': true, 'underline': true, 'color': '#c40df2' };
-    const retobj = { 'modified': false };
-    expect(compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})).toBeDefined();
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})
+    ).toBeDefined();
   });
   it('should handle compareMarkWithStyle when type = MARK_TEXT_COLOR ', () => {
-    const mark = { type: { name: 'mark-text-color' }, attrs: { overridden: false } };
-    const style1 = { 'align': 'justify', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'Normal', 'fontName': 'Arial', 'fontSize': 11, 'strong': true, 'em': true, 'underline': true, 'color': '#c40df2' };
-    const retobj = { 'modified': false };
-    expect(compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})).toBeDefined();
+    const mark = {
+      type: { name: 'mark-text-color' },
+      attrs: { overridden: false },
+    };
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})
+    ).toBeDefined();
   });
   it('should handle compareMarkWithStyle when type = MARK_TEXT_HIGHLIGHT ', () => {
-    const mark = { type: { name: 'mark-text-highlight' }, attrs: { overridden: false } };
-    const style1 = { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'FS_36', 'fontName': 'Arial', 'fontSize': 11, 'textHighlight': '#3b0df2', 'strong': true, 'em': true, 'underline': true };
-    const retobj = { 'modified': false };
-    expect(compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})).toBeDefined();
+    const mark = {
+      type: { name: 'mark-text-highlight' },
+      attrs: { overridden: false },
+    };
+    const style1 = {
+      align: 'left',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'FS_36',
+      fontName: 'Arial',
+      fontSize: 11,
+      textHighlight: '#3b0df2',
+      strong: true,
+      em: true,
+      underline: true,
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})
+    ).toBeDefined();
   });
   it('should handle compareMarkWithStyle when type = MARK_TEXT_HIGHLIGHT ', () => {
-    const mark = { type: { name: 'mark-text-highlight' }, attrs: { overridden: false } };
-    const style1 = { 'align': 'justify', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'Normal', 'fontName': 'Arial', 'fontSize': 11, 'strong': true, 'em': true, 'underline': true, 'color': '#c40df2' };
-    const retobj = { 'modified': false };
-    expect(compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})).toBeDefined();
+    const mark = {
+      type: { name: 'mark-text-highlight' },
+      attrs: { overridden: false },
+    };
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})
+    ).toBeDefined();
   });
   it('should handle compareMarkWithStyle when type = MARK_STRIKE ', () => {
     const mark = { type: { name: 'strike' }, attrs: { overridden: false } };
-    const style1 = { 'align': 'justify', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'Normal', 'fontName': 'Arial', 'fontSize': 11, 'strong': true, 'em': true, 'underline': true, 'color': '#c40df2' };
-    const retobj = { 'modified': false };
-    expect(compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})).toBeDefined();
-  });;
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})
+    ).toBeDefined();
+  });
   it('should handle compareMarkWithStyle when type = MARK_UNDERLINE ', () => {
     const mark = { type: { name: 'underline' }, attrs: { overridden: false } };
-    const style1 = { 'align': 'justify', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'Normal', 'fontName': 'Arial', 'fontSize': 11, 'strong': true, 'em': true, 'underline': true, 'color': '#c40df2' };
-    const retobj = { 'modified': false };
-    expect(compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})).toBeDefined();
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})
+    ).toBeDefined();
   });
   it('should handle compareMarkWithStyle when style not present ', () => {
     const mark = { type: { name: 'underline' }, attrs: { overridden: false } };
-    const retobj = { 'modified': false };
-    expect(compareMarkWithStyle(mark, null, trmock, '', '', retobj, {})).toBeDefined();
-  });;
-
-
-
-
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, null, trmock, '', '', retobj, {})
+    ).toBeDefined();
+  });
 });
 describe('updateDocument', () => {
-  const styl = { 'styleName': 'A_12', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': false }, 'toc': false, 'isHidden': false };
+  const styl = {
+    styleName: 'A_12',
+    mode: 1,
+    styles: {
+      align: 'left',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'A_12',
+      fontName: 'Aclonica',
+      fontSize: '14',
+      strong: true,
+      styleLevel: '2',
+      hasBullet: true,
+      bulletLevel: '272A',
+      hasNumbering: false,
+    },
+    toc: false,
+    isHidden: false,
+  };
   const trmock = {
     doc: {
       type: 'doc',
@@ -1952,7 +2643,7 @@ describe('updateDocument', () => {
         padding: null,
         width: null,
         counterFlags: null,
-        capcoMode: 0
+        capcoMode: 0,
       },
       content: [
         {
@@ -1966,7 +2657,7 @@ describe('updateDocument', () => {
             paddingBottom: null,
             paddingTop: null,
             capco: null,
-            styleName: 'FM_chpara'
+            styleName: 'FM_chpara',
           },
           content: [
             {
@@ -1976,29 +2667,29 @@ describe('updateDocument', () => {
                   type: 'mark-font-size',
                   attrs: {
                     pt: 18,
-                    overridden: false
-                  }
+                    overridden: false,
+                  },
                 },
                 {
                   type: 'mark-font-type',
                   attrs: {
                     name: 'Times New Roman',
-                    overridden: false
-                  }
+                    overridden: false,
+                  },
                 },
                 {
                   type: 'mark-text-color',
                   attrs: {
                     color: '#0d69f2',
-                    overridden: false
-                  }
-                }
+                    overridden: false,
+                  },
+                },
               ],
-              text: 'fggfdfgfghfghfgh'
-            }
-          ]
-        }
-      ]
+              text: 'fggfdfgfghfghfgh',
+            },
+          ],
+        },
+      ],
     },
     steps: [
       {
@@ -2007,11 +2698,11 @@ describe('updateDocument', () => {
           type: 'mark-font-size',
           attrs: {
             pt: 14,
-            overridden: false
-          }
+            overridden: false,
+          },
         },
         from: 1,
-        to: 17
+        to: 17,
       },
       {
         stepType: 'removeMark',
@@ -2019,11 +2710,11 @@ describe('updateDocument', () => {
           type: 'mark-font-type',
           attrs: {
             name: 'Arial Black',
-            overridden: false
-          }
+            overridden: false,
+          },
         },
         from: 1,
-        to: 17
+        to: 17,
       },
       {
         stepType: 'addMark',
@@ -2031,11 +2722,11 @@ describe('updateDocument', () => {
           type: 'mark-font-type',
           attrs: {
             name: 'Times New Roman',
-            overridden: false
-          }
+            overridden: false,
+          },
         },
         from: 1,
-        to: 17
+        to: 17,
       },
       {
         stepType: 'addMark',
@@ -2043,11 +2734,11 @@ describe('updateDocument', () => {
           type: 'mark-font-size',
           attrs: {
             pt: 18,
-            overridden: false
-          }
+            overridden: false,
+          },
         },
         from: 1,
-        to: 17
+        to: 17,
       },
       {
         stepType: 'replaceAround',
@@ -2069,12 +2760,12 @@ describe('updateDocument', () => {
                 paddingBottom: null,
                 paddingTop: null,
                 capco: null,
-                styleName: 'A11-Rename'
-              }
-            }
-          ]
+                styleName: 'A11-Rename',
+              },
+            },
+          ],
         },
-        structure: true
+        structure: true,
       },
       {
         stepType: 'addMark',
@@ -2082,11 +2773,11 @@ describe('updateDocument', () => {
           type: 'mark-text-color',
           attrs: {
             color: '#0d69f2',
-            overridden: false
-          }
+            overridden: false,
+          },
         },
         from: 1,
-        to: 17
+        to: 17,
       },
       {
         stepType: 'replaceAround',
@@ -2108,13 +2799,13 @@ describe('updateDocument', () => {
                 paddingBottom: null,
                 paddingTop: null,
                 capco: null,
-                styleName: 'FM_chpara'
-              }
-            }
-          ]
+                styleName: 'FM_chpara',
+              },
+            },
+          ],
         },
-        structure: true
-      }
+        structure: true,
+      },
     ],
     docs: [
       {
@@ -2124,7 +2815,7 @@ describe('updateDocument', () => {
           padding: null,
           width: null,
           counterFlags: null,
-          capcoMode: 0
+          capcoMode: 0,
         },
         content: [
           {
@@ -2138,7 +2829,7 @@ describe('updateDocument', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'A11-Rename'
+              styleName: 'A11-Rename',
             },
             content: [
               {
@@ -2148,22 +2839,22 @@ describe('updateDocument', () => {
                     type: 'mark-font-size',
                     attrs: {
                       pt: 14,
-                      overridden: false
-                    }
+                      overridden: false,
+                    },
                   },
                   {
                     type: 'mark-font-type',
                     attrs: {
                       name: 'Arial Black',
-                      overridden: false
-                    }
-                  }
+                      overridden: false,
+                    },
+                  },
                 ],
-                text: 'fggfdfgfghfghfgh'
-              }
-            ]
-          }
-        ]
+                text: 'fggfdfgfghfghfgh',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'doc',
@@ -2172,7 +2863,7 @@ describe('updateDocument', () => {
           padding: null,
           width: null,
           counterFlags: null,
-          capcoMode: 0
+          capcoMode: 0,
         },
         content: [
           {
@@ -2186,7 +2877,7 @@ describe('updateDocument', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'A11-Rename'
+              styleName: 'A11-Rename',
             },
             content: [
               {
@@ -2196,15 +2887,15 @@ describe('updateDocument', () => {
                     type: 'mark-font-type',
                     attrs: {
                       name: 'Arial Black',
-                      overridden: false
-                    }
-                  }
+                      overridden: false,
+                    },
+                  },
                 ],
-                text: 'fggfdfgfghfghfgh'
-              }
-            ]
-          }
-        ]
+                text: 'fggfdfgfghfghfgh',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'doc',
@@ -2213,7 +2904,7 @@ describe('updateDocument', () => {
           padding: null,
           width: null,
           counterFlags: null,
-          capcoMode: 0
+          capcoMode: 0,
         },
         content: [
           {
@@ -2227,16 +2918,16 @@ describe('updateDocument', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'A11-Rename'
+              styleName: 'A11-Rename',
             },
             content: [
               {
                 type: 'text',
-                text: 'fggfdfgfghfghfgh'
-              }
-            ]
-          }
-        ]
+                text: 'fggfdfgfghfghfgh',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'doc',
@@ -2245,7 +2936,7 @@ describe('updateDocument', () => {
           padding: null,
           width: null,
           counterFlags: null,
-          capcoMode: 0
+          capcoMode: 0,
         },
         content: [
           {
@@ -2259,7 +2950,7 @@ describe('updateDocument', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'A11-Rename'
+              styleName: 'A11-Rename',
             },
             content: [
               {
@@ -2269,15 +2960,15 @@ describe('updateDocument', () => {
                     type: 'mark-font-type',
                     attrs: {
                       name: 'Times New Roman',
-                      overridden: false
-                    }
-                  }
+                      overridden: false,
+                    },
+                  },
                 ],
-                text: 'fggfdfgfghfghfgh'
-              }
-            ]
-          }
-        ]
+                text: 'fggfdfgfghfghfgh',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'doc',
@@ -2286,7 +2977,7 @@ describe('updateDocument', () => {
           padding: null,
           width: null,
           counterFlags: null,
-          capcoMode: 0
+          capcoMode: 0,
         },
         content: [
           {
@@ -2300,7 +2991,7 @@ describe('updateDocument', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'A11-Rename'
+              styleName: 'A11-Rename',
             },
             content: [
               {
@@ -2310,22 +3001,22 @@ describe('updateDocument', () => {
                     type: 'mark-font-size',
                     attrs: {
                       pt: 18,
-                      overridden: false
-                    }
+                      overridden: false,
+                    },
                   },
                   {
                     type: 'mark-font-type',
                     attrs: {
                       name: 'Times New Roman',
-                      overridden: false
-                    }
-                  }
+                      overridden: false,
+                    },
+                  },
                 ],
-                text: 'fggfdfgfghfghfgh'
-              }
-            ]
-          }
-        ]
+                text: 'fggfdfgfghfghfgh',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'doc',
@@ -2334,7 +3025,7 @@ describe('updateDocument', () => {
           padding: null,
           width: null,
           counterFlags: null,
-          capcoMode: 0
+          capcoMode: 0,
         },
         content: [
           {
@@ -2348,7 +3039,7 @@ describe('updateDocument', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'A11-Rename'
+              styleName: 'A11-Rename',
             },
             content: [
               {
@@ -2358,64 +3049,64 @@ describe('updateDocument', () => {
                     type: 'mark-font-size',
                     attrs: {
                       pt: 18,
-                      overridden: false
-                    }
+                      overridden: false,
+                    },
                   },
                   {
                     type: 'mark-font-type',
                     attrs: {
                       name: 'Times New Roman',
-                      overridden: false
-                    }
+                      overridden: false,
+                    },
                   },
                   {
                     type: 'mark-text-color',
                     attrs: {
                       color: '#0d69f2',
-                      overridden: false
-                    }
-                  }
+                      overridden: false,
+                    },
+                  },
                 ],
-                text: 'fggfdfgfghfghfgh'
-              }
-            ]
-          }
-        ]
-      }
+                text: 'fggfdfgfghfghfgh',
+              },
+            ],
+          },
+        ],
+      },
     ],
     mapping: {
       maps: [
         {
           ranges: [],
-          inverted: false
+          inverted: false,
         },
         {
           ranges: [],
-          inverted: false
+          inverted: false,
         },
         {
           ranges: [],
-          inverted: false
+          inverted: false,
         },
         {
           ranges: [],
-          inverted: false
+          inverted: false,
         },
         {
           ranges: [0, 1, 1, 17, 1, 1],
-          inverted: false
+          inverted: false,
         },
         {
           ranges: [],
-          inverted: false
+          inverted: false,
         },
         {
           ranges: [0, 1, 1, 17, 1, 1],
-          inverted: false
-        }
+          inverted: false,
+        },
       ],
       from: 0,
-      to: 7
+      to: 7,
     },
     curSelectionFor: 5,
     updated: 1,
@@ -2424,35 +3115,38 @@ describe('updateDocument', () => {
     curSelection: {
       type: 'text',
       anchor: 0,
-      head: 17
+      head: 17,
     },
     storedMarks: [
       {
         type: 'mark-font-type',
         attrs: {
           name: 'Times New Roman',
-          overridden: false
-        }
+          overridden: false,
+        },
       },
       {
         type: 'mark-font-size',
         attrs: {
           pt: '18',
-          overridden: false
-        }
+          overridden: false,
+        },
       },
       {
         type: 'mark-text-color',
         attrs: {
           color: '#0d69f2',
-          overridden: false
-        }
-      }
+          overridden: false,
+        },
+      },
     ],
-    addMark: (x, y, z) => { return { removeMark: (x, y, z) => { } }; },
-    removeMark: (x, y, z) => { return { key: 'mocktr' }; }
+    addMark: (x, y, z) => {
+      return { removeMark: (x, y, z) => {} };
+    },
+    removeMark: (x, y, z) => {
+      return { key: 'mocktr' };
+    },
   };
-
 
   const schema = new Schema({
     nodes: {
@@ -2485,78 +3179,92 @@ describe('updateDocument', () => {
     marks: {
       link: {
         attrs: {
-          href: 'test_href'
-        }
+          href: 'test_href',
+        },
       },
       em: {
-        parseDOM: [{
-          tag: 'i'
-        }, {
-          tag: 'em'
-        }, {
-          style: 'font-style=italic'
-        }],
+        parseDOM: [
+          {
+            tag: 'i',
+          },
+          {
+            tag: 'em',
+          },
+          {
+            style: 'font-style=italic',
+          },
+        ],
         toDOM() {
           return ['em', 0];
         },
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
+            default: false,
+          },
+        },
       },
       strong: {
-        parseDOM: [{
-          tag: 'strong'
-        }, {
-          tag: 'b'
-        }, {
-          style: 'font-weight'
-        }],
+        parseDOM: [
+          {
+            tag: 'strong',
+          },
+          {
+            tag: 'b',
+          },
+          {
+            style: 'font-weight',
+          },
+        ],
         toDOM() {
           return ['strong', 0];
         },
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
+            default: false,
+          },
+        },
       },
       underline: {
-        parseDOM: [{
-          tag: 'u'
-        }, {
-          style: 'text-decoration-line'
-        }, {
-          style: 'text-decoration'
-        }],
+        parseDOM: [
+          {
+            tag: 'u',
+          },
+          {
+            style: 'text-decoration-line',
+          },
+          {
+            style: 'text-decoration',
+          },
+        ],
         toDOM() {
           return ['u', 0];
         },
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
+            default: false,
+          },
+        },
       },
       'mark-text-color': {
         attrs: {
           color: '',
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          style: 'color'
-        }],
+        parseDOM: [
+          {
+            style: 'color',
+          },
+        ],
         toDOM() {
-          return ['span', { 'color': '' }, 0];
+          return ['span', { color: '' }, 0];
         },
       },
       'mark-text-highlight': {
@@ -2564,66 +3272,74 @@ describe('updateDocument', () => {
           highlightColor: '',
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          tag: 'span[style*=background-color]'
-        }],
+        parseDOM: [
+          {
+            tag: 'span[style*=background-color]',
+          },
+        ],
         toDOM() {
           return {
-            highlightColor: ''
+            highlightColor: '',
           };
         },
-
       },
       'mark-font-size': {
         attrs: {
           pt: {
-            default: null
+            default: null,
           },
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          style: 'font-size'
-        }],
+        parseDOM: [
+          {
+            style: 'font-size',
+          },
+        ],
         toDOM(mark, inline) {
           return ['Test Mark'];
-        }
-
+        },
       },
       'mark-font-type': {
         attrs: {
           name: '',
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          style: 'font-family'
-        }],
+        parseDOM: [
+          {
+            style: 'font-family',
+          },
+        ],
         toDOM() {
           return ['span', 0];
-        }
+        },
       },
       strong: {
-        parseDOM: [{
-          tag: 'strong'
-        }, {
-          tag: 'b'
-        }, {
-          style: 'font-weight'
-        }],
+        parseDOM: [
+          {
+            tag: 'strong',
+          },
+          {
+            tag: 'b',
+          },
+          {
+            style: 'font-weight',
+          },
+        ],
 
         toDOM() {
           return ['strong', 0];
@@ -2631,11 +3347,10 @@ describe('updateDocument', () => {
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
-      }
-
+            default: false,
+          },
+        },
+      },
     },
   });
 
@@ -2678,12 +3393,10 @@ describe('updateDocument', () => {
             ],
             text: 'fggfdfgfghfghfgh',
           },
-
         ],
       },
     ],
-  },
-  );
+  });
   // Create the EditorState
   const statemock = { schema: schema, doc: doc, selection: { from: 0, to: 1 } };
   // Create the ProseMirror node from JSON
@@ -2723,78 +3436,92 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
     marks: {
       link: {
         attrs: {
-          href: 'test_href'
-        }
+          href: 'test_href',
+        },
       },
       em: {
-        parseDOM: [{
-          tag: 'i'
-        }, {
-          tag: 'em'
-        }, {
-          style: 'font-style=italic'
-        }],
+        parseDOM: [
+          {
+            tag: 'i',
+          },
+          {
+            tag: 'em',
+          },
+          {
+            style: 'font-style=italic',
+          },
+        ],
         toDOM() {
           return ['em', 0];
         },
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
+            default: false,
+          },
+        },
       },
       strong: {
-        parseDOM: [{
-          tag: 'strong'
-        }, {
-          tag: 'b'
-        }, {
-          style: 'font-weight'
-        }],
+        parseDOM: [
+          {
+            tag: 'strong',
+          },
+          {
+            tag: 'b',
+          },
+          {
+            style: 'font-weight',
+          },
+        ],
         toDOM() {
           return ['strong', 0];
         },
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
+            default: false,
+          },
+        },
       },
       underline: {
-        parseDOM: [{
-          tag: 'u'
-        }, {
-          style: 'text-decoration-line'
-        }, {
-          style: 'text-decoration'
-        }],
+        parseDOM: [
+          {
+            tag: 'u',
+          },
+          {
+            style: 'text-decoration-line',
+          },
+          {
+            style: 'text-decoration',
+          },
+        ],
         toDOM() {
           return ['u', 0];
         },
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
+            default: false,
+          },
+        },
       },
       'mark-text-color': {
         attrs: {
           color: '',
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          style: 'color'
-        }],
+        parseDOM: [
+          {
+            style: 'color',
+          },
+        ],
         toDOM() {
-          return ['span', { 'color': '' }, 0];
+          return ['span', { color: '' }, 0];
         },
       },
       'mark-text-highlight': {
@@ -2802,66 +3529,74 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
           highlightColor: '',
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          tag: 'span[style*=background-color]'
-        }],
+        parseDOM: [
+          {
+            tag: 'span[style*=background-color]',
+          },
+        ],
         toDOM() {
           return {
-            highlightColor: ''
+            highlightColor: '',
           };
         },
-
       },
       'mark-font-size': {
         attrs: {
           pt: {
-            default: null
+            default: null,
           },
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          style: 'font-size'
-        }],
+        parseDOM: [
+          {
+            style: 'font-size',
+          },
+        ],
         toDOM(mark, inline) {
           return ['Test Mark'];
-        }
-
+        },
       },
       'mark-font-type': {
         attrs: {
           name: '',
           overridden: {
             hasDefault: true,
-            default: false
-          }
+            default: false,
+          },
         },
         inline: true,
         group: 'inline',
-        parseDOM: [{
-          style: 'font-family'
-        }],
+        parseDOM: [
+          {
+            style: 'font-family',
+          },
+        ],
         toDOM() {
           return ['span', 0];
-        }
+        },
       },
       strong: {
-        parseDOM: [{
-          tag: 'strong'
-        }, {
-          tag: 'b'
-        }, {
-          style: 'font-weight'
-        }],
+        parseDOM: [
+          {
+            tag: 'strong',
+          },
+          {
+            tag: 'b',
+          },
+          {
+            style: 'font-weight',
+          },
+        ],
 
         toDOM() {
           return ['strong', 0];
@@ -2869,11 +3604,10 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
         attrs: {
           overridden: {
             hasDefault: true,
-            default: false
-          }
-        }
-      }
-
+            default: false,
+          },
+        },
+      },
     },
   });
 
@@ -2916,27 +3650,87 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
             ],
             text: 'fggfdfgfghfghfgh',
           },
-
         ],
       },
     ],
-  },
-  );
+  });
   // Create the EditorState
   const statemock = { schema: schema, doc: doc, selection: { from: 0, to: 1 } };
   it('should handle isCustomStyleAlreadyApplied', () => {
-    expect(isCustomStyleAlreadyApplied('10Normal-@#$-10', statemock)).toBeTruthy();
+    expect(
+      isCustomStyleAlreadyApplied('10Normal-@#$-10', statemock)
+    ).toBeTruthy();
   });
   it('should handle isLevelUpdated', () => {
-    const styl = { 'styleName': 'A_12', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': false }, 'toc': false, 'isHidden': false };
+    const styl = {
+      styleName: 'A_12',
+      mode: 1,
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A_12',
+        fontName: 'Aclonica',
+        fontSize: '14',
+        strong: true,
+        styleLevel: '2',
+        hasBullet: true,
+        bulletLevel: '272A',
+        hasNumbering: false,
+      },
+      toc: false,
+      isHidden: false,
+    };
     expect(isLevelUpdated(statemock, '10Normal-@#$-10', styl)).toBeTruthy();
   });
   it('should handle isLevelUpdated branch coverage', () => {
-    const styl = { 'styleName': 'A_12', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': undefined, 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': true }, 'toc': false, 'isHidden': false };
+    const styl = {
+      styleName: 'A_12',
+      mode: 1,
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A_12',
+        fontName: 'Aclonica',
+        fontSize: '14',
+        strong: true,
+        styleLevel: undefined,
+        hasBullet: true,
+        bulletLevel: '272A',
+        hasNumbering: true,
+      },
+      toc: false,
+      isHidden: false,
+    };
     expect(isLevelUpdated(statemock, '10Normal-@#$-10', styl)).toBeTruthy();
   });
   it('should handle isLevelUpdated branch coverage', () => {
-    const styl = { 'styleName': 'A_12', 'mode': 1, 'styles': { 'align': 'left', 'boldNumbering': true, 'toc': false, 'isHidden': false, 'boldSentence': true, 'nextLineStyleName': 'A_12', 'fontName': 'Aclonica', 'fontSize': '14', 'strong': true, 'styleLevel': '2', 'hasBullet': true, 'bulletLevel': '272A', 'hasNumbering': true }, 'toc': false, 'isHidden': false };
+    const styl = {
+      styleName: 'A_12',
+      mode: 1,
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A_12',
+        fontName: 'Aclonica',
+        fontSize: '14',
+        strong: true,
+        styleLevel: '2',
+        hasBullet: true,
+        bulletLevel: '272A',
+        hasNumbering: true,
+      },
+      toc: false,
+      isHidden: false,
+    };
     expect(isLevelUpdated(statemock, '10Normal-@#$-10', styl)).toBeTruthy();
   });
   it('should handle isLevelUpdated branch coverage when style undefined', () => {
@@ -2960,7 +3754,7 @@ describe('applyLatestStyle', () => {
         paragraph: {
           content: 'text*',
           attrs: {
-            styleName: { default: 'test' }
+            styleName: { default: 'test' },
           },
           toDOM() {
             return ['p', 0];
@@ -2971,7 +3765,11 @@ describe('applyLatestStyle', () => {
           content: 'inline*',
           marks: '',
           toDOM(node) {
-            return ['h' + node.attrs.level, { 'data-style-name': node.attrs.styleName }, 0];
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
           },
         },
         text: {
@@ -2999,7 +3797,7 @@ describe('applyLatestStyle', () => {
             {
               type: 'text',
               text: 'This is a mock dummy document.',
-              attrs: { styleName: 'Normal' }
+              attrs: { styleName: 'Normal' },
             },
           ],
         },
@@ -3014,10 +3812,32 @@ describe('applyLatestStyle', () => {
         },
       ],
     });
-    expect(applyLatestStyle('', {}, { doc: mockdoc }, { attrs: { lineSpacing: '', indent: '', styleName: '' } }, 0, 1, { styles: { 'lineHeight': '1px' } }, true)).toBeDefined();
+    expect(
+      applyLatestStyle(
+        '',
+        {},
+        { doc: mockdoc },
+        { attrs: { lineSpacing: '', indent: '', styleName: '' } },
+        0,
+        1,
+        { styles: { lineHeight: '1px' } },
+        true
+      )
+    ).toBeDefined();
   });
   it('should handle applyLatestStyle when styleprops  not there', () => {
-    expect(applyLatestStyle('', {}, {}, { attrs: { lineSpacing: '', indent: '', styleName: '' } }, 0, 1, {}, true)).toBeDefined();
+    expect(
+      applyLatestStyle(
+        '',
+        {},
+        {},
+        { attrs: { lineSpacing: '', indent: '', styleName: '' } },
+        0,
+        1,
+        {},
+        true
+      )
+    ).toBeDefined();
   });
   it('should handle applyLatestStyle if element is instance of indent', () => {
     const mockschema = new Schema({
@@ -3028,7 +3848,7 @@ describe('applyLatestStyle', () => {
         paragraph: {
           content: 'text*',
           attrs: {
-            styleName: { default: 'test' }
+            styleName: { default: 'test' },
           },
           toDOM() {
             return ['p', 0];
@@ -3039,7 +3859,11 @@ describe('applyLatestStyle', () => {
           content: 'inline*',
           marks: '',
           toDOM(node) {
-            return ['h' + node.attrs.level, { 'data-style-name': node.attrs.styleName }, 0];
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
           },
         },
         text: {
@@ -3068,7 +3892,7 @@ describe('applyLatestStyle', () => {
             {
               type: 'text',
               text: 'This is a mock dummy document.',
-              attrs: { styleName: 'Normal' }
+              attrs: { styleName: 'Normal' },
             },
           ],
         },
@@ -3083,141 +3907,329 @@ describe('applyLatestStyle', () => {
         },
       ],
     });
-    expect(applyLatestStyle('', {}, { doc: mockdoc }, { attrs: { lineSpacing: '', indent: '', styleName: 'Normal', align: 'justify' }, content: { content: [{ type: { name: 'image' } }] } }, 0, 1, { styles: { 'indent': '1px' } }, true)).toBeDefined();
+    expect(
+      applyLatestStyle(
+        '',
+        {},
+        { doc: mockdoc },
+        {
+          attrs: {
+            lineSpacing: '',
+            indent: '',
+            styleName: 'Normal',
+            align: 'justify',
+          },
+          content: { content: [{ type: { name: 'image' } }] },
+        },
+        0,
+        1,
+        { styles: { indent: '1px' } },
+        true
+      )
+    ).toBeDefined();
   });
 });
 describe('allowCustomLevelIndent', () => {
   it('should handle allowCustomLevelIndent', () => {
     const parentElement = {
       attrs: {
-        styleName: 'heading'
+        styleName: 'heading',
       },
-      type: { name: 'paragraph' }
+      type: { name: 'paragraph' },
     };
     const element = {
-      parent: parentElement
+      parent: parentElement,
     };
-    expect(allowCustomLevelIndent({ doc: { resolve: () => { return element; } } }, 0, 'Normal', 1)).toBeTruthy();
+    expect(
+      allowCustomLevelIndent(
+        {
+          doc: {
+            resolve: () => {
+              return element;
+            },
+          },
+        },
+        0,
+        'Normal',
+        1
+      )
+    ).toBeTruthy();
   });
   it('should handle allowCustomLevelIndent when startPos not less than 2', () => {
     const parentElement = {
       attrs: {
-        styleName: 'heading'
+        styleName: 'heading',
       },
-      type: { name: 'paragraph' }
+      type: { name: 'paragraph' },
     };
     const element = {
-      parent: parentElement
+      parent: parentElement,
     };
-    expect(allowCustomLevelIndent({ doc: { resolve: () => { return element; } } }, 2, 'Normal', 1)).toBeTruthy();
+    expect(
+      allowCustomLevelIndent(
+        {
+          doc: {
+            resolve: () => {
+              return element;
+            },
+          },
+        },
+        2,
+        'Normal',
+        1
+      )
+    ).toBeTruthy();
   });
   it('should handle allowCustomLevelIndent when RESERVED_STYLE_NONE == node.attrs.styleName', () => {
     const parentElement = {
       attrs: {
-        styleName: 'Normal'
+        styleName: 'Normal',
       },
-      type: { name: 'paragraph' }
+      type: { name: 'paragraph' },
     };
     const element = {
-      parent: parentElement
+      parent: parentElement,
     };
-    expect(allowCustomLevelIndent({ doc: { resolve: () => { return element; } } }, 0, 'test', 1)).toBeFalsy();
+    expect(
+      allowCustomLevelIndent(
+        {
+          doc: {
+            resolve: () => {
+              return element;
+            },
+          },
+        },
+        0,
+        'test',
+        1
+      )
+    ).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when nodeStyleLevel < styleLevel and styleLevel - nodeStyleLevel === 1', () => {
-    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({ styles: { styleLevel: 1, hasNumbering: true } });
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValue({ styles: { styleLevel: 1, hasNumbering: true } });
     const parentElement = {
       attrs: {
-        styleName: undefined
+        styleName: undefined,
       },
-      type: { name: 'paragraph' }
+      type: { name: 'paragraph' },
     };
     const element = {
-      parent: parentElement
+      parent: parentElement,
     };
-    expect(allowCustomLevelIndent({ doc: { resolve: () => { return element; } } }, 0, 'test', 1)).toBeTruthy();
+    expect(
+      allowCustomLevelIndent(
+        {
+          doc: {
+            resolve: () => {
+              return element;
+            },
+          },
+        },
+        0,
+        'test',
+        1
+      )
+    ).toBeTruthy();
   });
   it('should handle allowCustomLevelIndent when nodeStyleLevel < styleLevel and styleLevel - nodeStyleLevel === 1 and styleLevel - nodeStyleLevel != 1', () => {
-    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({ styles: { styleLevel: 2, hasNumbering: true } });
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValue({ styles: { styleLevel: 2, hasNumbering: true } });
     const parentElement = {
       attrs: {
-        styleName: undefined
+        styleName: undefined,
       },
-      type: { name: 'paragraph' }
+      type: { name: 'paragraph' },
     };
     const element = {
-      parent: parentElement
+      parent: parentElement,
     };
-    expect(allowCustomLevelIndent({ doc: { resolve: () => { return element; } } }, 0, 'test', 1)).toBeFalsy();
+    expect(
+      allowCustomLevelIndent(
+        {
+          doc: {
+            resolve: () => {
+              return element;
+            },
+          },
+        },
+        0,
+        'test',
+        1
+      )
+    ).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when  isAllowedNode(node) is false', () => {
-    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({ styles: { styleLevel: 2, hasNumbering: true } });
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValue({ styles: { styleLevel: 2, hasNumbering: true } });
     const parentElement = {
       attrs: {
-        styleName: undefined
+        styleName: undefined,
       },
-      type: { name: 'span' }
+      type: { name: 'span' },
     };
     const element = {
-      parent: parentElement
+      parent: parentElement,
     };
-    expect(allowCustomLevelIndent({ doc: { resolve: () => { return element; } } }, 0, 'test', 1)).toBeFalsy();
+    expect(
+      allowCustomLevelIndent(
+        {
+          doc: {
+            resolve: () => {
+              return element;
+            },
+          },
+        },
+        0,
+        'test',
+        1
+      )
+    ).toBeFalsy();
   });
 
   it('should handle allowCustomLevelIndent when element not present', () => {
-    expect(allowCustomLevelIndent({ doc: { resolve: () => { return null; } } }, 0, 'Normal', 1)).toBeFalsy();
+    expect(
+      allowCustomLevelIndent(
+        {
+          doc: {
+            resolve: () => {
+              return null;
+            },
+          },
+        },
+        0,
+        'Normal',
+        1
+      )
+    ).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when delta = 0', () => {
     const parentElement = {
       attrs: {
-        styleName: 'heading'
+        styleName: 'heading',
       },
-      type: { name: 'paragraph' }
+      type: { name: 'paragraph' },
     };
     const element = {
-      parent: parentElement
+      parent: parentElement,
     };
-    expect(allowCustomLevelIndent({ doc: { resolve: () => { return element; }, nodeSize: 6 } }, 0, 'Normal', 0)).toBeTruthy();
+    expect(
+      allowCustomLevelIndent(
+        {
+          doc: {
+            resolve: () => {
+              return element;
+            },
+            nodeSize: 6,
+          },
+        },
+        0,
+        'Normal',
+        0
+      )
+    ).toBeTruthy();
   });
   it('should handle allowCustomLevelIndent when delta = 0 and when element not present', () => {
-
-    expect(allowCustomLevelIndent({ doc: { resolve: () => { return null; }, nodeSize: 6 } }, 0, 'Normal', 0)).toBeFalsy();
+    expect(
+      allowCustomLevelIndent(
+        {
+          doc: {
+            resolve: () => {
+              return null;
+            },
+            nodeSize: 6,
+          },
+        },
+        0,
+        'Normal',
+        0
+      )
+    ).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when delta = 0 when not isAllowed(node)', () => {
     const parentElement = {
       attrs: {
-        styleName: 'heading'
+        styleName: 'heading',
       },
-      type: { name: 'span' }
+      type: { name: 'span' },
     };
     const element = {
-      parent: parentElement
+      parent: parentElement,
     };
-    expect(allowCustomLevelIndent({ doc: { resolve: () => { return element; }, nodeSize: 6 } }, 0, 'Normal', 0)).toBeFalsy();
+    expect(
+      allowCustomLevelIndent(
+        {
+          doc: {
+            resolve: () => {
+              return element;
+            },
+            nodeSize: 6,
+          },
+        },
+        0,
+        'Normal',
+        0
+      )
+    ).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when delta = 0 when normal is node.attrs.styleName', () => {
     const parentElement = {
       attrs: {
-        styleName: 'Normal'
+        styleName: 'Normal',
       },
-      type: { name: 'paragraph' }
+      type: { name: 'paragraph' },
     };
     const element = {
-      parent: parentElement
+      parent: parentElement,
     };
-    expect(allowCustomLevelIndent({ doc: { resolve: () => { return element; }, nodeSize: 6 } }, 0, 'Normal', 0)).toBeFalsy();
+    expect(
+      allowCustomLevelIndent(
+        {
+          doc: {
+            resolve: () => {
+              return element;
+            },
+            nodeSize: 6,
+          },
+        },
+        0,
+        'Normal',
+        0
+      )
+    ).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when nodeStyleLevel < styleLevel', () => {
-    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValueOnce({ styles: { styleLevel: 2, hasNumbering: true } }).mockReturnValueOnce({ styles: { styleLevel: 1, hasNumbering: true } });
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValueOnce({ styles: { styleLevel: 2, hasNumbering: true } })
+      .mockReturnValueOnce({ styles: { styleLevel: 1, hasNumbering: true } });
     const parentElement = {
       attrs: {
-        styleName: 'test'
+        styleName: 'test',
       },
-      type: { name: 'paragraph' }
+      type: { name: 'paragraph' },
     };
     const element = {
-      parent: parentElement
+      parent: parentElement,
     };
-    expect(allowCustomLevelIndent({ doc: { resolve: () => { return element; }, nodeSize: 6 } }, 0, 'Normal', 0)).toBeFalsy();
+    expect(
+      allowCustomLevelIndent(
+        {
+          doc: {
+            resolve: () => {
+              return element;
+            },
+            nodeSize: 6,
+          },
+        },
+        0,
+        'Normal',
+        0
+      )
+    ).toBeFalsy();
   });
 });
 
@@ -3228,12 +4240,112 @@ describe('insertParagraph', () => {
 });
 describe('applyLineStyle', () => {
   it('should handle applyLineStyle ', () => {
-    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({ styles: { boldPartial: true } });
-    expect(applyLineStyle({ schema: { marks: { 'strong': { create: () => { return 1; } } } } }, { selection: { $from: { before: (x) => { return x - 1; }, pos: 0 }, $to: { after: (x) => { return x + 1; }, pos: 1 } }, doc: { nodeAt: () => { return { type: { name: 'table' } }; } }, addMark: () => { return { removeMark: () => { return {}; } }; } }, { attrs: { styleName: 'test' }, descendants: () => { return 'text'; } }, 0)).toBeDefined();
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValue({ styles: { boldPartial: true } });
+    expect(
+      applyLineStyle(
+        {
+          schema: {
+            marks: {
+              strong: {
+                create: () => {
+                  return 1;
+                },
+              },
+            },
+          },
+        },
+        {
+          selection: {
+            $from: {
+              before: (x) => {
+                return x - 1;
+              },
+              pos: 0,
+            },
+            $to: {
+              after: (x) => {
+                return x + 1;
+              },
+              pos: 1,
+            },
+          },
+          doc: {
+            nodeAt: () => {
+              return { type: { name: 'table' } };
+            },
+          },
+          addMark: () => {
+            return {
+              removeMark: () => {
+                return {};
+              },
+            };
+          },
+        },
+        {
+          attrs: { styleName: 'test' },
+          descendants: () => {
+            return 'text';
+          },
+        },
+        0
+      )
+    ).toBeDefined();
   });
   it('should handle applyLineStyle when tr is null', () => {
-
-    expect(applyLineStyle({ schema: { marks: { 'strong': { create: () => { return 1; } } } }, tr: { selection: { $from: { before: (x) => { return x - 1; }, pos: 0 }, $to: { after: (x) => { return x + 1; }, pos: 1 } }, doc: { nodeAt: () => { return { type: { name: 'table' } }; } }, addMark: () => { return { removeMark: () => { return {}; } }; } } }, null, { attrs: { styleName: 'test' }, descendants: () => { return 'text'; } }, 0)).toBeDefined();
+    expect(
+      applyLineStyle(
+        {
+          schema: {
+            marks: {
+              strong: {
+                create: () => {
+                  return 1;
+                },
+              },
+            },
+          },
+          tr: {
+            selection: {
+              $from: {
+                before: (x) => {
+                  return x - 1;
+                },
+                pos: 0,
+              },
+              $to: {
+                after: (x) => {
+                  return x + 1;
+                },
+                pos: 1,
+              },
+            },
+            doc: {
+              nodeAt: () => {
+                return { type: { name: 'table' } };
+              },
+            },
+            addMark: () => {
+              return {
+                removeMark: () => {
+                  return {};
+                },
+              };
+            },
+          },
+        },
+        null,
+        {
+          attrs: { styleName: 'test' },
+          descendants: () => {
+            return 'text';
+          },
+        },
+        0
+      )
+    ).toBeDefined();
   });
 });
 describe('isLevelUpdated', () => {
@@ -3246,7 +4358,7 @@ describe('isLevelUpdated', () => {
         paragraph: {
           content: 'text*',
           attrs: {
-            styleName: { default: 'test' }
+            styleName: { default: 'test' },
           },
           toDOM() {
             return ['p', 0];
@@ -3257,7 +4369,11 @@ describe('isLevelUpdated', () => {
           content: 'inline*',
           marks: '',
           toDOM(node) {
-            return ['h' + node.attrs.level, { 'data-style-name': node.attrs.styleName }, 0];
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
           },
         },
         text: {
@@ -3280,10 +4396,13 @@ describe('isLevelUpdated', () => {
             },
           ],
         },
-
       ],
     });
-    expect(isLevelUpdated({ schema: mockschema, doc: mockdoc }, 'Normal', { styles: {} })).toBeDefined();
+    expect(
+      isLevelUpdated({ schema: mockschema, doc: mockdoc }, 'Normal', {
+        styles: {},
+      })
+    ).toBeDefined();
   });
 });
 describe('removeAllMarksExceptLink', () => {
@@ -3300,7 +4419,7 @@ describe('removeAllMarksExceptLink', () => {
         paragraph: {
           content: 'text*',
           attrs: {
-            styleName: { default: 'test' }
+            styleName: { default: 'test' },
           },
           toDOM() {
             return ['p', 0];
@@ -3311,7 +4430,11 @@ describe('removeAllMarksExceptLink', () => {
           content: 'inline*',
           marks: '',
           toDOM(node) {
-            return ['h' + node.attrs.level, { 'data-style-name': node.attrs.styleName }, 0];
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
           },
         },
         text: {
@@ -3319,7 +4442,7 @@ describe('removeAllMarksExceptLink', () => {
         },
       },
       marks: {
-        strong: strongMark
+        strong: strongMark,
       },
     });
 
@@ -3341,10 +4464,23 @@ describe('removeAllMarksExceptLink', () => {
             { type: 'strong', attrs: { ['overridden']: false } },
           ],
         },
-
       ],
     });
-    expect(removeAllMarksExceptLink(0, 1, { doc: mockdoc, removeMark: () => { return { doc: mockdoc }; } }, {}, {}, {})).toBeDefined();
+    expect(
+      removeAllMarksExceptLink(
+        0,
+        1,
+        {
+          doc: mockdoc,
+          removeMark: () => {
+            return { doc: mockdoc };
+          },
+        },
+        {},
+        {},
+        {}
+      )
+    ).toBeDefined();
   });
   it('should handle removeAllMarksExceptLink when mark.attrs[ATTR_OVERRIDDEN] && link === mark.type.name', () => {
     const linkmark = new Mark({
@@ -3359,7 +4495,7 @@ describe('removeAllMarksExceptLink', () => {
         paragraph: {
           content: 'text*',
           attrs: {
-            styleName: { default: 'test' }
+            styleName: { default: 'test' },
           },
           toDOM() {
             return ['p', 0];
@@ -3370,7 +4506,11 @@ describe('removeAllMarksExceptLink', () => {
           content: 'inline*',
           marks: '',
           toDOM(node) {
-            return ['h' + node.attrs.level, { 'data-style-name': node.attrs.styleName }, 0];
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
           },
         },
         text: {
@@ -3378,7 +4518,7 @@ describe('removeAllMarksExceptLink', () => {
         },
       },
       marks: {
-        link: linkmark
+        link: linkmark,
       },
     });
 
@@ -3400,20 +4540,72 @@ describe('removeAllMarksExceptLink', () => {
             { type: 'link', attrs: { ['overridden']: true } },
           ],
         },
-
       ],
     });
-    expect(removeAllMarksExceptLink(0, 1, { doc: mockdoc, removeMark: () => { return { doc: mockdoc }; } }, {}, {}, {})).toBeDefined();
+    expect(
+      removeAllMarksExceptLink(
+        0,
+        1,
+        {
+          doc: mockdoc,
+          removeMark: () => {
+            return { doc: mockdoc };
+          },
+        },
+        {},
+        {},
+        {}
+      )
+    ).toBeDefined();
   });
 });
 describe('handleRemoveMarks', () => {
   it('should handle handleRemoveMarks', () => {
-    expect(handleRemoveMarks({ removeMark: () => { return {}; } }, [{ mark: { type: { name: 'mark-text-highlight' }, attrs: { 'overridden': undefined } } }], 0, 1, {}, { styles: {} }, {})).toBeDefined();
+    expect(
+      handleRemoveMarks(
+        {
+          removeMark: () => {
+            return {};
+          },
+        },
+        [
+          {
+            mark: {
+              type: { name: 'mark-text-highlight' },
+              attrs: { overridden: undefined },
+            },
+          },
+        ],
+        0,
+        1,
+        {},
+        { styles: {} },
+        {}
+      )
+    ).toBeDefined();
   });
   it('should handle handleRemoveMarks when styleProps null', () => {
-    expect(handleRemoveMarks({ removeMark: () => { return {}; } }, [{ mark: { type: { name: 'mark-text-highlight' }, attrs: { 'overridden': true } } }], 0, 1, {}, null, {})).toBeDefined();
+    expect(
+      handleRemoveMarks(
+        {
+          removeMark: () => {
+            return {};
+          },
+        },
+        [
+          {
+            mark: {
+              type: { name: 'mark-text-highlight' },
+              attrs: { overridden: true },
+            },
+          },
+        ],
+        0,
+        1,
+        {},
+        null,
+        {}
+      )
+    ).toBeDefined();
   });
 });
-
-
-

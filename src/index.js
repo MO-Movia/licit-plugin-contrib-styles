@@ -239,7 +239,7 @@ export function onUpdateAppendTransaction(
 }
 
 // [FS] IRAD-1202 2021-02-15
-function remapCounterFlags(tr) {
+export function remapCounterFlags(tr) {
   // Depending on the window variables,
   // set counters for numbering.
   const cFlags = tr.doc.attrs.counterFlags;

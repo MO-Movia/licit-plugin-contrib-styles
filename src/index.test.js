@@ -12,6 +12,7 @@ import {
   onUpdateAppendTransaction,
   applyNormalIfNoStyle,
   applyStyleForEmptyParagraph,
+  remapCounterFlags,
 } from './index';
 import { builders } from 'prosemirror-test-builder';
 import {
@@ -3177,5 +3178,11 @@ describe('applyStyleForEmptyParagraph', () => {
         }
       )
     ).toBeDefined();
+  });
+});
+describe('remapCounterFlags', () => {
+  it('should handle remapCounterFlags', () => {
+    const tr = { doc: { attrs: { counterFlags: { key: {} } } } };
+    expect(remapCounterFlags(tr)).toBeUndefined;
   });
 });

@@ -1207,4 +1207,228 @@ describe('customstyledropdowncommand 1', () => {
     expect(customstyledropdowncommand.render()).toBeDefined();
     spy.mockRestore();
   });
+  it('should handle render when styleName not null', () => {
+    const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([
+      {
+        styleName: 'A Apply Stylefff',
+        mode: 1,
+        styles: {
+          align: 'justify',
+          boldNumbering: true,
+          toc: false,
+          isHidden: false,
+          boldSentence: true,
+          nextLineStyleName: 'Normal',
+          fontName: 'Arial',
+          fontSize: 11,
+          strong: true,
+          em: true,
+          underline: true,
+          color: '#c40df2',
+        },
+        toc: false,
+        isHidden: false,
+      },
+      {
+        styleName: 'A11-Rename',
+        mode: 2,
+        styles: {
+          align: 'left',
+          boldNumbering: true,
+          toc: false,
+          isHidden: false,
+          boldSentence: true,
+          nextLineStyleName: 'A_Test1234',
+          fontName: 'Arial Black',
+          fontSize: '14',
+          styleLevel: 'None',
+          hasBullet: false,
+          bulletLevel: '25CF',
+          hasNumbering: false,
+          isLevelbased: true,
+          paragraphSpacingBefore: '5',
+          paragraphSpacingAfter: '5',
+        },
+        toc: false,
+        isHidden: false,
+      },
+    ]);
+    const mockschema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            align: { default: null },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: null },
+          },
+          toDOM(node) {
+            const { align, color } = node.attrs;
+            const style = [];
+            if (align) style.push(`text-align: ${align}`);
+            if (color) style.push(`color: ${color}`);
+            return ['p', { style: style.join('; ') }, 0];
+          },
+          parseDOM: [
+            {
+              tag: 'p',
+              getAttrs(dom) {
+                const style = dom.getAttribute('style') || '';
+                const attrs = {};
+                if (style.includes('text-align: left')) attrs.align = 'left';
+                if (style.includes('text-align: center'))
+                  attrs.align = 'center';
+                if (style.includes('text-align: right')) attrs.align = 'right';
+                const colorMatch = style.match(/color: (.*?);/);
+                if (colorMatch) attrs.color = colorMatch[1];
+                return attrs;
+              },
+            },
+          ],
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            align: { default: null },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: null },
+          },
+          toDOM(node) {
+            const { align, color } = node.attrs;
+            const style = [];
+            if (align) style.push(`text-align: ${align}`);
+            if (color) style.push(`color: ${color}`);
+            return ['p', { style: style.join('; ') }, 0];
+          },
+          parseDOM: [
+            {
+              tag: 'p',
+              getAttrs(dom) {
+                const style = dom.getAttribute('style') || '';
+                const attrs = {};
+                if (style.includes('text-align: left')) attrs.align = 'left';
+                if (style.includes('text-align: center'))
+                  attrs.align = 'center';
+                if (style.includes('text-align: right')) attrs.align = 'right';
+                const colorMatch = style.match(/color: (.*?);/);
+                if (colorMatch) attrs.color = colorMatch[1];
+                return attrs;
+              },
+            },
+          ],
+        },
+        ordered_list: {
+          content: 'text*', // Content can be any inline content (e.g., text, marks)
+          attrs: {
+            level: { default: 1 }, // Add any additional attributes specific to the node
+            align: { default: null },
+            color: { default: null },
+            id: { default: null },
+            styleName: { default: null },
+            // Add more attributes as needed
+          },
+          toDOM(node) {
+            const { align, color, level } = node.attrs;
+            const style = [];
+            if (align) style.push(`text-align: ${align}`);
+            if (color) style.push(`color: ${color}`);
+            return [`h${level}`, { style: style.join('; ') }, 0];
+          },
+          parseDOM: [
+            {
+              tag: 'h1', // Adjust the heading tag based on the desired level
+              getAttrs(dom) {
+                const style = dom.getAttribute('style') || '';
+                const attrs = {};
+                if (style.includes('text-align: left')) attrs.align = 'left';
+                if (style.includes('text-align: center'))
+                  attrs.align = 'center';
+                if (style.includes('text-align: right')) attrs.align = 'right';
+                const colorMatch = style.match(/color: (.*?);/);
+                if (colorMatch) attrs.color = colorMatch[1];
+                return attrs;
+              },
+            },
+          ],
+        },
+        doc_heading: {
+          content: 'text*',
+          attrs: {
+            align: { default: null },
+            color: { default: null },
+            id: { default: null },
+            styleName: { default: null },
+          },
+          toDOM(node) {
+            const { align, color } = node.attrs;
+            const style = [];
+            if (align) style.push(`text-align: ${align}`);
+            if (color) style.push(`color: ${color}`);
+            return ['h1', { style: style.join('; ') }, 0];
+          },
+          parseDOM: [
+            {
+              tag: 'h1',
+              getAttrs(dom) {
+                const style = dom.getAttribute('style') || '';
+                const attrs = {};
+                if (style.includes('text-align: left')) attrs.align = 'left';
+                if (style.includes('text-align: center'))
+                  attrs.align = 'center';
+                if (style.includes('text-align: right')) attrs.align = 'right';
+                const colorMatch = style.match(/color: (.*?);/);
+                if (colorMatch) attrs.color = colorMatch[1];
+                return attrs;
+              },
+            },
+          ],
+        },
+        text: { inline: true },
+      },
+    });
+
+    // Create the editor state
+    const mockeditorState = {
+      schema: mockschema,
+      doc: mockschema.nodeFromJSON({
+        type: 'doc_heading',
+        attrs: {
+          align: 'center', // Set the desired alignment
+          color: 'blue', // Set the desired color
+          id: null,
+          styleName: 'Heading-1',
+        },
+        content: [
+          {
+            type: 'text',
+            text: 'This is a heading',
+          },
+        ],
+      }),
+      selection: { from: 0, to: 2 },
+    };
+
+    customstyledropdowncommand.props = {
+      dispatch: (tr) => {},
+      editorState: mockeditorState,
+      editorView: {
+        disabled: true,
+      },
+    };
+    expect(customstyledropdowncommand.render()).toBeDefined();
+    spy.mockRestore();
+  });
 });

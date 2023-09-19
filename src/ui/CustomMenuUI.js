@@ -8,8 +8,7 @@ import uuid from './Uuid';
 import './listType.css';
 import CustomStyleItem from './CustomStyleItem';
 
-import { atViewportCenter } from '@modusoperandi/licit-ui-commands';
-import { createPopUp } from '@modusoperandi/licit-ui-commands';
+import { atViewportCenter, createPopUp, setTextAlign, setTextLineSpacing } from '@modusoperandi/licit-ui-commands';
 import AlertInfo from './AlertInfo';
 
 import CustomStyleSubMenu from './CustomStyleSubMenu';
@@ -25,8 +24,6 @@ import {
   renameStyle,
   removeStyle,
 } from '../customStyle';
-import { setTextAlign } from '@modusoperandi/licit-ui-commands';
-import { setTextLineSpacing } from '@modusoperandi/licit-ui-commands';
 import { setParagraphSpacing } from '../ParagraphSpacingCommand';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 
@@ -52,7 +49,7 @@ class CustomMenuUI extends React.PureComponent<any, any> {
     label?: string | React.Element<any> | null,
     title?: ?string,
     _style?: ?any,
-    updated?:?boolean
+    updated?: ?boolean
   };
 
 
@@ -168,11 +165,9 @@ class CustomMenuUI extends React.PureComponent<any, any> {
   };
 
   _execute = (command: UICommand, e: SyntheticEvent<*>) => {
-    if (undefined !== command) {
-      const { dispatch, editorState, editorView, onCommand } = this.props;
-      command.execute(editorState, dispatch, editorView, e);
-      onCommand && onCommand();
-    }
+    const { dispatch, editorState, editorView, onCommand } = this.props;
+    command.execute(editorState, dispatch, editorView, e);
+    onCommand && onCommand();
   };
 
   //shows the alignment and line spacing option
@@ -401,35 +396,35 @@ class CustomMenuUI extends React.PureComponent<any, any> {
 
                     if (null !== result) {
                       // if (val.styleName === val.styles.nextLineStyleName) {
-                        let tr;
-                        // delete val.editorView;
-                        // saveStyle(val).then((result) => {
-                        //   if (result) {
-                            setStyles(result);
-                            result.forEach((obj) => {
-                              if (val.styleName === obj.styleName) {
-                                tr = this.renameStyleInDocument(
-                                  this.props.editorState,
-                                  this.props.editorState.tr,
-                                  this._styleName,
-                                  val.styleName,
-                                  obj.styles
-                                );
-                              }
-                            });
-                            if (tr) {
-                              dispatch(tr);
-                            }
-                          }
-                          this.props.editorView.focus();
-                          this._stylePopup.close();
-                          this._stylePopup = null;
+                      let tr;
+                      // delete val.editorView;
+                      // saveStyle(val).then((result) => {
+                      //   if (result) {
+                      setStyles(result);
+                      result.forEach((obj) => {
+                        if (val.styleName === obj.styleName) {
+                          tr = this.renameStyleInDocument(
+                            this.props.editorState,
+                            this.props.editorState.tr,
+                            this._styleName,
+                            val.styleName,
+                            obj.styles
+                          );
+                        }
+                      });
+                      if (tr) {
+                        dispatch(tr);
+                      }
+                    }
+                    this.props.editorView.focus();
+                    this._stylePopup.close();
+                    this._stylePopup = null;
 
-                        // });
+                    // });
 
-                      // }
-                      this.props.samplecallback();
-                  //   }
+                    // }
+                    this.props.updateListCallback();
+                    //   }
                   });
               }
             }

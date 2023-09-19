@@ -42,7 +42,7 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
     hasUpdated: false,
   };
 
-  update_me = ()=> {
+  updateDropdownItems = () => {
     const hasUpdated = !this.state.hasUpdated;
     this.setState({
       hasUpdated,
@@ -147,7 +147,7 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
       }
     });
     let backgroundColorClass = 'width-100';
-    if (!isCustomStyleExists(customStyleName) && customStyleName!==MULTIPLE_STYLE) {
+    if (!isCustomStyleExists(customStyleName) && customStyleName !== MULTIPLE_STYLE) {
       backgroundColorClass = 'width-100 stylemenu-backgroundcolor';
     }
 
@@ -167,6 +167,7 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
         parent={this}
         samplecallback={this.update_me}
         staticCommand={this.staticCommands()}
+        updateListCallback={this.updateDropdownItems}
         updated={this.state.hasUpdated}
       />
     );

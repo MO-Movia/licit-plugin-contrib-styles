@@ -30,9 +30,8 @@ export function getNode(from: number, to: number, tr: Transform): Node {
   let selectedNode = null;
   tr.doc.nodesBetween(from, to, (node, startPos) => {
     if (node.type.name === 'paragraph') {
-      if (null == selectedNode) {
-        selectedNode = node;
-      }
+      selectedNode = node;
+
     }
   });
   return selectedNode;

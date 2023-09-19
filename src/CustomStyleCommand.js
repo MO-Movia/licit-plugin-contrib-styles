@@ -95,7 +95,9 @@ function getCustomStyleCommandsEx(
       break;
 
     case COLOR:
-      commands.push(new TextColorCommand(customStyle[property]));
+      if (customStyle[property] && customStyle[property] !== '#151515') {
+        commands.push(new TextColorCommand(customStyle[property]));
+      }
       break;
 
     case FONTSIZE:
@@ -118,7 +120,9 @@ function getCustomStyleCommandsEx(
       break;
 
     case TEXTHL:
-      commands.push(new TextHighlightCommand(customStyle[property]));
+      if (customStyle[property] && customStyle[property] !== 'rgba(0,0,0,0)') {
+        commands.push(new TextHighlightCommand(customStyle[property]));
+      }
       break;
 
     case UNDERLINE:
@@ -191,12 +195,11 @@ class CustomStyleCommand extends UICommand {
   };
 
   isEmpty = (obj: Object) => {
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        return false;
-      }
+    if (Object.keys(obj).length === 0) {
+      return true;
+    } else {
+      return false;
     }
-    return true;
   };
 
   isEnabled = (
@@ -232,7 +235,6 @@ class CustomStyleCommand extends UICommand {
     node: any,
     startPos: number,
     endPos: number,
-    newattrs: any,
     selection: Selection
   ) {
     let done = false;
@@ -241,7 +243,7 @@ class CustomStyleCommand extends UICommand {
     hasMismatchHeirarchy(state, tr, node, startPos, endPos);
     // [FS] IRAD-1480 2021-06-25
     // Indenting not remove when clear style is applied
-    newattrs = node.attrs;
+    const newattrs = Object.assign({}, node ? node.attrs : {});
     newattrs['styleName'] = RESERVED_STYLE_NONE;
     newattrs['id'] = '';
     // [FS] IRAD-1414 2021-07-12
@@ -274,7 +276,6 @@ class CustomStyleCommand extends UICommand {
     const startPos = selection.$from.before(1);
     const endPos = selection.$to.after(1) - 1;
     const node = getNode(state, startPos, endPos, tr);
-    const newattrs = Object.assign({}, node ? node.attrs : {});
     let isValidated = true;
 
     if ('newstyle' === this._customStyle) {
@@ -296,7 +297,6 @@ class CustomStyleCommand extends UICommand {
         node,
         startPos,
         endPos,
-        newattrs,
         selection
       );
     }
@@ -505,7 +505,7 @@ class CustomStyleCommand extends UICommand {
   }
 }
 
-function compareMarkWithStyle(
+export function compareMarkWithStyle(
   mark,
   style,
   tr,
@@ -520,21 +520,16 @@ function compareMarkWithStyle(
   if (style) {
     switch (mark.type.name) {
       case MARK_STRONG:
-        same = undefined !== style[STRONG];
+        same = true === style[STRONG];
         break;
       case MARK_EM:
-        same = undefined !== style[EM];
+        same = true === style[EM];
         break;
       case MARK_TEXT_COLOR:
         same = mark.attrs['color'] === style[COLOR];
         break;
       case MARK_TEXT_HIGHLIGHT:
-        if (undefined !== style[TEXTHL]) {
-          same = mark.attrs['highlightColor'] === style[TEXTHL];
-        }
-        else {
-          same = true;
-        }
+        same = mark.attrs['highlightColor'] === style[TEXTHL];
         break;
       case MARK_FONT_SIZE:
         same = mark.attrs['pt'] === Number(style[FONTSIZE]);
@@ -546,7 +541,7 @@ function compareMarkWithStyle(
       case MARK_SUPER:
         break;
       case MARK_UNDERLINE:
-        same = undefined !== style[UNDERLINE];
+        same = true === style[UNDERLINE];
         break;
       default:
         break;
@@ -655,7 +650,11 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
           attrs = styleProp.styles[property]
             ? { color: styleProp.styles[property] }
             : null;
-          marks.push(markType.create(attrs));
+          if (
+            styleProp.styles[property] &&
+            styleProp.styles[property] !== '#151515'
+          )
+            marks.push(markType.create(attrs));
           break;
 
         case FONTSIZE:
@@ -679,12 +678,16 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
           attrs = styleProp.styles[property]
             ? { highlightColor: styleProp.styles[property] }
             : null;
-          marks.push(markType.create(attrs));
+          if (
+            styleProp.styles[property] &&
+            styleProp.styles[property] !== 'rgba(0,0,0,0)'
+          )
+            marks.push(markType.create(attrs));
           break;
 
         case UNDERLINE:
           markType = schema.marks[MARK_UNDERLINE];
-          marks.push(markType.create(attrs));
+          if (styleProp.styles[property]) marks.push(markType.create(attrs));
           break;
 
         default:
@@ -702,7 +705,7 @@ function applyStyleEx(
   node: Node,
   startPos: number,
   endPos: number,
-  keepMarks: ?Boolean,
+  keepMarks: ?Boolean
 ) {
   const loading = !styleProp;
   // keepMarks is passed in the function when removing of marks are not necessary.
@@ -741,7 +744,6 @@ function applyStyleEx(
     // Issue fix on not removing center alignment when switch style with center
     // alignment to style with left alignment
     newattrs.lineSpacing = null;
-
     // [FS] IRAD-1131 2021-01-12
     // Indent overriding not working on a paragraph where custom style is applied
     newattrs.indent = null;
@@ -750,33 +752,32 @@ function applyStyleEx(
       newattrs.align = node.attrs.align;
     }
     _commands.forEach((element) => {
-      if (styleProp && styleProp.styles) {
-        // to set the node attribute for text-align
-        if (element instanceof TextAlignCommand) {
-          if (!loading) {
-            newattrs.align = styleProp.styles.align;
-          }
-          // to set the node attribute for line-height
-        } else if (element instanceof TextLineSpacingCommand) {
-          // [FS] IRAD-1104 2020-11-13
-          // Issue fix : Linespacing Double and Single not applied in the sample text paragraph
-          newattrs.lineSpacing = getLineSpacingValue(
-            styleProp.styles.lineHeight || ''
-          );
-        } else if (element instanceof ParagraphSpacingCommand) {
-          // [FS] IRAD-1100 2020-11-05
-          // Add in leading and trailing spacing (before and after a paragraph)
-          newattrs.paragraphSpacingAfter =
-            styleProp.styles.paragraphSpacingAfter || null;
-          newattrs.paragraphSpacingBefore =
-            styleProp.styles.paragraphSpacingBefore || null;
-        } else if (element instanceof IndentCommand) {
-          // [FS] IRAD-1162 2021-1-25
-          // Bug fix: indent not working along with level
-          newattrs.indent = styleProp.styles.isLevelbased
-            ? styleProp.styles.styleLevel
-            : styleProp.styles.indent;
+
+      // to set the node attribute for text-align
+      if (element instanceof TextAlignCommand) {
+        if (!loading) {
+          newattrs.align = styleProp.styles.align;
         }
+        // to set the node attribute for line-height
+      } else if (element instanceof TextLineSpacingCommand) {
+        // [FS] IRAD-1104 2020-11-13
+        // Issue fix : Linespacing Double and Single not applied in the sample text paragraph
+        newattrs.lineSpacing = getLineSpacingValue(
+          styleProp.styles.lineHeight || ''
+        );
+      } else if (element instanceof ParagraphSpacingCommand) {
+        // [FS] IRAD-1100 2020-11-05
+        // Add in leading and trailing spacing (before and after a paragraph)
+        newattrs.paragraphSpacingAfter =
+          styleProp.styles.paragraphSpacingAfter || null;
+        newattrs.paragraphSpacingBefore =
+          styleProp.styles.paragraphSpacingBefore || null;
+      } else if (element instanceof IndentCommand) {
+        // [FS] IRAD-1162 2021-1-25
+        // Bug fix: indent not working along with level
+        newattrs.indent = styleProp.styles.isLevelbased
+          ? styleProp.styles.styleLevel
+          : styleProp.styles.indent;
       }
 
       // to set the marks for the node
@@ -788,7 +789,6 @@ function applyStyleEx(
         if (typeof returnVal !== 'boolean') {
           tr = returnVal;
         }
-        // tr = element.executeCustom(state, tr, startPos, endPos);
       }
     });
     const storedmarks = getMarkByStyleName(styleName, state.schema);
@@ -835,10 +835,10 @@ function hasMismatchHeirarchy(
   styleName /* New style to be applied */
 ) {
   const styleLevel = Number(getStyleLevel(styleName ? styleName : ''));
-  const currentLevel = getStyleLevel(node.attrs.styleName);
+  const currentLevel = getStyleLevel(node?.attrs?.styleName);
   nodesBeforeSelection.splice(0);
   nodesAfterSelection.splice(0);
-  const attrs = Object.assign({}, node.attrs);
+  const attrs = Object.assign({}, node?.attrs);
   attrs['styleName'] = styleName;
   let previousLevel = null;
   let levelDiff = 0;
@@ -942,6 +942,9 @@ function hasMismatchHeirarchy(
         }
       }
     });
+    if (found) {
+      return true;
+    }
   }
   return hasHeirarchyBroken;
 }
@@ -1141,7 +1144,7 @@ export function allowCustomLevelIndent(
 }
 
 // Mange heirarchy for the elements after selection
-function manageElementsAfterSelection(nodeArray, state, tr) {
+export function manageElementsAfterSelection(nodeArray, state, tr) {
   let selectedLevel = Number(MISSED_HEIRACHY_ELEMENT.previousLevel);
   let subsequantLevel = 0;
   let counter = 0;
@@ -1202,7 +1205,7 @@ function setNewElementObject(attrs, startPos, previousLevel, isAfter) {
   MISSED_HEIRACHY_ELEMENT.previousLevel = previousLevel;
 }
 
-function insertParagraph(nodeAttrs, startPos, tr, index, state) {
+export function insertParagraph(nodeAttrs, startPos, tr, index, state) {
   if (state && state.schema && nodeAttrs) {
     const paragraph = state.schema.nodes[PARAGRAPH];
     // [FS] IRAD-1202 2021-02-15
@@ -1227,7 +1230,7 @@ function resetNodeAttrs(nodeAttrs, customStyle) {
   return nodeAttrs;
 }
 
-function addElementEx(
+export function addElementEx(
   nodeAttrs,
   state,
   tr,
@@ -1253,7 +1256,7 @@ function addElementEx(
   return { tr, level, counter };
 }
 
-function addElement(
+export function addElement(
   nodeAttrs,
   state,
   tr,
@@ -1290,8 +1293,7 @@ export function getStyleLevel(styleName: string) {
   if (undefined !== styleName && styleName) {
     const styleProp = getCustomStyleByName(styleName);
     if (
-      null !== styleProp &&
-      styleProp.styles &&
+      styleProp && styleProp.styles &&
       styleProp.styles.styleLevel &&
       styleProp.styles.hasNumbering
     ) {
@@ -1366,7 +1368,7 @@ function _setNodeAttribute(
 
 // [FS] IRAD-1087 2020-11-02
 // Issue fix: Missing the applied link after applying a style
-function removeAllMarksExceptLink(
+export function removeAllMarksExceptLink(
   from: number,
   to: number,
   tr: Transform,
@@ -1394,7 +1396,7 @@ function removeAllMarksExceptLink(
   return handleRemoveMarks(tr, tasks, from, to, schema, styleProp, state);
 }
 
-function handleRemoveMarks(
+export function handleRemoveMarks(
   tr: Transform,
   tasks: any,
   from: number,
@@ -1536,7 +1538,7 @@ export function applyLineStyle(
   return tr;
 }
 // add bold marks to node
-function addMarksToLine(tr, state, node, pos, boldSentence) {
+export function addMarksToLine(tr, state, node, pos, boldSentence) {
   const markType = state.schema.marks[MARK_STRONG];
   let textContent = getNodeText(node);
   const endPos = textContent.length;
@@ -1597,9 +1599,8 @@ export function getNode(
   selectedNodes.splice(0);
   tr.doc.nodesBetween(from, to, (node, startPos) => {
     if (node.type.name === 'paragraph') {
-      if (null == selectedNode) {
-        selectedNode = node;
-      }
+      selectedNode = node;
+
       selectedNodes.push({ pos: startPos, node });
     }
   });
@@ -1615,7 +1616,7 @@ export function updateDocument(
   style: Style
 ) {
   const { doc } = state;
-  doc.descendants(function (child, pos) {
+  doc?.descendants(function (child, pos) {
     const contentLen = child.content.size;
     if (haveEligibleChildren(child, contentLen, styleName)) {
       tr = applyLatestStyle(
@@ -1651,7 +1652,7 @@ export function isCustomStyleAlreadyApplied(
   return found;
 }
 
-function haveEligibleChildren(
+export function haveEligibleChildren(
   node: Node,
   contentLen: number,
   styleName: string
@@ -1680,12 +1681,11 @@ export function isLevelUpdated(
     // [FS] IRAD-1496 2021-06-25
     // Fix: warning message not showing if deselect numbering and save
     if (
-      (style &&
-        style.styles &&
+      (
+        style?.styles &&
         currentLevel > 0 &&
-        !style.styles.hasNumbering) ||
-      (style.styles && undefined === style.styles.styleLevel) ||
-      (style && style.styles && style.styles.styleLevel !== currentLevel)
+        !style.styles.hasNumbering) ||  (style?.styles && undefined === style?.styles?.styleLevel) ||
+        (style?.styles && style?.styles?.styleLevel !== currentLevel)
     ) {
       bOK = true;
     }

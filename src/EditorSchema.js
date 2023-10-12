@@ -162,20 +162,22 @@ function createMarkAttributes(mark, markName, existingAttr) {
       if (!mark.attrs) {
         mark['attrs'] = {};
       }
-      let newAttr = mark.attrs[key];
-      if (!newAttr) {
-        if (existingAttr) {
-          newAttr = Object.assign(
-            Object.create(Object.getPrototypeOf(existingAttr)),
-            existingAttr
-          );
-          newAttr.default = false;
-        } else {
-          newAttr = {};
-          newAttr.hasDefault = true;
-          newAttr.default = false;
+      if (mark.attrs) {
+        let newAttr = mark.attrs[key];
+        if (!newAttr) {
+          if (existingAttr) {
+            newAttr = Object.assign(
+              Object.create(Object.getPrototypeOf(existingAttr)),
+              existingAttr
+            );
+            newAttr.default = false;
+          } else {
+            newAttr = {};
+            newAttr.hasDefault = true;
+            newAttr.default = false;
+          }
+          mark.attrs[key] = newAttr;
         }
-        mark.attrs[key] = newAttr;
       }
     });
   }

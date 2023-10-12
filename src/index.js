@@ -1,7 +1,7 @@
 // @flow
 
 // Plugin to handle Styles.
-import { Plugin, PluginKey, TextSelection } from 'prosemirror-state';
+import { Plugin, PluginKey } from 'prosemirror-state';
 import {
   updateOverrideFlag,
   applyLatestStyle,
@@ -15,8 +15,7 @@ import {
   getCustomStyleByLevel,
   setStyleRuntime,
   setHidenumberingFlag,
-  isStylesLoaded,
-  setStyles,
+  isStylesLoaded
 } from './customStyle';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
@@ -55,8 +54,6 @@ export class CustomstylePlugin extends Plugin {
         init(config, state) {
           loaded = false;
           firstTime = true;
-          setStyles([]);
-          // await setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
           setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
           setHidenumberingFlag(hideNumbering ? hideNumbering : false);
         },
@@ -69,7 +66,7 @@ export class CustomstylePlugin extends Plugin {
         // [FS] IRAD-1668 2022-01-21
         // dummy plugin view so that EditorView is accessible when refreshing the document
         // to apply styles after getting the styles.
-        csview = view;
+        this.csview = view;
         return {
           update: () => {
             /* This is intentional */
@@ -136,7 +133,7 @@ export class CustomstylePlugin extends Plugin {
   }
 }
 
-export function onInitAppendTransaction(ref, tr, nextState) {
+function onInitAppendTransaction(ref, tr, nextState) {
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
     tr = updateStyleOverrideFlag(nextState, tr);
@@ -150,7 +147,7 @@ export function onInitAppendTransaction(ref, tr, nextState) {
   return tr;
 }
 
-export function onUpdateAppendTransaction(
+function onUpdateAppendTransaction(
   ref,
   tr,
   nextState,
@@ -159,7 +156,7 @@ export function onUpdateAppendTransaction(
   transactions,
   slice1
 ) {
-  const keepMarks = true;
+  const opt = 1;
   if (!ref.firstTime) {
     // when user updates
     if (!(slice1)) {
@@ -182,52 +179,51 @@ export function onUpdateAppendTransaction(
   }
   tr = applyLineStyleForBoldPartial(nextState, tr);
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
-    tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc, keepMarks);
+    tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc, opt);
     for (let index = 0; index < slice1.content.childCount; index++) {
-      if ((!(slice1.content.content[index].type.name === 'table' || slice1.content.content[index].type.name === 'doc')) && index === 0) {
-        if (!(slice1.content.content[index].content.size === 0)) {
-          const tabPos = csview.state.selection.$from.before(1);
-          const node2 = csview.state.tr.doc.nodeAt(tabPos);
-          const demoPos = prevState.selection.from;
-          const node1 = prevState.doc.resolve(demoPos).parent;
-          const curPos = nextState.tr.curSelection.from;
-          if (!(node1.content && node1.content.content[0] && node1.content.content[0].attrs)) {
-            const keepMarks = true;
-            if (node2.type.name === 'table') {
-              const startPos = demoPos;
-              const styleName = slice1.content.content[index].attrs.styleName;
-              const node = nextState.tr.doc.nodeAt(startPos);
-              const len = node.nodeSize;
-              const endPos = startPos + len;
-              tr = applyLatestStyle(styleName, nextState, tr, node, startPos, endPos, null, keepMarks);
-              tr = tr.setSelection(TextSelection.create(tr.doc, curPos, curPos));
-            } else {
-              const startPos = csview.state.selection.$to.after(1) - 1;
-              const styleName = slice1.content.content[index].attrs.styleName;
-              const node = nextState.tr.doc.nodeAt(startPos);
-              const len = node.nodeSize;
-              const endPos = startPos + len;
-              tr = applyLatestStyle(styleName, nextState, tr, node, startPos, endPos, null, keepMarks);
-              tr = tr.setSelection(TextSelection.create(tr.doc, curPos, curPos));
+      if (!(slice1.content.content[index].type.name === 'table' || slice1.content.content[index].type.name === 'doc')) {
+        if (!(index !== 0)) {
+          if (!(slice1.content.content[index].content.size === 0)) {
+            const tabPos = csview.state.selection.$from.before(1);
+            const node2 = csview.state.tr.doc.nodeAt(tabPos);
+            const demoPos = prevState.selection.from;
+            const node1 = prevState.doc.resolve(demoPos).parent;
+            if (!(node1.content && node1.content.content[0] && node1.content.content[0].attrs)) {
+              const opt = 1;
+              if (node2.type.name === 'table') {
+                const startPos = demoPos;
+                const styleName = slice1.content.content[index].attrs.styleName;
+                const node = nextState.tr.doc.nodeAt(startPos);
+                const len = node.nodeSize;
+                const endPos = startPos + len;
+                tr = applyLatestStyle(styleName, nextState, tr, node, startPos, endPos, opt);
+              } else {
+                const startPos = csview.state.selection.$to.after(1) - 1;
+                const styleName = slice1.content.content[index].attrs.styleName;
+                const node = nextState.tr.doc.nodeAt(startPos);
+                const len = node.nodeSize;
+                const endPos = startPos + len;
+                tr = applyLatestStyle(styleName, nextState, tr, node, startPos, endPos, opt);
+              }
             }
-          }
-          else {
-            if (node2.type.name === 'table') {
-              const startPos = demoPos;
-              const styleName = node1.attrs.styleName;
-              const node = nextState.tr.doc.nodeAt(startPos);
-              const len = node.nodeSize;
-              const endPos = startPos + len;
-              const styleProp = getCustomStyleByName(styleName);
-              tr = applyStyleToEachNode(nextState, startPos, endPos, tr, styleProp, styleName);
-            } else {
-              const startPos = csview.state.selection.$to.after(1) - 1;
-              const styleName = node1.attrs.styleName;
-              const node = nextState.tr.doc.nodeAt(startPos);
-              const len = node.nodeSize;
-              const endPos = startPos + len;
-              const styleProp = getCustomStyleByName(styleName);
-              tr = applyStyleToEachNode(nextState, startPos, endPos, tr, styleProp, styleName);
+            else {
+              if (node2.type.name === 'table') {
+                const startPos = demoPos;
+                const styleName = node1.attrs.styleName;
+                const node = nextState.tr.doc.nodeAt(startPos);
+                const len = node.nodeSize;
+                const endPos = startPos + len;
+                const styleProp = getCustomStyleByName(styleName);
+                tr = applyStyleToEachNode(nextState, startPos, endPos, tr, styleProp, styleName);
+              } else {
+                const startPos = csview.state.selection.$to.after(1) - 1;
+                const styleName = node1.attrs.styleName;
+                const node = nextState.tr.doc.nodeAt(startPos);
+                const len = node.nodeSize;
+                const endPos = startPos + len;
+                const styleProp = getCustomStyleByName(styleName);
+                tr = applyStyleToEachNode(nextState, startPos, endPos, tr, styleProp, styleName);
+              }
             }
           }
         }
@@ -239,7 +235,7 @@ export function onUpdateAppendTransaction(
 }
 
 // [FS] IRAD-1202 2021-02-15
-export function remapCounterFlags(tr) {
+function remapCounterFlags(tr) {
   // Depending on the window variables,
   // set counters for numbering.
   const cFlags = tr.doc.attrs.counterFlags;
@@ -249,7 +245,6 @@ export function remapCounterFlags(tr) {
     }
   }
 }
-
 
 function applyStyles(state, tr) {
   if (!tr) {
@@ -292,7 +287,7 @@ function refreshToApplyStyles() {
 
 // [FS] IRAD-1130 2021-01-07
 // Handle heirarchy on delete
-export function manageHierarchyOnDelete(prevState, nextState, tr, view) {
+function manageHierarchyOnDelete(prevState, nextState, tr, view) {
   const nodesAfterSelection = [];
   const nodesBeforeSelection = [];
   let selectedPos = nextState.selection.from;
@@ -389,7 +384,7 @@ export function manageHierarchyOnDelete(prevState, nextState, tr, view) {
 }
 
 // get all the nodes having styleName attribute
-export function nodeAssignment(state) {
+function nodeAssignment(state) {
   const nodes = [];
   state.doc.descendants((node, pos) => {
     if (requiredAddAttr(node)) {
@@ -433,8 +428,8 @@ function applyLineStyleForBoldPartial(nextState, tr) {
 
 // [FS] IRAD-1474 2021-07-01
 // Select multiple paragraph with empty paragraph and apply style not working.
-export function applyStyleForEmptyParagraph(nextState, tr) {
-  const keepMarks = true;
+function applyStyleForEmptyParagraph(nextState, tr) {
+  const opt = 1;
   const startPos = nextState.selection.$from.before(1);
   const endPos = nextState.selection.$to.after(1) - 1;
   if (null === tr) {
@@ -457,8 +452,7 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
         node,
         startPos,
         endPos,
-        null,
-        keepMarks,
+        opt,
       );
     }
   }
@@ -466,7 +460,7 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
 }
 
 // Continious Numbering for custom style
-export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
+function applyStyleForNextParagraph(prevState, nextState, tr, view) {
   let modified = false;
   if (!tr) {
     tr = nextState.tr;
@@ -528,7 +522,7 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
   return modified ? tr : null;
 }
 
-export function resetTheDefaultStyleNameToNone(styleName) {
+function resetTheDefaultStyleNameToNone(styleName) {
   if ('Default' === styleName) {
     styleName = RESERVED_STYLE_NONE;
   }
@@ -537,7 +531,7 @@ export function resetTheDefaultStyleNameToNone(styleName) {
 
 // [FS] IRAD-1217 2021-02-24
 // get the style object using the nextlineStyleName and set the attribute values to the node.
-export function setNodeAttrs(nextLineStyleName, newattrs) {
+function setNodeAttrs(nextLineStyleName, newattrs) {
   if (nextLineStyleName) {
     const nextLineStyle = getCustomStyleByName(nextLineStyleName);
     if (nextLineStyle && nextLineStyle.styles) {
@@ -582,7 +576,7 @@ function isDocChanged(transactions) {
   return transactions.some((transaction) => transaction.docChanged);
 }
 
-export function applyNormalIfNoStyle(nextState, tr, node, keepMarks) {
+function applyNormalIfNoStyle(nextState, tr, node, opt) {
   if (!tr) {
     tr = nextState.tr;
   }
@@ -601,7 +595,7 @@ export function applyNormalIfNoStyle(nextState, tr, node, keepMarks) {
         child.attrs.styleName = RESERVED_STYLE_NONE;
         styleName = RESERVED_STYLE_NONE;
       }
-      tr = applyLatestStyle(styleName, nextState, tr, child, pos, end + 1, null, keepMarks);
+      tr = applyLatestStyle(styleName, nextState, tr, child, pos, end + 1, opt);
     }
   });
   return tr;

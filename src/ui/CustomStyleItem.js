@@ -128,7 +128,8 @@ class CustomStyleItem extends React.PureComponent<any, any> {
         </div>
         <div
           className="molsp-arrow-right"
-          style={{ width: '50px', display: hasText ? 'block' : 'none' }}
+          style={{ width: '50px' }}
+          style={hasText ? { display: 'block' } : { display: 'none' }}
         >
           {/* Need to change the below icon to downarroe */}
           <PointerSurface {...pointerProps} className={klass + ' edit-icon'}>

@@ -13,7 +13,7 @@ let hideNumbering = false;
 // [FS] IRAD-1202 2021-02-15
 // None & None-@#$- have same effect of None.
 // None-@#$-<styleLevel> is used for numbering to set style level for None, based on the cursor level style level.
-export function isValidStyleName(styleName) {
+function isValidStyleName(styleName) {
   return (
     styleName && !styleName.includes(RESERVED_STYLE_NONE_NUMBERING) &&
     customStyles.length > 0
@@ -83,7 +83,9 @@ export function setStyleRuntime(runtime: any, callback) {
 
 function saveDefaultStyle() {
   if (!isCustomStyleExists(RESERVED_STYLE_NONE)) {
-    saveStyle(DEFAULT_NORMAL_STYLE);
+    saveStyle(DEFAULT_NORMAL_STYLE).then((_result) => {
+      /* This is intentional */
+    });
   }
 }
 
@@ -105,10 +107,10 @@ export function getCustomStyleByLevel(level: number) {
         obj.styles.styleLevel &&
         level === Number(obj.styles.styleLevel)
       ) {
-        //if (null === style) {
+        if (null === style) {
           style = obj;
           return style;
-        //}
+        }
       }
     }
   }

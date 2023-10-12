@@ -24,8 +24,6 @@ import './custom-dropdown.css';
 // [FS] IRAD-1042 2020-09-09
 // To include custom styles in the toolbar
 
-const MULTIPLE_STYLE = 'Multiple Styles';
-
 let HEADING_COMMANDS: Object = {
   [RESERVED_STYLE_NONE]: new HeadingCommand(0),
 };
@@ -37,18 +35,6 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
     editorView: ?EditorView,
   };
   hasRuntime: boolean = hasStyleRuntime();
-
-  state = {
-    hasUpdated: false,
-  };
-
-  updateDropdownItems = () => {
-    const hasUpdated = !this.state.hasUpdated;
-    this.setState({
-      hasUpdated,
-    });
-  }
-
   //[FS] IRAD-1085 2020-10-09
   //method to build commands for list buttons
   getCommandGroups() {
@@ -135,7 +121,7 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
               ? RESERVED_STYLE_NONE
               : node.attrs.styleName;
           } else {
-            customStyleName = MULTIPLE_STYLE;
+            customStyleName = RESERVED_STYLE_NONE;
           }
         }
         // [FS] IRAD-1231 2021-03-02
@@ -147,13 +133,13 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
       }
     });
     let backgroundColorClass = 'width-100';
-    if (!isCustomStyleExists(customStyleName) && customStyleName !== MULTIPLE_STYLE) {
+    if (!isCustomStyleExists(customStyleName)) {
       backgroundColorClass = 'width-100 stylemenu-backgroundcolor';
     }
 
     return (
       <CustomMenuButton
-        className={backgroundColorClass}
+        className= {backgroundColorClass}
         // [FS] IRAD-1008 2020-07-16
         // Disable font type menu on editor disable state
         commandGroups={this.getCommandGroups()}
@@ -165,10 +151,7 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
         editorView={editorView}
         label={customStyleName}
         parent={this}
-        samplecallback={this.update_me}
         staticCommand={this.staticCommands()}
-        updateListCallback={this.updateDropdownItems}
-        updated={this.state.hasUpdated}
       />
     );
   }

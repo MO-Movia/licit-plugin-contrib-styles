@@ -8,7 +8,8 @@ import uuid from './Uuid';
 import './listType.css';
 import CustomStyleItem from './CustomStyleItem';
 
-import { atViewportCenter, createPopUp, setTextAlign, setTextLineSpacing } from '@modusoperandi/licit-ui-commands';
+import { atViewportCenter } from '@modusoperandi/licit-ui-commands';
+import { createPopUp } from '@modusoperandi/licit-ui-commands';
 import AlertInfo from './AlertInfo';
 
 import CustomStyleSubMenu from './CustomStyleSubMenu';
@@ -24,6 +25,8 @@ import {
   renameStyle,
   removeStyle,
 } from '../customStyle';
+import { setTextAlign } from '@modusoperandi/licit-ui-commands';
+import { setTextLineSpacing } from '@modusoperandi/licit-ui-commands';
 import { setParagraphSpacing } from '../ParagraphSpacingCommand';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 
@@ -49,9 +52,7 @@ class CustomMenuUI extends React.PureComponent<any, any> {
     label?: string | React.Element<any> | null,
     title?: ?string,
     _style?: ?any,
-    updated?: ?boolean
   };
-
 
   _id = uuid();
   _selectedIndex = 0;
@@ -74,7 +75,6 @@ class CustomMenuUI extends React.PureComponent<any, any> {
       staticCommand,
       onCommand,
     } = this.props;
-
     const children = [];
     const children1 = [];
     let counter = 0;
@@ -165,9 +165,11 @@ class CustomMenuUI extends React.PureComponent<any, any> {
   };
 
   _execute = (command: UICommand, e: SyntheticEvent<*>) => {
-    const { dispatch, editorState, editorView, onCommand } = this.props;
-    command.execute(editorState, dispatch, editorView, e);
-    onCommand && onCommand();
+    if (undefined !== command) {
+      const { dispatch, editorState, editorView, onCommand } = this.props;
+      command.execute(editorState, dispatch, editorView, e);
+      onCommand && onCommand();
+    }
   };
 
   //shows the alignment and line spacing option
@@ -394,37 +396,35 @@ class CustomMenuUI extends React.PureComponent<any, any> {
                     // [FS] IRAD-1133 2021-01-06
                     // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
 
-                    if (null !== result) {
-                      // if (val.styleName === val.styles.nextLineStyleName) {
-                      let tr;
-                      // delete val.editorView;
-                      // saveStyle(val).then((result) => {
-                      //   if (result) {
-                      setStyles(result);
-                      result.forEach((obj) => {
-                        if (val.styleName === obj.styleName) {
-                          tr = this.renameStyleInDocument(
-                            this.props.editorState,
-                            this.props.editorState.tr,
-                            this._styleName,
-                            val.styleName,
-                            obj.styles
-                          );
-                        }
-                      });
-                      if (tr) {
-                        dispatch(tr);
+                    if (null != result) {
+                      if (val.styleName === val.styles.nextLineStyleName) {
+                        let tr;
+                        delete val.editorView;
+                        saveStyle(val).then((result) => {
+                          if (result) {
+                            setStyles(result);
+                            result.forEach((obj) => {
+                              if (val.styleName === obj.styleName) {
+                                tr = this.renameStyleInDocument(
+                                  this.props.editorState,
+                                  this.props.editorState.tr,
+                                  this._styleName,
+                                  val.styleName,
+                                  obj.styles
+                                );
+                              }
+                            });
+                            if (tr) {
+                              dispatch(tr);
+                            }
+                          }
+                          this.props.editorView.focus();
+                          this._stylePopup.close();
+                          this._stylePopup = null;
+                        });
+
                       }
                     }
-                    this.props.editorView.focus();
-                    this._stylePopup.close();
-                    this._stylePopup = null;
-
-                    // });
-
-                    // }
-                    this.props.updateListCallback();
-                    //   }
                   });
               }
             }

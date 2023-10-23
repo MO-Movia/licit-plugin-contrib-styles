@@ -12,10 +12,10 @@ import { CustomButton } from '@modusoperandi/licit-ui-commands';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { createPopUp } from '@modusoperandi/licit-ui-commands';
 import uuid from './Uuid';
-import CustomMenuUI from './CustomMenuUI';
+import { CustomMenuUI } from './CustomMenuUI';
 import './custom-dropdown.css';
 
-class CustomMenuButton extends React.PureComponent<any, any> {
+export class CustomMenuButton extends React.PureComponent<any, any> {
   props: {
     className?: ?string,
     commandGroups: Array<{ [string]: UICommand }>,
@@ -106,5 +106,3 @@ class CustomMenuButton extends React.PureComponent<any, any> {
     }
   };
 }
-
-export default CustomMenuButton;

@@ -18,9 +18,9 @@ import {
   IndentCommand,
   getLineSpacingValue,
 } from '@modusoperandi/licit-ui-commands';
-import AlertInfo from './ui/AlertInfo';
-import CustomStyleEditor from './ui/CustomStyleEditor';
-import ParagraphSpacingCommand from './ParagraphSpacingCommand';
+import { AlertInfo } from './ui/AlertInfo';
+import { CustomStyleEditor } from './ui/CustomStyleEditor';
+import { ParagraphSpacingCommand } from './ParagraphSpacingCommand';
 import {
   removeTextAlignAndLineSpacing,
   clearCustomStyleAttribute,
@@ -176,7 +176,7 @@ export function getCustomStyleCommands(customStyle: any) {
   return commands;
 }
 
-class CustomStyleCommand extends UICommand {
+export class CustomStyleCommand extends UICommand {
   _customStyleName: string;
   _customStyle: any;
   _popUp = null;
@@ -695,36 +695,36 @@ function applyStyleEx(
   tr: Transform,
   node: Node,
   startPos: number,
-  endPos: number, 
+  endPos: number,
   way: number,
   opt: number
 ) {
   const loading = !styleProp;
-  if(!opt){
-  if (loading) {
-    tr = onLoadRemoveAllMarksExceptOverridden(
-      node,
-      state.schema,
-      startPos,
-      endPos,
-      tr,
-      state
-    );
-  } else {
-    // [FS] IRAD-1087 2020-11-02
-    // Issue fix: applied link is missing after applying a custom style.
-    if (way === 0) {
-    tr = removeAllMarksExceptLink(
-      startPos,
-      endPos,
-      tr,
-      state.schema,
-      styleProp,
-      state
-    );
+  if (!opt) {
+    if (loading) {
+      tr = onLoadRemoveAllMarksExceptOverridden(
+        node,
+        state.schema,
+        startPos,
+        endPos,
+        tr,
+        state
+      );
+    } else {
+      // [FS] IRAD-1087 2020-11-02
+      // Issue fix: applied link is missing after applying a custom style.
+      if (way === 0) {
+        tr = removeAllMarksExceptLink(
+          startPos,
+          endPos,
+          tr,
+          state.schema,
+          styleProp,
+          state
+        );
+      }
     }
   }
-}
 
   if (loading || !opt) {
     styleProp = getCustomStyleByName(styleName);
@@ -1328,7 +1328,17 @@ export function applyLatestStyle(
   opt: number
 ) {
   let way = 1;
-  tr = applyStyleEx(style, styleName, state, tr, node, startPos, endPos, way, opt);
+  tr = applyStyleEx(
+    style,
+    styleName,
+    state,
+    tr,
+    node,
+    startPos,
+    endPos,
+    way,
+    opt
+  );
   // apply bold first word/sentence custom style
   tr = applyLineStyle(state, tr, node, startPos);
   return tr;
@@ -1679,5 +1689,3 @@ export function isLevelUpdated(
   }
   return bOK;
 }
-
-export default CustomStyleCommand;

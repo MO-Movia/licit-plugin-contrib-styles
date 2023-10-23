@@ -1,4 +1,5 @@
-import CustomStyleCommand, {
+import {
+  CustomStyleCommand,
   getMarkByStyleName,
   getStyleLevel,
   addMarksToLine,
@@ -456,30 +457,28 @@ describe('CustomStyleCommand', () => {
 
   it('should handle createNewStyle', () => {
     const spy2 = jest.spyOn(customstylecommand, 'showAlert');
-    jest
-      .spyOn(customstyles, 'saveStyle')
-      .mockResolvedValue([
-        {
-          styleName: 'A Apply Stylefff',
-          mode: 1,
-          styles: {
-            align: 'justify',
-            boldNumbering: true,
-            toc: false,
-            isHidden: false,
-            boldSentence: true,
-            nextLineStyleName: 'Normal',
-            fontName: 'Arial',
-            fontSize: 11,
-            strong: true,
-            em: true,
-            underline: true,
-            color: '#c40df2',
-          },
+    jest.spyOn(customstyles, 'saveStyle').mockResolvedValue([
+      {
+        styleName: 'A Apply Stylefff',
+        mode: 1,
+        styles: {
+          align: 'justify',
+          boldNumbering: true,
           toc: false,
           isHidden: false,
+          boldSentence: true,
+          nextLineStyleName: 'Normal',
+          fontName: 'Arial',
+          fontSize: 11,
+          strong: true,
+          em: true,
+          underline: true,
+          color: '#c40df2',
         },
-      ]);
+        toc: false,
+        isHidden: false,
+      },
+    ]);
     jest.spyOn(customstyles, 'isCustomStyleExists').mockReturnValue(true);
     jest.spyOn(customstyles, 'isPreviousLevelExists').mockReturnValue(false);
     const mocktr = {
@@ -831,27 +830,25 @@ describe('getMarkByStyleName', () => {
   });
 
   it('should handle getMarkByStyleName', () => {
-    jest
-      .spyOn(customstyles, 'getCustomStyleByName')
-      .mockReturnValue({
-        styles: {
-          hasBullet: true,
-          bulletLevel: '25CF',
-          styleLevel: 1,
-          paragraphSpacingBefore: 10,
-          paragraphSpacingAfter: 10,
-          strong: 10,
-          boldNumbering: 10,
-          em: 10,
-          color: 'blue',
-          fontSize: 10,
-          fontName: 'Tahoma',
-          indent: 10,
-          hasNumbering: true,
-          textHighlight: 'blue',
-          underline: true,
-        },
-      });
+    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: 1,
+        paragraphSpacingBefore: 10,
+        paragraphSpacingAfter: 10,
+        strong: 10,
+        boldNumbering: 10,
+        em: 10,
+        color: 'blue',
+        fontSize: 10,
+        fontName: 'Tahoma',
+        indent: 10,
+        hasNumbering: true,
+        textHighlight: 'blue',
+        underline: true,
+      },
+    });
     const mockSchema = new Schema({
       nodes: {
         doc: {

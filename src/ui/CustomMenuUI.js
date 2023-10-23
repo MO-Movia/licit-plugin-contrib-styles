@@ -6,25 +6,20 @@ import { EditorView } from 'prosemirror-view';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import uuid from './Uuid';
 import './listType.css';
-import CustomStyleItem from './CustomStyleItem';
+import { CustomStyleItem } from './CustomStyleItem';
 
 import { atViewportCenter } from '@modusoperandi/licit-ui-commands';
 import { createPopUp } from '@modusoperandi/licit-ui-commands';
-import AlertInfo from './AlertInfo';
+import { AlertInfo } from './AlertInfo';
 
-import CustomStyleSubMenu from './CustomStyleSubMenu';
-import CustomStyleEditor from './CustomStyleEditor';
+import { CustomStyleSubMenu } from './CustomStyleSubMenu';
+import { CustomStyleEditor } from './CustomStyleEditor';
 import {
   updateDocument,
   isCustomStyleAlreadyApplied,
   isLevelUpdated,
 } from '../CustomStyleCommand';
-import {
-  setStyles,
-  saveStyle,
-  renameStyle,
-  removeStyle,
-} from '../customStyle';
+import { setStyles, saveStyle, renameStyle, removeStyle } from '../customStyle';
 import { setTextAlign } from '@modusoperandi/licit-ui-commands';
 import { setTextLineSpacing } from '@modusoperandi/licit-ui-commands';
 import { setParagraphSpacing } from '../ParagraphSpacingCommand';
@@ -33,7 +28,7 @@ import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 // [FS] IRAD-1039 2020-09-24
 // UI to show the list buttons
 
-class CustomMenuUI extends React.PureComponent<any, any> {
+export class CustomMenuUI extends React.PureComponent<any, any> {
   _activeCommand: ?UICommand = null;
   _popUp = null;
   _stylePopup = null;
@@ -205,16 +200,15 @@ class CustomMenuUI extends React.PureComponent<any, any> {
                     this.props.editorState
                   )
                 ) {
-                  removeStyle(val.command._customStyleName)
-                    .then((success) => {
-                      // [FS] IRAD-1099 2020-11-17
-                      // Issue fix: Even the applied style is removed the style name is showing in the editor
-                      this.removeCustomStyleName(
-                        this.props.editorState,
-                        val.command._customStyleName,
-                        this.props.editorView.dispatch
-                      );
-                    });
+                  removeStyle(val.command._customStyleName).then((success) => {
+                    // [FS] IRAD-1099 2020-11-17
+                    // Issue fix: Even the applied style is removed the style name is showing in the editor
+                    this.removeCustomStyleName(
+                      this.props.editorState,
+                      val.command._customStyleName,
+                      this.props.editorView.dispatch
+                    );
+                  });
                 } else {
                   this.showAlert();
                 }
@@ -391,41 +385,39 @@ class CustomMenuUI extends React.PureComponent<any, any> {
                 }
               } else {
                 // rename
-                renameStyle(this._styleName, val.styleName)
-                  .then((result) => {
-                    // [FS] IRAD-1133 2021-01-06
-                    // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
+                renameStyle(this._styleName, val.styleName).then((result) => {
+                  // [FS] IRAD-1133 2021-01-06
+                  // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
 
-                    if (null != result) {
-                      if (val.styleName === val.styles.nextLineStyleName) {
-                        let tr;
-                        delete val.editorView;
-                        saveStyle(val).then((result) => {
-                          if (result) {
-                            setStyles(result);
-                            result.forEach((obj) => {
-                              if (val.styleName === obj.styleName) {
-                                tr = this.renameStyleInDocument(
-                                  this.props.editorState,
-                                  this.props.editorState.tr,
-                                  this._styleName,
-                                  val.styleName,
-                                  obj.styles
-                                );
-                              }
-                            });
-                            if (tr) {
-                              dispatch(tr);
+                  if (null != result) {
+                    if (val.styleName === val.styles.nextLineStyleName) {
+                      let tr;
+                      delete val.editorView;
+                      saveStyle(val).then((result) => {
+                        if (result) {
+                          setStyles(result);
+                          result.forEach((obj) => {
+                            if (val.styleName === obj.styleName) {
+                              tr = this.renameStyleInDocument(
+                                this.props.editorState,
+                                this.props.editorState.tr,
+                                this._styleName,
+                                val.styleName,
+                                obj.styles
+                              );
                             }
+                          });
+                          if (tr) {
+                            dispatch(tr);
                           }
-                          this.props.editorView.focus();
-                          this._stylePopup.close();
-                          this._stylePopup = null;
-                        });
-
-                      }
+                        }
+                        this.props.editorView.focus();
+                        this._stylePopup.close();
+                        this._stylePopup = null;
+                      });
                     }
-                  });
+                  }
+                });
               }
             }
           }
@@ -471,5 +463,3 @@ class CustomMenuUI extends React.PureComponent<any, any> {
     return customStyleName;
   }
 }
-
-export default CustomMenuUI;

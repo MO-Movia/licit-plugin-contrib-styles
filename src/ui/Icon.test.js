@@ -1,9 +1,9 @@
-import Icon from './Icon';
+import { Icon } from './Icon';
 
 describe('Icon', () => {
   const props = {
     type: 'superscript',
-    title: ''
+    title: '',
   };
   const icon = new Icon(props);
   it('should handle icon', () => {
@@ -12,14 +12,14 @@ describe('Icon', () => {
   it('should handle render when props is superscript', () => {
     icon.props = {
       type: 'superscript',
-      title: ''
+      title: '',
     };
     expect(icon.render()).toBeDefined();
   });
   it('should handle render when props is subscript', () => {
     icon.props = {
       type: 'subscript',
-      title: ''
+      title: '',
     };
     expect(icon.render()).toBeDefined();
   });
@@ -27,14 +27,14 @@ describe('Icon', () => {
   it('should handle render when props anything else', () => {
     icon.props = {
       type: 'any',
-      title: ''
+      title: '',
     };
     expect(icon.render()).toBeDefined();
   });
   it('should handle render when props is null', () => {
     icon.props = {
       type: null,
-      title: ''
+      title: '',
     };
     expect(icon.render()).toBeDefined();
   });

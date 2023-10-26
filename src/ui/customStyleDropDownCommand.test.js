@@ -1,4 +1,4 @@
-import CustomstyleDropDownCommand from './CustomstyleDropDownCommand';
+import { CustomstyleDropDownCommand } from './CustomstyleDropDownCommand';
 import { createEditor, doc, p } from 'jest-prosemirror';
 import { EditorState } from 'prosemirror-state';
 import { Schema } from 'prosemirror-model';
@@ -435,7 +435,7 @@ describe('customstyledropdowncommand', () => {
   });
 
   const props = {
-    dispatch: (tr) => { },
+    dispatch: (tr) => {},
     editorState: state,
     editorView: editor.view,
   };
@@ -590,7 +590,7 @@ describe('customstyledropdowncommand', () => {
     };
 
     customstyledropdowncommand.props = {
-      dispatch: (tr) => { },
+      dispatch: (tr) => {},
       editorState: mockeditorState,
       editorView: null,
     };
@@ -791,7 +791,7 @@ describe('customstyledropdowncommand', () => {
     };
 
     customstyledropdowncommand.props = {
-      dispatch: (tr) => { },
+      dispatch: (tr) => {},
       editorState: mockeditorState,
       editorView: null,
     };
@@ -990,7 +990,7 @@ describe('customstyledropdowncommand 1', () => {
     styleName: 'test',
   });
   const props = {
-    dispatch: (tr) => { },
+    dispatch: (tr) => {},
     editorState: state,
     editorView: editor.view,
   };
@@ -1198,10 +1198,10 @@ describe('customstyledropdowncommand 1', () => {
     };
 
     customstyledropdowncommand.props = {
-      dispatch: (tr) => { },
+      dispatch: (tr) => {},
       editorState: mockeditorState,
       editorView: {
-        disabled: true
+        disabled: true,
       },
     };
     expect(customstyledropdowncommand.render()).toBeDefined();

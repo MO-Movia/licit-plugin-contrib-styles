@@ -38,8 +38,8 @@ import * as DOMfunc from './CustomStyleNodeSpec';
 import * as CustStyl from './customStyle';
 
 import sanitizeURL from './sanitizeURL';
-import { CustomStyleCommand } from './CustomStyleCommand';
-import * as ccommand from './CustomStyleCommand.js';
+import CustomStyleCommand from './CustomStyleCommand';
+import * as ccommand from './CustomStyleCommand';
 
 const attrs = {
   align: { default: null },

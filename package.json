@@ -19,7 +19,7 @@
     "build:babel": "babel src --out-dir dist",
     "build:flow": "flow-copy-source -v -i '**/__tests__/**' src dist",
     "build:css": "cp src/ui/*.css dist/ui && cp src/*.css dist",
-    "build:dist": "npm run build:clean && npm run webpack --display-error-details && npm run build:babel && npm run build:css && npm run build:flow",
+    "build:dist": "npm run build:clean && npm run webpack && npm run build:babel && npm run build:css && npm run build:flow",
     "flow": "flow --show-all-errors",
     "lint:js": "eslint \"src/**/*.js\"",
     "lint:css": "stylelint \"**/*.css\"",
@@ -31,7 +31,6 @@
   "devDependencies": {
     "@babel/cli": "^7.11.6",
     "@babel/core": "^7.11.6",
-    "@babel/eslint-parser": "^7.15.0",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/plugin-proposal-decorators": "^7.10.5",
     "@babel/plugin-proposal-do-expressions": "^7.10.4",

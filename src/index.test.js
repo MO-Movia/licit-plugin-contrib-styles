@@ -1,5 +1,5 @@
 import { createEditor, doc, p } from 'jest-prosemirror';
-import CustomstyleDropDownCommand from './ui/CustomstyleDropDownCommand';
+import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand';
 import uuid from './ui/Uuid';
 import {
   CustomstylePlugin,
@@ -38,8 +38,8 @@ import * as DOMfunc from './CustomStyleNodeSpec';
 import * as CustStyl from './customStyle';
 
 import sanitizeURL from './sanitizeURL';
-import CustomStyleCommand from './CustomStyleCommand';
-import * as ccommand from './CustomStyleCommand';
+import { CustomStyleCommand } from './CustomStyleCommand';
+import * as ccommand from './CustomStyleCommand.js';
 
 const attrs = {
   align: { default: null },

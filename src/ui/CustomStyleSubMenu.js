@@ -5,7 +5,7 @@ import * as React from 'react';
 import './custom-dropdown.css';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 
-class CustomStyleSubMenu extends React.PureComponent<any, any> {
+export class CustomStyleSubMenu extends React.PureComponent<any, any> {
   props: {
     command: UICommand,
     disabled?: ?boolean,
@@ -51,4 +51,3 @@ class CustomStyleSubMenu extends React.PureComponent<any, any> {
   }
 }
 
-export default CustomStyleSubMenu;

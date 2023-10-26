@@ -9,19 +9,19 @@ import {
   getStyleLevel,
   applyLineStyle,
   applyStyleToEachNode,
-} from './CustomStyleCommand';
+} from './CustomStyleCommand.js';
 import {
   getCustomStyleByName,
   getCustomStyleByLevel,
   setStyleRuntime,
   setHidenumberingFlag,
-  isStylesLoaded
+  isStylesLoaded,
 } from './customStyle';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
 import { Node, Schema } from 'prosemirror-model';
-import CustomstyleDropDownCommand from './ui/CustomstyleDropDownCommand';
+import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand';
 import { applyEffectiveSchema } from './EditorSchema';
 import type { StyleRuntime } from './StyleRuntime';
 
@@ -79,7 +79,11 @@ export class CustomstylePlugin extends Plugin {
 
       props: {
         handlePaste(view, event, slice) {
-          if (slice.content && slice.content.content[0] && slice.content.content[0].attrs) {
+          if (
+            slice.content &&
+            slice.content.content[0] &&
+            slice.content.content[0].attrs
+          ) {
             slice1 = slice;
           }
           return false;
@@ -159,7 +163,7 @@ function onUpdateAppendTransaction(
   const opt = 1;
   if (!ref.firstTime) {
     // when user updates
-    if (!(slice1)) {
+    if (!slice1) {
       tr = updateStyleOverrideFlag(nextState, tr);
     }
     tr = manageHierarchyOnDelete(prevState, nextState, tr, csview);
@@ -181,14 +185,25 @@ function onUpdateAppendTransaction(
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
     tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc, opt);
     for (let index = 0; index < slice1.content.childCount; index++) {
-      if (!(slice1.content.content[index].type.name === 'table' || slice1.content.content[index].type.name === 'doc')) {
+      if (
+        !(
+          slice1.content.content[index].type.name === 'table' ||
+          slice1.content.content[index].type.name === 'doc'
+        )
+      ) {
         if (!(index !== 0)) {
           if (!(slice1.content.content[index].content.size === 0)) {
             const tabPos = csview.state.selection.$from.before(1);
             const node2 = csview.state.tr.doc.nodeAt(tabPos);
             const demoPos = prevState.selection.from;
             const node1 = prevState.doc.resolve(demoPos).parent;
-            if (!(node1.content && node1.content.content[0] && node1.content.content[0].attrs)) {
+            if (
+              !(
+                node1.content &&
+                node1.content.content[0] &&
+                node1.content.content[0].attrs
+              )
+            ) {
               const opt = 1;
               if (node2.type.name === 'table') {
                 const startPos = demoPos;
@@ -196,17 +211,32 @@ function onUpdateAppendTransaction(
                 const node = nextState.tr.doc.nodeAt(startPos);
                 const len = node.nodeSize;
                 const endPos = startPos + len;
-                tr = applyLatestStyle(styleName, nextState, tr, node, startPos, endPos, opt);
+                tr = applyLatestStyle(
+                  styleName,
+                  nextState,
+                  tr,
+                  node,
+                  startPos,
+                  endPos,
+                  opt
+                );
               } else {
                 const startPos = csview.state.selection.$to.after(1) - 1;
                 const styleName = slice1.content.content[index].attrs.styleName;
                 const node = nextState.tr.doc.nodeAt(startPos);
                 const len = node.nodeSize;
                 const endPos = startPos + len;
-                tr = applyLatestStyle(styleName, nextState, tr, node, startPos, endPos, opt);
+                tr = applyLatestStyle(
+                  styleName,
+                  nextState,
+                  tr,
+                  node,
+                  startPos,
+                  endPos,
+                  opt
+                );
               }
-            }
-            else {
+            } else {
               if (node2.type.name === 'table') {
                 const startPos = demoPos;
                 const styleName = node1.attrs.styleName;
@@ -214,7 +244,14 @@ function onUpdateAppendTransaction(
                 const len = node.nodeSize;
                 const endPos = startPos + len;
                 const styleProp = getCustomStyleByName(styleName);
-                tr = applyStyleToEachNode(nextState, startPos, endPos, tr, styleProp, styleName);
+                tr = applyStyleToEachNode(
+                  nextState,
+                  startPos,
+                  endPos,
+                  tr,
+                  styleProp,
+                  styleName
+                );
               } else {
                 const startPos = csview.state.selection.$to.after(1) - 1;
                 const styleName = node1.attrs.styleName;
@@ -222,7 +259,14 @@ function onUpdateAppendTransaction(
                 const len = node.nodeSize;
                 const endPos = startPos + len;
                 const styleProp = getCustomStyleByName(styleName);
-                tr = applyStyleToEachNode(nextState, startPos, endPos, tr, styleProp, styleName);
+                tr = applyStyleToEachNode(
+                  nextState,
+                  startPos,
+                  endPos,
+                  tr,
+                  styleProp,
+                  styleName
+                );
               }
             }
           }
@@ -317,7 +361,10 @@ function manageHierarchyOnDelete(prevState, nextState, tr, view) {
           validateStyleName(selectedNode) &&
           0 !== Number(getStyleLevel(selectedNode.attrs.styleName))
         ) {
-          if (nodesBeforeSelection.length > 0 || nodesAfterSelection.length > 0) {
+          if (
+            nodesBeforeSelection.length > 0 ||
+            nodesAfterSelection.length > 0
+          ) {
             // assigning transaction if tr is null
             if (!tr) {
               tr = nextState.tr;
@@ -341,13 +388,20 @@ function manageHierarchyOnDelete(prevState, nextState, tr, view) {
                   getStyleLevel(beforeitem.node.attrs.styleName)
                 );
                 if (subsequantLevel !== 0) {
-                  if (subsequantLevel > 1 && subsequantLevel - levelCounter > 1) {
+                  if (
+                    subsequantLevel > 1 &&
+                    subsequantLevel - levelCounter > 1
+                  ) {
                     subsequantLevel = subsequantLevel - 1;
                     const style = getCustomStyleByLevel(subsequantLevel);
                     if (style) {
                       const newattrs = Object.assign({}, beforeitem.node.attrs);
                       newattrs.styleName = style.styleName;
-                      tr = tr.setNodeMarkup(beforeitem.pos, undefined, newattrs);
+                      tr = tr.setNodeMarkup(
+                        beforeitem.pos,
+                        undefined,
+                        newattrs
+                      );
                     }
                   }
                   levelCounter = subsequantLevel;
@@ -356,7 +410,9 @@ function manageHierarchyOnDelete(prevState, nextState, tr, view) {
             }
 
             for (const item of nodesAfterSelection) {
-              subsequantLevel = Number(getStyleLevel(item.node.attrs.styleName));
+              subsequantLevel = Number(
+                getStyleLevel(item.node.attrs.styleName)
+              );
 
               if (subsequantLevel !== 0) {
                 if (levelCounter !== subsequantLevel) {
@@ -452,7 +508,7 @@ function applyStyleForEmptyParagraph(nextState, tr) {
         node,
         startPos,
         endPos,
-        opt,
+        opt
       );
     }
   }

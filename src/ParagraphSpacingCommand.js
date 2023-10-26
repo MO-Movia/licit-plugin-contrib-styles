@@ -86,7 +86,7 @@ export function setParagraphSpacing(
   return tr;
 }
 
-class ParagraphSpacingCommand extends UICommand {
+export class ParagraphSpacingCommand extends UICommand {
   _paragraphSpacing: ?string;
   _isAfter: ?boolean;
 
@@ -117,4 +117,3 @@ class ParagraphSpacingCommand extends UICommand {
   };
 }
 
-export default ParagraphSpacingCommand;

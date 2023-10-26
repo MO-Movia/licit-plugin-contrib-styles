@@ -51,7 +51,7 @@ class SubscriptIcon extends React.PureComponent<any, any> {
   }
 }
 
-class Icon extends React.PureComponent<any, any> {
+export class Icon extends React.PureComponent<any, any> {
   // Get the static Icon.
   static get(type: string, title: ?string): React.Element<any> {
     const key = `${type || ''}-${title || ''}`;
@@ -85,5 +85,3 @@ class Icon extends React.PureComponent<any, any> {
     return <span className={className}>{children}</span>;
   }
 }
-
-export default Icon;

@@ -1,8 +1,8 @@
 // @flow
 
-import CustomMenuButton from './CustomMenuButton';
+import { CustomMenuButton } from './CustomMenuButton';
 import { HeadingCommand } from '@modusoperandi/licit-ui-commands';
-import CustomStyleCommand from '../CustomStyleCommand';
+import { CustomStyleCommand } from '../CustomStyleCommand';
 
 import * as React from 'react';
 import { EditorState } from 'prosemirror-state';
@@ -17,7 +17,7 @@ import {
   setStyles,
   getStylesAsync,
   hasStyleRuntime,
-  isCustomStyleExists
+  isCustomStyleExists,
 } from '../customStyle';
 import './custom-dropdown.css';
 
@@ -28,7 +28,7 @@ let HEADING_COMMANDS: Object = {
   [RESERVED_STYLE_NONE]: new HeadingCommand(0),
 };
 
-class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
+export class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
   props: {
     dispatch: (tr: Transform) => void,
     editorState: EditorState,
@@ -60,7 +60,6 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
                 obj,
                 obj.styleName
               );
-
             });
           }
         }
@@ -139,7 +138,7 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
 
     return (
       <CustomMenuButton
-        className= {backgroundColorClass}
+        className={backgroundColorClass}
         // [FS] IRAD-1008 2020-07-16
         // Disable font type menu on editor disable state
         commandGroups={this.getCommandGroups()}
@@ -157,4 +156,3 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
   }
 }
 
-export default CustomstyleDropDownCommand;

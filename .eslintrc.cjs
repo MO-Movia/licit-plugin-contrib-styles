@@ -23,6 +23,7 @@ module.exports = {
     'no-mixed-spaces-and-tabs': 'error',
     'no-trailing-spaces': 'error',
     'no-undef': 'error',
+    "no-prototype-builtins": "off",
     // The following rule was being reported as misconfigured.  After correcting
     // that, it was reported as not existing at all.
     // "no-unused-expression": [true, "allow-fast-null-checks"],
@@ -35,6 +36,7 @@ module.exports = {
         argsIgnorePattern: '^_',
       },
     ],
+    '@typescript-eslint/no-explicit-any': 'off',
     'no-var': 'error',
     'prefer-const': 'error',
     quotes: [2, 'single', {
@@ -55,6 +57,11 @@ module.exports = {
     'requestAnimationFrame': false,
     'window': false,
     'CSSStyleDeclaration': false,
+    'KeyboardEvent': false,
+    'SyntheticEvent': false,
+    "console": true,
+    "setTimeout": true
+    
   },
   overrides: [{
     // enable jest globals in test files
@@ -62,8 +69,10 @@ module.exports = {
     plugins: ['jest'],
     env: {
       'jest/globals': true,
+      "browser": true,
+      "node": true
     },
-  }, ]
+  },]
 }
 
 

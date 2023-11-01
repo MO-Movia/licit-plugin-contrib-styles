@@ -1,6 +1,6 @@
-import Enzyme from 'enzyme';
+// import Enzyme from 'enzyme';
 import { createEditor, doc, p } from 'jest-prosemirror';
-import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
+// import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { CustomstylePlugin } from '../index';
 import { CustomMenuUI } from './CustomMenuUI';
 import { Schema } from 'prosemirror-model';
@@ -9,7 +9,7 @@ import { EditorView } from 'prosemirror-view';
 import { CustomStyleCommand } from '../CustomStyleCommand';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 
-Enzyme.configure({ adapter: new Adapter() });
+// Enzyme.configure({ adapter: new Adapter() });
 
 describe('Custom Menu UI   ', () => {
   const TestCustomStyleRuntime = {

@@ -1,10 +1,10 @@
 // @flow
 
 import { Node, DOMOutputSpec } from 'prosemirror-model';
-import type { KeyValuePair } from './Constants';
+import type { KeyValuePair } from './Constants.js';
 import { toCSSLineSpacing } from '@modusoperandi/licit-ui-commands';
 
-import { getCustomStyleByName, getHidenumberingFlag } from './customStyle';
+import { getCustomStyleByName, getHidenumberingFlag } from './customStyle.js';
 import './ui/czi-cust-style-numbered.css';
 
 // This assumes that every 36pt maps to one indent level.
@@ -19,7 +19,8 @@ export const ATTRIBUTE_SHOW_SYMBOL = 'data-show-bullet';
 export const ATTRIBUTE_BULLET_COLOR = 'data-bullet-color';
 export const RESERVED_STYLE_NONE = 'Normal';
 export const RESERVED_STYLE_NONE_NUMBERING = RESERVED_STYLE_NONE + '-@#$-';
-const cssVal = new Set < string > (['', '0%', '0pt', '0px']);
+// const cssVal = new Set < string > (['', '0%', '0pt', '0px']);
+const cssVal = new Set(['', '0%', '0pt', '0px']);
 /*
 Symbols are grabbed from
 https://en.wikipedia.org/wiki/List_of_Unicode_characters

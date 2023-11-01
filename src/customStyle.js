@@ -1,12 +1,13 @@
 // @flow
 // [FS] IRAD-1085 2020-10-09
-import type { Style, CSSStyle } from './StyleRuntime';
+import type { Style, CSSStyle } from './StyleRuntime.js';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
-} from './CustomStyleNodeSpec';
-import { DEFAULT_NORMAL_STYLE } from './Constants';
-let customStyles: Style[] = new Array < Style > (0);
+} from './CustomStyleNodeSpec.js';
+import { DEFAULT_NORMAL_STYLE } from './Constants.js';
+// let customStyles: Style[] = new Array < Style > (0);
+let customStyles = new Array(0);
 let styleRuntime;
 let hideNumbering = false;
 

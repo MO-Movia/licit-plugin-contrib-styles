@@ -18,13 +18,13 @@ import {
   IndentCommand,
   getLineSpacingValue,
 } from '@modusoperandi/licit-ui-commands';
-import { AlertInfo } from './ui/AlertInfo';
-import { CustomStyleEditor } from './ui/CustomStyleEditor';
-import { ParagraphSpacingCommand } from './ParagraphSpacingCommand';
+import { AlertInfo } from './ui/AlertInfo.js';
+import { CustomStyleEditor } from './ui/CustomStyleEditor.js';
+import { ParagraphSpacingCommand } from './ParagraphSpacingCommand.js';
 import {
   removeTextAlignAndLineSpacing,
   clearCustomStyleAttribute,
-} from './clearCustomStyleMarks';
+} from './clearCustomStyleMarks.js';
 import {
   getCustomStyleByName,
   getCustomStyleByLevel,
@@ -32,24 +32,24 @@ import {
   setStyles,
   saveStyle,
   getStylesAsync,
-} from './customStyle';
-import type { Style } from './StyleRuntime';
+} from './customStyle.js';
+import type { Style } from './StyleRuntime.js';
 import {
-  MARK_STRONG,
-  MARK_EM,
-  MARK_TEXT_COLOR,
-  MARK_FONT_SIZE,
-  MARK_FONT_TYPE,
-  MARK_STRIKE,
-  MARK_SUPER,
-  MARK_TEXT_HIGHLIGHT,
-  MARK_UNDERLINE,
-} from './MarkNames';
-import { PARAGRAPH } from './NodeNames';
+  MARKSTRONG,
+  MARKEM,
+  MARKTEXTCOLOR,
+  MARKFONTSIZE,
+  MARKFONTTYPE,
+  MARKSTRIKE,
+  MARKSUPER,
+  MARKTEXTHIGHLIGHT,
+  MARKUNDERLINE,
+} from './MarkNames.js';
+import { PARAGRAPH } from './NodeNames.js';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
-} from './CustomStyleNodeSpec';
+} from './CustomStyleNodeSpec.js';
 
 export const STRONG = 'strong';
 export const EM = 'em';
@@ -243,12 +243,15 @@ export class CustomStyleCommand extends UICommand {
     // [FS] IRAD-1480 2021-06-25
     // Indenting not remove when clear style is applied
     newattrs = node.attrs;
-    newattrs['styleName'] = RESERVED_STYLE_NONE;
-    newattrs['id'] = '';
-    // [FS] IRAD-1414 2021-07-12
-    // FIX: Applied number/bullet list removes when 'Clear Style'
-    newattrs['indent'] = 0;
-    tr = tr.setNodeMarkup(startPos, undefined, newattrs);
+    if (newattrs) {
+      newattrs['styleName'] = RESERVED_STYLE_NONE;
+      newattrs['id'] = '';
+      // [FS] IRAD-1414 2021-07-12
+      // FIX: Applied number/bullet list removes when 'Clear Style'
+      newattrs['indent'] = 0;
+      tr = tr.setNodeMarkup(startPos, undefined, newattrs);
+    }
+
     tr = removeTextAlignAndLineSpacing(tr, state.schema);
     tr = createEmptyElement(
       state,
@@ -506,7 +509,7 @@ export class CustomStyleCommand extends UICommand {
   }
 }
 
-function compareMarkWithStyle(
+export function compareMarkWithStyle(
   mark,
   style,
   tr,
@@ -520,26 +523,26 @@ function compareMarkWithStyle(
 
   if (style) {
     switch (mark.type.name) {
-      case MARK_STRONG:
+      case MARKSTRONG:
         same = undefined !== style[STRONG];
         break;
-      case MARK_EM:
+      case MARKEM:
         same = undefined !== style[EM];
         break;
-      case MARK_TEXT_COLOR:
+      case MARKTEXTCOLOR:
         same = mark.attrs['color'] === style[COLOR];
         break;
-      case MARK_FONT_SIZE:
+      case MARKFONTSIZE:
         same = mark.attrs['pt'] === Number(style[FONTSIZE]);
         break;
-      case MARK_FONT_TYPE:
+      case MARKFONTTYPE:
         same = mark.attrs['name'] === style[FONTNAME];
         break;
-      case MARK_STRIKE:
-      case MARK_SUPER:
-      case MARK_TEXT_HIGHLIGHT:
+      case MARKSTRIKE:
+      case MARKSUPER:
+      case MARKTEXTHIGHLIGHT:
         break;
-      case MARK_UNDERLINE:
+      case MARKUNDERLINE:
         same = undefined !== style[UNDERLINE];
         break;
       default:
@@ -634,18 +637,18 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
         case STRONG:
         case BOLDPARTIAL:
           if (styleProp.styles[property]) {
-            markType = schema.marks[MARK_STRONG];
+            markType = schema.marks[MARKSTRONG];
             marks.push(markType.create(attrs));
           }
           break;
 
         case EM:
-          markType = schema.marks[MARK_EM];
+          markType = schema.marks[MARKEM];
           if (styleProp.styles[property]) marks.push(markType.create(attrs));
           break;
 
         case COLOR:
-          markType = schema.marks[MARK_TEXT_COLOR];
+          markType = schema.marks[MARKTEXTCOLOR];
           attrs = styleProp.styles[property]
             ? { color: styleProp.styles[property] }
             : null;
@@ -653,7 +656,7 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
           break;
 
         case FONTSIZE:
-          markType = schema.marks[MARK_FONT_SIZE];
+          markType = schema.marks[MARKFONTSIZE];
           attrs = styleProp.styles[property]
             ? { pt: styleProp.styles[property] }
             : null;
@@ -661,7 +664,7 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
           break;
 
         case FONTNAME:
-          markType = schema.marks[MARK_FONT_TYPE];
+          markType = schema.marks[MARKFONTTYPE];
           attrs = styleProp.styles[property]
             ? { name: styleProp.styles[property] }
             : null;
@@ -669,7 +672,7 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
           break;
 
         case TEXTHL:
-          markType = schema.marks[MARK_TEXT_HIGHLIGHT];
+          markType = schema.marks[MARKTEXTHIGHLIGHT];
           attrs = styleProp.styles[property]
             ? { highlightColor: styleProp.styles[property] }
             : null;
@@ -677,7 +680,7 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
           break;
 
         case UNDERLINE:
-          markType = schema.marks[MARK_UNDERLINE];
+          markType = schema.marks[MARKUNDERLINE];
           marks.push(markType.create(attrs));
           break;
 
@@ -825,7 +828,7 @@ function hasMismatchHeirarchy(
   styleName /* New style to be applied */
 ) {
   const styleLevel = Number(getStyleLevel(styleName ? styleName : ''));
-  const currentLevel = getStyleLevel(node.attrs.styleName);
+  const currentLevel = getStyleLevel(node.attrs?.styleName);
   nodesBeforeSelection.splice(0);
   nodesAfterSelection.splice(0);
   const attrs = Object.assign({}, node.attrs);
@@ -1131,7 +1134,7 @@ export function allowCustomLevelIndent(
 }
 
 // Mange heirarchy for the elements after selection
-function manageElementsAfterSelection(nodeArray, state, tr) {
+export function manageElementsAfterSelection(nodeArray, state, tr) {
   let selectedLevel = Number(MISSED_HEIRACHY_ELEMENT.previousLevel);
   let subsequantLevel = 0;
   let counter = 0;
@@ -1192,7 +1195,7 @@ function setNewElementObject(attrs, startPos, previousLevel, isAfter) {
   MISSED_HEIRACHY_ELEMENT.previousLevel = previousLevel;
 }
 
-function insertParagraph(nodeAttrs, startPos, tr, index, state) {
+export function insertParagraph(nodeAttrs, startPos, tr, index, state) {
   if (state && state.schema && nodeAttrs) {
     const paragraph = state.schema.nodes[PARAGRAPH];
     // [FS] IRAD-1202 2021-02-15
@@ -1217,7 +1220,7 @@ function resetNodeAttrs(nodeAttrs, customStyle) {
   return nodeAttrs;
 }
 
-function addElementEx(
+export function addElementEx(
   nodeAttrs,
   state,
   tr,
@@ -1281,9 +1284,9 @@ export function getStyleLevel(styleName: string) {
     const styleProp = getCustomStyleByName(styleName);
     if (
       null !== styleProp &&
-      styleProp.styles &&
-      styleProp.styles.styleLevel &&
-      styleProp.styles.hasNumbering
+      styleProp?.styles &&
+      styleProp?.styles?.styleLevel &&
+      styleProp?.styles?.hasNumbering
     ) {
       styleLevel = styleProp.styles.styleLevel;
     } else {
@@ -1367,7 +1370,7 @@ function _setNodeAttribute(
 
 // [FS] IRAD-1087 2020-11-02
 // Issue fix: Missing the applied link after applying a style
-function removeAllMarksExceptLink(
+export function removeAllMarksExceptLink(
   from: number,
   to: number,
   tr: Transform,
@@ -1395,7 +1398,7 @@ function removeAllMarksExceptLink(
   return handleRemoveMarks(tr, tasks, from, to, schema, styleProp, state);
 }
 
-function handleRemoveMarks(
+export function handleRemoveMarks(
   tr: Transform,
   tasks: any,
   from: number,
@@ -1407,7 +1410,7 @@ function handleRemoveMarks(
   tasks.forEach((job) => {
     const { mark } = job;
     const retObj = { modified: false };
-    if (styleProp && MARK_TEXT_HIGHLIGHT === mark.type.name) {
+    if (styleProp && MARKTEXTHIGHLIGHT === mark.type.name) {
       tr = compareMarkWithStyle(
         mark,
         styleProp.styles,
@@ -1533,8 +1536,8 @@ export function applyLineStyle(
   return tr;
 }
 // add bold marks to node
-function addMarksToLine(tr, state, node, pos, boldSentence) {
-  const markType = state.schema.marks[MARK_STRONG];
+export function addMarksToLine(tr, state, node, pos, boldSentence) {
+  const markType = state.schema.marks[MARKSTRONG];
   let textContent = getNodeText(node);
   const endPos = textContent.length;
   let content = '';
@@ -1681,7 +1684,7 @@ export function isLevelUpdated(
         style.styles &&
         currentLevel > 0 &&
         !style.styles.hasNumbering) ||
-      (style.styles && undefined === style.styles.styleLevel) ||
+      (style?.styles && undefined === style?.styles?.styleLevel) ||
       (style && style.styles && style.styles.styleLevel !== currentLevel)
     ) {
       bOK = true;

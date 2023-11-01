@@ -7,11 +7,11 @@ import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import './custom-dropdown.css';
-import { getCustomStyleByName, getCustomStyle } from '../customStyle';
-import { getDetailsBullet } from '../CustomStyleNodeSpec';
+import { getCustomStyleByName, getCustomStyle } from '../customStyle.js';
+import { getDetailsBullet } from '../CustomStyleNodeSpec.js';
 import { PointerSurface } from '@modusoperandi/licit-ui-commands';
 import type { PointerSurfaceProps } from '@modusoperandi/licit-ui-commands';
-import { Icon } from './Icon';
+import { Icon } from './Icon.js';
 import cx from 'classnames';
 export class CustomStyleItem extends React.PureComponent<any, any> {
   props: PointerSurfaceProps & {

@@ -1,7 +1,7 @@
 // @flow
 
 import { Node, DOMOutputSpec } from 'prosemirror-model';
-import type { KeyValuePair } from './Constants';
+import type { KeyValuePair } from './Constants.js';
 
 // Always append to base calls.
 const ATTR_OVERRIDDEN = 'overridden';

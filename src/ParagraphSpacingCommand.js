@@ -1,19 +1,39 @@
 // @flow
 
-import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
-import { AllSelection,EditorState, TextSelection } from 'prosemirror-state';
-import { BLOCKQUOTE, HEADING, LIST_ITEM, PARAGRAPH } from './NodeNames';
-import { EditorView } from 'prosemirror-view';
-import { Schema } from 'prosemirror-model';
-import { Transform } from 'prosemirror-transform';
+import {
+  UICommand
+} from '@modusoperandi/licit-doc-attrs-step';
+import {
+  AllSelection,
+  EditorState,
+  TextSelection
+} from 'prosemirror-state';
+import {
+  BLOCKQUOTE,
+  HEADING,
+  LIST_ITEM,
+  PARAGRAPH
+} from './NodeNames.js';
+import {
+  EditorView
+} from 'prosemirror-view';
+import {
+  Schema
+} from 'prosemirror-model';
+import {
+  Transform
+} from 'prosemirror-transform';
 
 export function setParagraphSpacing(
   tr: Transform,
   schema: Schema,
-  paragraphSpacing: ?string,
-  isAfter: ?boolean
+  paragraphSpacing: ? string,
+  isAfter : ? boolean
 ): Transform {
-  const { selection, doc } = tr;
+  const {
+    selection,
+    doc
+  } = tr;
   if (!selection || !doc) {
     return tr;
   }
@@ -25,7 +45,10 @@ export function setParagraphSpacing(
     return tr;
   }
 
-  const { from, to } = selection;
+  const {
+    from,
+    to
+  } = selection;
   const paragraph = schema.nodes[PARAGRAPH];
   const heading = schema.nodes[HEADING];
   const listItem = schema.nodes[LIST_ITEM];
@@ -63,21 +86,25 @@ export function setParagraphSpacing(
   }
 
   tasks.forEach((job) => {
-    const { node, pos, nodeType } = job;
-    let { attrs } = node;
+    const {
+      node,
+      pos,
+      nodeType
+    } = job;
+    let {
+      attrs
+    } = node;
     if (isAfter) {
       attrs = {
         ...attrs,
-        paragraphSpacingAfter: paragraphSpacingValue
-          ? paragraphSpacingValue
-          : null,
+        paragraphSpacingAfter: paragraphSpacingValue ?
+          paragraphSpacingValue : null,
       };
     } else {
       attrs = {
         ...attrs,
-        paragraphSpacingBefore: paragraphSpacingValue
-          ? paragraphSpacingValue
-          : null,
+        paragraphSpacingBefore: paragraphSpacingValue ?
+          paragraphSpacingValue : null,
       };
     }
     tr = tr.setNodeMarkup(pos, nodeType, attrs, node.marks);
@@ -87,10 +114,10 @@ export function setParagraphSpacing(
 }
 
 export class ParagraphSpacingCommand extends UICommand {
-  _paragraphSpacing: ?string;
-  _isAfter: ?boolean;
+  _paragraphSpacing: ? string;
+  _isAfter: ? boolean;
 
-  constructor(paragraphSpacing: ?string, isAfter: ?boolean) {
+  constructor(paragraphSpacing: ? string, isAfter : ? boolean) {
     super();
     this._paragraphSpacing = paragraphSpacing;
     this._isAfter = isAfter;
@@ -98,10 +125,13 @@ export class ParagraphSpacingCommand extends UICommand {
 
   execute = (
     state: EditorState,
-    dispatch: ?(tr: Transform) => void,
-    view: ?EditorView
+    dispatch: ? (tr: Transform) => void,
+    view : ? EditorView
   ): boolean => {
-    const { schema, selection } = state;
+    const {
+      schema,
+      selection
+    } = state;
     const tr = setParagraphSpacing(
       state.tr.setSelection(selection),
       schema,
@@ -116,4 +146,3 @@ export class ParagraphSpacingCommand extends UICommand {
     }
   };
 }
-

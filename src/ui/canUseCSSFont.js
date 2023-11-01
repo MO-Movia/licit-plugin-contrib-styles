@@ -1,8 +1,8 @@
 // @flow
 
-const cached = {};
+export const cached = {};
 
-export default function canUseCSSFont(fontName: string): Promise<boolean> {
+export function canUseCSSFont(fontName: string): Promise<boolean> {
   const doc: any = document;
 
   if (cached.hasOwnProperty(fontName)) {
@@ -35,7 +35,8 @@ export default function canUseCSSFont(fontName: string): Promise<boolean> {
       const fontFaces = Array.from(doc.fonts.values());
       const matched = fontFaces.find((ff) => ff.family === fontName);
       const result = !!matched;
-      cached[fontName] = result;
+      if (cached)
+        cached[fontName] = result;
       resolve(result);
     };
     doc.fonts.ready.then(check);

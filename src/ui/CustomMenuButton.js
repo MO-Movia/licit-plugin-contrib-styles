@@ -11,8 +11,10 @@ import * as React from 'react';
 import { CustomButton } from '@modusoperandi/licit-ui-commands';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { createPopUp } from '@modusoperandi/licit-ui-commands';
-import uuid from './Uuid';
-import { CustomMenuUI } from './CustomMenuUI';
+import {
+  uuid
+} from './Uuid.js';
+import { CustomMenuUI } from './CustomMenuUI.js';
 import './custom-dropdown.css';
 
 export class CustomMenuButton extends React.PureComponent<any, any> {

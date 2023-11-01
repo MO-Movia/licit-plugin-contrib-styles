@@ -269,7 +269,7 @@ describe('CustomStyleCommand', () => {
     expect(
       customstylecommand.executeClearStyle(
         mockeditorstate,
-        () => {},
+        () => { },
         0,
         1,
         {},
@@ -576,7 +576,7 @@ describe('CustomStyleCommand', () => {
         },
       ],
     };
-    const mockdispatch = () => {};
+    const mockdispatch = () => { };
     const mockval = {
       styles: {
         hasBullet: true,
@@ -1618,7 +1618,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       },
     ],
     addMark: (x, y, z) => {
-      return { removeMark: (x, y, z) => {} };
+      return { removeMark: (x, y, z) => { } };
     },
     removeMark: (x, y, z) => {
       return { key: 'mocktr' };
@@ -2560,7 +2560,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})
     ).toBeDefined();
   });
-  it('should handle compareMarkWithStyle when type = MARK_STRIKE ', () => {
+  it('should handle compareMarkWithStyle when type = MARKSTRIKE ', () => {
     const mark = { type: { name: 'strike' }, attrs: { overridden: false } };
     const style1 = {
       align: 'justify',
@@ -3138,7 +3138,7 @@ describe('updateDocument', () => {
       },
     ],
     addMark: (x, y, z) => {
-      return { removeMark: (x, y, z) => {} };
+      return { removeMark: (x, y, z) => { } };
     },
     removeMark: (x, y, z) => {
       return { key: 'mocktr' };
@@ -4540,69 +4540,48 @@ describe('removeAllMarksExceptLink', () => {
       ],
     });
     expect(
-      removeAllMarksExceptLink(
-        0,
-        1,
-        {
-          doc: mockdoc,
-          removeMark: () => {
-            return { doc: mockdoc };
-          },
+      removeAllMarksExceptLink(0, 1, {
+        doc: mockdoc, removeMark: () => {
+          return { doc: mockdoc };
         },
-        {},
-        {},
-        {}
-      )
-    ).toBeDefined();
+      }, {}, {}, {})).toBeDefined();
   });
 });
 describe('handleRemoveMarks', () => {
   it('should handle handleRemoveMarks', () => {
-    expect(
-      handleRemoveMarks(
-        {
-          removeMark: () => {
-            return {};
-          },
+    const tr= {
+      removeMark: () => {
+        return {};
+      },
+    };
+    const tasks = [
+      {
+        mark: {
+          type: { name: 'mark-text-highlight' },
+          attrs: { overridden: undefined },
         },
-        [
-          {
-            mark: {
-              type: { name: 'mark-text-highlight' },
-              attrs: { overridden: undefined },
-            },
-          },
-        ],
-        0,
-        1,
-        {},
-        { styles: {} },
-        {}
-      )
-    ).toBeDefined();
+      },
+    ];
+    const testtr = handleRemoveMarks(tr,tasks,0,1,{},{styles:{}},{});
+    expect(testtr).toBeDefined();
   });
   it('should handle handleRemoveMarks when styleProps null', () => {
-    expect(
-      handleRemoveMarks(
+    expect(handleRemoveMarks(
+      { removeMark: () => { return {}; }, },
+      [
         {
-          removeMark: () => {
-            return {};
+          mark: {
+            type: { name: 'mark-text-highlight' },
+            attrs: { overridden: true },
           },
         },
-        [
-          {
-            mark: {
-              type: { name: 'mark-text-highlight' },
-              attrs: { overridden: true },
-            },
-          },
-        ],
-        0,
-        1,
-        {},
-        null,
-        {}
-      )
+      ],
+      0,
+      1,
+      {},
+      null,
+      {}
+    )
     ).toBeDefined();
   });
 });

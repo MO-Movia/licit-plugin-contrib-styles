@@ -1,4 +1,4 @@
-import sanitizeURL from './SanitizeURL';
+import {sanitizeURL} from './SanitizeURL';
 
 describe('sanitizeURL',()=>{
     it('should handle sanitizeURL when !url and return http://',()=>{

@@ -12,14 +12,14 @@ import {
   setStyles,
   saveStyle,
   getStylesAsync,
-} from '../customStyle';
+} from '../customStyle.js';
 import {
   RESERVED_STYLE_NONE,
   getDetailsBullet,
   BULLET_POINTS,
-} from '../CustomStyleNodeSpec';
+} from '../CustomStyleNodeSpec.js';
 import { EditorState } from 'prosemirror-state';
-import type { Style } from '../StyleRuntime';
+import type { Style } from '../StyleRuntime.js';
 
 let customStyles: Style[] = [];
 const otherStyleSelected = false;

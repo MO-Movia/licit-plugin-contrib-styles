@@ -1,8 +1,8 @@
 // @flow
 
-import { CustomMenuButton } from './CustomMenuButton';
+import { CustomMenuButton } from './CustomMenuButton.js';
 import { HeadingCommand } from '@modusoperandi/licit-ui-commands';
-import { CustomStyleCommand } from '../CustomStyleCommand';
+import { CustomStyleCommand } from '../CustomStyleCommand.js';
 
 import * as React from 'react';
 import { EditorState } from 'prosemirror-state';
@@ -12,13 +12,13 @@ import { Node } from 'prosemirror-model';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
-} from '../CustomStyleNodeSpec';
+} from '../CustomStyleNodeSpec.js';
 import {
   setStyles,
   getStylesAsync,
   hasStyleRuntime,
   isCustomStyleExists,
-} from '../customStyle';
+} from '../customStyle.js';
 import './custom-dropdown.css';
 
 // [FS] IRAD-1042 2020-09-09

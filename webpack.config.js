@@ -92,7 +92,6 @@ let options = {
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx'],
     alias: {},
   },
   plugins: [

@@ -1,4 +1,4 @@
-import convertToCSSPTValue from './convertToCSSPTValue';
+import {convertToCSSPTValue} from './convertToCSSPTValue';
 
 describe('convertToCSSPTValue', () => {
   it('should convert pixel value to points', () => {

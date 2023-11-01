@@ -4,26 +4,28 @@ import { Schema, Node } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
-import uuid from './Uuid';
+import {
+  uuid
+} from './Uuid.js';
 import './listType.css';
-import { CustomStyleItem } from './CustomStyleItem';
+import { CustomStyleItem } from './CustomStyleItem.js';
 
 import { atViewportCenter } from '@modusoperandi/licit-ui-commands';
 import { createPopUp } from '@modusoperandi/licit-ui-commands';
-import { AlertInfo } from './AlertInfo';
+import { AlertInfo } from './AlertInfo.js';
 
-import { CustomStyleSubMenu } from './CustomStyleSubMenu';
-import { CustomStyleEditor } from './CustomStyleEditor';
+import { CustomStyleSubMenu } from './CustomStyleSubMenu.js';
+import { CustomStyleEditor } from './CustomStyleEditor.js';
 import {
   updateDocument,
   isCustomStyleAlreadyApplied,
   isLevelUpdated,
-} from '../CustomStyleCommand';
-import { setStyles, saveStyle, renameStyle, removeStyle } from '../customStyle';
+} from '../CustomStyleCommand.js';
+import { setStyles, saveStyle, renameStyle, removeStyle } from '../customStyle.js';
 import { setTextAlign } from '@modusoperandi/licit-ui-commands';
 import { setTextLineSpacing } from '@modusoperandi/licit-ui-commands';
-import { setParagraphSpacing } from '../ParagraphSpacingCommand';
-import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
+import { setParagraphSpacing } from '../ParagraphSpacingCommand.js';
+import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec.js';
 
 // [FS] IRAD-1039 2020-09-24
 // UI to show the list buttons

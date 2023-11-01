@@ -3,7 +3,9 @@
 import cx from 'classnames';
 import * as React from 'react';
 
-import canUseCSSFont from './canUseCSSFont';
+import {
+  canUseCSSFont
+} from './canUseCSSFont.js';
 
 import './czi-icon.css';
 
@@ -30,7 +32,7 @@ const CSS_FONT = 'Material Icons';
 })();
 
 class SuperscriptIcon extends React.PureComponent<any, any> {
-  render(): React.Element<any> {
+  render(): React.ReactElement<any> {
     return (
       <span className="superscript-wrap">
         <span className="superscript-base">x</span>
@@ -39,9 +41,8 @@ class SuperscriptIcon extends React.PureComponent<any, any> {
     );
   }
 }
-
-class SubscriptIcon extends React.PureComponent<any, any> {
-  render(): React.Element<any> {
+class SubscriptIcon extends React.PureComponent < any, any > {
+  render(): React.ReactElement<any> {
     return (
       <span className="subscript-wrap">
         <span className="subscript-base">x</span>
@@ -49,11 +50,11 @@ class SubscriptIcon extends React.PureComponent<any, any> {
       </span>
     );
   }
-}
+  
+};
 
 export class Icon extends React.PureComponent<any, any> {
-  // Get the static Icon.
-  static get(type: string, title: ?string): React.Element<any> {
+  static get(type: string, title?: string): React.ReactElement<any> {
     const key = `${type || ''}-${title || ''}`;
     const icon = cached[key] || <Icon title={title} type={type} />;
     cached[key] = icon;
@@ -61,25 +62,25 @@ export class Icon extends React.PureComponent<any, any> {
   }
 
   props: {
-    type: string,
-    title: ?string,
+    type: string;
+    title?: string;
   };
 
-  render(): React.Element<any> {
+  render(): React.ReactElement<any> {
     const { type, title } = this.props;
     let className = '';
     let children = '';
-    if (type == 'superscript') {
-      className = cx('czi-icon', { [type]: true });
+    if (type === 'superscript') {
+      className = 'czi-icon superscript';
       children = <SuperscriptIcon />;
-    } else if (type == 'subscript') {
-      className = cx('czi-icon', { [type]: true });
+    } else if (type === 'subscript') {
+      className = 'czi-icon subscript';
       children = <SubscriptIcon />;
-    } else if (!type || !VALID_CHARS.test(type)) {
-      className = cx('czi-icon-unknown');
+    } else if (!type || !/^[A-Za-z0-9_-]+$/.test(type)) {
+      className = 'czi-icon-unknown';
       children = title || type;
     } else {
-      className = cx('czi-icon', { [type]: true });
+      className = `czi-icon ${type}`;
       children = type;
     }
     return <span className={className}>{children}</span>;

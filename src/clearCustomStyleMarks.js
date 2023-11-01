@@ -4,8 +4,8 @@ import { Schema, Node } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
 import { setTextAlign } from '@modusoperandi/licit-ui-commands';
 import { setTextLineSpacing } from '@modusoperandi/licit-ui-commands';
-import { setParagraphSpacing } from './ParagraphSpacingCommand';
-import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
+import { setParagraphSpacing } from './ParagraphSpacingCommand.js';
+import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec.js';
 
 // [FS] IRAD-1053 2020-11-13
 // Issue fix: Line spacing and paragraph spacing not removed when select Remove style.

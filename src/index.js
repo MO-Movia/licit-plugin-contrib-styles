@@ -16,14 +16,14 @@ import {
   setStyleRuntime,
   setHidenumberingFlag,
   isStylesLoaded,
-} from './customStyle';
-import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
+} from './customStyle.js';
+import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec.js';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
 import { Node, Schema } from 'prosemirror-model';
-import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand';
-import { applyEffectiveSchema } from './EditorSchema';
-import type { StyleRuntime } from './StyleRuntime';
+import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand.js';
+import { applyEffectiveSchema } from './EditorSchema.js';
+import type { StyleRuntime } from './StyleRuntime.js';
 
 const ENTERKEYCODE = 13;
 const DELKEYCODE = 46;
@@ -137,7 +137,7 @@ export class CustomstylePlugin extends Plugin {
   }
 }
 
-function onInitAppendTransaction(ref, tr, nextState) {
+export function onInitAppendTransaction(ref, tr, nextState) {
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
     tr = updateStyleOverrideFlag(nextState, tr);
@@ -151,7 +151,7 @@ function onInitAppendTransaction(ref, tr, nextState) {
   return tr;
 }
 
-function onUpdateAppendTransaction(
+export function onUpdateAppendTransaction(
   ref,
   tr,
   nextState,
@@ -279,7 +279,7 @@ function onUpdateAppendTransaction(
 }
 
 // [FS] IRAD-1202 2021-02-15
-function remapCounterFlags(tr) {
+export function remapCounterFlags(tr) {
   // Depending on the window variables,
   // set counters for numbering.
   const cFlags = tr.doc.attrs.counterFlags;
@@ -331,7 +331,7 @@ function refreshToApplyStyles() {
 
 // [FS] IRAD-1130 2021-01-07
 // Handle heirarchy on delete
-function manageHierarchyOnDelete(prevState, nextState, tr, view) {
+export function manageHierarchyOnDelete(prevState, nextState, tr, view) {
   const nodesAfterSelection = [];
   const nodesBeforeSelection = [];
   let selectedPos = nextState.selection.from;
@@ -440,7 +440,7 @@ function manageHierarchyOnDelete(prevState, nextState, tr, view) {
 }
 
 // get all the nodes having styleName attribute
-function nodeAssignment(state) {
+export function nodeAssignment(state) {
   const nodes = [];
   state.doc.descendants((node, pos) => {
     if (requiredAddAttr(node)) {
@@ -484,7 +484,7 @@ function applyLineStyleForBoldPartial(nextState, tr) {
 
 // [FS] IRAD-1474 2021-07-01
 // Select multiple paragraph with empty paragraph and apply style not working.
-function applyStyleForEmptyParagraph(nextState, tr) {
+export function applyStyleForEmptyParagraph(nextState, tr) {
   const opt = 1;
   const startPos = nextState.selection.$from.before(1);
   const endPos = nextState.selection.$to.after(1) - 1;
@@ -516,7 +516,7 @@ function applyStyleForEmptyParagraph(nextState, tr) {
 }
 
 // Continious Numbering for custom style
-function applyStyleForNextParagraph(prevState, nextState, tr, view) {
+export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
   let modified = false;
   if (!tr) {
     tr = nextState.tr;
@@ -578,7 +578,7 @@ function applyStyleForNextParagraph(prevState, nextState, tr, view) {
   return modified ? tr : null;
 }
 
-function resetTheDefaultStyleNameToNone(styleName) {
+export function resetTheDefaultStyleNameToNone(styleName) {
   if ('Default' === styleName) {
     styleName = RESERVED_STYLE_NONE;
   }
@@ -587,7 +587,7 @@ function resetTheDefaultStyleNameToNone(styleName) {
 
 // [FS] IRAD-1217 2021-02-24
 // get the style object using the nextlineStyleName and set the attribute values to the node.
-function setNodeAttrs(nextLineStyleName, newattrs) {
+export function setNodeAttrs(nextLineStyleName, newattrs) {
   if (nextLineStyleName) {
     const nextLineStyle = getCustomStyleByName(nextLineStyleName);
     if (nextLineStyle && nextLineStyle.styles) {
@@ -632,7 +632,7 @@ function isDocChanged(transactions) {
   return transactions.some((transaction) => transaction.docChanged);
 }
 
-function applyNormalIfNoStyle(nextState, tr, node, opt) {
+export function applyNormalIfNoStyle(nextState, tr, node, opt) {
   if (!tr) {
     tr = nextState.tr;
   }

@@ -60,7 +60,7 @@ export function setParagraphSpacing(
   const tasks = [];
   const paragraphSpacingValue = paragraphSpacing || null;
 
-  doc.nodesBetween(from, to, (node, pos, parentNode) => {
+  doc.nodesBetween(from, to, (node, pos) => {
     const nodeType = node.type;
     if (
       nodeType === paragraph ||
@@ -126,7 +126,6 @@ export class ParagraphSpacingCommand extends UICommand {
   execute = (
     state: EditorState,
     dispatch: ? (tr: Transform) => void,
-    view : ? EditorView
   ): boolean => {
     const {
       schema,

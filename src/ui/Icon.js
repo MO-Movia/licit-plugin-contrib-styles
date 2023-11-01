@@ -1,6 +1,4 @@
 // @flow
-
-import cx from 'classnames';
 import * as React from 'react';
 
 import {
@@ -14,7 +12,7 @@ import './czi-icon.css';
 //import injectStyleSheet from './injectStyleSheet';
 import './icon-font.css';
 
-const VALID_CHARS = /[a-z_]+/;
+//const VALID_CHARS = /[a-z_]+/;
 const cached = {};
 
 const CSS_CDN_URL = '//fonts.googleapis.com/icon?family=Material+Icons';

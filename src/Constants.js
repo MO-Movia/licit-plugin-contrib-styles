@@ -28,7 +28,7 @@ export const DEFAULT_NORMAL_STYLE = {
 //to get the selected node
 export function getNode(from: number, to: number, tr: Transform): Node {
   let selectedNode = null;
-  tr.doc.nodesBetween(from, to, (node, startPos) => {
+  tr.doc.nodesBetween(from, to, (node) => {
     if (node.type.name === 'paragraph') {
       if (null == selectedNode) {
         selectedNode = node;

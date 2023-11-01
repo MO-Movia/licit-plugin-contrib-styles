@@ -76,7 +76,7 @@ describe('ParagraphSpacingCommand ', () => {
       tr: {
         selection: TextSelection.create(doc, 0, 1), // Mock selection object
         doc: doc,
-        setSelection: (x) => {
+        setSelection: (_x) => {
           return {
             tr: {
               selection: {}, // Mock selection object
@@ -108,7 +108,7 @@ describe('ParagraphSpacingCommand ', () => {
       tr: {
         selection: TextSelection.create(doc, 0, 1), // Mock selection object
         doc: doc,
-        setSelection: (x) => {
+        setSelection: (_x) => {
           return {
             tr: {
               selection: {}, // Mock selection object
@@ -121,7 +121,7 @@ describe('ParagraphSpacingCommand ', () => {
       },
     };
     const mockview = {};
-    const dispatch = (tr) => {
+    const dispatch = (_tr) => {
       return true;
     };
     const psc = new ParagraphSpacingCommand('', true).execute(

@@ -65,7 +65,7 @@ function toDOM(base: toDOMFn, node: Node) {
   return output;
 }
 
-function getStyle(attrs: Object) {
+function getStyle(attrs) {
   return getStyleEx(
     attrs.align,
     attrs.lineSpacing,

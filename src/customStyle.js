@@ -70,7 +70,7 @@ export function getHidenumberingFlag(): boolean {
   return hideNumbering;
 }
 
-export function setStyleRuntime(runtime: any, callback) {
+export function setStyleRuntime(runtime, callback) {
   styleRuntime = runtime;
   getStylesAsync().then((result) => {
     if (result) {
@@ -137,7 +137,7 @@ export function isPreviousLevelExists(previousLevel: number) {
 
 // [FS] IRAD-1046 2020-09-24
 // To create a style object from the customstyles to show the styles in the example piece.
-export function getCustomStyle(customStyle: any) {
+export function getCustomStyle(customStyle) {
   const style: CSSStyle = {};
 
   for (const property in customStyle) {

@@ -61,7 +61,7 @@ describe('CustomMenuButton', () => {
       },
     ],
     disabled: true,
-    dispatch: (tr) => {},
+    dispatch: (_tr) => {},
     editorState: mockState,
     editorView: null,
     label: 'Normal',
@@ -98,7 +98,7 @@ describe('CustomMenuButton', () => {
       },
     ],
     disabled: true,
-    dispatch: (tr) => {},
+    dispatch: (_tr) => {},
     editorState: mockState,
     editorView: null,
     label: 'Normal',
@@ -210,7 +210,7 @@ describe('custommenubutton', () => {
         },
       ],
       disabled: true,
-      dispatch: (tr) => {},
+      dispatch: (_tr) => {},
       editorState: mockState,
       editorView: null,
       label: 'Normal',
@@ -247,13 +247,13 @@ describe('custommenubutton', () => {
         },
       ],
       disabled: true,
-      dispatch: (tr) => {},
+      dispatch: (_tr) => {},
       editorState: mockState,
       editorView: null,
       label: 'Normal',
     };
     custommenubutton.state.expanded = true;
-    custommenubutton._menu = { close: () => {}, update: (menuprops) => {} };
+    custommenubutton._menu = { close: () => {}, update: (_menuprops) => {} };
     const spy = jest.spyOn(custommenubutton._menu, 'update');
     custommenubutton._showMenu();
     expect(spy).toHaveBeenCalled();

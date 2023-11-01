@@ -2,7 +2,7 @@ import { toCustomStyleDOM, getCustomStyleAttrs } from './CustomStyleNodeSpec';
 import * as customstyle from './customStyle';
 
 describe('getAttrs', () => {
-  const base = (p) => {
+  const base = () => {
     return { attrs: { styleName: '' } };
   };
   const dom = document.createElement('div');

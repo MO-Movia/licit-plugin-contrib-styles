@@ -131,7 +131,7 @@ describe('CustomStyleCommand', () => {
     const mockEditorView = {
       state: editorState,
       dispatch: jest.fn(),
-      posAtCoords: ({ left, top }) => {
+      posAtCoords: ({ }) => {
         return {
           pos: 1,
           inside: 1,
@@ -256,7 +256,7 @@ describe('CustomStyleCommand', () => {
                 },
               },
               $to: {
-                after: (x) => {
+                after: () => {
                   return 1;
                 },
               },
@@ -394,7 +394,7 @@ describe('CustomStyleCommand', () => {
               },
             },
             $to: {
-              after: (x) => {
+              after: (_x) => {
                 return 1;
               },
             },
@@ -517,7 +517,7 @@ describe('CustomStyleCommand', () => {
       time: 1684831731977,
       curSelection: { type: 'text', anchor: 1, head: 1 },
       storedMarks: null,
-      setSelection(anchor, head) {
+      setSelection(_anchor, _head) {
         return true;
       },
     };
@@ -762,7 +762,7 @@ describe('getMarkByStyleName', () => {
               style: 'font-size',
             },
           ],
-          toDOM(mark, inline) {
+          toDOM(_mark, _inline) {
             return ['Test Mark'];
           },
         },
@@ -1000,7 +1000,7 @@ describe('getMarkByStyleName', () => {
               style: 'font-size',
             },
           ],
-          toDOM(mark, inline) {
+          toDOM(_mark, _inline) {
             return ['Test Mark'];
           },
         },
@@ -1617,16 +1617,16 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         },
       },
     ],
-    addMark: (x, y, z) => {
-      return { removeMark: (x, y, z) => { } };
+    addMark: (_x, _y, _z) => {
+      return { removeMark: (_x, _y, _z) => { } };
     },
-    removeMark: (x, y, z) => {
+    removeMark: (_x, _y, _z) => {
       return { key: 'mocktr' };
     },
-    insert: (a, b) => {
+    insert: (_a, _b) => {
       return { key: 'mocktr' };
     },
-    setSelection: (a) => {
+    setSelection: (_a) => {
       return {};
     },
   };
@@ -1788,7 +1788,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
             style: 'font-size',
           },
         ],
-        toDOM(mark, inline) {
+        toDOM(_mark, _inline) {
           return ['Test Mark'];
         },
       },
@@ -2037,7 +2037,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
             style: 'font-size',
           },
         ],
-        toDOM(mark, inline) {
+        toDOM(_mark, _inline) {
           return ['Test Mark'];
         },
       },
@@ -3137,10 +3137,10 @@ describe('updateDocument', () => {
         },
       },
     ],
-    addMark: (x, y, z) => {
-      return { removeMark: (x, y, z) => { } };
+    addMark: (_x, _y, _z) => {
+      return { removeMark: (_x, _y, _z) => { } };
     },
-    removeMark: (x, y, z) => {
+    removeMark: (_x, _y, _z) => {
       return { key: 'mocktr' };
     },
   };
@@ -3302,7 +3302,7 @@ describe('updateDocument', () => {
             style: 'font-size',
           },
         ],
-        toDOM(mark, inline) {
+        toDOM(_mark, _inline) {
           return ['Test Mark'];
         },
       },
@@ -3559,7 +3559,7 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
             style: 'font-size',
           },
         ],
-        toDOM(mark, inline) {
+        toDOM(_mark, _inline) {
           return ['Test Mark'];
         },
       },
@@ -4549,7 +4549,7 @@ describe('removeAllMarksExceptLink', () => {
 });
 describe('handleRemoveMarks', () => {
   it('should handle handleRemoveMarks', () => {
-    const tr= {
+    const tr = {
       removeMark: () => {
         return {};
       },
@@ -4562,7 +4562,7 @@ describe('handleRemoveMarks', () => {
         },
       },
     ];
-    const testtr = handleRemoveMarks(tr,tasks,0,1,{},{styles:{}},{});
+    const testtr = handleRemoveMarks(tr, tasks, 0, 1, {}, { styles: {} }, {});
     expect(testtr).toBeDefined();
   });
   it('should handle handleRemoveMarks when styleProps null', () => {

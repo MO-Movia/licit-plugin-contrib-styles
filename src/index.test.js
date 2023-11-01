@@ -263,7 +263,7 @@ const mockSchema = new Schema({
           style: 'font-size',
         },
       ],
-      toDOM(mark, inline) {
+      toDOM(_mark, _inline) {
         return ['Test Mark'];
       },
     },
@@ -2188,7 +2188,7 @@ describe('Cus Style Plugin-Pass', () => {
             styleName: { default: 'AFDP Bullet' },
           },
           parseDOM: [{ tag: 'p' }],
-          toDOM(node) {
+          toDOM(_node) {
             return ['p', 0];
           },
         },
@@ -2322,11 +2322,11 @@ describe('Cus Style Plugin-Pass', () => {
     };
 
     transaction1.doc = schematr.nodeFromJSON(json.doc);
-    transaction1.addStoredMark = (x) => {
+    transaction1.addStoredMark = (_x) => {
       return {};
     };
     transaction1.storedMarks = json.storedMarks;
-    transaction1.setNodeMarkup = (a, b, c) => {
+    transaction1.setNodeMarkup = (_a, _b, _c) => {
       return transaction1;
     };
 

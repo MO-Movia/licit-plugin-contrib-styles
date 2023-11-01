@@ -2,11 +2,11 @@ import { CustomStyleSubMenu } from './CustomStyleSubMenu';
 
 describe('CustomStyleSubMenu', () => {
   it('should handle onclick', () => {
-    const customstylesubmenu = new CustomStyleSubMenu({}, true, (x) => {});
+    const customstylesubmenu = new CustomStyleSubMenu({}, true, (_x) => {});
     customstylesubmenu.props = {
       command: {},
       disables: false,
-      close: (x) => {
+      close: (_x) => {
         return { key: 'closed' };
       },
     };

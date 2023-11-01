@@ -51,7 +51,7 @@ export class CustomstylePlugin extends Plugin {
     super({
       key: new PluginKey('CustomstylePlugin'),
       state: {
-        init(config, state) {
+        init(_config, _state) {
           loaded = false;
           firstTime = true;
           setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
@@ -78,7 +78,7 @@ export class CustomstylePlugin extends Plugin {
       },
 
       props: {
-        handlePaste(view, event, slice) {
+        handlePaste(_view, _event, slice) {
           if (
             slice.content &&
             slice.content.content[0] &&
@@ -663,7 +663,7 @@ function updateStyleOverrideFlag(state, tr) {
     tr = state.tr;
   }
 
-  tr.doc.descendants(function (child, pos) {
+  tr.doc.descendants(function (child, _pos) {
     const contentLen = child.content.size;
     if (tr && haveEligibleChildren(child, contentLen)) {
       const startPos = tr.curSelection.$anchor.pos; //pos

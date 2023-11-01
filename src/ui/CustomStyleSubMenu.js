@@ -9,7 +9,7 @@ export class CustomStyleSubMenu extends React.PureComponent<any, any> {
   props: {
     command: UICommand,
     disabled?: ?boolean,
-    close: (?string) => void,
+    close: () => void,
   };
 
   render(): React.Element<any> {
@@ -46,7 +46,7 @@ export class CustomStyleSubMenu extends React.PureComponent<any, any> {
   }
 
   //handles the option button click, close the popup with selected values
-  onButtonClick(val: Object) {
+  onButtonClick(val) {
     this.props.close(val);
   }
 }

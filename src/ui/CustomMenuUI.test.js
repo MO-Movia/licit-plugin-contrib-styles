@@ -76,9 +76,6 @@ describe('Custom Menu UI   ', () => {
           capco: {
             default: null,
           },
-          paddingTop: {
-            default: null,
-          },
         },
         content: 'inline*',
         group: 'block',
@@ -112,9 +109,6 @@ describe('Custom Menu UI   ', () => {
             default: null,
           },
           capco: {
-            default: null,
-          },
-          paddingTop: {
             default: null,
           },
         },
@@ -454,7 +448,7 @@ describe('Custom Menu UI   ', () => {
     commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
     staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
     disabled: false,
-    dispatch: (tr) => {},
+    dispatch: (_tr) => {},
     editorState: state,
     editorView: editor.view,
     icon: 'button',
@@ -474,7 +468,7 @@ describe('Custom Menu UI   ', () => {
   }
   document.getElementsByClassName = jest
     .fn()
-    .mockImplementation((className) => {
+    .mockImplementation((_className) => {
       // Return a custom Element instance with the given class name
       const mockElement = new MockElement('div');
       // mockElement.classList.add(className);
@@ -492,7 +486,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: (tr) => {},
+      dispatch: (_tr) => {},
       editorState: state,
       editorView: { disabled: true },
       icon: 'button',
@@ -511,7 +505,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: (tr) => {},
+      dispatch: (_tr) => {},
       editorState: state,
       editorView: { disabled: true },
       icon: 'button',
@@ -833,7 +827,7 @@ describe('Custom Menu UI   ', () => {
               style: 'font-size',
             },
           ],
-          toDOM(mark, inline) {
+          toDOM(_mark, _inline) {
             return ['Test Mark'];
           },
         },
@@ -854,29 +848,6 @@ describe('Custom Menu UI   ', () => {
           ],
           toDOM() {
             return ['span', 0];
-          },
-        },
-        strong: {
-          parseDOM: [
-            {
-              tag: 'strong',
-            },
-            {
-              tag: 'b',
-            },
-            {
-              style: 'font-weight',
-            },
-          ],
-
-          toDOM() {
-            return ['strong', 0];
-          },
-          attrs: {
-            overridden: {
-              hasDefault: true,
-              default: false,
-            },
           },
         },
       },
@@ -931,7 +902,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: (tr) => {},
+      dispatch: (_tr) => {},
       editorState: state,
       editorView: editor.view,
       icon: 'button',
@@ -991,7 +962,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: (tr) => {},
+      dispatch: (_tr) => {},
       editorState: state,
       editorView: view,
       icon: 'button',

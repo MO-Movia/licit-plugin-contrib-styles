@@ -187,11 +187,11 @@ export class CustomStyleCommand extends UICommand {
     this._customStyleName = customStyleName;
   }
 
-  renderLabel = (state: EditorState): any => {
+  renderLabel = (_state: EditorState): any => {
     return this._customStyleName;
   };
 
-  isEmpty = (obj: Object) => {
+  isEmpty = (obj) => {
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
         return false;
@@ -202,7 +202,7 @@ export class CustomStyleCommand extends UICommand {
 
   isEnabled = (
     state: EditorState,
-    view: EditorView,
+    _view: EditorView,
     menuTitle: string
   ): boolean => {
     // [FS] IRAD-1053 2020-10-22
@@ -219,7 +219,7 @@ export class CustomStyleCommand extends UICommand {
     const { selection, doc } = editorState;
     const { from, to } = selection;
     let customStyleName = RESERVED_STYLE_NONE;
-    doc.nodesBetween(from, to, (node, pos) => {
+    doc.nodesBetween(from, to, (node, _pos) => {
       if (node.attrs.styleName) {
         customStyleName = node.attrs.styleName;
       }
@@ -353,7 +353,7 @@ export class CustomStyleCommand extends UICommand {
       {
         anchor,
         position: atViewportCenter,
-        onClose: (val) => {
+        onClose: (_val) => {
           if (this._popUp) {
             this._popUp = null;
           }
@@ -371,7 +371,7 @@ export class CustomStyleCommand extends UICommand {
     const from = selection.$from.before(1);
     const to = selection.$to.after(1) - 1;
     let customStyleName = RESERVED_STYLE_NONE;
-    doc.nodesBetween(from, to, (node, pos) => {
+    doc.nodesBetween(from, to, (node, _pos) => {
       if (
         node.attrs.styleName &&
         RESERVED_STYLE_NONE !== node.attrs.styleName
@@ -513,10 +513,10 @@ export function compareMarkWithStyle(
   mark,
   style,
   tr,
-  startPos,
-  endPos,
+  _startPos,
+  _endPos,
   retObj,
-  state
+  _state
 ) {
   let same = false;
   let overridden = false;
@@ -572,16 +572,16 @@ export function updateOverrideFlag(
   styleName: string,
   tr: Transform,
   node: Node,
-  startPos: Number,
-  endPos: Number,
+  startPos: number,
+  endPos: number,
   retObj: any,
   state: EditorState
 ) {
   const styleProp = getCustomStyleByName(styleName);
   if (styleProp && styleProp.styles) {
-    node.descendants(function (child: Node, pos: number, parent: Node) {
+    node.descendants(function (child: Node, _pos: number, _parent: Node) {
       if (child instanceof Node) {
-        child.marks.forEach(function (mark, index) {
+        child.marks.forEach(function (mark, _index) {
           tr = compareMarkWithStyle(
             mark,
             styleProp.styles,
@@ -607,9 +607,9 @@ function onLoadRemoveAllMarksExceptOverridden(
   state: EditorState
 ) {
   const tasks = [];
-  node.descendants(function (child: Node, pos: number, parent: Node) {
+  node.descendants(function (child: Node, pos: number, _parent: Node) {
     if (child instanceof Node) {
-      child.marks.forEach(function (mark, index) {
+      child.marks.forEach(function (mark, _index) {
         // [FS] IRAD-1311 2021-05-06
         // Issue fix: Applied URL is removed when applying number style and refresh.
         if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
@@ -820,7 +820,7 @@ function isValidHeirarchy(
 // Loop the whole document
 // if any heirachy misses return true and keep the object in a global object
 function hasMismatchHeirarchy(
-  state: EditorState,
+  _state: EditorState,
   tr: Transform,
   node: Node /* The current node */,
   startPos: number,
@@ -943,10 +943,10 @@ function hasMismatchHeirarchy(
 function createEmptyElement(
   state: EditorState,
   tr: Transform,
-  node: Node /* The current node */,
+  _node: Node /* The current node */,
   startPos: number,
-  endPos: number,
-  attrs /* New style to be applied */
+  _endPos: number,
+  _attrs /* New style to be applied */
 ) {
   /* Validate the missed heirachy object details are availale */
   if (undefined !== MISSED_HEIRACHY_ELEMENT.attrs) {
@@ -1330,7 +1330,7 @@ export function applyLatestStyle(
   style: ?Style,
   opt: number
 ) {
-  let way = 1;
+  const way = 1;
   tr = applyStyleEx(
     style,
     styleName,
@@ -1354,7 +1354,7 @@ function isAllowedNode(node) {
 // [FS] IRAD-1088 2020-10-05
 // set custom style for node
 function _setNodeAttribute(
-  state: EditorState,
+  _state: EditorState,
   tr: Transform,
   from: number,
   to: number,
@@ -1452,7 +1452,7 @@ export function applyStyleToEachNode(
   style: Style,
   styleName: string
 ) {
-  let way = 0;
+  const way = 0;
   let _node = null;
   tr.doc.nodesBetween(from, to, (node, startPos) => {
     if (node.type.name === 'paragraph') {
@@ -1578,7 +1578,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
 // get text content from selected node
 function getNodeText(node: Node) {
   let textContent = '';
-  node.descendants(function (child: Node, pos: number, parent: Node) {
+  node.descendants(function (child: Node, _pos: number, _parent: Node) {
     if ('text' === child.type.name) {
       textContent = `${textContent}${child.text}`;
     }
@@ -1588,7 +1588,7 @@ function getNodeText(node: Node) {
 
 //to get the selected node
 export function getNode(
-  state: EditorState,
+  _state: EditorState,
   from: number,
   to: number,
   tr: Transform
@@ -1640,7 +1640,7 @@ export function isCustomStyleAlreadyApplied(
 ) {
   let found = false;
   const { doc } = editorState;
-  doc.nodesBetween(0, doc.nodeSize - 2, (node, pos) => {
+  doc.nodesBetween(0, doc.nodeSize - 2, (node, _pos) => {
     if (node.content && node.content.content && node.content.content.length) {
       const styleLevel = getStyleLevel(styleName);
       if (!found && 0 < styleLevel && node.attrs.styleName === styleName) {

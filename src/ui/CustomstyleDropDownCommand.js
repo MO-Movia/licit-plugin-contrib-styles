@@ -24,7 +24,7 @@ import './custom-dropdown.css';
 // [FS] IRAD-1042 2020-09-09
 // To include custom styles in the toolbar
 
-let HEADING_COMMANDS: Object = {
+let HEADING_COMMANDS = {
   [RESERVED_STYLE_NONE]: new HeadingCommand(0),
 };
 
@@ -69,13 +69,13 @@ export class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
     return [HEADING_COMMANDS];
   }
 
-  isValidCustomstyle(styleName) {
+  isValidCustomstyle(_styleName) {
     const bOK = isCustomStyleExists(this.state.styleName);
     return bOK;
   }
 
   staticCommands() {
-    const MENU_COMMANDS: Object = {
+    const MENU_COMMANDS = {
       ['newstyle']: new CustomStyleCommand('newstyle', 'New Style..'),
     };
     // [FS] IRAD-1176 2021-02-08
@@ -99,7 +99,7 @@ export class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
     let selectedStyleCount = 0;
     // [FS] IRAD-1088 2020-10-05
     // get the custom style name from node attribute
-    doc.nodesBetween(from, to, (node, pos) => {
+    doc.nodesBetween(from, to, (node, _pos) => {
       // [FS] IRAD-1231 2021-03-05
       // Issue fix : Applied custom style name shows only when click start and end position of paragraph,
       // otherwise shows 'None'.

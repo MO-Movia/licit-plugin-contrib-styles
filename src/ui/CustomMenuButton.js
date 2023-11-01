@@ -20,8 +20,8 @@ import './custom-dropdown.css';
 export class CustomMenuButton extends React.PureComponent<any, any> {
   props: {
     className?: ?string,
-    commandGroups: Array<{ [string]: UICommand }>,
-    staticCommand: Array<{ [string]: UICommand }>,
+    commandGroups: Array<{ [string:string]: UICommand }>,
+    staticCommand: Array<{ [string:string]: UICommand }>,
     disabled?: ?boolean,
     dispatch: (tr: Transform) => void,
     editorState: EditorState,

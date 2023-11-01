@@ -23,8 +23,8 @@ export class CustomStyleItem extends React.PureComponent<any, any> {
     label: string,
     onClick: ?(value: any, e: SyntheticEvent<>) => void,
     onMouseEnter: ?(value: any, e: SyntheticEvent<>) => void,
-    hasText?: ?Boolean,
-    onCommand: ?Function,
+    hasText?: ?boolean,
+    onCommand: ?()=>void,//Function changed to ()=>void
     selectionClassName: ?string,
   };
 

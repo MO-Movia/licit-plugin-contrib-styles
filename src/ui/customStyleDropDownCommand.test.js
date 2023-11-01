@@ -677,43 +677,6 @@ describe('customstyledropdowncommand', () => {
             },
           ],
         },
-        paragraph: {
-          content: 'text*',
-          attrs: {
-            align: { default: null },
-            color: { default: null },
-            id: { default: null },
-            indent: { default: null },
-            lineSpacing: { default: null },
-            paddingBottom: { default: null },
-            paddingTop: { default: null },
-            capco: { default: null },
-            styleName: { default: null },
-          },
-          toDOM(node) {
-            const { align, color } = node.attrs;
-            const style = [];
-            if (align) style.push(`text-align: ${align}`);
-            if (color) style.push(`color: ${color}`);
-            return ['p', { style: style.join('; ') }, 0];
-          },
-          parseDOM: [
-            {
-              tag: 'p',
-              getAttrs(dom) {
-                const style = dom.getAttribute('style') || '';
-                const attrs = {};
-                if (style.includes('text-align: left')) attrs.align = 'left';
-                if (style.includes('text-align: center'))
-                  attrs.align = 'center';
-                if (style.includes('text-align: right')) attrs.align = 'right';
-                const colorMatch = style.match(/color: (.*?);/);
-                if (colorMatch) attrs.color = colorMatch[1];
-                return attrs;
-              },
-            },
-          ],
-        },
         ordered_list: {
           content: 'text*', // Content can be any inline content (e.g., text, marks)
           attrs: {
@@ -849,9 +812,6 @@ describe('customstyledropdowncommand 1', () => {
             default: null,
           },
           capco: {
-            default: null,
-          },
-          paddingTop: {
             default: null,
           },
         },
@@ -1084,43 +1044,6 @@ describe('customstyledropdowncommand 1', () => {
             },
           ],
         },
-        paragraph: {
-          content: 'text*',
-          attrs: {
-            align: { default: null },
-            color: { default: null },
-            id: { default: null },
-            indent: { default: null },
-            lineSpacing: { default: null },
-            paddingBottom: { default: null },
-            paddingTop: { default: null },
-            capco: { default: null },
-            styleName: { default: null },
-          },
-          toDOM(node) {
-            const { align, color } = node.attrs;
-            const style = [];
-            if (align) style.push(`text-align: ${align}`);
-            if (color) style.push(`color: ${color}`);
-            return ['p', { style: style.join('; ') }, 0];
-          },
-          parseDOM: [
-            {
-              tag: 'p',
-              getAttrs(dom) {
-                const style = dom.getAttribute('style') || '';
-                const attrs = {};
-                if (style.includes('text-align: left')) attrs.align = 'left';
-                if (style.includes('text-align: center'))
-                  attrs.align = 'center';
-                if (style.includes('text-align: right')) attrs.align = 'right';
-                const colorMatch = style.match(/color: (.*?);/);
-                if (colorMatch) attrs.color = colorMatch[1];
-                return attrs;
-              },
-            },
-          ],
-        },
         ordered_list: {
           content: 'text*', // Content can be any inline content (e.g., text, marks)
           attrs: {
@@ -1250,43 +1173,6 @@ describe('customstyledropdowncommand 1', () => {
     const mockschema = new Schema({
       nodes: {
         doc: { content: 'paragraph+' },
-        paragraph: {
-          content: 'text*',
-          attrs: {
-            align: { default: null },
-            color: { default: null },
-            id: { default: null },
-            indent: { default: null },
-            lineSpacing: { default: null },
-            paddingBottom: { default: null },
-            paddingTop: { default: null },
-            capco: { default: null },
-            styleName: { default: null },
-          },
-          toDOM(node) {
-            const { align, color } = node.attrs;
-            const style = [];
-            if (align) style.push(`text-align: ${align}`);
-            if (color) style.push(`color: ${color}`);
-            return ['p', { style: style.join('; ') }, 0];
-          },
-          parseDOM: [
-            {
-              tag: 'p',
-              getAttrs(dom) {
-                const style = dom.getAttribute('style') || '';
-                const attrs = {};
-                if (style.includes('text-align: left')) attrs.align = 'left';
-                if (style.includes('text-align: center'))
-                  attrs.align = 'center';
-                if (style.includes('text-align: right')) attrs.align = 'right';
-                const colorMatch = style.match(/color: (.*?);/);
-                if (colorMatch) attrs.color = colorMatch[1];
-                return attrs;
-              },
-            },
-          ],
-        },
         paragraph: {
           content: 'text*',
           attrs: {

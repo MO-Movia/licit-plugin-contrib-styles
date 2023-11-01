@@ -15,9 +15,6 @@ import {
   PARAGRAPH
 } from './NodeNames.js';
 import {
-  EditorView
-} from 'prosemirror-view';
-import {
   Schema
 } from 'prosemirror-model';
 import {

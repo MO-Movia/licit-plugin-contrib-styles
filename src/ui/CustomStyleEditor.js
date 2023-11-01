@@ -70,7 +70,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   _unmounted = false;
   _popUp = null;
 
-  constructor(props: any) {
+  constructor(props) {
     super(props);
     this.state = {
       ...props,
@@ -103,7 +103,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     this._unmounted = true;
   }
   // To set the selected style values
-  onStyleClick(style: string, event: any) {
+  onStyleClick(style: string, event) {
     let state = null;
     switch (style) {
       // simple toggles where style matches the key to change.
@@ -441,7 +441,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   // shows color dialog based on input text-color/text-heighlight
-  showColorDialog(isTextColor: Boolean, event: SyntheticEvent<*>) {
+  showColorDialog(isTextColor: boolean, event: SyntheticEvent<*>) {
     const anchor = event ? event.currentTarget : null;
     const hex = null;
     this._popUp = createPopUp(
@@ -470,7 +470,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   //handles the option button click, close the popup with selected values
-  onAlignButtonClick(val: String) {
+  onAlignButtonClick(val: string) {
     this.setState({ styles: { ...this.state.styles, align: val } });
   }
 
@@ -1375,7 +1375,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     }
   };
 
-  handleKeyDown = (e: KeyboardEvent): void => {
+  handleKeyDown = (_e: KeyboardEvent): void => {
     const txtName = document.getElementById('txtName');
     if (txtName) {
       txtName.focus();

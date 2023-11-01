@@ -1,4 +1,5 @@
 import { createEditor, doc, p } from 'jest-prosemirror';
+import * as  cusStyle from './customStyle';
 import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand';
 import { uuid } from './ui/Uuid';
 import {
@@ -284,29 +285,6 @@ const mockSchema = new Schema({
       ],
       toDOM() {
         return ['span', mark_type_attr, 0];
-      },
-    },
-    strong: {
-      parseDOM: [
-        {
-          tag: 'strong',
-        },
-        {
-          tag: 'b',
-        },
-        {
-          style: 'font-weight',
-        },
-      ],
-
-      toDOM() {
-        return ['strong', 0];
-      },
-      attrs: {
-        overridden: {
-          hasDefault: true,
-          default: false,
-        },
       },
     },
   },
@@ -917,7 +895,6 @@ describe('Style Plugin', () => {
       indent: null,
       isLevelbased: false,
       lineHeight: '1.5',
-      styleLevel: false,
     };
     expect(ccommand.getCustomStyleCommands(styleprops1)).toBeDefined();
   });
@@ -1014,7 +991,7 @@ describe('Style Plugin Execute', () => {
       schema: mockSchema,
       plugins: [plugin],
     });
-    const view = { dispatch: () => { return {}; } }
+    const view = { dispatch: () => { return {}; } };
 
     if (val != 'none') {
       const customcommand = new CustomStyleCommand(val, val);
@@ -1079,9 +1056,7 @@ describe('Custom Style Plugin pass', () => {
   const editor = createEditor(doc(p('<cursor>')), {
     plugins: [plugin],
   });
-
-  const cusStyle = require('./customStyle');
-
+///////jk
   const isStylesLoadedMock = jest.spyOn(cusStyle, 'isStylesLoaded');
   isStylesLoadedMock.mockImplementation(() => {
     return true;

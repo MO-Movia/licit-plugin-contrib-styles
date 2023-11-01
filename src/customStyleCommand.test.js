@@ -131,7 +131,7 @@ describe('CustomStyleCommand', () => {
     const mockEditorView = {
       state: editorState,
       dispatch: jest.fn(),
-      posAtCoords: ({ }) => {
+      posAtCoords: () => {
         return {
           pos: 1,
           inside: 1,
@@ -439,9 +439,9 @@ describe('CustomStyleCommand', () => {
         ],
         {
           selection: { $from: { before: () => 0 }, $to: { after: () => 1 } },
-          removeMark: () => {
-            key: 'markremoved tr';
-          },
+          removeMark: () => {return {
+            key: 'markremoved tr'
+          };},
         },
         {
           content: 'text*',
@@ -452,7 +452,7 @@ describe('CustomStyleCommand', () => {
           },
         }
       )
-    ).toBeUndefined();
+    ).toBeDefined();
   });
 
   it('should handle createNewStyle', () => {
@@ -785,29 +785,6 @@ describe('getMarkByStyleName', () => {
             return ['span', 0];
           },
         },
-        strong: {
-          parseDOM: [
-            {
-              tag: 'strong',
-            },
-            {
-              tag: 'b',
-            },
-            {
-              style: 'font-weight',
-            },
-          ],
-
-          toDOM() {
-            return ['strong', 0];
-          },
-          attrs: {
-            overridden: {
-              hasDefault: true,
-              default: false,
-            },
-          },
-        },
       },
       spec: {
         nodes: {
@@ -1021,29 +998,6 @@ describe('getMarkByStyleName', () => {
           ],
           toDOM() {
             return ['span', 0];
-          },
-        },
-        strong: {
-          parseDOM: [
-            {
-              tag: 'strong',
-            },
-            {
-              tag: 'b',
-            },
-            {
-              style: 'font-weight',
-            },
-          ],
-
-          toDOM() {
-            return ['strong', 0];
-          },
-          attrs: {
-            overridden: {
-              hasDefault: true,
-              default: false,
-            },
           },
         },
       },
@@ -1811,29 +1765,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           return ['span', 0];
         },
       },
-      strong: {
-        parseDOM: [
-          {
-            tag: 'strong',
-          },
-          {
-            tag: 'b',
-          },
-          {
-            style: 'font-weight',
-          },
-        ],
-
-        toDOM() {
-          return ['strong', 0];
-        },
-        attrs: {
-          overridden: {
-            hasDefault: true,
-            default: false,
-          },
-        },
-      },
     },
   });
 
@@ -2058,29 +1989,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         ],
         toDOM() {
           return ['span', 0];
-        },
-      },
-      strong: {
-        parseDOM: [
-          {
-            tag: 'strong',
-          },
-          {
-            tag: 'b',
-          },
-          {
-            style: 'font-weight',
-          },
-        ],
-
-        toDOM() {
-          return ['strong', 0];
-        },
-        attrs: {
-          overridden: {
-            hasDefault: true,
-            default: false,
-          },
         },
       },
     },
@@ -3325,29 +3233,6 @@ describe('updateDocument', () => {
           return ['span', 0];
         },
       },
-      strong: {
-        parseDOM: [
-          {
-            tag: 'strong',
-          },
-          {
-            tag: 'b',
-          },
-          {
-            style: 'font-weight',
-          },
-        ],
-
-        toDOM() {
-          return ['strong', 0];
-        },
-        attrs: {
-          overridden: {
-            hasDefault: true,
-            default: false,
-          },
-        },
-      },
     },
   });
 
@@ -3580,29 +3465,6 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
         ],
         toDOM() {
           return ['span', 0];
-        },
-      },
-      strong: {
-        parseDOM: [
-          {
-            tag: 'strong',
-          },
-          {
-            tag: 'b',
-          },
-          {
-            style: 'font-weight',
-          },
-        ],
-
-        toDOM() {
-          return ['strong', 0];
-        },
-        attrs: {
-          overridden: {
-            hasDefault: true,
-            default: false,
-          },
         },
       },
     },

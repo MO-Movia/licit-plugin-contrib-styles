@@ -39,7 +39,7 @@ class SuperscriptIcon extends React.PureComponent<any, any> {
     );
   }
 }
-class SubscriptIcon extends React.PureComponent < any, any > {
+class SubscriptIcon extends React.PureComponent<any, any> {
   render(): React.ReactElement<any> {
     return (
       <span className="subscript-wrap">
@@ -48,9 +48,7 @@ class SubscriptIcon extends React.PureComponent < any, any > {
       </span>
     );
   }
-  
-};
-
+}
 export class Icon extends React.PureComponent<any, any> {
   static get(type: string, title?: string): React.ReactElement<any> {
     const key = `${type || ''}-${title || ''}`;

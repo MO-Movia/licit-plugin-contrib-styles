@@ -2422,7 +2422,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
   });
   it('should handle compareMarkWithStyle when type = MARKFONTSIZE ', () => {
     const mark = {
-      type: { name: "mark-font-size" },
+      type: { name: 'mark-font-size' },
       attrs: { overridden: false },
     };
     const style1 = {
@@ -2446,7 +2446,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
   });
   it('should handle compareMarkWithStyle when type = MARKFONTTYPE ', () => {
     const mark = {
-      type: { name: "mark-font-type" },
+      type: { name: 'mark-font-type' },
       attrs: { overridden: false },
     };
     const style1 = {

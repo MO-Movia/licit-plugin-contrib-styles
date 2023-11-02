@@ -23,6 +23,6 @@ describe('canUseCSSFont', () => {
       fonts: null,
     };
     expect(canUseCSSFont('ariel')).toBeDefined();
-  })
+  });
 
 });

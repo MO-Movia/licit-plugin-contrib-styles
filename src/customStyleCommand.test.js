@@ -2420,9 +2420,33 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})
     ).toBeDefined();
   });
-  it('should handle compareMarkWithStyle when type = MARK_TEXT_HIGHLIGHT ', () => {
+  it('should handle compareMarkWithStyle when type = MARKFONTSIZE ', () => {
     const mark = {
-      type: { name: 'mark-text-highlight' },
+      type: { name: "mark-font-size" },
+      attrs: { overridden: false },
+    };
+    const style1 = {
+      align: 'left',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'FS_36',
+      fontName: 'Arial',
+      fontSize: 11,
+      textHighlight: '#3b0df2',
+      strong: true,
+      em: true,
+      underline: true,
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj, {})
+    ).toBeDefined();
+  });
+  it('should handle compareMarkWithStyle when type = MARKFONTTYPE ', () => {
+    const mark = {
+      type: { name: "mark-font-type" },
       attrs: { overridden: false },
     };
     const style1 = {

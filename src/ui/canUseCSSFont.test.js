@@ -1,3 +1,4 @@
+/ global global /
 import { canUseCSSFont, cached } from './canUseCSSFont';
 
 describe('canUseCSSFont', () => {
@@ -18,11 +19,9 @@ describe('canUseCSSFont', () => {
   //   delete global.document;
   //   delete cached['Font1'];
   // });
-  it('should handle canUseCSSFont',()=>{
-    global.document = {
-      fonts: null,
-    };
-    expect(canUseCSSFont('ariel')).toBeDefined();
+  it('should return true if the font is already in cache', async () => {
+    const result = await canUseCSSFont('Font1');
+    expect(result).toBe(true);
+    expect(mockFonts.check).not.toBeCalled();
   });
-
 });

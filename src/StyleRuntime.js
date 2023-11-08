@@ -29,6 +29,7 @@ export type Style = {
     nextLineStyleName?: string,
     toc?: Boolean,
     isHidden?: Boolean,
+    isList?: Boolean,
   },
 };
 
@@ -48,6 +49,7 @@ export type CSSStyle = {
   textDecoration: ?string, //css text-decoration property
   textAlign: ?string, //css text-align property
   lineHeight: ?string, //css line-height property
+  isList?: ?Boolean,
 };
 
 export type StyleRuntime = {
@@ -60,7 +62,7 @@ export type StyleRuntime = {
   // Adds / Replaces supplied style on service.
   // Resolves to server-processed style on success.
   // Rejects with Error('reason') on network or other failure.
-  saveStyle(style: Style): Promise<Style>;
+  saveStyle(style: Style): Promise<Style>,
   /**
    * Renames an existing style from the service.
    * @param oldStyleName

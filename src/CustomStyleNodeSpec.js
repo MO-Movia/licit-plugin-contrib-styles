@@ -13,6 +13,7 @@ export const MIN_INDENT_LEVEL = 0;
 export const MAX_INDENT_LEVEL = 7;
 export const ATTRIBUTE_INDENT = 'data-indent';
 export const ATTRIBUTE_STYLE_LEVEL = 'data-style-level';
+export const ATTRIBUTE_LIST_STYLE_LEVEL = 'list-style-level';
 export const HIDE_STYLE_LEVEL = 'hide-style-level';
 export const ATTRIBUTE_BULLET_SYMBOL = 'data-bullet-symbol';
 export const ATTRIBUTE_SHOW_SYMBOL = 'data-show-bullet';
@@ -45,11 +46,22 @@ function getAttrs(base: getAttrsFn, dom: HTMLElement) {
 function toDOM(base: toDOMFn, node: Node) {
   const output = base(node);
   output[1][STYLENAME] = node.attrs[STYLENAME];
-  const { style, styleLevel, indentOverriden, bulletDetails } = getStyle(node.attrs);
+  const { style, styleLevel, indentOverriden, bulletDetails, isListStyle } =
+    getStyle(node.attrs);
   style && (output[1].style = style);
   if (styleLevel) {
-    output[1][ATTRIBUTE_STYLE_LEVEL] = String(styleLevel);
-    output[1][HIDE_STYLE_LEVEL] = getHidenumberingFlag();
+    if (isListStyle) {
+      if (node.attrs.indent !== null) {
+        console.log("Indent value is", node.attrs.indent);
+        output[1][ATTRIBUTE_LIST_STYLE_LEVEL] = node.attrs.indent + 1;
+      } else {
+        output[1][ATTRIBUTE_LIST_STYLE_LEVEL] = styleLevel;
+      }
+      // output[1][HIDE_STYLE_LEVEL] = getHidenumberingFlag();
+    } else {
+      output[1][ATTRIBUTE_STYLE_LEVEL] = String(styleLevel);
+      output[1][HIDE_STYLE_LEVEL] = getHidenumberingFlag();
+    }
   }
   if ('' !== indentOverriden) {
     output[1][ATTRIBUTE_INDENT] = String(indentOverriden);
@@ -73,23 +85,35 @@ function getStyle(attrs: Object) {
 }
 
 // [FS] IRAD-1202 2021-02-15
-function refreshCounters(styleLevel) {
+function refreshCounters(styleLevel, isListStyle) {
   let latestCounters = '';
   let cssCounterReset = '';
   let setCounterReset = false;
-
-  // set style counters in window variables,
-  // so that it is remapped later to add to document attribute via transaction.
-  for (let index = 1; index <= styleLevel; index++) {
-    const counterVar = 'set-cust-style-counter-' + index;
-    const setCounterVal = window[counterVar];
-    if (!setCounterVal) {
-      cssCounterReset += `C${index} `;
-      setCounterReset = true;
+  if (isListStyle) {
+    // set style counters in window variables,
+    // so that it is remapped later to add to document attribute via transaction.
+    for (let index = 1; index <= styleLevel; index++) {
+      const counterVar = 'set-cust-list-style-counter-' + index;
+      const setCounterVal = window[counterVar];
+      if (!setCounterVal) {
+        cssCounterReset += `L${index} `;
+        setCounterReset = true;
+      }
+      window[counterVar] = true;
     }
-    window[counterVar] = true;
+  } else {
+    // set style counters in window variables,
+    // so that it is remapped later to add to document attribute via transaction.
+    for (let index = 1; index <= styleLevel; index++) {
+      const counterVar = 'set-cust-style-counter-' + index;
+      const setCounterVal = window[counterVar];
+      if (!setCounterVal) {
+        cssCounterReset += `C${index} `;
+        setCounterReset = true;
+      }
+      window[counterVar] = true;
+    }
   }
-
   if (setCounterReset) {
     latestCounters = `counter-increment: ${cssCounterReset};`;
   }
@@ -115,6 +139,7 @@ function getStyleEx(align, lineSpacing, styleName) {
   let style = '';
   let styleLevel = 0;
   let indentOverriden = '';
+  let isListStyle = false;
   let bulletDetails = {};
   if (align) {
     style += `text-align: ${align};`;
@@ -176,10 +201,12 @@ function getStyleEx(align, lineSpacing, styleName) {
         }
         // [FS] IRAD-1462 2021-06-17
         // FIX:  Numbering applied for paragraph even though the custom style not selected numbering(but set level)
-        styleLevel = styleProps.styles.hasNumbering
-          ? parseInt(styleProps.styles.styleLevel)
-          : 0;
-        style += refreshCounters(styleLevel);
+        styleLevel =
+          styleProps.styles.hasNumbering || styleProps.styles.isList
+            ? parseInt(styleProps.styles.styleLevel)
+            : 0;
+        isListStyle = styleProps.styles.isList;
+        style += refreshCounters(styleLevel, isListStyle);
       }
     } else if (styleName && styleName.includes(RESERVED_STYLE_NONE_NUMBERING)) {
       const indices = styleName.split(RESERVED_STYLE_NONE_NUMBERING);
@@ -187,11 +214,11 @@ function getStyleEx(align, lineSpacing, styleName) {
         styleLevel = parseInt(indices[1]);
       }
       if (styleLevel) {
-        style += refreshCounters(styleLevel);
+        style += refreshCounters(styleLevel, isListStyle);
       }
     }
   }
-  return { style, styleLevel, indentOverriden, bulletDetails };
+  return { style, styleLevel, indentOverriden, bulletDetails, isListStyle };
 }
 
 export const toCustomStyleDOM = toDOM;

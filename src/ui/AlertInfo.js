@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react';
+import './custom-style-edit.css';
 
 class AlertInfo extends React.PureComponent<any, any> {
   _unmounted = false;

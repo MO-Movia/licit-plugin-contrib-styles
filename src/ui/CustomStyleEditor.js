@@ -5,6 +5,7 @@
 import * as React from 'react';
 import './custom-style-edit.css';
 import {
+  atViewportCenter,
   ColorEditor,
   getLineSpacingValue,
   createPopUp,
@@ -22,6 +23,7 @@ import {
 } from '../CustomStyleNodeSpec';
 import { EditorState } from 'prosemirror-state';
 import type { Style } from '../StyleRuntime';
+import AlertInfo from './AlertInfo';
 
 let customStyles: Style[] = [];
 const otherStyleSelected = false;
@@ -256,7 +258,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
         // Style Example not showing properly when select Bold and Bold First Sentence
         style.fontWeight = 'normal';
       }
-      if (this.state.styles.styleLevel && this.state.styles.hasNumbering) {
+      if (this.state.styles.styleLevel && (this.state.styles.hasNumbering || this.state.styles.isList)) {
         // [FS] IRAD-1137 2021-01-11
         // Issue fix : The Preview text is not showing the numbering in bold after Bold Numbering is enabled.
         if (this.state.styles.boldNumbering) {
@@ -520,6 +522,64 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
     this.setState({
       styles: { ...this.state.styles, toc: val.target.checked },
     });
+  }
+
+  handleList(val) {
+    //edit mode
+    if (this.state.mode > 0 && this.isCustomStyleAlreadyApplied() && false === val.target.checked) {
+      this.showAlert();
+    }
+    else {
+      this.setState({
+        styles: {
+          ...this.state.styles, styleLevel: 1, isList: val.target.checked,
+          nextLineStyleName: val.target.checked
+            ? this.state.styleName
+            : RESERVED_STYLE_NONE,
+        },
+      });
+    }
+
+  }
+
+  isCustomStyleAlreadyApplied(
+  ) {
+    let found = false;
+    const { doc } = this.state.editorView.state;
+    doc.nodesBetween(0, doc.nodeSize - 2, (node, pos) => {
+      if (node.content && node.content.content && node.content.content.length) {
+        if (!found && node.attrs.styleName === this.state.styleName) {
+          found = true;
+        }
+      }
+    });
+    return found;
+  }
+
+  showAlert() {
+    const anchor = null;
+    this._popUp = createPopUp(
+      AlertInfo,
+      {
+        content:
+          'This style already used in the document,uncheck list-style will breaks the heirarchy.',
+        title: 'Modify Style Alert!!!',
+      },
+      {
+        anchor,
+        position: atViewportCenter,
+        onClose: (val) => {
+          if (this._popUp) {
+            this._popUp = null;
+            this.setState({
+              styles: {
+                ...this.state.styles, styleLevel: 1, isList: true
+              },
+            });
+          }
+        },
+      }
+    );
   }
 
   // [FS] IRAD-1201 2021-02-17
@@ -1106,12 +1166,37 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                 className="molsp-panel2 molsp-formp"
                 style={{ maxHeight: '100%' }}
               >
-                <p className="molsp-formp">Level:</p>
+                <div
+                  class="molsp-hierarchydiv"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <p class="molsp-formp" style={{ margin: '0' }}>
+                    Level:
+                  </p>
+                  <div
+                    class="molsp-hierarchydiv"
+                    style={{ textAlign: 'right' }}
+                  >
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={this.state.styles.isList}
+                        onChange={this.handleList.bind(this)}
+                      />
+                      List-style
+                    </label>
+                  </div>
+                </div>
                 <div className="molsp-hierarchydiv" style={{ display: 'flex' }}>
                   <div style={{ float: 'left', marginTop: '8px' }}>
                     <select
                       className="molsp-leveltype molsp-fontstyle"
                       id="levelValue"
+                      disabled={this.state.styles.isList === true}
                       onChange={this.onLevelChange.bind(this)}
                       value={this.state.styles.styleLevel || ''}
                     >
@@ -1191,6 +1276,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     <input
                       checked={this.state.styles.isLevelbased}
                       name="indenting"
+                      disabled={this.state.styles.isList === true}
                       onChange={this.onIndentRadioChanged.bind(this)}
                       type="radio"
                       value="0"
@@ -1209,6 +1295,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     <input
                       checked={!this.state.styles.isLevelbased}
                       name="indenting"
+                      disabled={this.state.styles.isList === true}
                       onChange={this.onIndentRadioChanged.bind(this)}
                       type="radio"
                       value="1"
@@ -1226,6 +1313,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                       <select
                         className="molsp-leveltype molsp-specifiedindent molsp-fontstyle"
                         onChange={this.onIndentChange.bind(this)}
+                        disabled={this.state.styles.isList === true}
                         style={{ width: '99px !important' }}
                         value={this.state.styles.indent || ''}
                       >
@@ -1288,6 +1376,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                         RESERVED_STYLE_NONE
                       }
                       name="nextlinestyle"
+                      disabled={this.state.styles.isList === true}
                       onChange={this.onNextLineStyleSelected.bind(this, 0)}
                       style={{
                         marginLeft: '10px',
@@ -1309,6 +1398,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     <input
                       checked={this.state.otherStyleSelected}
                       name="nextlinestyle"
+                      disabled={this.state.styles.isList === true}
                       onChange={this.onNextLineStyleSelected.bind(this, 2)}
                       style={{
                         marginLeft: '9px',
@@ -1331,6 +1421,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                         className="molsp-fontstyle molsp-stylenameinput"
                         // defaultValue={'DEFAULT'}
                         id="nextStyleValue"
+                        disabled={this.state.styles.isList === true}
                         onChange={this.onOtherStyleSelectionChanged.bind(this)}
                         style={{
                           height: '20px',

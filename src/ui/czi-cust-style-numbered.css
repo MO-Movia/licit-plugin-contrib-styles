@@ -1,8 +1,174 @@
 html {
   counter-reset: C1 C2 C3 C4 C5 C6 C7 C8 C9 C10;
+  counter-reset: L1 L2 L3 L4 L5 L6 L7 L8 L9 L10;
 
   --czi-counter-bold: 100;
 }
+
+/* List style counter */
+.ProseMirror p[list-style-level='1'] {
+  counter-increment: L1;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: L2 L3 L4 L5 L6 L7 L8 L9 L10;
+  margin-left: 12pt;
+}
+
+.ProseMirror p[list-style-level='2'] {
+  counter-increment: L2;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: L3 L4 L5 L6 L7 L8 L9 L10;
+  margin-left: 16pt;
+}
+
+.ProseMirror p[list-style-level='3'] {
+  counter-increment: L3;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: L4 L5 L6 L7 L8 L9 L10;
+  margin-left: 25pt;
+}
+
+.ProseMirror p[list-style-level='4'] {
+  counter-increment: L4;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: L5 L6 L7 L8 L9 L10;
+  margin-left: 37pt;
+}
+
+.ProseMirror p[list-style-level='5'] {
+  counter-increment: L5;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: L6 L7 L8 L9 L10;
+  margin-left: 46pt;
+}
+
+.ProseMirror p[list-style-level='6'] {
+  counter-increment: L6;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: L7 L8 L9 L10;
+  margin-left: 56pt;
+}
+
+.ProseMirror p[list-style-level='7'] {
+  counter-increment: L7;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: L8 L9 L10;
+  margin-left: 65pt;
+}
+
+.ProseMirror p[list-style-level='8'] {
+  counter-increment: L8;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: L9 L10;
+  margin-left: 73pt;
+}
+
+.ProseMirror p[list-style-level='9'] {
+  counter-increment: L9;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: L10;
+  margin-left: 85pt;
+}
+
+.ProseMirror p[list-style-level='10'] {
+  counter-increment: L10;
+  margin-left: 92pt;
+}
+
+.ProseMirror p[list-style-level='1']::before {
+  content: counter(L1, decimal) '. ';
+  font-weight: var(--czi-counter-bold);
+  margin-left: -12pt;
+  font-size: var(--czi-content-font-size);
+}
+
+.ProseMirror p[list-style-level='2']::before {
+  content: counter(L1, decimal) '.' counter(L2, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  margin-left: -16pt;
+  font-size: var(--czi-content-font-size);
+}
+
+.ProseMirror p[list-style-level='3']::before {
+  content: counter(L1, decimal) '.' counter(L2, decimal) '.'
+    counter(L3, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  margin-left: -25pt;
+  font-size: var(--czi-content-font-size);
+}
+
+.ProseMirror p[list-style-level='4']::before {
+  content: counter(L1, decimal) '.' counter(L2, decimal) '.'
+    counter(L3, decimal) '.' counter(L4, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  margin-left: -37pt;
+  font-size: var(--czi-content-font-size);
+}
+
+.ProseMirror p[list-style-level='5']::before {
+  content: counter(L1, decimal) '.' counter(L2, decimal) '.'
+    counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  margin-left: -46pt;
+  font-size: var(--czi-content-font-size);
+}
+
+.ProseMirror p[list-style-level='6']::before {
+  content: counter(L1, decimal) '.' counter(L2, decimal) '.'
+    counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) '.'
+    counter(L6, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  margin-left: -56pt;
+  font-size: var(--czi-content-font-size);
+}
+
+.ProseMirror p[list-style-level='7']::before {
+  content: counter(L1, decimal) '.' counter(L2, decimal) '.'
+    counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) '.'
+    counter(L6, decimal) '.' counter(L7, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  margin-left: -65pt;
+  font-size: var(--czi-content-font-size);
+}
+
+.ProseMirror p[list-style-level='8']::before {
+  content: counter(L1, decimal) '.' counter(L2, decimal) '.'
+    counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) '.'
+    counter(L6, decimal) '.' counter(L7, decimal) '.' counter(L8, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  margin-left: -73pt;
+  font-size: var(--czi-content-font-size);
+}
+
+.ProseMirror p[list-style-level='9']::before {
+  content: counter(L1, decimal) '.' counter(L2, decimal) '.'
+    counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) '.'
+    counter(L6, decimal) '.' counter(L7, decimal) '.' counter(L8, decimal) '.'
+    counter(L9, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  font-size: var(--czi-content-font-size);
+  margin-left: -85pt;
+}
+
+.ProseMirror p[list-style-level='10']::before {
+  content: counter(L1, decimal) '.' counter(L2, decimal) '.'
+    counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) '.'
+    counter(L6, decimal) '.' counter(L7, decimal) '.' counter(L8, decimal) '.'
+    counter(L9, decimal) '.' counter(L10, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  margin-left: -92pt;
+  font-size: var(--czi-content-font-size);
+}
+
+/* List style counter */
 
 .ProseMirror p[data-style-level='1'] {
   counter-increment: C1;

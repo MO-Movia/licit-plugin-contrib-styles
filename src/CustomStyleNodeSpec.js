@@ -80,12 +80,13 @@ function getStyle(attrs: Object) {
   return getStyleEx(
     attrs.align,
     attrs.lineSpacing,
-    attrs.styleName
+    attrs.styleName,
+    attrs.indent
   );
 }
 
 // [FS] IRAD-1202 2021-02-15
-function refreshCounters(styleLevel, isListStyle) {
+function refreshCounters(styleLevel, isListStyle, indent) {
   let latestCounters = '';
   let cssCounterReset = '';
   let setCounterReset = false;
@@ -135,7 +136,7 @@ function getBulletDetails(code) {
   return bulletData;
 }
 
-function getStyleEx(align, lineSpacing, styleName) {
+function getStyleEx(align, lineSpacing, styleName, indent) {
   let style = '';
   let styleLevel = 0;
   let indentOverriden = '';
@@ -206,7 +207,7 @@ function getStyleEx(align, lineSpacing, styleName) {
             ? parseInt(styleProps.styles.styleLevel)
             : 0;
         isListStyle = styleProps.styles.isList;
-        style += refreshCounters(styleLevel, isListStyle);
+        style += refreshCounters(styleLevel, isListStyle, indent);
       }
     } else if (styleName && styleName.includes(RESERVED_STYLE_NONE_NUMBERING)) {
       const indices = styleName.split(RESERVED_STYLE_NONE_NUMBERING);
@@ -214,7 +215,7 @@ function getStyleEx(align, lineSpacing, styleName) {
         styleLevel = parseInt(indices[1]);
       }
       if (styleLevel) {
-        style += refreshCounters(styleLevel, isListStyle);
+        style += refreshCounters(styleLevel, isListStyle, indent);
       }
     }
   }

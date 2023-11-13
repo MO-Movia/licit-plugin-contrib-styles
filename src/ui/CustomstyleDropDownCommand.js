@@ -68,7 +68,7 @@ class CustomstyleDropDownCommand extends React.PureComponent<any, any> {
         if (result) {
           setStyles(result);
           HEADING_NAMES = result;
-          if (null != HEADING_NAMES) {
+          if (null !== HEADING_NAMES) {
             HEADING_NAMES.forEach((obj) => {
               HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
                 obj,

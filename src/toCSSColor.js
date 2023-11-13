@@ -31,10 +31,11 @@ export function toCSSColor(source: any): string {
     if (color.valpha === 0) {
       ColorMaping[source] = RGBA_TRANSPARENT;
       return RGBA_TRANSPARENT;
+    } else {
+      const rgba = color.toString();
+      ColorMaping[source] = rgba.toString();
+      return rgba;
     }
-    const rgba = color.toString();
-    ColorMaping[source] = rgba.toString();
-    return rgba;
   }
 
   let hex = '';
@@ -42,8 +43,6 @@ export function toCSSColor(source: any): string {
     hex = Color(source).hex().toLowerCase();
     ColorMaping[source] = hex;
   } catch (ex) {
-    console.warn('unable to convert to hex', source);
-    ColorMaping[source] = '';
   }
   return hex;
 }

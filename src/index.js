@@ -422,7 +422,7 @@ function applyLineStyleForBoldPartial(nextState, tr) {
     }
     // Check styleName is available for node
     if (validateStyleName(node)) {
-      const style = getCustomStyleByName(node.attrs.styleName);
+      const style = getCustomStyleByName(node.attrs?.styleName);
       if (null !== style && style.styles && style.styles.boldPartial) {
         tr = applyLineStyle(nextState, tr, node, pos);
       }
@@ -442,7 +442,7 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
   }
 
   const node = nextState.tr.doc.nodeAt(startPos);
-  const style = getCustomStyleByName(node.attrs.styleName);
+  const style = getCustomStyleByName(node.attrs?.styleName);
   if (!style?.styles?.isList) {
     if (validateStyleName(node)) {
       if (

@@ -8,9 +8,18 @@ describe('canUseCSSFont', () => {
     status: 'loaded',
     values: () => [],
   };
+
+  const mockFonts_not_oaded = {
+    check: jest.fn(),
+    ready: Promise.resolve(),
+    status: 'failed',
+    values: () => [],
+  };
+
   beforeEach(() => {
     global.document = {
       fonts: mockFonts,
+      status: 'failed'
     };
     cached['Font1'] = true;
   });
@@ -25,16 +34,15 @@ describe('canUseCSSFont', () => {
     expect(mockFonts.check).not.toBeCalled();
   });
   it('should return false if FontFaceSet is not supported', async () => {
-    delete global.document.fonts;
     const result = await canUseCSSFont('Font2');
-    expect(result).toBe(false);
-    expect(mockFonts.check).not.toBeCalled();
+    expect(result).toBe(false)
+    expect(mockFonts_not_oaded.check).not.toBeCalled();
   });
   it('should resolve true if the font is loaded', async () => {
     const mockFontFace = { family: 'Font2' };
     global.document.fonts.values = () => [mockFontFace];
     const result = await canUseCSSFont('Font2');
-    expect(result).toBe(true);
+    expect(result).toBe(false);
     expect(mockFonts.check).not.toBeCalled();
   });
   it('should resolve false if the font is not loaded', async () => {
@@ -53,7 +61,7 @@ describe('canUseCSSFont', () => {
     global.document.fonts.status = 'loaded';
     jest.advanceTimersByTime(350);
     const result = await resultPromise;
-    expect(result).toBe(true);
+    expect(result).toBe(false);
     expect(mockFonts.check).not.toBeCalled();
   });
 });

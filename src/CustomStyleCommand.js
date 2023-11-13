@@ -222,8 +222,10 @@ class CustomStyleCommand extends UICommand {
     const { from, to } = selection;
     let customStyleName = RESERVED_STYLE_NONE;
     doc.nodesBetween(from, to, (node, pos) => {
-      if (node.attrs.styleName) {
-        customStyleName = node.attrs.styleName;
+      if (node.attrs?.styleName) {
+        customStyleName = node.attrs?.styleName;
+      } else {
+        customStyleName = RESERVED_STYLE_NONE;
       }
     });
     return customStyleName;
@@ -1684,8 +1686,8 @@ export function isLevelUpdated(
       (
         style?.styles &&
         currentLevel > 0 &&
-        !style.styles.hasNumbering) ||  (style?.styles && undefined === style?.styles?.styleLevel) ||
-        (style?.styles && style?.styles?.styleLevel !== currentLevel)
+        !style.styles.hasNumbering) || (style?.styles && undefined === style?.styles?.styleLevel) ||
+      (style?.styles && style?.styles?.styleLevel !== currentLevel)
     ) {
       bOK = true;
     }

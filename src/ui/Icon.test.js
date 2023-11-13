@@ -43,3 +43,4 @@ describe('Icon', () => {
     expect(Icon.get(null, 'edit')).toBeDefined();
   });
 });
+

@@ -1183,9 +1183,9 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   >
                     <label>
                       <input
-                        type="checkbox"
                         checked={this.state.styles.isList}
                         onChange={this.handleList.bind(this)}
+                        type="checkbox"
                       />
                       List-style
                     </label>
@@ -1195,8 +1195,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   <div style={{ float: 'left', marginTop: '8px' }}>
                     <select
                       className="molsp-leveltype molsp-fontstyle"
-                      id="levelValue"
                       disabled={this.state.styles.isList === true}
+                      id="levelValue"
                       onChange={this.onLevelChange.bind(this)}
                       value={this.state.styles.styleLevel || ''}
                     >
@@ -1275,8 +1275,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   <div className="molsp-indentdiv">
                     <input
                       checked={this.state.styles.isLevelbased}
-                      name="indenting"
                       disabled={this.state.styles.isList === true}
+                      name="indenting"
                       onChange={this.onIndentRadioChanged.bind(this)}
                       type="radio"
                       value="0"
@@ -1294,8 +1294,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   <div className="molsp-indentdiv">
                     <input
                       checked={!this.state.styles.isLevelbased}
-                      name="indenting"
                       disabled={this.state.styles.isList === true}
+                      name="indenting"
                       onChange={this.onIndentRadioChanged.bind(this)}
                       type="radio"
                       value="1"
@@ -1312,8 +1312,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     <span>
                       <select
                         className="molsp-leveltype molsp-specifiedindent molsp-fontstyle"
-                        onChange={this.onIndentChange.bind(this)}
                         disabled={this.state.styles.isList === true}
+                        onChange={this.onIndentChange.bind(this)}
                         style={{ width: '99px !important' }}
                         value={this.state.styles.indent || ''}
                       >
@@ -1349,7 +1349,7 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     <input
                       checked={
                         this.state.styles.nextLineStyleName ===
-                          this.state.styleName && !this.state.otherStyleSelected
+                        this.state.styleName && !this.state.otherStyleSelected
                       }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 1)}
@@ -1375,8 +1375,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                         this.state.styles.nextLineStyleName ===
                         RESERVED_STYLE_NONE
                       }
-                      name="nextlinestyle"
                       disabled={this.state.styles.isList === true}
+                      name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 0)}
                       style={{
                         marginLeft: '10px',
@@ -1397,8 +1397,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                   <div className="molsp-indentdiv">
                     <input
                       checked={this.state.otherStyleSelected}
-                      name="nextlinestyle"
                       disabled={this.state.styles.isList === true}
+                      name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 2)}
                       style={{
                         marginLeft: '9px',
@@ -1419,9 +1419,8 @@ class CustomStyleEditor extends React.PureComponent<any, any> {
                     <span id="nextStyle" style={{ display: 'none' }}>
                       <select
                         className="molsp-fontstyle molsp-stylenameinput"
-                        // defaultValue={'DEFAULT'}
-                        id="nextStyleValue"
                         disabled={this.state.styles.isList === true}
+                        id="nextStyleValue"
                         onChange={this.onOtherStyleSelectionChanged.bind(this)}
                         style={{
                           height: '20px',

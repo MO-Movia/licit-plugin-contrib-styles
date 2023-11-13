@@ -510,7 +510,12 @@ describe('Style Plugin', () => {
   });
 
   it('toCSSColor input not given', () => {
-    const bOK = toCSSColor('');
+    const bOK = toCSSColor('rgba(0, 0, 255, 0.5)');
+    expect(bOK).toBe('rgba(0, 0, 255, 0.5)');
+  });
+
+  it('toCSSColor input null', () => {
+    const bOK = toCSSColor(null);
     expect(bOK).toBe('');
   });
   //
@@ -520,7 +525,7 @@ describe('Style Plugin', () => {
   });
 
   it('toCSSColor input  given as transparent', () => {
-    const bOK = toCSSColor('transparent');
+    const bOK = toCSSColor('rgba(255, 0, 0, 0)');
     expect(bOK).toBe('rgba(0,0,0,0)');
   });
   it('sanitizeURL with out http url as input', () => {
@@ -1155,7 +1160,7 @@ describe('Custom Style Plugin pass', () => {
 
   it('Test 1 ', () => {
     const props = {
-      dispatch: () => {},
+      dispatch: () => { },
       editorState: state,
       editorView: editor.view,
     };

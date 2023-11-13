@@ -112,7 +112,7 @@ function createStyleNodeAttributes(schema: Schema) {
   ];
 
   contentArr.forEach((content) => {
-    createAttribute(content,  STYLEKEY, null);
+    createAttribute(content, STYLEKEY, null);
   });
 }
 

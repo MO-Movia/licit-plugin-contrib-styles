@@ -54,6 +54,9 @@ describe('CustomStyleCommand', () => {
     });
     const myDoc = DOMParser.fromSchema(mySchema).parse('<p>Hello, world!</p>');
     const mySelection = myDoc.content.findDiffEnd(myDoc.content);
+    myDoc.content.attrs = {
+      stleName: 'Normal'
+    }
     const myEditorState = EditorState.create({
       doc: myDoc,
       schema: mySchema,
@@ -268,7 +271,7 @@ describe('CustomStyleCommand', () => {
     expect(
       customstylecommand.executeClearStyle(
         mockeditorstate,
-        () => {},
+        () => { },
         0,
         1,
         {},
@@ -577,7 +580,7 @@ describe('CustomStyleCommand', () => {
         },
       ],
     };
-    const mockdispatch = () => {};
+    const mockdispatch = () => { };
     const mockval = {
       styles: {
         hasBullet: true,
@@ -1621,7 +1624,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       },
     ],
     addMark: (x, y, z) => {
-      return { removeMark: (x, y, z) => {} };
+      return { removeMark: (x, y, z) => { } };
     },
     removeMark: (x, y, z) => {
       return { key: 'mocktr' };
@@ -3141,7 +3144,7 @@ describe('updateDocument', () => {
       },
     ],
     addMark: (x, y, z) => {
-      return { removeMark: (x, y, z) => {} };
+      return { removeMark: (x, y, z) => { } };
     },
     removeMark: (x, y, z) => {
       return { key: 'mocktr' };

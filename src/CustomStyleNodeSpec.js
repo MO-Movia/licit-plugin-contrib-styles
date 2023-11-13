@@ -52,7 +52,7 @@ function toDOM(base: toDOMFn, node: Node) {
   if (styleLevel) {
     if (isListStyle) {
       if (node.attrs.indent !== null) {
-        console.log("Indent value is", node.attrs.indent);
+        console.log('Indent value is', node.attrs.indent);
         output[1][ATTRIBUTE_LIST_STYLE_LEVEL] = node.attrs.indent + 1;
       } else {
         output[1][ATTRIBUTE_LIST_STYLE_LEVEL] = styleLevel;
@@ -166,7 +166,7 @@ function getStyleEx(align, lineSpacing, styleName, indent) {
         styleLevel = parseInt(styleProps.styles.styleLevel);
       }
 
-      if (null=== align && styleProps.styles.align) {
+      if (null === align && styleProps.styles.align) {
         style += `text-align: ${styleProps.styles.align};`;
       }
 

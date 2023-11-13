@@ -6,7 +6,7 @@ import { TextSelection } from 'prosemirror-state';
 describe('paragraphspacingcommand', () => {
     it('should handle setParagraphSpacing', () => {
 
-        const doc = schema.node('doc', null, [
+        const doc = schema.node('doc', { paragraphSpacing: '1' }, [
             schema.node('paragraph'),
             schema.node('heading'),
             schema.node('paragraph'),
@@ -32,7 +32,7 @@ describe('paragraphspacingcommand', () => {
     });
     it('should handle setParagraphSpacing', () => {
 
-        const doc = schema.node('doc', null, [
+        const doc = schema.node('doc', { paragraphSpacing: '1' }, [
             schema.node('paragraph'),
             schema.node('heading'),
             schema.node('paragraph'),
@@ -61,8 +61,8 @@ describe('ParagraphSpacingCommand ', () => {
         expect(new ParagraphSpacingCommand('', true)).toBeDefined();
     });
     it('should handle execute', () => {
-jest.spyOn(paragraphspacingcommand, 'setParagraphSpacing').mockReturnValue({ docChanged: true });
-        const doc = schema.node('doc', null, [
+        jest.spyOn(paragraphspacingcommand, 'setParagraphSpacing').mockReturnValue({ docChanged: true });
+        const doc = schema.node('doc', { paragraphSpacing: '1' }, [
             schema.node('paragraph'),
             schema.node('heading'),
             schema.node('paragraph'),
@@ -116,9 +116,9 @@ jest.spyOn(paragraphspacingcommand, 'setParagraphSpacing').mockReturnValue({ doc
 
     it('should handle execute when tr.docChanged is true', () => {
         const mockstate = {
-            schema: {}, selection: {}, tr:{setSelection:()=>{return {docChanged:true};}}
+            schema: {}, selection: {}, tr: { setSelection: () => { return { docChanged: true }; } }
         };
-         const psc = new ParagraphSpacingCommand().execute(mockstate,()=>{return true;});
-         expect(psc).toBeTruthy();
+        const psc = new ParagraphSpacingCommand().execute(mockstate, () => { return true; });
+        expect(psc).toBeTruthy();
     });
 });

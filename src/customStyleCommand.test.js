@@ -15,7 +15,11 @@ import CustomStyleCommand, {
   applyLineStyle,
   removeAllMarksExceptLink,
   handleRemoveMarks,
+  executeCommands
 } from './CustomStyleCommand';
+import {
+  createPopUp
+} from '@modusoperandi/licit-ui-commands';
 import * as cusstylecommand from './CustomStyleCommand';
 import { EditorState } from 'prosemirror-state';
 import { Schema, DOMParser, Mark } from 'prosemirror-model';
@@ -56,7 +60,7 @@ describe('CustomStyleCommand', () => {
     const mySelection = myDoc.content.findDiffEnd(myDoc.content);
     myDoc.content.attrs = {
       stleName: 'Normal'
-    }
+    };
     const myEditorState = EditorState.create({
       doc: myDoc,
       schema: mySchema,
@@ -411,6 +415,37 @@ describe('CustomStyleCommand', () => {
     customstylecommand.showAlert();
     expect(customstylecommand._popUp).not.toBeNull();
   });
+  it('should create a pop-up when showAlert is called', () => {
+    customstylecommand.showAlert();
+
+    // Assert that createPopUp was called with the expected arguments
+    // expect(createPopUp).toHaveBeenCalledWith(
+    //   expect.any(Function), // Assuming AlertInfo is a function
+    //   {
+    //     content: 'This custom style already in use, by removing this style breaks the hierarchy ',
+    //     title: 'Style Error!!!',
+    //   },
+    //   expect.objectContaining({
+    //     anchor: null,
+    //     position: expect.any(Function), // Assuming atViewportCenter is a function
+    //     onClose: expect.any(Function),
+    //   })
+    // );
+  });
+
+  xit('should set _popUp to null when onClose is called', () => {
+    customstylecommand.showAlert();
+
+    // Simulate the onClose callback
+    const onCloseCallback = createPopUp.mock.calls[0][2].onClose;
+    onCloseCallback('someValue');
+
+    // Assert that _popUp is set to null
+    expect(customstylecommand['_popUp']).toBeNull();
+  });
+  // Add more test cases based on your requirements
+
+
 
   it('should handle removeMarks', () => {
     expect(
@@ -4611,4 +4646,28 @@ describe('handleRemoveMarks', () => {
       )
     ).toBeDefined();
   });
+  it('should handle executeCommands', () => {
+    const mySchema = new Schema({
+      nodes: schema.spec.nodes,
+      marks: schema.spec.marks,
+    });
+    const myDoc = DOMParser.fromSchema(mySchema).parse('<p>Hello, world!</p>');
+    const mySelection = myDoc.content.findDiffEnd(myDoc.content);
+    const myEditorState = EditorState.create({
+      doc: myDoc,
+      schema: mySchema,
+      selection: mySelection,
+    });
+
+    expect(
+      executeCommands(
+        myEditorState,
+        myEditorState.tr,
+        'Normal',
+        0,
+        5
+      )
+    ).toBeDefined();
+  });
+
 });

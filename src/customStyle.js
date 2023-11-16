@@ -207,7 +207,7 @@ export function getCustomStyle(customStyle: any) {
 // [FS] IRAD-1539 2021-08-02
 // method to save,retrive,rename and remove style from the style server.
 export function saveStyle(styleProps: Style): Promise<Style[]> {
-  return styleRuntime.saveStyle(styleProps);
+  return styleRuntime?.saveStyle(styleProps);
 }
 export function getStylesAsync(): Promise<Style[]> {
   return styleRuntime.getStylesAsync();

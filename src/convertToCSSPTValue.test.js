@@ -2,6 +2,7 @@ import convertToCSSPTValue from './convertToCSSPTValue';
 
 describe('convertToCSSPTValue', () => {
   it('should convert pixel value to points', () => {
+    expect(convertToCSSPTValue('0px')).toBe(0);
     expect(convertToCSSPTValue('16px')).toBeCloseTo(12.04685712);
     expect(convertToCSSPTValue('20px')).toBeCloseTo(15.0585714);
   });

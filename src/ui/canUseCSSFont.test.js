@@ -35,7 +35,7 @@ describe('canUseCSSFont', () => {
   });
   it('should return false if FontFaceSet is not supported', async () => {
     const result = await canUseCSSFont('Font2');
-    expect(result).toBe(false)
+    expect(result).toBe(false);
     expect(mockFonts_not_oaded.check).not.toBeCalled();
   });
   it('should resolve true if the font is loaded', async () => {

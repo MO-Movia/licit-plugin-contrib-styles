@@ -522,6 +522,93 @@ describe('Custom Menu UI   ', () => {
         jest.spyOn(custommenuui, 'removeTextAlignAndLineSpacing').mockReturnValue({ key: 'tr', docChanged: true, setNodeMarkup: () => { return { key: 'tr', docChanged: true }; } });
         expect(custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', (x) => { return x; })).toBe(true);
     });
+    it('should handle removeCustomStyleName function inside condition (tasks.length)', () => {
+       
+        const mockschema = new Schema({
+            nodes: {
+              doc: {
+                content: 'paragraph+',
+              },
+              paragraph: {
+                content: 'text*',
+                attrs: {
+                  styleName: { default: 'test' },
+                },
+                toDOM() {
+                  return ['p', 0];
+                },
+              },
+              heading: {
+                attrs: { level: { default: 1 }, styleName: { default: '' } },
+                content: 'inline*',
+                marks: '',
+                toDOM(node) {
+                  return [
+                    'h' + node.attrs.level,
+                    { 'data-style-name': node.attrs.styleName },
+                    0,
+                  ];
+                },
+              },
+              text: {
+                group: 'inline',
+                marks: '', 
+              },
+            },
+            marks: {
+              styleMark: {},
+            },
+          });
+        const mockdoc = mockschema.nodeFromJSON({
+          type: 'doc',
+          content: [
+            {
+              type: 'heading',
+              attrs: { level: 1, styleName: 'AFDP_Bullet' },
+              content: [
+                {
+                  type: 'text',
+                  text: 'Hello, ProseMirror!',
+                  marks: [{ type: 'styleMark' }],
+                },
+              ],
+            },
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: 'This is a mock dummy document.',
+                  attrs: { styleName: 'AFDP_Bullet' },
+                  marks: [{ type: 'styleMark' }],
+                },
+              ],
+            },
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: 'It demonstrates the structure of a ProseMirror document.',
+                  marks: [{ type: 'styleMark' }],
+                },
+              ],
+            },
+          ],
+        });
+        
+
+        const state = {
+            doc: mockdoc,
+            schema: schema,
+            selection: { from: 0, to: 1 },
+            plugins: [new CustomstylePlugin(TestCustomStyleRuntime)],
+            empty: null,
+            tr:{removeMark:()=>{return 1},}
+        };
+        jest.spyOn(custommenuui, 'removeTextAlignAndLineSpacing').mockReturnValue({ key: 'tr', docChanged: true, setNodeMarkup: () => { return { key: 'tr', docChanged: true }; } });
+        expect(custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', (x) => { return x; })).toBe(true);
+    });
     it('should handle showStyleWindow', () => {
 
         const schema = new Schema({

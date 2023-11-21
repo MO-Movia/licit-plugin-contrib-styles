@@ -17,9 +17,6 @@ import CustomStyleCommand, {
   handleRemoveMarks,
   executeCommands
 } from './CustomStyleCommand';
-import {
-  createPopUp
-} from '@modusoperandi/licit-ui-commands';
 import * as cusstylecommand from './CustomStyleCommand';
 import { EditorState } from 'prosemirror-state';
 import { Schema, DOMParser, Mark } from 'prosemirror-model';

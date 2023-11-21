@@ -523,7 +523,6 @@ describe('Custom Menu UI   ', () => {
         expect(custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', (x) => { return x; })).toBe(true);
     });
     it('should handle removeCustomStyleName function inside condition (tasks.length)', () => {
-       
         const mockschema = new Schema({
             nodes: {
               doc: {
@@ -552,7 +551,7 @@ describe('Custom Menu UI   ', () => {
               },
               text: {
                 group: 'inline',
-                marks: '', 
+                marks: '',
               },
             },
             marks: {
@@ -596,15 +595,13 @@ describe('Custom Menu UI   ', () => {
             },
           ],
         });
-        
-
         const state = {
             doc: mockdoc,
             schema: schema,
             selection: { from: 0, to: 1 },
             plugins: [new CustomstylePlugin(TestCustomStyleRuntime)],
             empty: null,
-            tr:{removeMark:()=>{return 1},}
+            tr:{removeMark:()=>{return 1;},}
         };
         jest.spyOn(custommenuui, 'removeTextAlignAndLineSpacing').mockReturnValue({ key: 'tr', docChanged: true, setNodeMarkup: () => { return { key: 'tr', docChanged: true }; } });
         expect(custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', (x) => { return x; })).toBe(true);

@@ -112,19 +112,18 @@ describe('toCustomStyleDOM', () => {
     jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({ styles: { hasBullet: true, bulletLevel: '25CF', styleLevel: 1, paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, strong: 10, boldNumbering: 10, em: 10, color: null, fontSize: 10, fontName: 'Tahoma', indent: 10, hasNumbering: true, align: 'left',isList:true } });
 
     const base = () => { return ['span', { 'styleName': '' }]; };
-    const node = { 'type': 'paragraph', 'attrs': 
+    const node = { 'type': 'paragraph', 'attrs':
     { 'align': 'center', 'color': null, 'id': null, 'indent': null, 'lineSpacing': '16pt', 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'FS_B01' }
     , 'content': [{ 'type': 'text', 'marks': [{ 'type': 'mark-font-size', 'attrs': { 'pt': 11, 'overridden': false } }, { 'type': 'mark-font-type', 'attrs': { 'name': 'Arial', 'overridden': false } }, { 'type': 'mark-text-color', 'attrs': { 'color': null, 'overridden': false } }], 'text': 'g' }] };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual( ["span", {"data-bullet-color": "#000000", "data-bullet-symbol": "● ", "data-indent": "10", "data-show-bullet": true, "list-style-level": 1, "style": "text-align: center;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;font-size: 10pt;font-family: Tahoma;counter-increment: L1 ;", "styleName": "FS_B01"}])
+    expect(toCustomStyleDOM(base, node)).toStrictEqual( ['span', {'data-bullet-color': '#000000', 'data-bullet-symbol': '● ', 'data-indent': '10', 'data-show-bullet': true, 'list-style-level': 1, 'style': 'text-align: center;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;font-size: 10pt;font-family: Tahoma;counter-increment: L1 ;', 'styleName': 'FS_B01'}]);
   });
-  
   it('should handle toCustomStyleDOM when isListStyle == true && node.attrs.indent !== null', () => {
     jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({ styles: { hasBullet: true, bulletLevel: '25CF', styleLevel: 1, paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, strong: 10, boldNumbering: 10, em: 10, color: null, fontSize: 10, fontName: 'Tahoma', indent: 10, hasNumbering: true, align: 'left',isList:true } });
 
     const base = () => { return ['span', { 'styleName': '' }]; };
-    const node = { 'type': 'paragraph', 'attrs': 
+    const node = { 'type': 'paragraph', 'attrs':
     { 'align': 'center', 'color': null, 'id': null, 'indent': '16px', 'lineSpacing': '16pt', 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'FS_B01' }
     , 'content': [{ 'type': 'text', 'marks': [{ 'type': 'mark-font-size', 'attrs': { 'pt': 11, 'overridden': false } }, { 'type': 'mark-font-type', 'attrs': { 'name': 'Arial', 'overridden': false } }, { 'type': 'mark-text-color', 'attrs': { 'color': null, 'overridden': false } }], 'text': 'g' }] };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual(["span", {"data-bullet-color": "#000000", "data-bullet-symbol": "● ", "data-indent": "10", "data-show-bullet": true, "list-style-level": "16px1", "style": "text-align: center;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;font-size: 10pt;font-family: Tahoma;", "styleName": "FS_B01"}])
+    expect(toCustomStyleDOM(base, node)).toStrictEqual(['span', {'data-bullet-color': '#000000', 'data-bullet-symbol': '● ', 'data-indent': '10', 'data-show-bullet': true, 'list-style-level': '16px1', 'style': 'text-align: center;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;font-size: 10pt;font-family: Tahoma;', 'styleName': 'FS_B01'}]);
   });
 });

@@ -6,6 +6,7 @@
   "description": "CustomStyle plugin built with ProseMirror",
   "main": "dist/index.js",
   "style": "dist/styles.css",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MO-Movia/licit.git"
@@ -19,12 +20,12 @@
     "build:babel": "babel src --out-dir dist",
     "build:flow": "flow-copy-source -v -i '**/__tests__/**' src dist",
     "build:css": "cp src/ui/*.css dist/ui && cp src/*.css dist",
-    "build:dist": "npm run build:clean && npm run webpack && npm run build:babel && npm run build:css && npm run build:flow",
+    "build:dist": "npm run build:clean && npm run webpack && npm run build:babel && npm run build:css && npm run build:flow && cp src/*.d.ts dist/",
     "flow": "flow --show-all-errors",
     "lint:js": "eslint \"src/**/*.js\"",
     "lint:css": "stylelint \"**/*.css\"",
     "lint": "npm run lint:css & npm run lint:js",
-    "ci:build": "npm run build:clean && npm run webpack && npm run build:babel && npm run build:css && npm run build:flow",
+    "ci:build": "npm run build:clean && npm run webpack && npm run build:babel && npm run build:css && npm run build:flow && cp src/*.d.ts dist/ ",
     "ci:bom": "cyclonedx-npm --ignore-npm-errors --short-PURLs --output-format XML --output-file dist/bom.xml",
     "prepare": "npm run build:dist"
   },
@@ -52,10 +53,6 @@
     "@babel/plugin-transform-parameters": "^7.10.5",
     "@babel/plugin-transform-runtime": "^7.11.5",
     "@babel/plugin-transform-typescript": "^7.22.15",
-    "@babel/plugin-proposal-json-strings": "^7.18.6",
-    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.15.0",
-    "@babel/plugin-proposal-numeric-separator": "^7.15.0",
-    "@babel/plugin-proposal-optional-chaining": "^7.15.0",
     "@babel/preset-env": "^7.11.5",
     "@babel/preset-flow": "^7.10.4",
     "@babel/preset-react": "^7.16.0",
@@ -101,8 +98,8 @@
     "uuid": "9.0.0"
   },
   "dependencies": {
-    "@modusoperandi/licit-doc-attrs-step": "modusoperandi-licit-doc-attrs-step-0.1.6.tgz",
-    "@modusoperandi/licit-ui-commands": "modusoperandi-licit-ui-commands-0.1.18.tgz",
+    "@modusoperandi/licit-doc-attrs-step": "file:modusoperandi-licit-doc-attrs-step-0.2.0.tgz",
+    "@modusoperandi/licit-ui-commands": "file:modusoperandi-licit-ui-commands-0.1.18.tgz",
     "classnames": "^2.3.1",
     "color": "3.1.2",
     "cors": "^2.8.5",

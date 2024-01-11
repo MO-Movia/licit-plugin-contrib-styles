@@ -95,11 +95,11 @@
     "write-file-webpack-plugin": "^4.5.1"
   },
   "peerDependencies": {
+    "@modusoperandi/licit-doc-attrs-step": "^0.1.5",
+    "@modusoperandi/licit-ui-commands": "^0.1.18",
     "uuid": "9.0.0"
   },
   "dependencies": {
-    "@modusoperandi/licit-doc-attrs-step": "file:modusoperandi-licit-doc-attrs-step-0.2.0.tgz",
-    "@modusoperandi/licit-ui-commands": "file:modusoperandi-licit-ui-commands-0.1.18.tgz",
     "classnames": "^2.3.1",
     "color": "3.1.2",
     "cors": "^2.8.5",

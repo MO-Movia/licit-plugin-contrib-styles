@@ -1,4 +1,4 @@
-/ global global /
+/ global global /;
 import { canUseCSSFont, cached } from './canUseCSSFont';
 
 describe('canUseCSSFont', () => {

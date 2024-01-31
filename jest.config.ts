@@ -3,7 +3,7 @@
  * https://jestjs.io/docs/configuration
  */
 
-import type {JestConfigWithTsJest} from 'ts-jest';
+import type { JestConfigWithTsJest } from 'ts-jest';
 
 const jestConfig: JestConfigWithTsJest = {
   // All imported modules in your tests should be mocked automatically
@@ -45,7 +45,7 @@ const jestConfig: JestConfigWithTsJest = {
   ],
 
   // An object that configures minimum threshold enforcement for coverage results
-  coverageThreshold: {global: {branches: 80, functions: 80, lines: 80}},
+  coverageThreshold: { global: { branches: 80, functions: 80, lines: 80 } },
 
   // A path to a custom dependency extractor
   // dependencyExtractor: undefined,
@@ -177,7 +177,7 @@ const jestConfig: JestConfigWithTsJest = {
   // ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
-  testRegex: ['((\\.|/*.)(test))\\.(js?|jsx?)$'],
+  testRegex: ['((\\.|/*.)(test))\\.(ts?|tsx?)$'],
 
   // This option allows the use of a custom results processor
   // testResultsProcessor: "jest-sonar-reporter",

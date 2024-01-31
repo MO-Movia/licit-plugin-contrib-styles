@@ -229,7 +229,7 @@ export class CustomStyleCommand extends UICommand {
 
   executeClearStyle(
     state: EditorState,
-    dispatch: ?(tr: Transform) => void,
+    dispatch?: (tr: Transform) => void,
     node: any,
     startPos: number,
     endPos: number,
@@ -270,8 +270,8 @@ export class CustomStyleCommand extends UICommand {
 
   execute = (
     state: EditorState,
-    dispatch: ?(tr: Transform) => void,
-    view: ?EditorView
+    dispatch?: (tr: Transform) => void,
+    view?: EditorView
   ): boolean => {
     let { tr } = state;
     const { selection } = state;
@@ -692,7 +692,7 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
   return marks;
 }
 function applyStyleEx(
-  styleProp: ?Style,
+  styleProp?: Style,
   styleName: string,
   state: EditorState,
   tr: Transform,
@@ -1327,8 +1327,8 @@ export function applyLatestStyle(
   node: Node,
   startPos: number,
   endPos: number,
-  style: ?Style,
-  opt: number
+  style?: Style,
+  opt?: number
 ) {
   const way = 1;
   tr = applyStyleEx(
@@ -1375,7 +1375,7 @@ export function removeAllMarksExceptLink(
   to: number,
   tr: Transform,
   schema: Schema,
-  styleProp: ?Style,
+  styleProp?: Style,
   state: EditorState
 ) {
   const { doc } = tr;
@@ -1404,7 +1404,7 @@ export function handleRemoveMarks(
   from: number,
   to: number,
   schema: Schema,
-  styleProp: ?Style,
+  styleProp?: Style,
   state: EditorState
 ) {
   tasks.forEach((job) => {

@@ -34,24 +34,24 @@ import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec.js';
 // UI to show the list buttons
 
 export class CustomMenuUI extends React.PureComponent<any, any> {
-  _activeCommand: ?UICommand = null;
+  _activeCommand?: UICommand = null;
   _popUp = null;
   _stylePopup = null;
   _styleName = null;
   _menuItemHeight = 28;
   // _popUpId = uuid();
   props: {
-    className?: ?string;
+    className?: string;
     commandGroups: Array<{ [key: string]: UICommand }>;
     staticCommand: Array<{ [key: string]: UICommand }>;
-    disabled?: ?boolean;
+    disabled?: boolean;
     dispatch: (tr: Transform) => void;
     editorState: EditorState;
-    editorView: ?EditorView;
+    editorView?: EditorView;
     icon?: string | React.Element<any> | null;
     label?: string | React.Element<any> | null;
-    title?: ?string;
-    _style?: ?any;
+    title?: string;
+    _style?: any;
   };
 
   _id = uuid();

@@ -170,7 +170,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   // Build styles to display the example piece
   buildStyle() {
-    const style = {};
+    const style: React.CSSProperties = {};
     if (this.state.styles.fontName) {
       style.fontFamily = this.state.styles.fontName;
     }
@@ -1439,14 +1439,14 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     }
 
     const hiddenDiv = document.getElementById('nextStyle');
-    if (hiddenDiv && hiddenDiv.style) {
+    if (hiddenDiv?.style) {
       hiddenDiv.style.display = display;
     }
   }
 
   // Disable the style attribute div on Rename
-  disableRename() {
-    const style = {};
+  disableRename(): React.CSSProperties {
+    const style: React.CSSProperties = {};
     if (2 === this.state.mode) {
       style.opacity = 0.4;
       style.pointerEvents = 'none';

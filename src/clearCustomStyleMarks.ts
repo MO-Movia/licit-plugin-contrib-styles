@@ -1,5 +1,3 @@
-// @flow
-
 import { Schema, Node } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
 import {

@@ -1,12 +1,13 @@
-// @flow
 // [FS] IRAD-1048 2020-09-24
 // UI for Custom Style edit
 //Need to change the button binding implementation
-import * as React from 'react';
+import React from 'react';
 import './custom-style-edit.css';
-import { ColorEditor } from '@modusoperandi/licit-ui-commands';
-import { createPopUp } from '@modusoperandi/licit-ui-commands';
-import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
+import {
+  ColorEditor,
+  createPopUp,
+  getLineSpacingValue,
+} from '@modusoperandi/licit-ui-commands';
 import {
   isCustomStyleExists,
   setStyles,
@@ -66,8 +67,7 @@ const LEVEL_VALUES = [
 
 const SAMPLE_TEXT = `Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample.
 Sample Text Sample Text Sample Text Sample Text Sample Text`;
-export class CustomStyleEditor extends React.PureComponent<any, any> {
-  _unmounted = false;
+export class CustomStyleEditor extends React.PureComponent<unknown, Style> {
   _popUp = null;
 
   constructor(props) {
@@ -94,14 +94,11 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       this.state.styles.fontName = 'Arial';
     }
     if (!this.state.styles.fontSize) {
-      this.state.styles.fontSize = 11;
+      this.state.styles.fontSize = '11';
     }
     this.getCustomStyles();
   }
 
-  componentWillUnmount(): void {
-    this._unmounted = true;
-  }
   // To set the selected style values
   onStyleClick(style: string, event) {
     let state = null;
@@ -226,7 +223,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         style.marginLeft = `${this.state.styles.indent * 2}px`;
       }
     } else {
-      const levelValue = document && document.getElementById('levelValue');
+      const levelValue = document?.getElementById('levelValue');
       if (
         // this covers null & undefined
         levelValue instanceof window.HTMLSelectElement &&
@@ -283,9 +280,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
   // [FS] IRAD-1111 2020-12-10
   // get the numbering corresponding to the level
-  getNumberingLevel(level: string) {
+  getNumberingLevel(level: string | number) {
     let levelStyle = '';
-    for (let i = 0; i < parseInt(level); i++) {
+    for (let i = 0; i < parseInt(`${level}`); i++) {
       levelStyle = levelStyle + '1.';
     }
     return levelStyle + ' ';
@@ -441,7 +438,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   // shows color dialog based on input text-color/text-heighlight
-  showColorDialog(isTextColor: boolean, event: SyntheticEvent<*>) {
+  showColorDialog(isTextColor: boolean, event: React.SyntheticEvent) {
     const anchor = event ? event.currentTarget : null;
     const hex = null;
     this._popUp = createPopUp(

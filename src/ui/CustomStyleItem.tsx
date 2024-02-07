@@ -1,11 +1,8 @@
-// @flow
-
 import '@modusoperandi/licit-ui-commands/dist/ui/czi-custom-button.css';
-import * as React from 'react';
+import React from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
-import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import './custom-dropdown.css';
 import { getCustomStyleByName, getCustomStyle } from '../customStyle.js';
 import { getDetailsBullet } from '../CustomStyleNodeSpec.js';
@@ -13,23 +10,24 @@ import { PointerSurface } from '@modusoperandi/licit-ui-commands';
 import type { PointerSurfaceProps } from '@modusoperandi/licit-ui-commands';
 import { Icon } from './Icon.js';
 import cx from 'classnames';
+import { HTMLStyles } from '../StyleRuntime';
+import { CustomStyleCommand } from '../CustomStyleCommand';
 export class CustomStyleItem extends React.PureComponent<
   PointerSurfaceProps & {
-    command: UICommand;
+    command: CustomStyleCommand;
     disabled?: boolean;
     dispatch: (tr: Transform) => void;
     editorState: EditorState;
     editorView?: EditorView;
     label: string;
-    onClick?: (value: any, e: React.SyntheticEvent<>) => void;
-    onMouseEnter?: (value: any, e: React.SyntheticEvent<>) => void;
+    onClick?: (value: unknown, e: React.SyntheticEvent) => void;
+    onMouseEnter?: (value: unknown, e: React.SyntheticEvent) => void;
     hasText?: boolean;
     onCommand?: () => void; //Function changed to ()=>void
     selectionClassName?: string;
-  },
-  any
+  }
 > {
-  render(): React.ReactElement<any> {
+  render(): React.ReactElement {
     const { label, hasText, ...pointerProps } = this.props;
     let text = '';
     let customStyle;
@@ -59,7 +57,7 @@ export class CustomStyleItem extends React.PureComponent<
       <div
         className={this.props.selectionClassName}
         id="container1"
-        tag={label}
+        title={label}
       >
         <div style={{ width: '140px', height: 'auto' }}>
           <PointerSurface
@@ -138,8 +136,7 @@ export class CustomStyleItem extends React.PureComponent<
         </div>
         <div
           className="molsp-arrow-right"
-          style={{ width: '50px' }}
-          style={hasText ? { display: 'block' } : { display: 'none' }}
+          style={{ width: '50px', display: hasText ? 'block' : 'none' }}
         >
           {/* Need to change the below icon to downarroe */}
           <PointerSurface {...pointerProps} className={klass + ' edit-icon'}>
@@ -153,26 +150,26 @@ export class CustomStyleItem extends React.PureComponent<
 
   // [FS] IRAD-1394 2021-05-25
   // To show Numbering in dropdown menu sample text
-  sampleLevel(styles: any): string {
+  sampleLevel(styles: HTMLStyles): string {
     let level = '';
-    if (this.props.hasText && styles && styles.hasNumbering) {
-      for (let i = 0; i < parseInt(styles.styleLevel); i++) {
+    if (this.props.hasText && styles?.hasNumbering) {
+      for (let i = 0; i < parseInt(`${styles.styleLevel}`); i++) {
         level = level + '1.';
       }
     }
 
-    if (this.props.hasText && styles && styles.hasBullet) {
+    if (this.props.hasText && styles?.hasBullet) {
       level = '';
     }
 
     return level;
   }
 
-  hasBoldPartial(styles: any) {
+  hasBoldPartial(styles: HTMLStyles) {
     return !!styles?.boldPartial;
   }
 
-  hasBoldSentence(styles: any) {
+  hasBoldSentence(styles: HTMLStyles) {
     return !!styles?.boldSentence;
   }
 }

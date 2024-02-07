@@ -1,4 +1,3 @@
-// @flow
 import { EditorState, TextSelection, Selection } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
@@ -178,10 +177,10 @@ export function getCustomStyleCommands(customStyle: any) {
 
 export class CustomStyleCommand extends UICommand {
   _customStyleName: string;
-  _customStyle: any;
+  _customStyle: Style;
   _popUp = null;
 
-  constructor(customStyle: any, customStyleName: string) {
+  constructor(customStyle: Style | string, customStyleName: string) {
     super();
     this._customStyle = customStyle;
     this._customStyleName = customStyleName;
@@ -193,7 +192,7 @@ export class CustomStyleCommand extends UICommand {
 
   isEmpty = (obj) => {
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (obj.has(key)) {
         return false;
       }
     }

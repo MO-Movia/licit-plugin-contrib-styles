@@ -1,4 +1,28 @@
-// @flow
+export type HTMLStyles = {
+  align?: string; // Text align
+  boldNumbering?: boolean; // true= Bold the Numbering part
+  boldPartial?: boolean; // true = Bold first word
+  boldSentence?: boolean; // true = Bold first sentence
+  fontName?: string; // Font Name
+  fontSize?: string; // Font size
+  strong?: boolean; // Bold
+  em?: boolean; // Italic
+  underline?: boolean; // Text Underline
+  color?: string; // Text colour
+  textHighlight?: string; // Text highlight
+  hasNumbering?: boolean; // true= The style has numbering
+  hasBullet?: boolean; // true= The style has bullet
+  paragraphSpacingAfter?: string; // Spacing after a Paragraph
+  paragraphSpacingBefore?: string; // Spacing before a Paragraph
+  styleLevel?: number; // Numbering heirachy level
+  bulletLevel?: number; // Numbering heirachy level
+  lineHeight?: string; // Line spacing
+  isLevelbased?: boolean; // true= Text indent will be based on Level
+  indent?: string; // Text indent
+  nextLineStyleName?: string;
+  toc?: boolean;
+  isHidden?: boolean;
+};
 
 export type Style = {
   /**
@@ -7,29 +31,7 @@ export type Style = {
   styleName: string; // Style name to display
   mode?: number; // For Style Editor UI behaviour //0 = new , 1- modify, 2- rename, 3- editall
   description?: string; // style description
-  styles?: {
-    align?: string; // Text align
-    boldNumbering?: boolean; // true= Bold the Numbering part
-    boldPartial?: boolean; // true = Bold first word
-    boldSentence?: boolean; // true = Bold first sentence
-    fontName?: string; // Font Name
-    fontSize?: string; // Font size
-    strong?: boolean; // Bold
-    em?: boolean; // Italic
-    underline?: boolean; // Text Underline
-    color?: string; // Text colour
-    textHighlight?: string; // Text highlight
-    hasNumbering?: boolean; // true= The style has numbering
-    paragraphSpacingAfter?: string; // Spacing after a Paragraph
-    paragraphSpacingBefore?: string; // Spacing before a Paragraph
-    styleLevel?: number; // Numbering heirachy level
-    lineHeight?: string; // Line spacing
-    isLevelbased?: boolean; // true= Text indent will be based on Level
-    indent?: string; // Text indent
-    nextLineStyleName?: string;
-    toc?: boolean;
-    isHidden?: boolean;
-  };
+  styles?: HTMLStyles;
 };
 
 /**

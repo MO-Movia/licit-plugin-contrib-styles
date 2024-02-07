@@ -1,10 +1,8 @@
-// @flow
-
 import { CustomMenuButton } from './CustomMenuButton.js';
 import { HeadingCommand } from '@modusoperandi/licit-ui-commands';
 import { CustomStyleCommand } from '../CustomStyleCommand.js';
 
-import * as React from 'react';
+import React from 'react';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Transform } from 'prosemirror-transform';
@@ -28,14 +26,11 @@ let HEADING_COMMANDS = {
   [RESERVED_STYLE_NONE]: new HeadingCommand(0),
 };
 
-export class CustomstyleDropDownCommand extends React.PureComponent<
-  {
-    dispatch: (tr: Transform) => void;
-    editorState: EditorState;
-    editorView?: EditorView;
-  },
-  any
-> {
+export class CustomstyleDropDownCommand extends React.PureComponent<{
+  dispatch: (tr: Transform) => void;
+  editorState: EditorState;
+  editorView?: EditorView;
+}> {
   hasRuntime: boolean = hasStyleRuntime();
   //[FS] IRAD-1085 2020-10-09
   //method to build commands for list buttons
@@ -93,7 +88,7 @@ export class CustomstyleDropDownCommand extends React.PureComponent<
     return node.type.name === 'paragraph' || node.type.name === 'ordered_list';
   }
 
-  render(): React.ReactElement<any> {
+  render(): React.ReactElement {
     const { dispatch, editorState, editorView } = this.props;
     const { selection, doc } = editorState;
     const { from, to } = selection;
@@ -101,7 +96,7 @@ export class CustomstyleDropDownCommand extends React.PureComponent<
     let selectedStyleCount = 0;
     // [FS] IRAD-1088 2020-10-05
     // get the custom style name from node attribute
-    doc.nodesBetween(from, to, (node, _pos) => {
+    doc.nodesBetween(from, to, (node) => {
       // [FS] IRAD-1231 2021-03-05
       // Issue fix : Applied custom style name shows only when click start and end position of paragraph,
       // otherwise shows 'None'.

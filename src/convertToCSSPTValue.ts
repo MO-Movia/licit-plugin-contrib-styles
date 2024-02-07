@@ -1,5 +1,3 @@
-// @flow
-
 const SIZE_PATTERN = /(\d+)(px|pt)/i;
 
 export const PX_TO_PT_RATIO = 0.75292857;

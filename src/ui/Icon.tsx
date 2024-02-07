@@ -1,5 +1,4 @@
-// @flow
-import * as React from 'react';
+import React from 'react';
 
 import { canUseCSSFont } from './canUseCSSFont.js';
 
@@ -10,7 +9,6 @@ import './czi-icon.css';
 //import injectStyleSheet from './injectStyleSheet';
 import './icon-font.css';
 
-//const VALID_CHARS = /[a-z_]+/;
 const cached = {};
 
 const CSS_CDN_URL = '//fonts.googleapis.com/icon?family=Material+Icons';
@@ -27,8 +25,8 @@ const CSS_FONT = 'Material Icons';
   }
 })();
 
-class SuperscriptIcon extends React.PureComponent<any, any> {
-  render(): React.ReactElement<any> {
+class SuperscriptIcon extends React.PureComponent {
+  render(): React.ReactElement {
     return (
       <span className="superscript-wrap">
         <span className="superscript-base">x</span>
@@ -37,8 +35,8 @@ class SuperscriptIcon extends React.PureComponent<any, any> {
     );
   }
 }
-class SubscriptIcon extends React.PureComponent<any, any> {
-  render(): React.ReactElement<any> {
+class SubscriptIcon extends React.PureComponent {
+  render(): React.ReactElement {
     return (
       <span className="subscript-wrap">
         <span className="subscript-base">x</span>
@@ -47,23 +45,24 @@ class SubscriptIcon extends React.PureComponent<any, any> {
     );
   }
 }
-export class Icon extends React.PureComponent<any, any> {
-  static get(type: string, title?: string): React.ReactElement<any> {
+export class Icon extends React.PureComponent<
+  {
+    type: string;
+    title?: string;
+  },
+  unknown
+> {
+  static get(type: string, title?: string): React.ReactElement {
     const key = `${type || ''}-${title || ''}`;
     const icon = cached[key] || <Icon title={title} type={type} />;
     cached[key] = icon;
     return icon;
   }
 
-  props: {
-    type: string;
-    title?: string;
-  };
-
-  render(): React.ReactElement<any> {
+  render(): React.ReactElement {
     const { type, title } = this.props;
     let className = '';
-    let children = '';
+    let children: React.ReactElement | string = '';
     if (type === 'superscript') {
       className = 'czi-icon superscript';
       children = <SuperscriptIcon />;

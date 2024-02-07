@@ -1,5 +1,3 @@
-// @flow
-
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { AllSelection, EditorState, TextSelection } from 'prosemirror-state';
 import { BLOCKQUOTE, HEADING, LIST_ITEM, PARAGRAPH } from './NodeNames.js';

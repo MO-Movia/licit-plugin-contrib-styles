@@ -1,7 +1,5 @@
-// @flow
-
 import '@modusoperandi/licit-ui-commands/dist/ui/czi-custom-button.css';
-import * as React from 'react';
+import React from 'react';
 import './custom-dropdown.css';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 
@@ -9,11 +7,11 @@ export class CustomStyleSubMenu extends React.PureComponent<
   {
     command: UICommand;
     disabled?: boolean;
-    close: (value: any) => void;
+    close: (value: unknown) => void;
   },
-  any
+  unknown
 > {
-  render(): React.ReactElement<any> {
+  render(): React.ReactElement<unknown> {
     const { command } = this.props;
 
     return (

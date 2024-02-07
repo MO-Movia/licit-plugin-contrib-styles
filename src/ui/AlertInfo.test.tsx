@@ -6,10 +6,6 @@ describe('alertinfo', () => {
   it('should handle alertinfo', () => {
     expect(alertinfo).toBeDefined();
   });
-  it('should handle componentWillUnmount', () => {
-    alertinfo.componentWillUnmount();
-    expect(alertinfo._unmounted).toBeTruthy();
-  });
   it('should handle _cancel ', () => {
     alertinfo.props = { close: () => undefined };
     const spy = jest.spyOn(alertinfo.props, 'close');

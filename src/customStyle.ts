@@ -1,4 +1,3 @@
-// @flow
 // [FS] IRAD-1085 2020-10-09
 import type { Style, CSSStyle } from './StyleRuntime.js';
 import {
@@ -6,7 +5,6 @@ import {
   RESERVED_STYLE_NONE_NUMBERING,
 } from './CustomStyleNodeSpec.js';
 import { DEFAULT_NORMAL_STYLE } from './Constants.js';
-// let customStyles: Style[] = new Array < Style > (0);
 let customStyles = new Array(0);
 let styleRuntime;
 let hideNumbering = false;
@@ -42,7 +40,7 @@ export function isCustomStyleExists(styleName: string) {
 // [FS] IRAD-1128 2020-12-30
 // get a style by styleName
 export function getCustomStyleByName(name: string): Style {
-  let style: Style = {};
+  let style: Style = { styleName: name };
   let has = false;
   if (isValidStyleName(name)) {
     // break the loop if find any matches
@@ -85,7 +83,7 @@ export function setStyleRuntime(runtime, callback) {
 
 function saveDefaultStyle() {
   if (!isCustomStyleExists(RESERVED_STYLE_NONE)) {
-    saveStyle(DEFAULT_NORMAL_STYLE).then((_result) => {
+    saveStyle(DEFAULT_NORMAL_STYLE).then(() => {
       /* This is intentional */
     });
   }

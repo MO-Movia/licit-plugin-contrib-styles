@@ -1,5 +1,3 @@
-// @flow
-
 const HTTP_PREFIX = /^http(s?):*\/\//i;
 
 export function sanitizeURL(url?: string): string {

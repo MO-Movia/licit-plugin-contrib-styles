@@ -1,5 +1,3 @@
-// @flow
-
 import { Node, DOMOutputSpec } from 'prosemirror-model';
 import type { KeyValuePair } from './Constants.js';
 import { toCSSLineSpacing } from '@modusoperandi/licit-ui-commands';
@@ -19,7 +17,6 @@ export const ATTRIBUTE_SHOW_SYMBOL = 'data-show-bullet';
 export const ATTRIBUTE_BULLET_COLOR = 'data-bullet-color';
 export const RESERVED_STYLE_NONE = 'Normal';
 export const RESERVED_STYLE_NONE_NUMBERING = RESERVED_STYLE_NONE + '-@#$-';
-// const cssVal = new Set < string > (['', '0%', '0pt', '0px']);
 const cssVal = new Set(['', '0%', '0pt', '0px']);
 /*
 Symbols are grabbed from
@@ -41,7 +38,7 @@ export const EMPTY_CSS_VALUE = cssVal;
 const STYLENAME = 'styleName';
 
 type toDOMFn = (node: Node) => DOMOutputSpec;
-type getAttrsFn = (p: Node | string) => KeyValuePair;
+type getAttrsFn = (p: Node | string | HTMLElement) => KeyValuePair;
 
 function getAttrs(base: getAttrsFn, dom: HTMLElement) {
   const attrs = base(dom);
@@ -64,11 +61,7 @@ function toDOM(base: toDOMFn, node: Node) {
     output[1][ATTRIBUTE_INDENT] = String(indentOverriden);
   }
 
-  if (
-    bulletDetails &&
-    bulletDetails.symbol &&
-    bulletDetails.symbol.length > 0
-  ) {
+  if (bulletDetails?.symbol?.length > 0) {
     output[1][ATTRIBUTE_BULLET_SYMBOL] = bulletDetails.symbol;
     output[1][ATTRIBUTE_SHOW_SYMBOL] = bulletDetails.symbol.length > 0;
     output[1][ATTRIBUTE_BULLET_COLOR] = bulletDetails.color
@@ -125,7 +118,10 @@ function getStyleEx(align, lineSpacing, styleName) {
   let style = '';
   let styleLevel = 0;
   let indentOverriden = '';
-  let bulletDetails = {};
+  let bulletDetails: {
+    symbol: string;
+    color: string;
+  };
   if (align && align !== 'left') {
     style += `text-align: ${align};`;
   }
@@ -142,10 +138,10 @@ function getStyleEx(align, lineSpacing, styleName) {
   if (null !== styleName && 'None' !== styleName) {
     // to get the styles of the corresponding style name
     const styleProps = getCustomStyleByName(styleName);
-    if (null !== styleProps && styleProps.styles) {
+    if (styleProps?.styles) {
       if (styleProps.styles.hasBullet) {
         bulletDetails = getBulletDetails(styleProps.styles.bulletLevel);
-        styleLevel = parseInt(styleProps.styles.styleLevel);
+        styleLevel = styleProps.styles.styleLevel;
       }
 
       // [FS] IRAD-1100 2020-11-04
@@ -181,11 +177,11 @@ function getStyleEx(align, lineSpacing, styleName) {
         // [FS] IRAD-1462 2021-06-17
         // FIX:  Numbering applied for paragraph even though the custom style not selected numbering(but set level)
         styleLevel = styleProps.styles.hasNumbering
-          ? parseInt(styleProps.styles.styleLevel)
+          ? styleProps.styles.styleLevel
           : 0;
         style += refreshCounters(styleLevel);
       }
-    } else if (styleName && styleName.includes(RESERVED_STYLE_NONE_NUMBERING)) {
+    } else if (styleName?.includes(RESERVED_STYLE_NONE_NUMBERING)) {
       const indices = styleName.split(RESERVED_STYLE_NONE_NUMBERING);
       if (indices && 2 === indices.length) {
         styleLevel = parseInt(indices[1]);

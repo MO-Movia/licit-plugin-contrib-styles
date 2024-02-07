@@ -1,5 +1,3 @@
-// @flow
-
 import { Node, DOMOutputSpec } from 'prosemirror-model';
 import type { KeyValuePair } from './Constants.js';
 

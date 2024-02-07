@@ -1,4 +1,3 @@
-// @flow
 // [FS] IRAD-1039 2020-09-23
 // Command button to handle different type of list types
 // Need to add Icons instead of label
@@ -7,7 +6,7 @@ import cx from 'classnames';
 import { EditorState } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
-import * as React from 'react';
+import React from 'react';
 import { CustomButton, createPopUp } from '@modusoperandi/licit-ui-commands';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { uuid } from './Uuid.js';
@@ -23,20 +22,18 @@ export class CustomMenuButton extends React.PureComponent<
     dispatch: (tr: Transform) => void;
     editorState: EditorState;
     editorView?: EditorView;
-    icon?: string | React.ReactElement<any> | null;
-    label?: string | React.ReactElement<any> | null;
+    icon?: string | React.ReactElement | null;
+    label?: string | React.ReactElement | null;
     title?: string;
   },
-  any
+  {
+    expanded: boolean;
+  }
 > {
   _menu = null;
   _id = uuid();
 
-  state = {
-    expanded: false,
-  };
-
-  render(): React.ReactElement<any, any> {
+  render(): React.ReactElement {
     const { className, label, icon, title } = this.props;
     const { expanded } = this.state;
     const buttonClassName = cx(className, {
@@ -62,11 +59,13 @@ export class CustomMenuButton extends React.PureComponent<
   }
 
   _onClick = (): void => {
-    const expanded = !this.state.expanded;
-    this.setState({
-      expanded,
+    this.setState((lastState) => {
+      const expanded = !lastState.expanded;
+      expanded ? this._showMenu() : this._hideMenu();
+      return {
+        expanded,
+      };
     });
-    expanded ? this._showMenu() : this._hideMenu();
   };
 
   _hideMenu = (): void => {

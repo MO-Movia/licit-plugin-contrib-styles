@@ -1,18 +1,16 @@
-// @flow
-
-export const cached = {};
+export const cached: { [key: string]: Promise<boolean> } = {};
 
 export function canUseCSSFont(fontName: string): Promise<boolean> {
   const doc = document;
 
-  if (cached.hasOwnProperty(fontName)) {
-    return Promise.resolve(cached[fontName]);
+  if (cached[fontName]?.then) {
+    return cached[fontName];
   }
 
   if (
-    !doc.fonts ||
+    typeof doc.fonts !== 'object' ||
     !doc.fonts.check ||
-    !doc.fonts.ready ||
+    !doc.fonts.ready?.then ||
     !doc.fonts.status ||
     !doc.fonts.values
   ) {
@@ -20,25 +18,24 @@ export function canUseCSSFont(fontName: string): Promise<boolean> {
     // https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/check#Browser_compatibility
     // TODO: Polyfill this.
     console.log('FontFaceSet is not supported');
-    return Promise.resolve(false);
+    cached[fontName] = Promise.resolve(false);
+  } else {
+    cached[fontName] = new Promise((resolve) => {
+      // https://stackoverflow.com/questions/5680013/how-to-be-notified-once-a-web-font-has-loaded
+      // All fonts in use by visible text have loaded.
+      const check = () => {
+        if (doc.fonts.status !== 'loaded') {
+          setTimeout(check, 350);
+          return;
+        }
+        // Do not use `doc.fonts.check()` because it may return falsey result.
+        const fontFaces = Array.from(doc.fonts.values());
+        const matched = fontFaces.find((ff) => ff.family === fontName);
+        const result = !!matched;
+        resolve(result);
+      };
+      doc.fonts.ready.then(check);
+    });
   }
-
-  return new Promise((resolve) => {
-    // https://stackoverflow.com/questions/5680013/how-to-be-notified-once-a-web-font-has-loaded
-    // All fonts in use by visible text have loaded.
-    const check = () => {
-      if (doc.fonts.status !== 'loaded') {
-        setTimeout(check, 350);
-        return;
-      }
-      // Do not use `doc.fonts.check()` because it may return falsey result.
-      const fontFaces = Array.from(doc.fonts.values());
-      const matched = fontFaces.find((ff) => ff.family === fontName);
-      const result = !!matched;
-      if (cached)
-        cached[fontName] = result;
-      resolve(result);
-    };
-    doc.fonts.ready.then(check);
-  });
+  return cached[fontName];
 }

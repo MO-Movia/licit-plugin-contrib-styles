@@ -1,5 +1,3 @@
-// @flow
-
 // Plugin to handle Styles.
 import { Plugin, PluginKey } from 'prosemirror-state';
 import {

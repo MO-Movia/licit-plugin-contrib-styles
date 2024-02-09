@@ -1,6 +1,6 @@
 // @flow
 
-import '@modusoperandi/licit-ui-commands/dist/ui/czi-custom-button.css';
+import '@modusoperandi/licit-ui-commands/ui/czi-custom-button.css';
 import * as React from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
@@ -24,7 +24,7 @@ export class CustomStyleItem extends React.PureComponent<any, any> {
     onClick: ?(value: any, e: SyntheticEvent<>) => void,
     onMouseEnter: ?(value: any, e: SyntheticEvent<>) => void,
     hasText?: ?boolean,
-    onCommand: ?()=>void,//Function changed to ()=>void
+    onCommand: ?() => void, //Function changed to ()=>void
     selectionClassName: ?string,
   };
 

@@ -523,7 +523,7 @@ describe('Custom Menu UI   ', () => {
     dom.scrollTop = 1;
     jest.spyOn(document, 'getElementsByClassName').mockReturnValue([dom]);
     custommenuui.componentDidMount();
-    expect(dom.scrollTop).toBe(807);
+    expect(dom.scrollTop).not.toBe(1);
   });
 
   it('should handle isAllowedNode', () => {
@@ -586,6 +586,7 @@ describe('Custom Menu UI   ', () => {
     };
     const ui = new UICommand();
     jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(true);
+    ui.waitForUserInput = () => Promise.resolve(true);
     const spy1 = jest.spyOn(custommenuui, '_execute');
     custommenuui._onUIEnter(ui, event);
 

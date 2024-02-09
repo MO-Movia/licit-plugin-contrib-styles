@@ -29,6 +29,7 @@
     "ci:bom": "cyclonedx-npm --ignore-npm-errors --short-PURLs --output-format XML --output-file dist/bom.xml"
   },
   "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "^1.7.1",
     "@babel/cli": "^7.11.6",
     "@babel/core": "^7.11.6",
     "@babel/eslint-parser": "^7.15.0",

@@ -47,5 +47,3 @@ export function toCSSColor(source: any): string {
   }
   return hex;
 }
-
-export default toCSSColor;

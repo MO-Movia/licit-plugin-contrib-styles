@@ -1,12 +1,13 @@
 // @flow
 // [FS] IRAD-1085 2020-10-09
-import type { Style, CSSStyle } from './StyleRuntime';
+import type { Style, CSSStyle } from './StyleRuntime.js';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
-} from './CustomStyleNodeSpec';
-import { DEFAULT_NORMAL_STYLE } from './Constants';
-let customStyles: Style[] = new Array < Style > (0);
+} from './CustomStyleNodeSpec.js';
+import { DEFAULT_NORMAL_STYLE } from './Constants.js';
+// let customStyles: Style[] = new Array < Style > (0);
+let customStyles = new Array(0);
 let styleRuntime;
 let hideNumbering = false;
 
@@ -69,7 +70,7 @@ export function getHidenumberingFlag(): boolean {
   return hideNumbering;
 }
 
-export function setStyleRuntime(runtime: any, callback) {
+export function setStyleRuntime(runtime, callback) {
   styleRuntime = runtime;
   getStylesAsync().then((result) => {
     if (result) {
@@ -83,7 +84,9 @@ export function setStyleRuntime(runtime: any, callback) {
 
 function saveDefaultStyle() {
   if (!isCustomStyleExists(RESERVED_STYLE_NONE)) {
-    saveStyle(DEFAULT_NORMAL_STYLE);
+    saveStyle(DEFAULT_NORMAL_STYLE).then((_result) => {
+      /* This is intentional */
+    });
   }
 }
 
@@ -134,7 +137,7 @@ export function isPreviousLevelExists(previousLevel: number) {
 
 // [FS] IRAD-1046 2020-09-24
 // To create a style object from the customstyles to show the styles in the example piece.
-export function getCustomStyle(customStyle: any) {
+export function getCustomStyle(customStyle) {
   const style: CSSStyle = {};
 
   for (const property in customStyle) {

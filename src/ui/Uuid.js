@@ -4,6 +4,6 @@
 // Upgrade outdated packages.
 import { v1 as uuidv1 } from 'uuid';
 
-export default function uuid(): string {
+export function uuid(): string {
   return uuidv1();
 }

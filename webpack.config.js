@@ -1,18 +1,23 @@
 /* eslint-disable */
 
-var webpack = require('webpack'),
-  FlowWebpackPlugin = require('flow-webpack-plugin'),
-  TerserPlugin = require('terser-webpack-plugin'),
-  WriteFilePlugin = require('write-file-webpack-plugin'),
-  path = require('path');
+import webpack from 'webpack';
+import TerserPlugin from 'terser-webpack-plugin';
+import WriteFilePlugin from 'write-file-webpack-plugin';
+import path, { dirname } from 'path';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import { fileURLToPath } from 'url';
 
-const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+
 
 const NODE_ENV = process.env.NODE_ENV || 'production';
 
-var isDev = 'development' === NODE_ENV || 0;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-var options = {
+
+let isDev = 'development' === NODE_ENV || 0;
+
+let options = {
   mode: NODE_ENV,
   entry: {
     index: path.join(__dirname, 'src', 'index.js'),
@@ -76,6 +81,14 @@ var options = {
         loader: 'html-loader',
         exclude: /node_modules/
       },
+      {
+        test: /\.(js|mjs|jsx)$/,
+        include: /node_modules/,
+        type: 'javascript/auto',
+        resolve: {
+          fullySpecified: false,
+        },
+      }
     ]
   },
   resolve: {
@@ -118,4 +131,4 @@ options.plugins.push(function () {
   });
 });
 
-module.exports = options;
+export default options;

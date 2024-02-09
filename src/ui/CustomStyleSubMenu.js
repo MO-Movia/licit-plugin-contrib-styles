@@ -1,15 +1,15 @@
 // @flow
 
-import '@modusoperandi/licit-ui-commands/dist/ui/czi-custom-button.css';
+import '@modusoperandi/licit-ui-commands/ui/czi-custom-button.css';
 import * as React from 'react';
 import './custom-dropdown.css';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 
-class CustomStyleSubMenu extends React.PureComponent<any, any> {
+export class CustomStyleSubMenu extends React.PureComponent<any, any> {
   props: {
     command: UICommand,
     disabled?: ?boolean,
-    close: (?string) => void,
+    close: () => void,
   };
 
   render(): React.Element<any> {
@@ -30,7 +30,6 @@ class CustomStyleSubMenu extends React.PureComponent<any, any> {
             type: 'rename',
             command: command,
           })}
-          style={{ pointerEvents: command._customStyleName==='Normal'? 'none':'auto' }}
         >
           Rename Style..
         </a>
@@ -40,16 +39,14 @@ class CustomStyleSubMenu extends React.PureComponent<any, any> {
             command: command,
           })}
         >
-          Delete Style..
+          Reset Style to Normal..
         </a>
       </div>
     );
   }
 
   //handles the option button click, close the popup with selected values
-  onButtonClick(val: Object) {
+  onButtonClick(val) {
     this.props.close(val);
   }
 }
-
-export default CustomStyleSubMenu;

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 
-class AlertInfo extends React.PureComponent<any, any> {
+export class AlertInfo extends React.PureComponent<any, any> {
   _unmounted = false;
 
   constructor(props: any) {
@@ -56,5 +56,3 @@ class AlertInfo extends React.PureComponent<any, any> {
     this.props.close();
   };
 }
-
-export default AlertInfo;

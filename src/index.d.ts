@@ -1,6 +1,4 @@
-// @flow
-
-// Plugin to handle Styles.
+// Type declaration file
 import { Plugin, PluginKey } from 'prosemirror-state';
 import {
   updateOverrideFlag,

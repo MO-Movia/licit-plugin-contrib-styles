@@ -1,10 +1,10 @@
 // @flow
 
 import { Node, DOMOutputSpec } from 'prosemirror-model';
-import type { KeyValuePair } from './Constants';
+import type { KeyValuePair } from './Constants.js';
 import { toCSSLineSpacing } from '@modusoperandi/licit-ui-commands';
 
-import { getCustomStyleByName, getHidenumberingFlag } from './customStyle';
+import { getCustomStyleByName, getHidenumberingFlag } from './customStyle.js';
 import './ui/czi-cust-style-numbered.css';
 
 // This assumes that every 36pt maps to one indent level.
@@ -19,7 +19,8 @@ export const ATTRIBUTE_SHOW_SYMBOL = 'data-show-bullet';
 export const ATTRIBUTE_BULLET_COLOR = 'data-bullet-color';
 export const RESERVED_STYLE_NONE = 'Normal';
 export const RESERVED_STYLE_NONE_NUMBERING = RESERVED_STYLE_NONE + '-@#$-';
-const cssVal = new Set < string > (['', '0%', '0pt', '0px']);
+// const cssVal = new Set < string > (['', '0%', '0pt', '0px']);
+const cssVal = new Set(['', '0%', '0pt', '0px']);
 /*
 Symbols are grabbed from
 https://en.wikipedia.org/wiki/List_of_Unicode_characters
@@ -64,7 +65,7 @@ function toDOM(base: toDOMFn, node: Node) {
   return output;
 }
 
-function getStyle(attrs: Object) {
+function getStyle(attrs) {
   return getStyleEx(
     attrs.align,
     attrs.lineSpacing,
@@ -116,7 +117,7 @@ function getStyleEx(align, lineSpacing, styleName) {
   let styleLevel = 0;
   let indentOverriden = '';
   let bulletDetails = {};
-  if (align) {
+  if (align && align !== 'left') {
     style += `text-align: ${align};`;
   }
 
@@ -129,8 +130,7 @@ function getStyleEx(align, lineSpacing, styleName) {
       `--czi-content-line-height: ${cssLineSpacing};`;
   }
 
-  // if (null !== styleName && 'Normal' !== styleName) {
-  if (null !== styleName) {
+  if (null !== styleName && 'None' !== styleName) {
     // to get the styles of the corresponding style name
     const styleProps = getCustomStyleByName(styleName);
     if (null !== styleProps && styleProps.styles) {
@@ -138,10 +138,6 @@ function getStyleEx(align, lineSpacing, styleName) {
       if (styleProps.styles.hasBullet) {
         bulletDetails = getBulletDetails(styleProps.styles.bulletLevel);
         styleLevel = parseInt(styleProps.styles.styleLevel);
-      }
-
-      if (null=== align && styleProps.styles.align) {
-        style += `text-align: ${styleProps.styles.align};`;
       }
 
       // [FS] IRAD-1100 2020-11-04

@@ -4,38 +4,38 @@ import { Schema } from 'prosemirror-model';
 import {
   toCustomStyleDOM,
   getCustomStyleAttrs,
-} from './CustomStyleNodeSpec';
+} from './CustomStyleNodeSpec.js';
 import {
   toMarkDOM,
   getMarkAttrs,
-} from './CustomStyleMarkSpec';
+} from './CustomStyleMarkSpec.js';
 import {
   STYLEKEY,
   PARAGRAPH,
-} from './Constants';
+} from './Constants.js';
 
 import {
-  MARK_STRONG,
-  MARK_EM,
-  MARK_TEXT_COLOR,
-  MARK_FONT_SIZE,
-  MARK_FONT_TYPE,
-  MARK_STRIKE,
-  MARK_SUPER,
-  MARK_TEXT_HIGHLIGHT,
-  MARK_UNDERLINE,
-} from './MarkNames';
+  MARKSTRONG,
+  MARKEM,
+  MARKTEXTCOLOR,
+  MARKFONTSIZE,
+  MARKFONTTYPE,
+  MARKSTRIKE,
+  MARKSUPER,
+  MARKTEXTHIGHLIGHT,
+  MARKUNDERLINE,
+} from './MarkNames.js';
 
 const ALLOWED_MARKS = [
-  MARK_STRONG,
-  MARK_EM,
-  MARK_TEXT_COLOR,
-  MARK_FONT_SIZE,
-  MARK_FONT_TYPE,
-  MARK_STRIKE,
-  MARK_SUPER,
-  MARK_TEXT_HIGHLIGHT,
-  MARK_UNDERLINE,
+  MARKSTRONG,
+  MARKEM,
+  MARKTEXTCOLOR,
+  MARKFONTSIZE,
+  MARKFONTTYPE,
+  MARKSTRIKE,
+  MARKSUPER,
+  MARKTEXTHIGHLIGHT,
+  MARKUNDERLINE,
 ];
 const ATTR_OVERRIDDEN = 'overridden';
 const NEWATTRS = [ATTR_OVERRIDDEN];
@@ -132,10 +132,10 @@ function getMarkContent(type, schema, nodeAttrs, toDOM) {
       content = contentArr[i + 1];
       // Always append to base calls.
       if (!content[PARSEDOM][0][GETATTRS]) {
-        if (MARK_STRONG === type) {
+        if (MARKSTRONG === type) {
           content[PARSEDOM][0].getAttrs = (node) => node.style.fontWeight != 'normal' && null;
         }
-        else if (MARK_EM === type) {
+        else if (MARKEM === type) {
           content[PARSEDOM][0].getAttrs = (node) => node.style.fontStyle === 'italic' && null;
         }
       }
@@ -155,27 +155,29 @@ function getRequiredMarks(marks, markName, schema) {
     marks.push(schema[SPEC]['marks'][markName]);
   }
 }
-function createMarkAttributes(mark, markName, existingAttr) {
+function createMarkAttributes(mark,existingAttr) {
   if (mark) {
     const requiredAttrs = [...NEWATTRS];
     requiredAttrs.forEach((key) => {
       if (!mark.attrs) {
         mark['attrs'] = {};
       }
-      let newAttr = mark.attrs[key];
-      if (!newAttr) {
-        if (existingAttr) {
-          newAttr = Object.assign(
-            Object.create(Object.getPrototypeOf(existingAttr)),
-            existingAttr
-          );
-          newAttr.default = false;
-        } else {
-          newAttr = {};
-          newAttr.hasDefault = true;
-          newAttr.default = false;
+      if (mark.attrs) {
+        let newAttr = mark.attrs[key];
+        if (!newAttr) {
+          if (existingAttr) {
+            newAttr = Object.assign(
+              Object.create(Object.getPrototypeOf(existingAttr)),
+              existingAttr
+            );
+            newAttr.default = false;
+          } else {
+            newAttr = {};
+            newAttr.hasDefault = true;
+            newAttr.default = false;
+          }
+          mark.attrs[key] = newAttr;
         }
-        mark.attrs[key] = newAttr;
       }
     });
   }

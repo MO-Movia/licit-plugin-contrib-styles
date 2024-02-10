@@ -1,6 +1,6 @@
 {
   "name": "@modusoperandi/licit-custom-styles",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "subversion": "1",
   "description": "CustomStyle plugin built with ProseMirror",

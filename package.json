@@ -1,6 +1,6 @@
 {
   "name": "@modusoperandi/licit-custom-styles",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "subversion": "1",
   "description": "CustomStyle plugin built with ProseMirror",
@@ -19,7 +19,7 @@
     "webpack": "webpack",
     "build:babel": "babel src --out-dir dist",
     "build:flow": "flow-copy-source -v -i '**/__tests__/**' src dist",
-    "build:css": "cp src/ui/*.css dist/ui && cp src/*.css dist",
+    "build:css": "cp src/ui/*.css dist/ui && cp src/*.css dist && cp -r src/fonts dist/fonts ",
     "build:dist": "npm run build:clean && npm run webpack && npm run build:babel && npm run build:css && npm run build:flow && cp src/*.d.ts dist/",
     "flow": "flow --show-all-errors",
     "lint:js": "eslint \"src/**/*.js\"",

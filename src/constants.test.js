@@ -2,7 +2,7 @@ import {getNode} from './Constants';
 import { schema } from 'prosemirror-schema-basic';
 describe('constants',()=>{
     it('should return selectedNode',()=>{
-        const transform = {doc:{doc:{type:{name:'paragraph'}},nodesBetween:(a,b,c)=>{value:'selctednode_dummy'; }}};
+        const transform = {doc:{doc:{type:{name:'paragraph'}},nodesBetween:()=>{return {value:'selctednode_dummy'}; }}};
         expect(getNode(0,1,transform)).toBe(null);
     });
     it('should return selectedNode',()=>{

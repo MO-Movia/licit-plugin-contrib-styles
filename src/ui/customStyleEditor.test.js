@@ -1,11 +1,38 @@
-import CustomStyleEditor from './CustomStyleEditor';
+import { CustomStyleEditor } from './CustomStyleEditor';
 import * as customstyle from '../customStyle';
 import { createEditor, doc, p } from 'jest-prosemirror';
 
 describe('CustomStyleEditor', () => {
   jest.spyOn(customstyle, 'getStylesAsync').mockResolvedValue([]);
-  const customstyleeditor = new CustomStyleEditor({ styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11 }, mode: 0 });
-  customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'A Apply Stylefff', fontName: 'Arial', fontSize: 11, strong: false }, mode: 0, styleName: 'A Apply Stylefff', otherStyleSelected: '' };
+  const customstyleeditor = new CustomStyleEditor({
+    styles: {
+      align: 'left',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'none',
+      fontName: 'Arial',
+      fontSize: 11,
+    },
+    mode: 0,
+  });
+  customstyleeditor.state = {
+    styles: {
+      align: 'left',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'A Apply Stylefff',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: false,
+    },
+    mode: 0,
+    styleName: 'A Apply Stylefff',
+    otherStyleSelected: '',
+  };
   it('should be defined', () => {
     expect(customstyleeditor).toBeDefined();
   });
@@ -14,28 +41,44 @@ describe('CustomStyleEditor', () => {
     expect(customstyleeditor._unmounted).toBe(true);
   });
   it('should handle onStyleClick when style = strong', () => {
-
-    expect(customstyleeditor.onStyleClick('strong', new Event('click'))).toBeUndefined();
+    expect(
+      customstyleeditor.onStyleClick('strong', new Event('click'))
+    ).toBeUndefined();
   });
   it('should handle onStyleClick when style = name', () => {
     const event = { target: { value: 'A Apply Stylefff-new' } };
     expect(customstyleeditor.onStyleClick('name', event)).toBeUndefined();
   });
   it('should handle onStyleClick when style = name and event null', () => {
-
     expect(customstyleeditor.onStyleClick('name', null)).toBeUndefined();
   });
   it('should handle onStyleClick when style = name and this.state.styles.nextLineStyleName != oldName', () => {
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: '', fontName: 'Arial', fontSize: 11, strong: false }, mode: 0, styleName: 'A Apply Stylefff', otherStyleSelected: '' };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: '',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+    };
     const event = { target: { value: 'A Apply Stylefff-new' } };
     expect(customstyleeditor.onStyleClick('name', event)).toBeUndefined();
   });
   it('should handle onStyleClick when style = description', () => {
     const event = { target: { value: 'description' } };
-    expect(customstyleeditor.onStyleClick('description', event)).toBeUndefined();
+    expect(
+      customstyleeditor.onStyleClick('description', event)
+    ).toBeUndefined();
   });
   it('should handle onStyleClick when style = description and event null', () => {
-
     expect(customstyleeditor.onStyleClick('description', null)).toBeUndefined();
   });
   it('should handle onStyleClick when style = before', () => {
@@ -43,7 +86,6 @@ describe('CustomStyleEditor', () => {
     expect(customstyleeditor.onStyleClick('before', event)).toBeUndefined();
   });
   it('should handle onStyleClick when style = before when event null', () => {
-
     expect(customstyleeditor.onStyleClick('before', null)).toBeUndefined();
   });
   it('should handle onStyleClick when style = after', () => {
@@ -51,7 +93,6 @@ describe('CustomStyleEditor', () => {
     expect(customstyleeditor.onStyleClick('after', event)).toBeUndefined();
   });
   it('should handle onStyleClick when style = after when event null', () => {
-
     expect(customstyleeditor.onStyleClick('after', null)).toBeUndefined();
   });
   it('should handle onStyleClick when style = default', () => {
@@ -86,50 +127,6 @@ describe('CustomStyleEditor', () => {
     const event = { target: { value: '' } };
     expect(customstyleeditor.onLineSpaceChange(event)).toBeUndefined();
   });
-  it('should handle onLevelChange with None', () => {
-    const event = { target: { value: 'None' } };
-    expect(customstyleeditor.onLevelChange(event)).toBeUndefined();
-  });
-  it('should handle showAlert when popup null', () => {
-    customstyleeditor.showAlert();
-    expect(customstyleeditor._popUp).not.toBeNull();
-  });
-  it('should handle modifyCustomStyle', () => {
-    const editor = createEditor(doc(p('<cursor>')), {
-      plugins: [],
-    });
-    const mockdoc = doc(p('Hello World!!!'));
-    mockdoc.styleName = '';
-    customstyleeditor.state = { editorView: editor.view, styles: { align: 'center', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, fontName: null, fontSize: null, strong: true, em: true, underline: true, color: 'rgba(0,0,0,0)', textHighlight: 'rgba(0,0,0,0)', boldPartial: true, styleLevel: true, hasNumbering: true, super: true }, mode: 3, styleName: 'A Apply Stylefff', otherStyleSelected: '', customStyles: [{ styles: { styleLevel: 2 }, styleName: 'test' }] };
-
-    const event = { target: { value: '', checked: true } };
-    expect(customstyleeditor.handleList(event)).toBeUndefined();
-  });
-
-  it('should handle handleList checked = false', () => {
-    const editor = createEditor(doc(p('<cursor>')), {
-      plugins: [],
-    });
-    const mockdoc = doc(p('Hello World!!!'));
-    mockdoc.styleName = '';
-    customstyleeditor.state = { editorView: editor.view, styles: { align: 'center', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, fontName: null, fontSize: null, strong: true, em: true, underline: true, color: 'rgba(0,0,0,0)', textHighlight: 'rgba(0,0,0,0)', boldPartial: true, styleLevel: true, hasNumbering: true, super: true }, mode: 3, styleName: 'A Apply Stylefff', otherStyleSelected: '', customStyles: [{ styles: { styleLevel: 2 }, styleName: 'test' }] };
-
-    const event = { target: { value: '', checked: true } };
-    expect(customstyleeditor.handleList(event)).toBeUndefined();
-  });
-
-  it('should handle handleList checked = false', () => {
-    const editor = createEditor(doc(p('<cursor>')), {
-      plugins: [],
-    });
-    const mockdoc = doc(p('Hello World!!!'));
-    mockdoc.styleName = '';
-    customstyleeditor.state = { editorView: editor.view, styles: { align: 'center', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, fontName: null, fontSize: null, strong: true, em: true, underline: true, color: 'rgba(0,0,0,0)', textHighlight: 'rgba(0,0,0,0)', boldPartial: true, styleLevel: true, hasNumbering: true, super: true }, mode: 3, styleName: 'A Apply Stylefff', otherStyleSelected: '', customStyles: [{ styles: { styleLevel: 2 }, styleName: 'test' }] };
-
-    const event = { target: { value: '', checked: false } };
-    expect(customstyleeditor.handleList(event)).toBeUndefined();
-  });
-
   it('should handle onLevelChange', () => {
     const event = { target: { value: '' } };
     expect(customstyleeditor.onLevelChange(event)).toBeUndefined();
@@ -148,7 +145,23 @@ describe('CustomStyleEditor', () => {
   });
   it('should handle handleBulletPoints when bulletLvel:true', () => {
     const event = { target: { value: '', checked: false } };
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, bulletLevel: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: '', fontName: 'Arial', fontSize: 11, strong: false }, mode: 0, styleName: 'A Apply Stylefff', otherStyleSelected: '' };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        bulletLevel: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: '',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+    };
     expect(customstyleeditor.handleBulletPoints(event)).toBeUndefined();
   });
   it('should handle onIndentChange', () => {
@@ -161,12 +174,32 @@ describe('CustomStyleEditor', () => {
   });
   it('should handle onOtherStyleSelectionChanged', () => {
     const event = { target: { value: '', checked: true } };
-    expect(customstyleeditor.onOtherStyleSelectionChanged(event)).toBeUndefined();
+    expect(
+      customstyleeditor.onOtherStyleSelectionChanged(event)
+    ).toBeUndefined();
   });
   it('should handle onOtherStyleSelectionChanged when this.state.otherStyleSelected', () => {
     const event = { target: { value: '', checked: true } };
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, bulletLevel: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: '', fontName: 'Arial', fontSize: 11, strong: false }, mode: 0, styleName: 'A Apply Stylefff', otherStyleSelected: true };
-    expect(customstyleeditor.onOtherStyleSelectionChanged(event)).toBeUndefined();
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        bulletLevel: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: '',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: true,
+    };
+    expect(
+      customstyleeditor.onOtherStyleSelectionChanged(event)
+    ).toBeUndefined();
   });
   it('should handle handleNumbering', () => {
     const event = { target: { value: '', checked: true } };
@@ -192,140 +225,410 @@ describe('CustomStyleEditor', () => {
     expect(customstyleeditor.selectStyleCheckboxState()).toBe(false);
   });
   it('should handle selectStyleCheckboxState', () => {
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, bulletLevel: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: true, fontName: 'Arial', fontSize: 11, strong: false }, mode: 0, styleName: 'A Apply Stylefff', otherStyleSelected: true };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        bulletLevel: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: true,
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: true,
+    };
     expect(customstyleeditor.selectStyleCheckboxState()).toBe(true);
   });
   it('should handle _save ', () => {
-    customstyleeditor.props = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11 }, mode: 0, close: () => { } };
+    customstyleeditor.props = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+      },
+      mode: 0,
+      close: () => {},
+    };
     expect(customstyleeditor._save()).toBeUndefined();
   });
   it('should handle _save when there is errMsg ', () => {
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, bulletLevel: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: true, fontName: 'Arial', fontSize: 11, strong: false }, mode: 0, styleName: 'A Apply Stylefff', otherStyleSelected: true };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        bulletLevel: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: true,
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: true,
+    };
     jest.spyOn(customstyle, 'isCustomStyleExists').mockReturnValue(true);
     jest.spyOn(document, 'getElementById').mockReturnValue(null);
-    customstyleeditor.props = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11 }, mode: 0, close: () => { } };
+    customstyleeditor.props = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+      },
+      mode: 0,
+      close: () => {},
+    };
     expect(customstyleeditor._save()).toBeUndefined();
   });
   it('should handle _save when there is errMsg when styleName is empty string', () => {
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, bulletLevel: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: true, fontName: 'Arial', fontSize: 11, strong: false }, mode: 2, styleName: '', otherStyleSelected: true };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        bulletLevel: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: true,
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 2,
+      styleName: '',
+      otherStyleSelected: true,
+    };
     jest.spyOn(customstyle, 'isCustomStyleExists').mockReturnValue(true);
     jest.spyOn(document, 'getElementById').mockReturnValue(null);
-    customstyleeditor.props = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11 }, mode: 2, close: () => { } };
+    customstyleeditor.props = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+      },
+      mode: 2,
+      close: () => {},
+    };
     expect(customstyleeditor._save()).toBeUndefined();
   });
   it('should handle disableRename ', () => {
-    customstyleeditor.props = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11 }, mode: 0, close: () => { } };
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'A Apply Stylefff', fontName: 'Arial', fontSize: 11, strong: false }, mode: 2, styleName: 'A Apply Stylefff', otherStyleSelected: '' };
+    customstyleeditor.props = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+      },
+      mode: 0,
+      close: () => {},
+    };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A Apply Stylefff',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 2,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+    };
     expect(customstyleeditor.disableRename()).toStrictEqual({
-      'opacity': 0.4,
-      'pointerEvents': 'none',
+      opacity: 0.4,
+      pointerEvents: 'none',
     });
   });
   it('should handle buildStyle ', () => {
-    customstyleeditor.state = ({ styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11, strong: true, color: true, underline: true, strike: true, em: true, textHighlight: true, lineHeight: true, paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, indent: 10 }, mode: 0, close: () => { } });
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: true,
+        color: true,
+        underline: true,
+        strike: true,
+        em: true,
+        textHighlight: true,
+        lineHeight: true,
+        paragraphSpacingBefore: 10,
+        paragraphSpacingAfter: 10,
+        indent: 10,
+      },
+      mode: 0,
+      close: () => {},
+    };
     expect(customstyleeditor.buildStyle()).toStrictEqual({
-      'backgroundColor': true,
-      'color': true,
-      'fontFamily': 'Arial',
-      'fontSize': '11px',
-      'fontStyle': 'italic',
-      'fontWeight': 'bold',
-      'lineHeight': '125%',
-      'marginBottom': '10px',
-      'marginLeft': '20px',
-      'marginTop': '10px',
-      'textAlign': 'left',
-      'textDecoration': 'underline line-through',
+      backgroundColor: true,
+      color: true,
+      fontFamily: 'Arial',
+      fontSize: '11px',
+      fontStyle: 'italic',
+      fontWeight: 'bold',
+      lineHeight: '125%',
+      marginBottom: '10px',
+      marginLeft: '20px',
+      marginTop: '10px',
+      textAlign: 'left',
+      textDecoration: 'underline line-through',
     });
   });
   it('should handle buildStyle when fontName and fontSize not present ', () => {
-    customstyleeditor.state = ({ styles: { align: null, boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: null, fontSize: null, strong: true, color: true, underline: true, strike: true, em: true, textHighlight: true, lineHeight: true, paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, indent: 10 }, mode: 0, close: () => { } });
+    customstyleeditor.state = {
+      styles: {
+        align: null,
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: null,
+        fontSize: null,
+        strong: true,
+        color: true,
+        underline: true,
+        strike: true,
+        em: true,
+        textHighlight: true,
+        lineHeight: true,
+        paragraphSpacingBefore: 10,
+        paragraphSpacingAfter: 10,
+        indent: 10,
+      },
+      mode: 0,
+      close: () => {},
+    };
     expect(customstyleeditor.buildStyle()).toStrictEqual({
-      'backgroundColor': true,
-      'color': true,
-      'fontStyle': 'italic',
-      'fontWeight': 'bold',
-      'lineHeight': '125%',
-      'marginBottom': '10px',
-      'marginLeft': '20px',
-      'marginTop': '10px',
-      'textDecoration': 'underline line-through',
+      backgroundColor: true,
+      color: true,
+      fontStyle: 'italic',
+      fontWeight: 'bold',
+      lineHeight: '125%',
+      marginBottom: '10px',
+      marginLeft: '20px',
+      marginTop: '10px',
+      textDecoration: 'underline line-through',
     });
   });
   it('should handle buildStyle when isLevelbased is true', () => {
     const mockSelectElement = document.createElement('Select');
     mockSelectElement.value = '2';
     jest.spyOn(document, 'getElementById').mockReturnValue(mockSelectElement);
-    customstyleeditor.state = ({ styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11, strong: true, color: true, underline: true, strike: true, em: true, textHighlight: true, lineHeight: true, paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, indent: 10, isLevelbased: true, boldPartial: true, boldSentence: true }, mode: 0, close: () => { } });
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: true,
+        color: true,
+        underline: true,
+        strike: true,
+        em: true,
+        textHighlight: true,
+        lineHeight: true,
+        paragraphSpacingBefore: 10,
+        paragraphSpacingAfter: 10,
+        indent: 10,
+        isLevelbased: true,
+        boldPartial: true,
+      },
+      mode: 0,
+      close: () => {},
+    };
     expect(customstyleeditor.buildStyle()).toStrictEqual({
-      'backgroundColor': true,
-      'color': true,
-      'fontFamily': 'Arial',
-      'fontSize': '11px',
-      'fontStyle': 'italic',
-      'fontWeight': 'normal',
-      'lineHeight': '125%',
-      'marginBottom': '10px',
-      'marginTop': '10px',
-      'textAlign': 'left',
-      'textDecoration': 'underline line-through',
+      backgroundColor: true,
+      color: true,
+      fontFamily: 'Arial',
+      fontSize: '11px',
+      fontStyle: 'italic',
+      fontWeight: 'normal',
+      lineHeight: '125%',
+      marginBottom: '10px',
+      marginTop: '10px',
+      textAlign: 'left',
+      textDecoration: 'underline line-through',
     });
   });
   it('should handle buildStyle when isLevelbased is true and boldSentence is false', () => {
     const mockSelectElement = document.createElement('Select');
     mockSelectElement.value = '2';
     jest.spyOn(document, 'getElementById').mockReturnValue(mockSelectElement);
-    customstyleeditor.state = ({ styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11, strong: true, color: true, underline: true, strike: true, em: true, textHighlight: true, lineHeight: true, paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, indent: 10, isLevelbased: true, boldPartial: true, boldSentence: false, hasNumbering: true, styleLevel: true, boldNumbering: true, hasBullet: true }, mode: 0, close: () => { } });
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: true,
+        color: true,
+        underline: true,
+        strike: true,
+        em: true,
+        textHighlight: true,
+        lineHeight: true,
+        paragraphSpacingBefore: 10,
+        paragraphSpacingAfter: 10,
+        indent: 10,
+        isLevelbased: true,
+        boldPartial: true,
+        styleLevel: true,
+        hasBullet: true,
+      },
+      mode: 0,
+      close: () => {},
+    };
     expect(customstyleeditor.buildStyle()).toStrictEqual({
-      'backgroundColor': true,
-      'color': true,
-      'fontFamily': 'Arial',
-      'fontSize': '11px',
-      'fontStyle': 'italic',
-      'fontWeight': 'normal',
-      'lineHeight': '125%',
-      'marginBottom': '10px',
-      'marginTop': '10px',
-      'textAlign': 'left',
-      'textDecoration': 'underline line-through',
+      backgroundColor: true,
+      color: true,
+      fontFamily: 'Arial',
+      fontSize: '11px',
+      fontStyle: 'italic',
+      fontWeight: 'normal',
+      lineHeight: '125%',
+      marginBottom: '10px',
+      marginTop: '10px',
+      textAlign: 'left',
+      textDecoration: 'underline line-through',
     });
   });
   it('should handle buildStyle when isLevelbased is true and boldnumbering false', () => {
     const mockSelectElement = document.createElement('div');
-    mockSelectElement.innerHTML =
-      jest.spyOn(document, 'getElementById').mockReturnValue(mockSelectElement);
-    customstyleeditor.state = ({ styles: { align: 'left', boldNumbering: null, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11, strong: true, color: true, underline: true, strike: true, em: true, textHighlight: true, lineHeight: true, paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, indent: 10, isLevelbased: true, boldPartial: true, boldSentence: false, hasNumbering: true, styleLevel: true, boldNumbering: false, hasBullet: true }, mode: 0, close: () => { } });
+    mockSelectElement.innerHTML = jest
+      .spyOn(document, 'getElementById')
+      .mockReturnValue(mockSelectElement);
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: null,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: true,
+        color: true,
+        underline: true,
+        strike: true,
+        em: true,
+        textHighlight: true,
+        lineHeight: true,
+        paragraphSpacingBefore: 10,
+        paragraphSpacingAfter: 10,
+        indent: 10,
+        isLevelbased: true,
+        boldPartial: true,
+        styleLevel: true,
+        hasBullet: true,
+      },
+      mode: 0,
+      close: () => {},
+    };
     expect(customstyleeditor.buildStyle()).toStrictEqual({
-      'backgroundColor': true,
-      'color': true,
-      'fontFamily': 'Arial',
-      'fontSize': '11px',
-      'fontStyle': 'italic',
-      'fontWeight': 'normal',
-      'lineHeight': '125%',
-      'marginBottom': '10px',
-      'marginTop': '10px',
-      'textAlign': 'left',
-      'textDecoration': 'underline line-through',
+      backgroundColor: true,
+      color: true,
+      fontFamily: 'Arial',
+      fontSize: '11px',
+      fontStyle: 'italic',
+      fontWeight: 'normal',
+      lineHeight: '125%',
+      marginBottom: '10px',
+      marginTop: '10px',
+      textAlign: 'left',
+      textDecoration: 'underline line-through',
     });
   });
   it('should handle buildStyle when underline false', () => {
     const mockSelectElement = document.createElement('div');
-    mockSelectElement.innerHTML =
-      jest.spyOn(document, 'getElementById').mockReturnValue(mockSelectElement);
-    customstyleeditor.state = ({ styles: { align: 'left', boldNumbering: null, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11, strong: true, color: true, underline: false, strike: true, em: true, textHighlight: true, lineHeight: true, paragraphSpacingBefore: 10, paragraphSpacingAfter: 10, indent: 10, isLevelbased: true, boldPartial: true, boldSentence: false, hasNumbering: true, styleLevel: true, boldNumbering: false, hasBullet: true }, mode: 0, close: () => { } });
+    mockSelectElement.innerHTML = jest
+      .spyOn(document, 'getElementById')
+      .mockReturnValue(mockSelectElement);
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: null,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: true,
+        color: true,
+        underline: false,
+        strike: true,
+        em: true,
+        textHighlight: true,
+        lineHeight: true,
+        paragraphSpacingBefore: 10,
+        paragraphSpacingAfter: 10,
+        indent: 10,
+        isLevelbased: true,
+        boldPartial: true,
+        hasNumbering: true,
+        styleLevel: true,
+        hasBullet: true,
+      },
+      mode: 0,
+      close: () => {},
+    };
     expect(customstyleeditor.buildStyle()).toStrictEqual({
-      'backgroundColor': true,
-      'color': true,
-      'fontFamily': 'Arial',
-      'fontSize': '11px',
-      'fontStyle': 'italic',
-      'fontWeight': 'normal',
-      'lineHeight': '125%',
-      'marginBottom': '10px',
-      'marginTop': '10px',
-      'textAlign': 'left',
-      'textDecoration': 'line-through',
+      backgroundColor: true,
+      color: true,
+      fontFamily: 'Arial',
+      fontSize: '11px',
+      fontStyle: 'italic',
+      fontWeight: 'normal',
+      lineHeight: '125%',
+      marginBottom: '10px',
+      marginTop: '10px',
+      textAlign: 'left',
+      textDecoration: 'line-through',
     });
   });
   it('should handle onNextLineStyleSelected', () => {
@@ -367,20 +670,76 @@ describe('CustomStyleEditor', () => {
     expect(customstyleeditor.showColorDialog(true, null)).toBeUndefined();
   });
   it('should handle onAlignButtonClick', () => {
-
     expect(customstyleeditor.onAlignButtonClick('')).toBeUndefined();
   });
   it('should handle _cancel when when mode 3', () => {
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'A Apply Stylefff', fontName: 'Arial', fontSize: 11, strong: false }, mode: 3, styleName: 'A Apply Stylefff', otherStyleSelected: '', customStyles: '' };
-    customstyleeditor.props = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11 }, mode: 0, close: () => { } };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A Apply Stylefff',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 3,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+      customStyles: '',
+    };
+    customstyleeditor.props = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+      },
+      mode: 0,
+      close: () => {},
+    };
     const spy = jest.spyOn(customstyleeditor.props, 'close');
     customstyleeditor._cancel();
     expect(spy).toHaveBeenCalled();
   });
   it('should handle _cancel when when mode not 3', () => {
-
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'A Apply Stylefff', fontName: 'Arial', fontSize: 11, strong: false }, mode: 1, styleName: 'A Apply Stylefff', otherStyleSelected: '', customStyles: '' };
-    customstyleeditor.props = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11 }, mode: 0, close: () => { } };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A Apply Stylefff',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 1,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+      customStyles: '',
+    };
+    customstyleeditor.props = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+      },
+      mode: 0,
+      close: () => {},
+    };
     const spy = jest.spyOn(customstyleeditor.props, 'close');
     customstyleeditor._cancel();
     expect(spy).toHaveBeenCalled();
@@ -390,8 +749,37 @@ describe('CustomStyleEditor', () => {
     dom.className = 'errormsg';
     dom.style = {};
     jest.spyOn(document, 'getElementById').mockReturnValue(dom);
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'A Apply Stylefff', fontName: 'Arial', fontSize: 11, strong: false }, mode: 0, styleName: 'A Apply Stylefff', otherStyleSelected: '', customStyles: '' };
-    customstyleeditor.props = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11 }, mode: 0, close: () => { } };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A Apply Stylefff',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+      customStyles: '',
+    };
+    customstyleeditor.props = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+      },
+      mode: 0,
+      close: () => {},
+    };
     jest.spyOn(customstyle, 'isCustomStyleExists').mockReturnValue(true);
     customstyleeditor._save();
     expect(dom.style.display).toBe('');
@@ -401,16 +789,45 @@ describe('CustomStyleEditor', () => {
     dom.className = 'errormsg';
     dom.style = {};
     jest.spyOn(document, 'getElementById').mockReturnValue(dom);
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'A Apply Stylefff', fontName: 'Arial', fontSize: 11, strong: false }, mode: 3, styleName: 'A Apply Stylefff', otherStyleSelected: '', customStyles: '' };
-    customstyleeditor.props = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11 }, mode: 0, close: () => { } };
-    customstyleeditor.modifyCustomStyle = () => { };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A Apply Stylefff',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 3,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+      customStyles: '',
+    };
+    customstyleeditor.props = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+      },
+      mode: 0,
+      close: () => {},
+    };
+    customstyleeditor.modifyCustomStyle = () => {};
     const spy = jest.spyOn(customstyleeditor, 'modifyCustomStyle');
     customstyleeditor._save();
     expect(spy).toHaveBeenCalled();
   });
   it('should handle handleKeyDown ', () => {
     const dom1 = document.createElement('div');
-    dom1.focus = () => { };
+    dom1.focus = () => {};
     jest.spyOn(document, 'getElementById').mockReturnValue(dom1);
     const spy = jest.spyOn(dom1, 'focus');
     customstyleeditor.handleKeyDown(new Event('click'));
@@ -421,8 +838,36 @@ describe('CustomStyleEditor', () => {
     expect(customstyleeditor.handleKeyDown(new Event('click'))).toBeUndefined();
   });
   it('should handle setNextLineStyle ', () => {
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, fontName: 'Arial', fontSize: 11, strong: false }, mode: 3, styleName: 'A Apply Stylefff', otherStyleSelected: '', customStyles: '' };
-    customstyleeditor.props = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11 }, mode: 1, close: () => { } };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 3,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+      customStyles: '',
+    };
+    customstyleeditor.props = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+      },
+      mode: 1,
+      close: () => {},
+    };
     const dom = document.createElement('select');
     jest.spyOn(document, 'getElementById').mockReturnValue(dom);
     const spy = jest.spyOn(customstyleeditor, 'setState');
@@ -430,8 +875,36 @@ describe('CustomStyleEditor', () => {
     expect(spy).toHaveBeenCalled();
   });
   it('should handle setNextLineStyle when document.getelementbyid does not return instance of select element', () => {
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, fontName: 'Arial', fontSize: 11, strong: false }, mode: 3, styleName: 'A Apply Stylefff', otherStyleSelected: '', customStyles: '' };
-    customstyleeditor.props = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, nextLineStyleName: 'none', fontName: 'Arial', fontSize: 11 }, mode: 1, close: () => { } };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+      },
+      mode: 3,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+      customStyles: '',
+    };
+    customstyleeditor.props = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+      },
+      mode: 1,
+      close: () => {},
+    };
     const dom = document.createElement('div');
     jest.spyOn(document, 'getElementById').mockReturnValue(dom);
     const spy = jest.spyOn(customstyleeditor, 'setState');
@@ -439,7 +912,24 @@ describe('CustomStyleEditor', () => {
     expect(spy).toHaveBeenCalled();
   });
   it('should handle componentDidMount ', () => {
-    customstyleeditor.state = { styles: { align: 'left', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, fontName: 'Arial', fontSize: 11, strong: false, styleLevel: true, hasNumbering: true }, mode: 3, styleName: 'A Apply Stylefff', otherStyleSelected: '', customStyles: '' };
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+        styleLevel: true,
+        hasNumbering: true,
+      },
+      mode: 3,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+      customStyles: '',
+    };
     customstyleeditor.props.mode = 1;
     const dom = document.createElement('div');
     const dom1 = document.createElement('div');
@@ -447,19 +937,90 @@ describe('CustomStyleEditor', () => {
     expect(customstyleeditor.componentDidMount()).toBeUndefined();
   });
   it('should handle render', () => {
-    customstyleeditor.state = { styles: { align: 'center', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, fontName: null, fontSize: null, strong: true, em: true, underline: true, color: 'rgba(0,0,0,0)', textHighlight: 'rgba(0,0,0,0)', boldPartial: true, styleLevel: true, hasNumbering: true, super: true }, mode: 3, styleName: 'A Apply Stylefff', otherStyleSelected: '', customStyles: [{ styles: { styleLevel: 2 }, styleName: 'test' }] };
+    customstyleeditor.state = {
+      styles: {
+        align: 'center',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        fontName: null,
+        fontSize: null,
+        strong: true,
+        em: true,
+        underline: true,
+        color: 'rgba(0,0,0,0)',
+        textHighlight: 'rgba(0,0,0,0)',
+        boldPartial: true,
+        styleLevel: true,
+        hasNumbering: true,
+        super: true,
+      },
+      mode: 3,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+      customStyles: [{ styles: { styleLevel: 2 }, styleName: 'test' }],
+    };
     jest.spyOn(customstyle, 'isCustomStyleExists').mockReturnValue(true);
     expect(customstyleeditor.render()).toBeDefined();
   });
   it('should handle render when align is justify', () => {
-    customstyleeditor.state = { styles: { align: 'justify', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, fontName: null, fontSize: null, strong: true, em: true, underline: true, color: 'rgba(0,0,0,0)', textHighlight: 'rgba(0,0,0,0)', boldPartial: true, hasBullet: true, styleLevel: true, hasNumbering: true, super: true }, mode: 3, styleName: 'A Apply Stylefff', otherStyleSelected: '', customStyles: [{ styles: { styleLevel: 2 }, styleName: 'test' }] };
+    customstyleeditor.state = {
+      styles: {
+        align: 'justify',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        fontName: null,
+        fontSize: null,
+        strong: true,
+        em: true,
+        underline: true,
+        color: 'rgba(0,0,0,0)',
+        textHighlight: 'rgba(0,0,0,0)',
+        boldPartial: true,
+        hasBullet: true,
+        styleLevel: true,
+        hasNumbering: true,
+        super: true,
+      },
+      mode: 3,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+      customStyles: [{ styles: { styleLevel: 2 }, styleName: 'test' }],
+    };
     jest.spyOn(customstyle, 'isCustomStyleExists').mockReturnValue(true);
     expect(customstyleeditor.render()).toBeDefined();
   });
   it('should handle render when align is right', () => {
-    customstyleeditor.state = { styles: { nextLineStyleName: 'A Apply Stylefff', align: 'right', boldNumbering: true, toc: false, isHidden: false, boldSentence: true, fontName: null, fontSize: null, strong: true, em: true, underline: true, color: 'rgba(0,0,0,0)', textHighlight: 'rgba(0,0,0,0)', boldPartial: true, hasBullet: true, styleLevel: true, hasNumbering: true, super: true }, mode: 3, styleName: 'A Apply Stylefff', otherStyleSelected: null, customStyles: [{ styles: { styleLevel: 2 }, styleName: 'test' }] };
+    customstyleeditor.state = {
+      styles: {
+        nextLineStyleName: 'A Apply Stylefff',
+        align: 'right',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        fontName: null,
+        fontSize: null,
+        strong: true,
+        em: true,
+        underline: true,
+        color: 'rgba(0,0,0,0)',
+        textHighlight: 'rgba(0,0,0,0)',
+        boldPartial: true,
+        hasBullet: true,
+        styleLevel: true,
+        hasNumbering: true,
+        super: true,
+      },
+      mode: 3,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: null,
+      customStyles: [{ styles: { styleLevel: 2 }, styleName: 'test' }],
+    };
     jest.spyOn(customstyle, 'isCustomStyleExists').mockReturnValue(true);
     expect(customstyleeditor.render()).toBeDefined();
   });
-
 });

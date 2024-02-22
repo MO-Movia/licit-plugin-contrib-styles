@@ -1,19 +1,19 @@
 // @flow
 
-import '@modusoperandi/licit-ui-commands/dist/ui/czi-custom-button.css';
+import '@modusoperandi/licit-ui-commands/ui/czi-custom-button.css';
 import * as React from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import './custom-dropdown.css';
-import { getCustomStyleByName, getCustomStyle } from '../customStyle';
-import { getDetailsBullet } from '../CustomStyleNodeSpec';
-import { PointerSurface } from '@modusoperandi/licit-ui-commands';;
+import { getCustomStyleByName, getCustomStyle } from '../customStyle.js';
+import { getDetailsBullet } from '../CustomStyleNodeSpec.js';
+import { PointerSurface } from '@modusoperandi/licit-ui-commands';
 import type { PointerSurfaceProps } from '@modusoperandi/licit-ui-commands';
-import Icon from './Icon';
+import { Icon } from './Icon.js';
 import cx from 'classnames';
-class CustomStyleItem extends React.PureComponent<any, any> {
+export class CustomStyleItem extends React.PureComponent<any, any> {
   props: PointerSurfaceProps & {
     command: UICommand,
     disabled?: ?boolean,
@@ -23,8 +23,8 @@ class CustomStyleItem extends React.PureComponent<any, any> {
     label: string,
     onClick: ?(value: any, e: SyntheticEvent<>) => void,
     onMouseEnter: ?(value: any, e: SyntheticEvent<>) => void,
-    hasText?: ?Boolean,
-    onCommand: ?Function,
+    hasText?: ?boolean,
+    onCommand: ?() => void, //Function changed to ()=>void
     selectionClassName: ?string,
   };
 
@@ -41,7 +41,9 @@ class CustomStyleItem extends React.PureComponent<any, any> {
     );
     // [FS] IRAD-1505 2021-07-07
     // Style menu not showing properly for First Word Bold
-    const hasBoldSentence = this.hasBoldSentence(pointerProps.command._customStyle.styles);
+    const hasBoldSentence = this.hasBoldSentence(
+      pointerProps.command._customStyle.styles
+    );
     // [FS] IRAD-1394 2021-05-25
     // Added two divs to display Numbering and bold first word/sentece.
     const BOLD_WORD = 'AaBb  ';
@@ -75,7 +77,7 @@ class CustomStyleItem extends React.PureComponent<any, any> {
             marginTop: '-4px',
             fontWeight:
               pointerProps.command._customStyle.styles &&
-                pointerProps.command._customStyle.styles.boldNumbering
+              pointerProps.command._customStyle.styles.boldNumbering
                 ? 'bold'
                 : 'normal',
           }}
@@ -88,16 +90,30 @@ class CustomStyleItem extends React.PureComponent<any, any> {
             {level}
           </PointerSurface>
         </div>
-        <div style={{
-          display: pointerProps.command._customStyle.styles &&
-            pointerProps.command._customStyle.styles.hasBullet ? '' : 'none',
-          color: pointerProps.command._customStyle.styles && pointerProps.command._customStyle.styles.bulletLevel ? getDetailsBullet(pointerProps.command._customStyle.styles.bulletLevel).color : '',
-          marginTop: '-4px',
-        }}>
-          <PointerSurface
-            {...pointerProps}
-            className={klass}>
-            {pointerProps.command._customStyle.styles && pointerProps.command._customStyle.styles.bulletLevel ? getDetailsBullet(pointerProps.command._customStyle.styles.bulletLevel).symbol : ''}
+        <div
+          style={{
+            display:
+              pointerProps.command._customStyle.styles &&
+              pointerProps.command._customStyle.styles.hasBullet
+                ? ''
+                : 'none',
+            color:
+              pointerProps.command._customStyle.styles &&
+              pointerProps.command._customStyle.styles.bulletLevel
+                ? getDetailsBullet(
+                    pointerProps.command._customStyle.styles.bulletLevel
+                  ).color
+                : '',
+            marginTop: '-4px',
+          }}
+        >
+          <PointerSurface {...pointerProps} className={klass}>
+            {pointerProps.command._customStyle.styles &&
+            pointerProps.command._customStyle.styles.bulletLevel
+              ? getDetailsBullet(
+                  pointerProps.command._customStyle.styles.bulletLevel
+                ).symbol
+              : ''}
           </PointerSurface>
         </div>
         <div
@@ -114,7 +130,7 @@ class CustomStyleItem extends React.PureComponent<any, any> {
             className={klass}
             style={customStyle}
           >
-            {(hasBoldPartial && hasBoldSentence) ? BOLD_SENTENCE : BOLD_WORD}
+            {hasBoldPartial && hasBoldSentence ? BOLD_SENTENCE : BOLD_WORD}
           </PointerSurface>
         </div>
         <div className="molsp-style-sampletext" style={customStyle}>
@@ -128,7 +144,8 @@ class CustomStyleItem extends React.PureComponent<any, any> {
         </div>
         <div
           className="molsp-arrow-right"
-          style={{ width: '50px', display: hasText ? 'block' : 'none' }}
+          style={{ width: '50px' }}
+          style={hasText ? { display: 'block' } : { display: 'none' }}
         >
           {/* Need to change the below icon to downarroe */}
           <PointerSurface {...pointerProps} className={klass + ' edit-icon'}>
@@ -165,5 +182,3 @@ class CustomStyleItem extends React.PureComponent<any, any> {
     return styles && styles.boldSentence ? true : false;
   }
 }
-
-export default CustomStyleItem;

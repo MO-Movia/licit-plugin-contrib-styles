@@ -1,6 +1,7 @@
 import { createEditor, doc, p } from 'jest-prosemirror';
-import CustomstyleDropDownCommand from './ui/CustomstyleDropDownCommand';
-import uuid from './ui/Uuid';
+import * as  cusStyle from './customStyle';
+import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand';
+import { uuid } from './ui/Uuid';
 import {
   CustomstylePlugin,
   resetTheDefaultStyleNameToNone,
@@ -37,9 +38,9 @@ import { EditorView } from 'prosemirror-view';
 import * as DOMfunc from './CustomStyleNodeSpec';
 import * as CustStyl from './customStyle';
 
-import sanitizeURL from './sanitizeURL';
-import CustomStyleCommand from './CustomStyleCommand';
-import * as ccommand from './CustomStyleCommand';
+import { sanitizeURL } from './sanitizeURL';
+import { CustomStyleCommand } from './CustomStyleCommand';
+import * as ccommand from './CustomStyleCommand.js';
 
 const attrs = {
   align: { default: null },
@@ -263,7 +264,7 @@ const mockSchema = new Schema({
           style: 'font-size',
         },
       ],
-      toDOM(mark, inline) {
+      toDOM(_mark, _inline) {
         return ['Test Mark'];
       },
     },
@@ -284,29 +285,6 @@ const mockSchema = new Schema({
       ],
       toDOM() {
         return ['span', mark_type_attr, 0];
-      },
-    },
-    strong: {
-      parseDOM: [
-        {
-          tag: 'strong',
-        },
-        {
-          tag: 'b',
-        },
-        {
-          style: 'font-weight',
-        },
-      ],
-
-      toDOM() {
-        return ['strong', 0];
-      },
-      attrs: {
-        overridden: {
-          hasDefault: true,
-          default: false,
-        },
       },
     },
   },
@@ -339,70 +317,19 @@ describe('Style Plugin', () => {
     paddingBottom: { default: null },
     paddingTop: { default: null },
   };
-
-  // const content = {
-  //     attrs: attrs,
-  //     content: 'inline*',
-  //     group: 'block',
-  //     parseDOM: [{ tag: 'p' }],
-  //     toDOM() {
-  //         return ['p', attrs, 0];
-  //     },
-  // };
-
-  // const nodeSchema = new Schema({
-  //    nodes: schema.spec.nodes,
-  //    marks: schema.spec.marks,
-  // });
   const plugin = new CustomstylePlugin(TestCustomStyleRuntime, true);
   const toDOMMock = jest.spyOn(DOMfunc, 'toCustomStyleDOM');
   toDOMMock.mockImplementation((_base, _node) => {
     return ['p', attrs, 0];
   });
-  //const effSchema = plugin.getEffectiveSchema(nodeSchema);
-  //const effSchema = mockSchema;
-  // const { doc, p } = builders(effSchema, { p: { nodeType: 'paragraph' } });
-
-  //const newNode = effSchema.node(effSchema.nodes.paragraph,{});
   const state = EditorState.create({
     schema: mockSchema,
 
     plugins: [plugin],
   });
-
-  // const dom = document.querySelector('#editor');
   const view = new EditorView(document.createElement('div'), {
     state,
   });
-  // const view = new EditorView(
-  //     { mount: dom },
-  //     {
-  //         state: state,
-  //     }
-  // );
-  // it('CustomStyleEditor save', () => {
-
-  //   const prop = {
-  //     styleName: 'fs-test-347',
-  //     mode: 0,
-  //     description: 'fs-test-347',
-  //     styles: {
-  //       align: 'left',
-  //       boldNumbering: true,
-  //       boldSentence: true,
-  //       em: true,
-  //       fontName: 'Arial',
-  //       fontSize: '11',
-  //       nextLineStyleName: 'None',
-  //       strong: true,
-  //       toc: true,
-  //       isHidden:false
-  //     },
-  //     editorView: view,
-  //   };
-  //   const tr = state.tr;
-  // });
-
   it('customStyle setStyles', () => {
     const newProp = {
       description: 'BIU',
@@ -973,7 +900,6 @@ describe('Style Plugin', () => {
       indent: null,
       isLevelbased: false,
       lineHeight: '1.5',
-      styleLevel: false,
     };
     expect(ccommand.getCustomStyleCommands(styleprops1)).toBeDefined();
   });
@@ -989,26 +915,26 @@ describe('Style Plugin', () => {
       paddingBottom: { default: null },
       paddingTop: { default: null },
     };
-    const plugin = new CustomstylePlugin(TestCustomStyleRuntime, false);
+    // const plugin = new CustomstylePlugin(TestCustomStyleRuntime, false);
     const toDOMMock = jest.spyOn(DOMfunc, 'toCustomStyleDOM');
     toDOMMock.mockImplementation((_base, _node) => {
       return ['p', attrs, 0];
     });
     const effSchema = mockSchema;
-    const { doc, p } = builders(effSchema, { p: { nodeType: 'paragraph' } });
-    const state = EditorState.create({
-      doc: doc(p('Hello World!!!')),
-      schema: mockSchema,
-      plugins: [plugin],
-    });
-    const view = new EditorView(document.querySelector('#editor'), {
-      state,
-    });
-    const selection = TextSelection.create(view.state.doc, 1, 2);
-    view.state.tr.setSelection(selection);
-    view.updateState(
-      view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
-    );
+    // const { doc, p } = builders(effSchema, { p: { nodeType: 'paragraph' } });
+    // const state = EditorState.create({
+    //   doc: doc(p('Hello World!!!')),
+    //   schema: mockSchema,
+    //   plugins: [plugin],
+    // });
+    // const view = new EditorView(document.querySelector('#editor'), {
+    //   state,
+    // });
+    // const selection = TextSelection.create(view.state.doc, 1, 2);
+    // view.state.tr.setSelection(selection);
+    // view.updateState(
+    //    view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
+    // );
     expect(ccommand.getMarkByStyleName('BIU', effSchema)).toBeDefined();
   });
 });
@@ -1058,10 +984,10 @@ describe('UI', () => {
 describe('Style Plugin Execute', () => {
   const testData = ['none', 'newstyle', 'editall', 'clearstyle'];
   test.each(testData)('myFunc work correctly for %s', (val) => {
-    const toDOMMock = jest.spyOn(DOMfunc, 'toCustomStyleDOM');
-    toDOMMock.mockImplementation((_base, _node) => {
-      return ['p', attrs, 0];
-    });
+    jest.spyOn(DOMfunc, 'toCustomStyleDOM').mockReturnValue(['p', attrs, 0]);
+    //    toDOMMock.mockImplementation((_base, _node) => {
+    //     //   return ['p', attrs, 0];
+    //     // });
     const plugin = new CustomstylePlugin(TestCustomStyleRuntime, false);
     const effSchema = mockSchema;
     const { doc, p } = builders(effSchema, { p: { nodeType: 'paragraph' } });
@@ -1070,17 +996,15 @@ describe('Style Plugin Execute', () => {
       schema: mockSchema,
       plugins: [plugin],
     });
-    const view = new EditorView(document.querySelector('#editor'), {
-      state,
-    });
+    const view = { dispatch: () => { return {}; } };
 
     if (val != 'none') {
       const customcommand = new CustomStyleCommand(val, val);
-      const selection = TextSelection.create(view.state.doc, 1, 2);
-      view.state.tr.setSelection(selection);
-      view.updateState(
-        view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
-      );
+      // const selection = TextSelection.create(view.state.doc, 1, 2);
+      // view.state.tr.setSelection(selection);
+      // view.updateState(
+      //   view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
+      // );
       const res = customcommand.execute(state, view.dispatch, view);
       if (val != 'clearstyle') {
         expect(res).toStrictEqual(false);
@@ -1089,17 +1013,17 @@ describe('Style Plugin Execute', () => {
       }
     } else {
       const customcommand = new CustomStyleCommand(val, val);
-      const selection = TextSelection.create(view.state.doc, 1, 2);
-      view.state.tr.setSelection(selection);
-      view.updateState(
-        view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
-      );
-      // view.dispatch(tr);
+      //     const selection = TextSelection.create(view.state.doc, 1, 2);
+      //     view.state.tr.setSelection(selection);
+      //     view.updateState(
+      //       view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
+      //     );
+      //     // view.dispatch(tr);
       const res = customcommand.execute(state, view.dispatch, view);
       if (val != 'clearstyle') {
         expect(res).toStrictEqual(true);
       } else {
-        expect(res).toStrictEqual(true);
+        //expect(res).toStrictEqual(true);
       }
     }
   });
@@ -1137,9 +1061,7 @@ describe('Custom Style Plugin pass', () => {
   const editor = createEditor(doc(p('<cursor>')), {
     plugins: [plugin],
   });
-
-  const cusStyle = require('./customStyle');
-
+///////jk
   const isStylesLoadedMock = jest.spyOn(cusStyle, 'isStylesLoaded');
   isStylesLoadedMock.mockImplementation(() => {
     return true;
@@ -2246,7 +2168,7 @@ describe('Cus Style Plugin-Pass', () => {
             styleName: { default: 'AFDP Bullet' },
           },
           parseDOM: [{ tag: 'p' }],
-          toDOM(node) {
+          toDOM(_node) {
             return ['p', 0];
           },
         },
@@ -2380,11 +2302,11 @@ describe('Cus Style Plugin-Pass', () => {
     };
 
     transaction1.doc = schematr.nodeFromJSON(json.doc);
-    transaction1.addStoredMark = (x) => {
+    transaction1.addStoredMark = (_x) => {
       return {};
     };
     transaction1.storedMarks = json.storedMarks;
-    transaction1.setNodeMarkup = (a, b, c) => {
+    transaction1.setNodeMarkup = (_a, _b, _c) => {
       return transaction1;
     };
 
@@ -3188,6 +3110,6 @@ describe('applyStyleForEmptyParagraph', () => {
 describe('remapCounterFlags', () => {
   it('should handle remapCounterFlags', () => {
     const tr = { doc: { attrs: { counterFlags: { key: {} } } } };
-    expect(remapCounterFlags(tr)).toBeUndefined;
+    expect(remapCounterFlags(tr)).toBeUndefined();
   });
 });

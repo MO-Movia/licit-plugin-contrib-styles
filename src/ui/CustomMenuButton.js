@@ -11,15 +11,17 @@ import * as React from 'react';
 import { CustomButton } from '@modusoperandi/licit-ui-commands';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { createPopUp } from '@modusoperandi/licit-ui-commands';
-import uuid from './Uuid';
-import CustomMenuUI from './CustomMenuUI';
+import {
+  uuid
+} from './Uuid.js';
+import { CustomMenuUI } from './CustomMenuUI.js';
 import './custom-dropdown.css';
 
-class CustomMenuButton extends React.PureComponent<any, any> {
+export class CustomMenuButton extends React.PureComponent<any, any> {
   props: {
     className?: ?string,
-    commandGroups: Array<{ [string]: UICommand }>,
-    staticCommand: Array<{ [string]: UICommand }>,
+    commandGroups: Array<{ [string:string]: UICommand }>,
+    staticCommand: Array<{ [string:string]: UICommand }>,
     disabled?: ?boolean,
     dispatch: (tr: Transform) => void,
     editorState: EditorState,
@@ -27,7 +29,7 @@ class CustomMenuButton extends React.PureComponent<any, any> {
     icon?: string | React.Element<any> | null,
     label?: string | React.Element<any> | null,
     title?: ?string,
-   };
+  };
 
   _menu = null;
   _id = uuid();
@@ -52,7 +54,7 @@ class CustomMenuButton extends React.PureComponent<any, any> {
         id={this._id}
         label={label}
         onClick={this._onClick}
-        title={'Style: ' + label}
+        title={label}
       />
     );
   }
@@ -106,5 +108,3 @@ class CustomMenuButton extends React.PureComponent<any, any> {
     }
   };
 }
-
-export default CustomMenuButton;

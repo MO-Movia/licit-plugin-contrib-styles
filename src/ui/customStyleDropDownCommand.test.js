@@ -1,4 +1,4 @@
-import CustomstyleDropDownCommand from './CustomstyleDropDownCommand';
+import {CustomstyleDropDownCommand} from './CustomstyleDropDownCommand';
 import { createEditor, doc, p } from 'jest-prosemirror';
 import { EditorState } from 'prosemirror-state';
 import { Schema } from 'prosemirror-model';
@@ -60,10 +60,7 @@ describe('customstyledropdowncommand', () => {
           },
           capco: {
             default: null,
-          },
-          paddingTop: {
-            default: null,
-          },
+          }
         },
         content: 'inline*',
         group: 'block',
@@ -98,10 +95,7 @@ describe('customstyledropdowncommand', () => {
           },
           capco: {
             default: null,
-          },
-          paddingTop: {
-            default: null,
-          },
+          }
         },
         content: 'inline*',
         group: 'block',
@@ -435,7 +429,7 @@ describe('customstyledropdowncommand', () => {
   });
 
   const props = {
-    dispatch: (tr) => { },
+    dispatch: (_tr) => { },
     editorState: state,
     editorView: editor.view,
   };
@@ -590,7 +584,7 @@ describe('customstyledropdowncommand', () => {
     };
 
     customstyledropdowncommand.props = {
-      dispatch: (tr) => { },
+      dispatch: (_tr) => { },
       editorState: mockeditorState,
       editorView: null,
     };
@@ -646,43 +640,6 @@ describe('customstyledropdowncommand', () => {
     const mockschema = new Schema({
       nodes: {
         doc: { content: 'paragraph+' },
-        paragraph: {
-          content: 'text*',
-          attrs: {
-            align: { default: null },
-            color: { default: null },
-            id: { default: null },
-            indent: { default: null },
-            lineSpacing: { default: null },
-            paddingBottom: { default: null },
-            paddingTop: { default: null },
-            capco: { default: null },
-            styleName: { default: null },
-          },
-          toDOM(node) {
-            const { align, color } = node.attrs;
-            const style = [];
-            if (align) style.push(`text-align: ${align}`);
-            if (color) style.push(`color: ${color}`);
-            return ['p', { style: style.join('; ') }, 0];
-          },
-          parseDOM: [
-            {
-              tag: 'p',
-              getAttrs(dom) {
-                const style = dom.getAttribute('style') || '';
-                const attrs = {};
-                if (style.includes('text-align: left')) attrs.align = 'left';
-                if (style.includes('text-align: center'))
-                  attrs.align = 'center';
-                if (style.includes('text-align: right')) attrs.align = 'right';
-                const colorMatch = style.match(/color: (.*?);/);
-                if (colorMatch) attrs.color = colorMatch[1];
-                return attrs;
-              },
-            },
-          ],
-        },
         paragraph: {
           content: 'text*',
           attrs: {
@@ -791,7 +748,7 @@ describe('customstyledropdowncommand', () => {
     };
 
     customstyledropdowncommand.props = {
-      dispatch: (tr) => { },
+      dispatch: (_tr) => { },
       editorState: mockeditorState,
       editorView: null,
     };
@@ -855,9 +812,6 @@ describe('customstyledropdowncommand 1', () => {
             default: null,
           },
           capco: {
-            default: null,
-          },
-          paddingTop: {
             default: null,
           },
         },
@@ -990,13 +944,13 @@ describe('customstyledropdowncommand 1', () => {
     styleName: 'test',
   });
   const props = {
-    dispatch: (tr) => { },
+    dispatch: (_tr) => { },
     editorState: state,
     editorView: editor.view,
   };
   jest.spyOn(cusstyles, 'hasStyleRuntime').mockReturnValue(false);
   const customstyledropdowncommand = new CustomstyleDropDownCommand(props);
-  customstyledropdowncommand.updateDropdownItems();
+  // customstyledropdowncommand.updateDropdownItems();
   it('should handle getCommandGroups when hasStyleRuntime is false ', async () => {
     jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([]);
     const commandGroups = await customstyledropdowncommand.getCommandGroups();
@@ -1053,43 +1007,6 @@ describe('customstyledropdowncommand 1', () => {
     const mockschema = new Schema({
       nodes: {
         doc: { content: 'paragraph+' },
-        paragraph: {
-          content: 'text*',
-          attrs: {
-            align: { default: null },
-            color: { default: null },
-            id: { default: null },
-            indent: { default: null },
-            lineSpacing: { default: null },
-            paddingBottom: { default: null },
-            paddingTop: { default: null },
-            capco: { default: null },
-            styleName: { default: null },
-          },
-          toDOM(node) {
-            const { align, color } = node.attrs;
-            const style = [];
-            if (align) style.push(`text-align: ${align}`);
-            if (color) style.push(`color: ${color}`);
-            return ['p', { style: style.join('; ') }, 0];
-          },
-          parseDOM: [
-            {
-              tag: 'p',
-              getAttrs(dom) {
-                const style = dom.getAttribute('style') || '';
-                const attrs = {};
-                if (style.includes('text-align: left')) attrs.align = 'left';
-                if (style.includes('text-align: center'))
-                  attrs.align = 'center';
-                if (style.includes('text-align: right')) attrs.align = 'right';
-                const colorMatch = style.match(/color: (.*?);/);
-                if (colorMatch) attrs.color = colorMatch[1];
-                return attrs;
-              },
-            },
-          ],
-        },
         paragraph: {
           content: 'text*',
           attrs: {
@@ -1198,7 +1115,7 @@ describe('customstyledropdowncommand 1', () => {
     };
 
     customstyledropdowncommand.props = {
-      dispatch: (tr) => { },
+      dispatch: (_tr) => { },
       editorState: mockeditorState,
       editorView: {
         disabled: true
@@ -1256,43 +1173,6 @@ describe('customstyledropdowncommand 1', () => {
     const mockschema = new Schema({
       nodes: {
         doc: { content: 'paragraph+' },
-        paragraph: {
-          content: 'text*',
-          attrs: {
-            align: { default: null },
-            color: { default: null },
-            id: { default: null },
-            indent: { default: null },
-            lineSpacing: { default: null },
-            paddingBottom: { default: null },
-            paddingTop: { default: null },
-            capco: { default: null },
-            styleName: { default: null },
-          },
-          toDOM(node) {
-            const { align, color } = node.attrs;
-            const style = [];
-            if (align) style.push(`text-align: ${align}`);
-            if (color) style.push(`color: ${color}`);
-            return ['p', { style: style.join('; ') }, 0];
-          },
-          parseDOM: [
-            {
-              tag: 'p',
-              getAttrs(dom) {
-                const style = dom.getAttribute('style') || '';
-                const attrs = {};
-                if (style.includes('text-align: left')) attrs.align = 'left';
-                if (style.includes('text-align: center'))
-                  attrs.align = 'center';
-                if (style.includes('text-align: right')) attrs.align = 'right';
-                const colorMatch = style.match(/color: (.*?);/);
-                if (colorMatch) attrs.color = colorMatch[1];
-                return attrs;
-              },
-            },
-          ],
-        },
         paragraph: {
           content: 'text*',
           attrs: {
@@ -1422,7 +1302,7 @@ describe('customstyledropdowncommand 1', () => {
     };
 
     customstyledropdowncommand.props = {
-      dispatch: (tr) => {},
+      dispatch: (_tr) => {},
       editorState: mockeditorState,
       editorView: {
         disabled: true,

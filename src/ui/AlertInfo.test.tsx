@@ -1,19 +1,34 @@
 import { AlertInfo } from './AlertInfo';
 import React from 'react';
 describe('alertinfo', () => {
-  const props = {};
-  const alertinfo = new AlertInfo(props);
+  const props = {
+    title: 'Alert Title', 
+    content: 'Alert content',
+    close: () => {}, 
+  };
+   const alertinfo = new AlertInfo(props);
   it('should handle alertinfo', () => {
     expect(alertinfo).toBeDefined();
   });
   it('should handle _cancel ', () => {
-    alertinfo.props = { close: () => undefined };
+    const props = {
+      title: 'Alert Title', 
+      content: 'Alert content',
+      close: () => undefined, 
+    };
+    const alertinfo = new AlertInfo(props);
+
     const spy = jest.spyOn(alertinfo.props, 'close');
     alertinfo._cancel();
     expect(spy).toHaveBeenCalled();
   });
   it('should handle render ', () => {
-    alertinfo.props = { close: () => undefined, content: null, title: null };
+    const props = {
+      title: '', 
+      content: '',
+      close: () => undefined, 
+    };
+    const alertinfo = new AlertInfo(props);
     const AlertComponent = () => {
       return (
         <div className="alert">

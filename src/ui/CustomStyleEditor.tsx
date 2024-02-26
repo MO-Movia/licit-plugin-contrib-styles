@@ -534,13 +534,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         }
       });
     }
-    const mp = document.getElementsByClassName('molsp-panel').item(0) as HTMLElement;
+    const mp = document.getElementsByClassName('molsp-panel')[0] as HTMLElement;
     mp.style.maxHeight = mp.scrollHeight + 'px';
-    const mp1 = document.getElementsByClassName('molsp-panel1').item(0) as HTMLElement;
+    const mp1 = document.getElementsByClassName('molsp-panel1')[0] as HTMLElement;
     mp1.style.maxHeight = mp1.scrollHeight + 'px';
-    const mp2 = document.getElementsByClassName('molsp-panel2').item(0) as HTMLElement;
+    const mp2 = document.getElementsByClassName('molsp-panel2')[0] as HTMLElement;
     mp2.style.maxHeight = mp2.scrollHeight + 'px';
-    const mp3 = document.getElementsByClassName('molsp-panel3').item(0) as HTMLElement;
+    const mp3 = document.getElementsByClassName('molsp-panel3')[0] as HTMLElement;
     mp3.style.maxHeight = mp3.scrollHeight + 'px';
 
     this.setNextLineStyle(this.state.styles.nextLineStyleName);

@@ -1,4 +1,6 @@
 import { applyEffectiveSchema } from './EditorSchema';
+import { Schema } from 'prosemirror-model';
+
 
 describe('EditorSchema', () => {
     const mockSchema = {
@@ -500,10 +502,10 @@ describe('EditorSchema', () => {
         },
     };
     it('Should handle effectiveSchema', () => {
-        expect(applyEffectiveSchema(mockSchema)).toBeDefined();
+        expect(applyEffectiveSchema(mockSchema as unknown as Schema)).toBeDefined();
     });
     it('Should handle effectiveSchema when schema not present', () => {
-        expect(applyEffectiveSchema(null)).toBeDefined();
+        expect(applyEffectiveSchema(null as unknown as Schema )).toBeDefined();
     });
     it('Should handle effectiveSchema when schema does not have paragraph node', () => {
         const mockSchema = {
@@ -563,7 +565,7 @@ describe('EditorSchema', () => {
             },
             spec: { nodes: { content: [] }, marks: { content: [] } },
         };
-        expect(applyEffectiveSchema(mockSchema)).toBeDefined();
+        expect(applyEffectiveSchema(mockSchema as unknown as Schema)).toBeDefined();
     });
     it('Should handle effectiveSchema when schema does not have paragraph node', () => {
         const mockSchema = {
@@ -1066,6 +1068,6 @@ describe('EditorSchema', () => {
                 }
             },
         };
-        expect(applyEffectiveSchema(mockSchema)).toBeDefined();
+        expect(applyEffectiveSchema(mockSchema as unknown as Schema)).toBeDefined();
     });
 });

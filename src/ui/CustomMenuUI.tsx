@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { SyntheticEvent } from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Schema, Node } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
@@ -40,19 +40,22 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   _styleName = null;
   _menuItemHeight = 28;
   // _popUpId = uuid();
-  props: {
-    className?: string;
-    commandGroups: Array<{ [key: string]: UICommand }>;
-    staticCommand: Array<{ [key: string]: UICommand }>;
-    disabled?: boolean;
-    dispatch: (tr: Transform) => void;
-    editorState: EditorState;
-    editorView?: EditorView;
-    icon?: string | React.Element<any> | null;
-    label?: string | React.Element<any> | null;
-    title?: string;
-    _style?: any;
-  };
+  // props: {
+  //   className?: string;
+  //   commandGroups: Array<{ [key: string]: UICommand }>;
+  //   staticCommand: Array<{ [key: string]: UICommand }>;
+  //   disabled?: boolean;
+  //   dispatch: (tr: Transform) => void;
+  //   editorState: EditorState;
+  //   editorView?: EditorView;
+  //   // icon?: string | React.Element<any> | null;
+  //   icon?: string | JSX.Element | null;
+  //   // label?: string | React.Element<any> | null;
+  //   label?: string | JSX.Element | null;
+  //   title?: string;
+  //   _style?: any;
+  //   onCommand?:any
+  // };
 
   _id = uuid();
   _selectedIndex = 0;
@@ -153,7 +156,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     return node.type.name === 'paragraph' || node.type.name === 'ordered_list';
   }
 
-  _onUIEnter = (command: UICommand, event: SyntheticEvent<*>) => {
+  _onUIEnter = (command: UICommand, event: SyntheticEvent<any>) => {
     if (command.shouldRespondToUIEvent(event)) {
       // check the mouse clicked on down arror to show sub menu
       if (event.currentTarget.className === 'czi-custom-menu-item edit-icon') {
@@ -164,7 +167,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     }
   };
 
-  _execute = (command: UICommand, e: SyntheticEvent<*>) => {
+  _execute = (command: UICommand, e: SyntheticEvent<any>) => {
     if (undefined !== command) {
       const { dispatch, editorState, editorView, onCommand } = this.props;
       command.execute(editorState, dispatch, editorView, e);
@@ -173,7 +176,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   };
 
   //shows the alignment and line spacing option
-  showSubMenu(command: UICommand, event: SyntheticEvent<*>) {
+  showSubMenu(command: UICommand, event: SyntheticEvent<any>) {
     const anchor = event ? event.currentTarget : null;
 
     // close the popup toggling effect
@@ -325,7 +328,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   }
 
   //shows the alignment and line spacing option
-  showStyleWindow(command: UICommand, _event: SyntheticEvent<*>, mode) {
+  showStyleWindow(command, _event: SyntheticEvent<any>, mode) {
     // const anchor = event ? event.currentTarget : null;
     // close the popup toggling effect
     if (this._stylePopup) {
@@ -445,7 +448,8 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
     doc.descendants(function (child, pos) {
       if (oldStyleName === child.attrs.styleName) {
-        child.attrs.styleName = styleName;
+        (( child.attrs as { styleName: string }).styleName) = styleName
+        // child.attrs.styleName = styleName;
         tr = tr.setNodeMarkup(pos, undefined, child.attrs);
       }
     });

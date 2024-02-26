@@ -192,7 +192,7 @@ function createNewAttributes(schema) {
     } else {
       name = '';
     }
-    createMarkAttributes(marks[i], name, existingAttr);
+    createMarkAttributes(marks[i], existingAttr);
   }
   return schema;
 }

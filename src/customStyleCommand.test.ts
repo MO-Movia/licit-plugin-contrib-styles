@@ -273,7 +273,7 @@ describe('CustomStyleCommand', () => {
         0,
         1,
         {},
-        {}
+        {},
       )
     ).toBeFalsy();
     expect(

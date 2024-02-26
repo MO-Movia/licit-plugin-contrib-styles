@@ -69,7 +69,12 @@ export const NUMBERING = 'hasNumbering';
 export const LEVELBASEDINDENT = 'isLevelbased';
 export const LEVEL = 'styleLevel';
 export const BOLDPARTIAL = 'boldPartial';
-const MISSED_HEIRACHY_ELEMENT = {};
+const MISSED_HEIRACHY_ELEMENT = {
+  isAfter: '',
+  attrs:{styleName:'',styleLevel:0},
+  previousLevel:'',
+  startPos:''
+};
 const nodesAfterSelection = [];
 const nodesBeforeSelection = [];
 const selectedNodes = [];
@@ -180,7 +185,7 @@ export class CustomStyleCommand extends UICommand {
   _customStyle: Style;
   _popUp = null;
 
-  constructor(customStyle: Style | string, customStyleName: string) {
+  constructor(customStyle: any, customStyleName: string) {
     super();
     this._customStyle = customStyle;
     this._customStyleName = customStyleName;
@@ -229,11 +234,11 @@ export class CustomStyleCommand extends UICommand {
   executeClearStyle(
     state: EditorState,
     dispatch?: (tr: Transform) => void,
-    node: any,
-    startPos: number,
-    endPos: number,
-    newattrs: any,
-    selection: Selection
+    node?: any,
+    startPos?: number,
+    endPos?: number,
+    newattrs?: any,
+    selection?: Selection
   ) {
     let done = false;
     let tr = this.clearCustomStyles(state.tr.setSelection(selection), state);
@@ -280,18 +285,18 @@ export class CustomStyleCommand extends UICommand {
     const newattrs = Object.assign({}, node ? node.attrs : {});
     let isValidated = true;
 
-    if ('newstyle' === this._customStyle) {
+    if ('newstyle' === this._customStyle.toString()) {
       this.editWindow(state, view, 0);
       return false;
-    } else if ('editall' === this._customStyle) {
+    } else if ('editall' === this._customStyle.toString()) {
       this.editWindow(state, view, 3);
       return false;
     }
     // [FS] IRAD-1053 2020-10-08
     // to remove the custom styles applied in the selected paragraph
     else if (
-      'clearstyle' === this._customStyle ||
-      RESERVED_STYLE_NONE === this._customStyle
+      'clearstyle' === this._customStyle.toString() ||
+      RESERVED_STYLE_NONE === this._customStyle.toString()
     ) {
       return this.executeClearStyle(
         state,
@@ -316,6 +321,7 @@ export class CustomStyleCommand extends UICommand {
         startPos,
         endPos,
         this._customStyle ? this._customStyle.styleName : ''
+       // this._customStyle ? (this._customStyle as Style).styleName : ''
       )
     ) {
       isValidated = checkLevlsAvailable();
@@ -388,8 +394,8 @@ export class CustomStyleCommand extends UICommand {
     return tr;
   }
 
-  removeMarks(marks: [], tr: Transform, node: Node) {
-    const { selection } = tr;
+  removeMarks(marks: any[], tr: Transform, node: Node) {
+    const { selection}  = tr;
     // [FS] IRAD-1495 2021-06-25
     // FIX: Clear style not working on multi select paragraph
     const from = selection.$from.before(1);
@@ -691,7 +697,7 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
   return marks;
 }
 function applyStyleEx(
-  styleProp?: Style,
+  styleProp: Style,
   styleName: string,
   state: EditorState,
   tr: Transform,
@@ -699,7 +705,7 @@ function applyStyleEx(
   startPos: number,
   endPos: number,
   way: number,
-  opt: number
+  opt?: number
 ) {
   const loading = !styleProp;
   if (!opt) {
@@ -734,7 +740,8 @@ function applyStyleEx(
 
   if (styleProp && styleProp.styles) {
     const _commands = getCustomStyleCommands(styleProp.styles);
-    const newattrs = Object.assign({}, node.attrs);
+    const newattrs = Object.assign({}, node.attrs as any);
+ //   const newattrs = node.attrs as { [key: string]: any };
     // [FS] IRAD-1074 2020-10-22
     // Issue fix on not removing center alignment when switch style with center
     // alignment to style with left alignment
@@ -824,7 +831,7 @@ function hasMismatchHeirarchy(
   node: Node /* The current node */,
   startPos: number,
   endPos: number,
-  styleName /* New style to be applied */
+  styleName? /* New style to be applied */
 ) {
   const styleLevel = Number(getStyleLevel(styleName ? styleName : ''));
   const currentLevel = getStyleLevel(node.attrs?.styleName);
@@ -1194,7 +1201,7 @@ function setNewElementObject(attrs, startPos, previousLevel, isAfter) {
   MISSED_HEIRACHY_ELEMENT.previousLevel = previousLevel;
 }
 
-export function insertParagraph(nodeAttrs, startPos, tr, index, state) {
+export function insertParagraph(nodeAttrs, startPos, tr, index, state?) {
   if (state && state.schema && nodeAttrs) {
     const paragraph = state.schema.nodes[PARAGRAPH];
     // [FS] IRAD-1202 2021-02-15
@@ -1226,7 +1233,7 @@ export function addElementEx(
   startPos,
   after,
   previousLevel,
-  currentLevel
+  currentLevel?
 ) {
   let level = 0;
   let counter = 0;
@@ -1542,9 +1549,9 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   let content = '';
   let counter = 0;
   if (boldSentence) {
-    content = textContent.split('.');
+    content = textContent.split('.').toString();
   } else {
-    content = textContent.split(' ');
+    content = textContent.split(' ').toString();
   }
   if ('' !== content[0]) {
     textContent = content[0];

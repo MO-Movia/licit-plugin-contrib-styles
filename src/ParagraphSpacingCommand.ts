@@ -5,12 +5,12 @@ import { Schema } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
 
 export function setParagraphSpacing(
-  tr: Transform,
+  tr: any,
   schema: Schema,
   paragraphSpacing?: string,
   isAfter?: boolean
 ): Transform {
-  const { selection, doc } = tr;
+  const { selection , doc } = tr;
   if (!selection || !doc) {
     return tr;
   }

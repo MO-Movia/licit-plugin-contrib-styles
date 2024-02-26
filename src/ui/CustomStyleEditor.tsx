@@ -67,7 +67,7 @@ const LEVEL_VALUES = [
 
 const SAMPLE_TEXT = `Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample.
 Sample Text Sample Text Sample Text Sample Text Sample Text`;
-export class CustomStyleEditor extends React.PureComponent<unknown, Style> {
+export class CustomStyleEditor extends React.PureComponent<any, any> {
   _popUp = null;
 
   constructor(props) {
@@ -199,7 +199,7 @@ export class CustomStyleEditor extends React.PureComponent<unknown, Style> {
       style.backgroundColor = this.state.styles.textHighlight;
     }
     if (this.state.styles.align) {
-      style.textAlign = this.state.styles.align;
+      (style.textAlign) = this.state.styles.align;
     }
     if (this.state.styles.lineHeight) {
       // [FS] IRAD-1104 2020-11-13
@@ -220,7 +220,7 @@ export class CustomStyleEditor extends React.PureComponent<unknown, Style> {
     // Issue fix : Indent is not applied in the sample text.
     if (!this.state.styles.isLevelbased) {
       if (this.state.styles.indent) {
-        style.marginLeft = `${this.state.styles.indent * 2}px`;
+        style.marginLeft = `${parseInt(this.state.styles.indent) * 2}px`;
       }
     } else {
       const levelValue = document?.getElementById('levelValue');
@@ -534,13 +534,13 @@ export class CustomStyleEditor extends React.PureComponent<unknown, Style> {
         }
       });
     }
-    const mp = document.getElementsByClassName('molsp-panel')[0];
+    const mp = document.getElementsByClassName('molsp-panel').item(0) as HTMLElement;
     mp.style.maxHeight = mp.scrollHeight + 'px';
-    const mp1 = document.getElementsByClassName('molsp-panel1')[0];
+    const mp1 = document.getElementsByClassName('molsp-panel1').item(0) as HTMLElement;
     mp1.style.maxHeight = mp1.scrollHeight + 'px';
-    const mp2 = document.getElementsByClassName('molsp-panel2')[0];
+    const mp2 = document.getElementsByClassName('molsp-panel2').item(0) as HTMLElement;
     mp2.style.maxHeight = mp2.scrollHeight + 'px';
-    const mp3 = document.getElementsByClassName('molsp-panel3')[0];
+    const mp3 = document.getElementsByClassName('molsp-panel3').item(0) as HTMLElement;
     mp3.style.maxHeight = mp3.scrollHeight + 'px';
 
     this.setNextLineStyle(this.state.styles.nextLineStyleName);
@@ -555,7 +555,7 @@ export class CustomStyleEditor extends React.PureComponent<unknown, Style> {
     }
   }
 
-  render(): React.Element<any> {
+  render(): JSX.Element {
     return (
       <div className="molsp-customedit-div">
         <div className="molsp-customedit-head">
@@ -622,7 +622,7 @@ export class CustomStyleEditor extends React.PureComponent<unknown, Style> {
             <p className="molsp-formp">Preview:</p>
             <div
               className="molsp-textareadiv"
-              name="body"
+
               style={
                 3 === this.props.mode
                   ? { height: '164px' }
@@ -1237,7 +1237,7 @@ export class CustomStyleEditor extends React.PureComponent<unknown, Style> {
                     <input
                       checked={
                         this.state.styles.nextLineStyleName ===
-                          this.state.styleName && !this.state.otherStyleSelected
+                        this.state.styleName && !this.state.otherStyleSelected
                       }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 1)}
@@ -1342,7 +1342,13 @@ export class CustomStyleEditor extends React.PureComponent<unknown, Style> {
     // [FS] IRAD-1231 2021-03-02
     // FIX: edited custom styles not applied to the document
     if (3 === this.state.mode) {
-      delete this.state.customStyles;
+      this.setState({
+        customstyles: []
+      });
+      // delete this.state.customStyles;
+      const { customStyles, ...newState } = this.state;
+      // Update the state with the new state object
+      this.setState(newState);
       this.props.close(editedStyles);
     } else {
       this.props.close();
@@ -1350,7 +1356,10 @@ export class CustomStyleEditor extends React.PureComponent<unknown, Style> {
   };
 
   _save = (): void => {
-    delete this.state.otherStyleSelected;
+    // delete this.state.otherStyleSelected;
+    const { otherStyleSelected, ...newState } = this.state;
+    // Update the state with the new state object
+    this.setState(newState);
     // [FS] IRAD-1137 2021-01-15
     // FIX: able to save a custom style name with already exist style name
     if (0 === this.state.mode && isCustomStyleExists(this.state.styleName)) {
@@ -1366,13 +1375,16 @@ export class CustomStyleEditor extends React.PureComponent<unknown, Style> {
       editedStyles.push(this.state.styleName);
     } else {
       if ('' !== this.state.styleName) {
-        delete this.state.customStyles;
-        this.props.close(this.state);
+        // delete this.state.customStyles;
+        const { customStyles, ...newState } = this.state;
+        // Update the state with the new state object
+        this.setState(newState);
+        this.props.close(newState);
       }
     }
   };
 
-  handleKeyDown = (_e: KeyboardEvent): void => {
+  handleKeyDown = (): void => {
     const txtName = document.getElementById('txtName');
     if (txtName) {
       txtName.focus();
@@ -1380,7 +1392,7 @@ export class CustomStyleEditor extends React.PureComponent<unknown, Style> {
   };
   // [FS] IRAD-1176 2021-02-08
   // save the custom styles from Edit all option.
-  modifyCustomStyle(val: EditorState) {
+  modifyCustomStyle(val) {
     delete val.editorView;
     const styleObj = {
       styleName: val.styleName,

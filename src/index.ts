@@ -42,7 +42,7 @@ const requiredAddAttr = (node) => {
 // [FS] IRAD-1503 2021-07-02
 // Fix: Update the private plugin classes as a named export rather than the default
 export class CustomstylePlugin extends Plugin {
-  constructor(runtime: StyleRuntime, hideNumbering: boolean) {
+  constructor(runtime: StyleRuntime, hideNumbering?: boolean) {
     let csview = null;
     let firstTime = true;
     let loaded = false;
@@ -64,7 +64,7 @@ export class CustomstylePlugin extends Plugin {
         // [FS] IRAD-1668 2022-01-21
         // dummy plugin view so that EditorView is accessible when refreshing the document
         // to apply styles after getting the styles.
-        this.csview = view;
+        csview = view;
         return {
           update: () => {
             /* This is intentional */
@@ -77,7 +77,7 @@ export class CustomstylePlugin extends Plugin {
 
       props: {
         handlePaste(_view, _event, slice) {
-          if (slice.content?.content[0]?.attrs) {
+          if ((slice.content as any)?.content[0]?.attrs) {
             slice1 = slice;
           }
           return false;
@@ -87,7 +87,7 @@ export class CustomstylePlugin extends Plugin {
             csview = view;
           },
         },
-        nodeViews: [],
+        nodeViews: [] as any,
       },
       appendTransaction: (transactions, prevState, nextState) => {
         let tr = null;
@@ -206,6 +206,7 @@ export function onUpdateAppendTransaction(
                   node,
                   startPos,
                   endPos,
+                  null,
                   opt
                 );
               } else {
@@ -221,6 +222,7 @@ export function onUpdateAppendTransaction(
                   node,
                   startPos,
                   endPos,
+                  null,
                   opt
                 );
               }
@@ -495,6 +497,7 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
         node,
         startPos,
         endPos,
+        null,
         opt
       );
     }
@@ -619,7 +622,7 @@ function isDocChanged(transactions) {
   return transactions.some((transaction) => transaction.docChanged);
 }
 
-export function applyNormalIfNoStyle(nextState, tr, node, opt) {
+export function applyNormalIfNoStyle(nextState, tr, node, opt?) {
   if (!tr) {
     tr = nextState.tr;
   }

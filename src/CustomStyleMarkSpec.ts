@@ -7,7 +7,7 @@ const ATTR_OVERRIDDEN = 'overridden';
 type toDOMFn = (node: Node) => DOMOutputSpec;
 type getAttrsFn = (p: Node | string) => KeyValuePair;
 
-function getAttrs(base: getAttrsFn, dom: HTMLElement) {
+function getAttrs(base: getAttrsFn | undefined, dom: HTMLElement) {
   if (typeof dom != 'string' && undefined !== base) {
     const attrs = base(dom as any);
     // [FS] IRAD-1623 2021-11-11

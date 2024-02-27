@@ -1,5 +1,8 @@
-import { Schema } from 'prosemirror-model';
+import { Schema, Node } from 'prosemirror-model';
 import { removeTextAlignAndLineSpacing, clearCustomStyleAttribute } from './clearCustomStyleMarks';
+import { Transform } from 'prosemirror-transform';
+
+
 
 describe('removeTextAlignAndLineSpacing', () => {
   const transaction = {
@@ -76,18 +79,22 @@ describe('removeTextAlignAndLineSpacing', () => {
           { tag: 'b' },
           {
             style: 'font-weight',
-            getAttrs: (value) => /^(bold(er)?|[5-9]\d{2,})$/.test(value) && null,
+            getAttrs: (value: string | HTMLElement) => {
+              if (typeof value === 'string') {
+                return /^(bold(er)?|[5-9]\d{2,})$/.test(value) ? {} : false;
+              } else {
+                // Handle HTMLElement case
+                return false;
+              }
+            },
           },
         ],
         toDOM: () => ['strong'],
-        create() {
-          return { class: 'strong' };
-        },
       },
     },
   });
 
-  const removetextalignandlinespacing = removeTextAlignAndLineSpacing(transaction, mySchema);
+  const removetextalignandlinespacing = removeTextAlignAndLineSpacing(transaction as unknown as Transform, mySchema);
 
   it('should return tr', () => {
     expect(removetextalignandlinespacing).toBeDefined();
@@ -100,7 +107,7 @@ describe('removeTextAlignAndLineSpacing', () => {
         indent: true,
       },
     };
-    clearCustomStyleAttribute(myNode);
+    clearCustomStyleAttribute(myNode as unknown as Node);
     expect(myNode.attrs.styleName).toBe('Normal');
     expect(myNode.attrs.indent).toBeNull;
   });
@@ -109,11 +116,11 @@ describe('removeTextAlignAndLineSpacing', () => {
     const myNode = {
       attrs: {},
     };
-    expect(clearCustomStyleAttribute(myNode)).toBeUndefined();
+    expect(clearCustomStyleAttribute(myNode as unknown as Node)).toBeUndefined();
   });
 
   it('should handle clearCustomStyleAttribute', () => {
     const myNode = {};
-    expect(clearCustomStyleAttribute(myNode)).toBeUndefined();
+    expect(clearCustomStyleAttribute(myNode as unknown as Node)).toBeUndefined();
   });
 });

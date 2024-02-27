@@ -1,4 +1,3 @@
-import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { CustomStyleItem } from './CustomStyleItem';
 import * as cusstyle from '../customStyle';
 
@@ -31,18 +30,9 @@ describe('customstyleitem', () => {
       ],
     },
     selection: { type: 'text', anchor: 1, head: 1 },
-  };
-  const props = {
-    command: new UICommand(),
-    disabled: true,
-    dispatch: () => undefined,
-    editorState: mockState,
-    editorView: null,
-    label: 'Normal',
-    hasText: true,
-  };
-  const customstyleitem = new CustomStyleItem(props);
-  customstyleitem.props = {
+  } as any;
+  
+   const props = {
     command: {
       _customStyleName: 'Normal',
       _customStyle: {
@@ -67,14 +57,16 @@ describe('customstyleitem', () => {
         isHidden: false,
       },
       _popUp: null,
-    },
+    } as any,
     disabled: true,
     dispatch: () => undefined,
     editorState: mockState,
-    editorView: null,
+    editorView: undefined,
     label: 'Normal',
     hasText: true,
   };
+  const customstyleitem = new CustomStyleItem(props);
+
   it('should be defined', () => {
     expect(customstyleitem).toBeDefined();
   });
@@ -82,20 +74,12 @@ describe('customstyleitem', () => {
     expect(customstyleitem.render()).toBeDefined();
   });
   it('should handle render when label is not defined branch coverage', () => {
-    jest.spyOn(cusstyle, 'getCustomStyleByName').mockReturnValue(null);
+    jest.spyOn(cusstyle, 'getCustomStyleByName').mockReturnValue({
+      styles: undefined,
+      styleName: ''
+    });   
+ 
     const props = {
-      command: new UICommand(),
-      disabled: true,
-      dispatch: () => undefined,
-      editorState: mockState,
-      editorView: null,
-      label: null,
-      hasText: false,
-    };
-    const customstyleitem = new CustomStyleItem(props);
-    jest.spyOn(customstyleitem, 'sampleLevel').mockReturnValue(null);
-    jest.spyOn(customstyleitem, 'hasBoldSentence').mockReturnValue(true);
-    customstyleitem.props = {
       command: {
         _customStyleName: 'Normal',
         _customStyle: {
@@ -122,29 +106,27 @@ describe('customstyleitem', () => {
           isHidden: false,
         },
         _popUp: null,
-      },
+      } as any,
       disabled: true,
       dispatch: () => undefined,
       editorState: mockState,
-      editorView: null,
-      label: null,
-      hasText: false,
-    };
-    expect(customstyleitem.render()).toBeDefined();
-  });
-  it('should handle render when label is not defined when hasBoldPartial and hasBoldSentance true and false respectively', () => {
-    jest.spyOn(cusstyle, 'getCustomStyleByName').mockReturnValue(null);
-    const props = {
-      command: new UICommand(),
-      disabled: true,
-      dispatch: () => undefined,
-      editorState: mockState,
-      editorView: null,
-      label: null,
+      editorView: undefined,
+      label: '',
       hasText: false,
     };
     const customstyleitem = new CustomStyleItem(props);
-    customstyleitem.props = {
+    jest.spyOn(customstyleitem, 'sampleLevel').mockReturnValue('');
+    jest.spyOn(customstyleitem, 'hasBoldSentence').mockReturnValue(true);
+
+    expect(customstyleitem.render()).toBeDefined();
+  });
+  it('should handle render when label is not defined when hasBoldPartial and hasBoldSentance true and false respectively', () => {
+    jest.spyOn(cusstyle, 'getCustomStyleByName').mockReturnValue({
+      styles: undefined,
+      styleName: ''
+    });
+  
+    const props = {
       command: {
         _customStyleName: 'Normal',
         _customStyle: {
@@ -155,14 +137,15 @@ describe('customstyleitem', () => {
           isHidden: false,
         },
         _popUp: null,
-      },
+      } as any,
       disabled: true,
       dispatch: () => undefined,
       editorState: mockState,
-      editorView: null,
-      label: null,
+      editorView: undefined,
+      label: '',
       hasText: false,
     };
+    const customstyleitem = new CustomStyleItem(props);
     expect(customstyleitem.render()).toBeDefined();
   });
 });

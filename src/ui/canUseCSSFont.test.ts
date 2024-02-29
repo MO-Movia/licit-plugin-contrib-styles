@@ -7,13 +7,13 @@ describe('canUseCSSFont', () => {
     ready: Promise.resolve(),
     status: 'loaded',
     values: () => [],
-  };
+  } as unknown as FontFaceSet;
   beforeEach(() => {
     global.document = {
       fonts: mockFonts,
-    };
-    cached['Font1'] = true;
-  });
+     } as unknown as Document;
+     cached['Font1'] = Promise.resolve(true);
+    });
   // afterEach(() => {
   //   jest.clearAllMocks();
   //   delete global.document;

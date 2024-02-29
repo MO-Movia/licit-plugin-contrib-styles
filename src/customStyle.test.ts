@@ -2,7 +2,7 @@ import { isPreviousLevelExists, setStyles, isStylesLoaded, hasStyleRuntime, getC
 
 describe('customstyle', () => {
     it('should handle isPreviousLevelExists', () => {
-        setStyles([{ styles: { styleLevel: 2 } }]);
+        setStyles([{ styleName: '', styles: { styleLevel: 2 } }]);
         expect(isPreviousLevelExists(2)).toBeTruthy();
     });
     it('should handle isPreviousLevelExists when customStyles.length=0', () => {
@@ -10,7 +10,7 @@ describe('customstyle', () => {
         expect(isPreviousLevelExists(2)).toBeTruthy();
     });
     it('should handle isPreviousLevelExists when customStyles does not have styles', () => {
-        setStyles([{}]);
+        setStyles([{styleName: ''}]);
         expect(isPreviousLevelExists(2)).toBeFalsy();
     });
     it('should handle isStylesLoaded', () => {

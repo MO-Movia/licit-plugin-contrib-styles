@@ -21,7 +21,7 @@ export class CustomMenuButton extends React.PureComponent<
     disabled?: boolean;
     dispatch: (tr: Transform) => void;
     editorState: EditorState;
-    editorView?: EditorView;
+    editorView?: EditorView | null;
     icon?: string | React.ReactElement | null;
     label?: string | React.ReactElement | null;
     title?: string;
@@ -33,7 +33,7 @@ export class CustomMenuButton extends React.PureComponent<
   state = {
     expanded: false,
   };
-  _menu = null;
+  _menu : any = null;
   _id = uuid();
 
   render(): React.ReactElement {

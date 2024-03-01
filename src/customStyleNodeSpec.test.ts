@@ -1,5 +1,6 @@
-import { toCustomStyleDOM, getCustomStyleAttrs } from './CustomStyleNodeSpec';
+import {toCustomStyleDOM,getCustomStyleAttrs} from './CustomStyleNodeSpec.js';
 import * as customstyle from './customStyle';
+import { Node,DOMOutputSpec } from 'prosemirror-model';
 
 describe('getAttrs', () => {
   const base = () => {
@@ -20,7 +21,7 @@ describe('getAttrs', () => {
 });
 describe('toCustomStyleDOM', () => {
   const base = () => {
-    return ['span', { styleName: '' }];
+    return ['span', { styleName: '' }] as unknown as DOMOutputSpec;
   };
 
   it('should handle toCustomStyleDOM ', () => {
@@ -29,21 +30,21 @@ describe('toCustomStyleDOM', () => {
         hasBullet: true,
         bulletLevel: '25CF',
         styleLevel: 1,
-        paragraphSpacingBefore: 10,
-        paragraphSpacingAfter: 10,
-        strong: 10,
-        boldNumbering: 10,
-        em: 10,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: true,
         color: 'blue',
-        fontSize: 10,
+        fontSize: '10',
         fontName: 'Tahoma',
-        indent: 10,
+        indent: '10',
         hasNumbering: true,
       },
+      styleName: ''
     });
-    const base = () => {
-      return ['span', { styleName: '' }];
-    };
+    //const base = undefined
+    
     const node = {
       type: 'paragraph',
       attrs: {
@@ -75,7 +76,7 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
       {
         'data-bullet-color': '#000000',
@@ -96,21 +97,20 @@ describe('toCustomStyleDOM', () => {
         hasBullet: true,
         bulletLevel: '25CF',
         styleLevel: 1,
-        paragraphSpacingBefore: 10,
-        paragraphSpacingAfter: 10,
-        strong: 10,
-        boldNumbering: 10,
-        em: 10,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: true,
         color: 'blue',
-        fontSize: 10,
+        fontSize: '10',
         fontName: 'Tahoma',
-        indent: 10,
+        indent: '10',
         hasNumbering: false,
       },
+      styleName: ''
     });
-    const base = () => {
-      return ['span', { styleName: '' }];
-    };
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -142,7 +142,7 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
       {
         'data-bullet-color': '#000000',
@@ -156,7 +156,7 @@ describe('toCustomStyleDOM', () => {
     ]);
   });
   it('should handle toCustomStyleDOM when styleName includes(RESERVED_STYLE_NONE_NUMBERING)', () => {
-    jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue(null);
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -188,39 +188,40 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
       {
-        'data-style-level': '10',
-        'hide-style-level': false,
-        style:
-          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;counter-increment: C2 C3 C4 C5 C6 C7 C8 C9 C10 ;',
-        styleName: '10Normal-@#$-10',
+        "data-bullet-color": "#000000",
+        "data-bullet-symbol": "● ",
+        "data-indent": "10",
+        "data-show-bullet": true,
+        "style": "text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;",
+        'styleName': '10Normal-@#$-10',
       },
     ]);
   });
   it('should handle toCustomStyleDOM when  hasBullet: false', () => {
+    
     jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
       styles: {
         hasBullet: false,
         bulletLevel: '25CF',
         styleLevel: 1,
-        paragraphSpacingBefore: null,
-        paragraphSpacingAfter: null,
-        strong: null,
-        boldNumbering: null,
-        em: null,
-        color: null,
-        fontSize: null,
-        fontName: null,
-        indent: null,
+        paragraphSpacingBefore: 'null',
+        paragraphSpacingAfter: 'null',
+        strong: true,
+        boldNumbering: true,
+        em: true,
+        color: 'null',
+        fontSize: 'null',
+        fontName: 'null',
+        indent: 'null',
         hasNumbering: true,
-        align: null,
+        align: 'null',
       },
+      styleName: ''
     });
-    const base = () => {
-      return ['span', { styleName: '' }];
-    };
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -252,12 +253,13 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
       'span',
       {
+        'data-indent': 'null',
         'data-style-level': '1',
         'hide-style-level': false,
-        style: 'line-height: 16pt;--czi-content-line-height: 16pt;',
+        style: 'line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
         styleName: 'FS_B01',
       },
     ]);
@@ -267,23 +269,22 @@ describe('toCustomStyleDOM', () => {
       styles: {
         hasBullet: false,
         bulletLevel: '25CF',
-        styleLevel: null,
-        paragraphSpacingBefore: null,
-        paragraphSpacingAfter: null,
-        strong: null,
-        boldNumbering: null,
-        em: null,
-        color: null,
-        fontSize: null,
-        fontName: null,
-        indent: null,
+        styleLevel: 10,
+        paragraphSpacingBefore: 'null',
+        paragraphSpacingAfter: 'null',
+        strong: true,
+        boldNumbering: true,
+        em: true,
+        color: 'null',
+        fontSize: 'null',
+        fontName: 'null',
+        indent: 'null',
         hasNumbering: true,
-        align: null,
+        align: 'null',
       },
+      styleName: ''
     });
-    const base = () => {
-      return ['span', { styleName: '' }];
-    };
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -315,7 +316,7 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
       'span',
       {
         style: 'line-height: 16pt;--czi-content-line-height: 16pt;',
@@ -328,23 +329,22 @@ describe('toCustomStyleDOM', () => {
       styles: {
         hasBullet: false,
         bulletLevel: '25CF',
-        styleLevel: null,
-        paragraphSpacingBefore: null,
-        paragraphSpacingAfter: null,
-        strong: null,
-        boldNumbering: null,
-        em: null,
-        color: null,
-        fontSize: null,
-        fontName: null,
-        indent: null,
+        styleLevel: 10,
+        paragraphSpacingBefore: 'null',
+        paragraphSpacingAfter: 'null',
+        strong: true,
+        boldNumbering: true,
+        em: true,
+        color: 'null',
+        fontSize: 'null',
+        fontName: 'null',
+        indent: 'null',
         hasNumbering: true,
-        align: null,
+        align: 'null',
       },
+      styleName: ''
     });
-    const base = () => {
-      return ['span', { styleName: '' }];
-    };
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -376,19 +376,19 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
       'span',
       {
-        style: 'line-height: 16pt;--czi-content-line-height: 16pt;',
-        styleName: 'test',
+        "data-indent": "null",
+        "data-style-level": "10",
+        "hide-style-level": false,
+        "style": "line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;counter-increment: C2 C3 C4 C5 C6 C7 C8 C9 C10 ;",
+        'styleName': 'test',
       },
     ]);
   });
   it('should handle toCustomStyleDOM when  styleprops null', () => {
-    jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue(null);
-    const base = () => {
-      return ['span', { styleName: '' }];
-    };
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -420,19 +420,19 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
       'span',
       {
-        style: 'line-height: 16pt;--czi-content-line-height: 16pt;',
-        styleName: 'test',
+        "data-indent": "null",
+        "data-style-level": "10",
+        "hide-style-level": false,
+        "style": "line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;",
+        'styleName': 'test',
       },
     ]);
   });
   it('should handle toCustomStyleDOM when  styleprops null and stylename has reservedStylenumbering and no styleLvel', () => {
-    jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue(null);
-    const base = () => {
-      return ['span', { styleName: '' }];
-    };
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -464,19 +464,19 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
       'span',
       {
-        style: 'line-height: 16pt;--czi-content-line-height: 16pt;',
-        styleName: '10Normal-@#$-',
+        "data-indent": "null",
+        "data-style-level": "10",
+        "hide-style-level": false,
+        "style": "line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;",
+        'styleName': '10Normal-@#$-',
       },
     ]);
   });
   it('should handle toCustomStyleDOM when  styleprops null and stylename has reservedStylenumbering and no styleLvel and 2 not equal to indices.length', () => {
-    jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue(null);
-    const base = () => {
-      return ['span', { styleName: '' }];
-    };
+   // const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -508,11 +508,14 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
       'span',
       {
-        style: 'line-height: 16pt;--czi-content-line-height: 16pt;',
-        styleName: 'Normal-@#$-Normal-@#$-Normal-@#$-',
+        "data-indent": "null",
+        "data-style-level": "10",
+        "hide-style-level": false,
+        "style": "line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;",
+        'styleName': 'Normal-@#$-Normal-@#$-Normal-@#$-',
       },
     ]);
   });
@@ -522,21 +525,20 @@ describe('toCustomStyleDOM', () => {
         hasBullet: true,
         bulletLevel: '25CF',
         styleLevel: 1,
-        paragraphSpacingBefore: 10,
-        paragraphSpacingAfter: 10,
-        strong: 10,
-        boldNumbering: 10,
-        em: 10,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: true,
         color: 'blue',
-        fontSize: 10,
+        fontSize: '10',
         fontName: 'Tahoma',
-        indent: 10,
+        indent: '10',
         hasNumbering: true,
       },
+      styleName: ''
     });
-    const base = () => {
-      return ['span', { styleName: '' }];
-    };
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -568,7 +570,7 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
       'span',
       {
         'data-bullet-color': '#000000',
@@ -589,22 +591,21 @@ describe('toCustomStyleDOM', () => {
         hasBullet: true,
         bulletLevel: '25CF',
         styleLevel: 1,
-        paragraphSpacingBefore: 10,
-        paragraphSpacingAfter: 10,
-        strong: 10,
-        boldNumbering: 10,
-        em: 10,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: true,
         color: 'blue',
-        fontSize: 10,
+        fontSize: '10',
         fontName: 'Tahoma',
-        indent: 10,
+        indent: '10',
         hasNumbering: true,
         align: 'left',
       },
+      styleName: ''
     });
-    const base = () => {
-      return ['span', { styleName: '' }];
-    };
+   // const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -636,7 +637,7 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
       'span',
       {
         'data-bullet-color': '#000000',

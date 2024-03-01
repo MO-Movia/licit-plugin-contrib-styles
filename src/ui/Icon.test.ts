@@ -10,36 +10,42 @@ describe('Icon', () => {
     expect(icon).toBeDefined();
   });
   it('should handle render when props is superscript', () => {
-    icon.props = {
+    const props = {
       type: 'superscript',
       title: '',
     };
+    const icon = new Icon(props);
     expect(icon.render()).toBeDefined();
   });
   it('should handle render when props is subscript', () => {
-    icon.props = {
+    const props = {
       type: 'subscript',
       title: '',
     };
+    const icon = new Icon(props);
     expect(icon.render()).toBeDefined();
   });
 
   it('should handle render when props anything else', () => {
-    icon.props = {
+    const props = {
       type: 'any',
       title: '',
     };
+    const icon = new Icon(props);
+
     expect(icon.render()).toBeDefined();
   });
   it('should handle render when props is null', () => {
-    icon.props = {
-      type: null,
+    const props = {
+      type: '',
       title: '',
     };
+    const icon = new Icon(props);
+
     expect(icon.render()).toBeDefined();
   });
 
   it('should handle render when props is null', () => {
-    expect(Icon.get(null, 'edit')).toBeDefined();
+    expect(Icon.get('', 'edit')).toBeDefined();
   });
 });

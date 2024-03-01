@@ -184,6 +184,7 @@ export class CustomStyleCommand extends UICommand {
   _customStyleName: string;
   _customStyle: Style;
   _popUp = null;
+  _level = 0;
 
   constructor(customStyle: any, customStyleName: string) {
     super();
@@ -197,7 +198,7 @@ export class CustomStyleCommand extends UICommand {
 
   isEmpty = (obj) => {
     for (const key in obj) {
-      if (obj.has(key)) {
+      if (obj.hasOwnProperty(key)) {
         return false;
       }
     }
@@ -277,7 +278,7 @@ export class CustomStyleCommand extends UICommand {
     dispatch?: (tr: Transform) => void,
     view?: EditorView
   ): boolean => {
-    let { tr } = state;
+    let tr = state.tr;
     const { selection } = state;
     const startPos = selection.$from.before(1);
     const endPos = selection.$to.after(1) - 1;
@@ -369,7 +370,7 @@ export class CustomStyleCommand extends UICommand {
 
   // [FS] IRAD-1053 2020-12-17
   // to clear the custom styles in the selected paragraph
-  clearCustomStyles(tr: Transform<any>, editorState: EditorState) {
+  clearCustomStyles(tr: Transform, editorState: EditorState) {
     const { selection, doc } = editorState;
     // [FS] IRAD-1495 2021-06-25
     // FIX: Clear style not working on multi select paragraph
@@ -387,15 +388,13 @@ export class CustomStyleCommand extends UICommand {
           editorState.schema
         );
         tr = this.removeMarks(storedmarks, tr, node);
-        return tr;
       }
-      return tr;
     });
     return tr;
   }
 
-  removeMarks(marks: any[], tr: Transform, node: Node) {
-    const { selection}  = tr;
+  removeMarks(marks: any[], tr: any, node: Node) {
+    const { selection } = tr;
     // [FS] IRAD-1495 2021-06-25
     // FIX: Clear style not working on multi select paragraph
     const from = selection.$from.before(1);
@@ -628,7 +627,7 @@ function onLoadRemoveAllMarksExceptOverridden(
     }
   });
 
-  return handleRemoveMarks(tr, tasks, from, to, schema, null, state);
+  return handleRemoveMarks(tr, tasks, from, to, schema, state, null);
 }
 
 export function getMarkByStyleName(styleName: string, schema: Schema) {
@@ -700,7 +699,7 @@ function applyStyleEx(
   styleProp: Style,
   styleName: string,
   state: EditorState,
-  tr: Transform,
+  tr: any,
   node: Node,
   startPos: number,
   endPos: number,
@@ -727,8 +726,8 @@ function applyStyleEx(
           endPos,
           tr,
           state.schema,
-          styleProp,
-          state
+          state,
+          styleProp
         );
       }
     }
@@ -828,7 +827,7 @@ function isValidHeirarchy(
 function hasMismatchHeirarchy(
   _state: EditorState,
   tr: Transform,
-  node: Node /* The current node */,
+  node: any /* The current node */,
   startPos: number,
   endPos: number,
   styleName? /* New style to be applied */
@@ -1381,8 +1380,8 @@ export function removeAllMarksExceptLink(
   to: number,
   tr: Transform,
   schema: Schema,
+  state: EditorState,
   styleProp?: Style,
-  state: EditorState
 ) {
   const { doc } = tr;
   const tasks = [];
@@ -1401,7 +1400,7 @@ export function removeAllMarksExceptLink(
     }
     return true;
   });
-  return handleRemoveMarks(tr, tasks, from, to, schema, styleProp, state);
+  return handleRemoveMarks(tr, tasks, from, to, schema, state, styleProp);
 }
 
 export function handleRemoveMarks(
@@ -1410,8 +1409,8 @@ export function handleRemoveMarks(
   from: number,
   to: number,
   schema: Schema,
+  state: EditorState,
   styleProp?: Style,
-  state: EditorState
 ) {
   tasks.forEach((job) => {
     const { mark } = job;
@@ -1454,7 +1453,7 @@ export function applyStyleToEachNode(
   state: EditorState,
   from: number,
   to: number,
-  tr: Transform,
+  tr: any,
   style: Style,
   styleName: string
 ) {
@@ -1511,7 +1510,7 @@ export function applyLineStyle(
     // FIX: multi-select paragraphs and apply a style with the bold the first sentence,
     // only the last selected paragraph have bold first sentence.
     tr.doc.nodesBetween(from, to, (node, pos) => {
-      if (node.content && node.content.content && node.content.content.length) {
+      if (node.content && node.content.size > 0) {
         // Check styleName is available for node
         if (
           node.attrs &&
@@ -1647,7 +1646,8 @@ export function isCustomStyleAlreadyApplied(
   let found = false;
   const { doc } = editorState;
   doc.nodesBetween(0, doc.nodeSize - 2, (node, _pos) => {
-    if (node.content && node.content.content && node.content.content.length) {
+
+    if (node.content && node.content.size > 0) {
       const styleLevel = getStyleLevel(styleName);
       if (!found && 0 < styleLevel && node.attrs.styleName === styleName) {
         found = true;

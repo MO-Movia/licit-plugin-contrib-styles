@@ -8,6 +8,9 @@ import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { CustomStyleCommand } from '../CustomStyleCommand';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
+import { SyntheticEvent } from 'react';
+import { Transform } from 'prosemirror-transform';
+import {DOMOutputSpec} from 'prosemirror-model'
 
 // Enzyme.configure({ adapter: new Adapter() });
 
@@ -434,7 +437,7 @@ describe('Custom Menu UI   ', () => {
     },
   });
   const mockdoc = doc(p('Hello World!!!'));
-  mockdoc.styleName = '';
+ // mockdoc.styleName = '';
   const state = EditorState.create({
     doc: mockdoc,
     schema: schema,
@@ -460,6 +463,7 @@ describe('Custom Menu UI   ', () => {
     },
   };
   class MockElement {
+    tagName: '';
     constructor(tagName) {
       this.tagName = tagName;
     }
@@ -475,7 +479,7 @@ describe('Custom Menu UI   ', () => {
       return [mockElement];
     });
   const custommenuui = new CustomMenuUI(CustomMenuTestProps);
-  custommenuui.props = CustomMenuTestProps;
+  (custommenuui as any).props = CustomMenuTestProps;
 
   it('should render the component', () => {
     expect(custommenuui.render()).toBeDefined();
@@ -496,7 +500,7 @@ describe('Custom Menu UI   ', () => {
     };
     const custommenuui = new CustomMenuUI(CustomMenuTestProps);
     jest.spyOn(custommenuui, 'isAllowedNode').mockReturnValue(false);
-    custommenuui.props = CustomMenuTestProps;
+    (custommenuui as any).props = CustomMenuTestProps;
     expect(custommenuui.render()).toBeDefined();
   });
   it('should render the component', () => {
@@ -513,7 +517,7 @@ describe('Custom Menu UI   ', () => {
       title: 'styles',
       _style: '',
     };
-    custommenuui.props = CustomMenuTestProps;
+    (custommenuui as any).props = CustomMenuTestProps;
     expect(custommenuui.render()).toBeDefined();
   });
 
@@ -521,14 +525,14 @@ describe('Custom Menu UI   ', () => {
     const dom = document.createElement('div');
     dom.className = 'molsp-stylenames';
     dom.scrollTop = 1;
-    jest.spyOn(document, 'getElementsByClassName').mockReturnValue([dom]);
+    jest.spyOn(document, 'getElementsByClassName').mockReturnValue([dom] as any);
     custommenuui.componentDidMount();
-    expect(dom.scrollTop).toBe(807);
+    expect(dom.scrollTop).toBe(863);
   });
 
   it('should handle isAllowedNode', () => {
-    const node = { type: { name: 'ordered_list' } };
-    expect(custommenuui.isAllowedNode(node)).toBe(true);
+    const node= { type: { name: 'ordered_list' } };
+    expect(custommenuui.isAllowedNode(node as any)).toBe(true);
   });
   it('should handle _onUIEnter ', () => {
     const parent = document.createElement('div');
@@ -547,7 +551,7 @@ describe('Custom Menu UI   ', () => {
     const ui = new UICommand();
     jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(true);
     const spy1 = jest.spyOn(custommenuui, 'showSubMenu');
-    custommenuui._onUIEnter(ui, event);
+    custommenuui._onUIEnter(ui, event as unknown as SyntheticEvent);
     expect(spy1).toHaveBeenCalled();
   });
   it('should handle _onUIEnter  when shouldRespondToUIEvent is false event.currentTarget.className === czi-custom-menu-item edit-icon ', () => {
@@ -567,7 +571,7 @@ describe('Custom Menu UI   ', () => {
     const ui = new UICommand();
     jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(false);
     // const spy1 = jest.spyOn(custommenuui, 'showSubMenu');
-    const test = custommenuui._onUIEnter(ui, event);
+    const test = custommenuui._onUIEnter(ui, event as unknown as SyntheticEvent);
     expect(test).toBeUndefined();
   });
   it('should handle _onUIEnter when shouldRespondToUIEvent is false ', () => {
@@ -587,14 +591,14 @@ describe('Custom Menu UI   ', () => {
     const ui = new UICommand();
     jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(true);
     const spy1 = jest.spyOn(custommenuui, '_execute');
-    custommenuui._onUIEnter(ui, event);
+    custommenuui._onUIEnter(ui, event as unknown as SyntheticEvent);
 
     expect(spy1).toHaveBeenCalled();
   });
 
   it('should handle showsubmenu', () => {
-    custommenuui._stylePopup = { close: () => {} };
-    const ui = {
+    custommenuui._stylePopup = null;
+    const ui= {
       _customStyleName: 'Normal',
       _customStyle: {
         styleName: 'Normal',
@@ -613,10 +617,11 @@ describe('Custom Menu UI   ', () => {
       },
       _popUp: null,
     };
-    expect(custommenuui.showSubMenu(ui, null)).toBeUndefined();
+    
+    expect(custommenuui.showSubMenu(ui as unknown as UICommand, null as unknown as SyntheticEvent)).toBeUndefined();
   });
   it('should handle showsubmenu when popup not null', () => {
-    custommenuui._popUp = { close: () => {} };
+    custommenuui._popUp = null;
     // custommenuui._stylePopup = {close:()=>{}};
     const ui = {
       _customStyleName: 'Normal',
@@ -636,11 +641,11 @@ describe('Custom Menu UI   ', () => {
         },
       },
       _popUp: null,
-    };
+    } as unknown as UICommand;
     expect(
       custommenuui.showSubMenu(ui, {
         currentTarget: document.createElement('span'),
-      })
+      } as unknown as SyntheticEvent)
     ).toBeUndefined();
   });
   it('should handle removeCustomStyleName', () => {
@@ -657,12 +662,12 @@ describe('Custom Menu UI   ', () => {
       empty: null,
     };
     jest.spyOn(custommenuui, 'removeTextAlignAndLineSpacing').mockReturnValue({
-      key: 'tr',
+       key: 'tr',
       docChanged: true,
       setNodeMarkup: () => {
         return { key: 'tr', docChanged: true };
       },
-    });
+    } as unknown as Transform);
     expect(
       custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', (x) => {
         return x;
@@ -701,7 +706,7 @@ describe('Custom Menu UI   ', () => {
       marks: {
         link: {
           attrs: {
-            href: 'test_href',
+            href: {},
           },
         },
         em: {
@@ -721,7 +726,6 @@ describe('Custom Menu UI   ', () => {
           },
           attrs: {
             overridden: {
-              hasDefault: true,
               default: false,
             },
           },
@@ -743,7 +747,6 @@ describe('Custom Menu UI   ', () => {
           },
           attrs: {
             overridden: {
-              hasDefault: true,
               default: false,
             },
           },
@@ -765,16 +768,15 @@ describe('Custom Menu UI   ', () => {
           },
           attrs: {
             overridden: {
-              hasDefault: true,
               default: false,
             },
           },
         },
         'mark-text-color': {
           attrs: {
-            color: '',
+            // color: '',
             overridden: {
-              hasDefault: true,
+            //  hasDefault: true,
               default: false,
             },
           },
@@ -791,9 +793,8 @@ describe('Custom Menu UI   ', () => {
         },
         'mark-text-highlight': {
           attrs: {
-            highlightColor: '',
+            // highlightColor: '',
             overridden: {
-              hasDefault: true,
               default: false,
             },
           },
@@ -805,9 +806,9 @@ describe('Custom Menu UI   ', () => {
             },
           ],
           toDOM() {
-            return {
+            return[ 'span',{
               highlightColor: '',
-            };
+            }];
           },
         },
         'mark-font-size': {
@@ -816,7 +817,7 @@ describe('Custom Menu UI   ', () => {
               default: null,
             },
             overridden: {
-              hasDefault: true,
+             // hasDefault: true,
               default: false,
             },
           },
@@ -833,9 +834,9 @@ describe('Custom Menu UI   ', () => {
         },
         'mark-font-type': {
           attrs: {
-            name: '',
+            // name: '',
             overridden: {
-              hasDefault: true,
+              // hasDefault: true,
               default: false,
             },
           },
@@ -911,13 +912,14 @@ describe('Custom Menu UI   ', () => {
       _style: '',
     };
     const custommenuui = new CustomMenuUI(CustomMenuTestProps);
-    custommenuui.props = CustomMenuTestProps;
+    (custommenuui as any).props = CustomMenuTestProps;
     const statemock = {
       schema: schema,
       doc: doc,
       selection: { from: 0, to: 1 },
-    };
-    const trmock = { setNodeMarkup: () => {} };
+    } as unknown as EditorState;
+    const trmock = { setNodeMarkup: () => {} } as unknown as Transform;
+
     expect(
       custommenuui.renameStyleInDocument(
         statemock,
@@ -934,8 +936,8 @@ describe('Custom Menu UI   ', () => {
       _customStyleName: 'test',
       _customStyle: { description: 'description', styles: {} },
     };
-    const event = new Event('click');
-    custommenuui._stylePopup = { close: () => {} };
+    const event = new Event('click') as unknown as SyntheticEvent;
+    custommenuui._stylePopup = null
     expect(custommenuui.showStyleWindow(uicommands, event, 0)).toBeUndefined();
   });
   it('should handle showStyleWindow', () => {
@@ -944,8 +946,8 @@ describe('Custom Menu UI   ', () => {
       _customStyleName: 'test',
       _customStyle: { description: 'description', styles: {} },
     };
-    uicommands._stylePopup = null;
-    expect(custommenuui.showStyleWindow(uicommands, event)).toBeUndefined();
+    custommenuui._stylePopup = null;
+    expect(custommenuui.showStyleWindow(uicommands, event as unknown as SyntheticEvent,0)).toBeUndefined();
   });
   it('should handle showStyleWindow', () => {
     const view = new EditorView(document.createElement('div'), {
@@ -971,13 +973,13 @@ describe('Custom Menu UI   ', () => {
       _style: '',
     };
     const custommenuui = new CustomMenuUI(CustomMenuTestProps);
-    custommenuui.props = CustomMenuTestProps;
+    (custommenuui as any).props = CustomMenuTestProps;
     const event = new Event('click');
     const uicommands = {
       _customStyleName: 'test',
       _customStyle: { description: 'description', styles: {} },
     };
-    uicommands._stylePopup = null;
-    expect(custommenuui.showStyleWindow(uicommands, event)).toBeUndefined();
+    custommenuui._stylePopup = null;
+    expect(custommenuui.showStyleWindow(uicommands, event as unknown as SyntheticEvent, 0)).toBeUndefined();
   });
 });

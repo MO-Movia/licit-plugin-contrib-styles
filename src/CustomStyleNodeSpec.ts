@@ -40,13 +40,13 @@ const STYLENAME = 'styleName';
 type toDOMFn = (node: Node) => DOMOutputSpec;
 type getAttrsFn = (p: Node | string | HTMLElement) => KeyValuePair;
 
-function getAttrs(base: getAttrsFn, dom: HTMLElement) {
+function getAttrs(base: getAttrsFn|undefined, dom: HTMLElement) {
   const attrs = base(dom);
   attrs[STYLENAME] = dom.getAttribute(STYLENAME);
   return attrs;
 }
 
-function toDOM(base: toDOMFn, node: Node) {
+function toDOM(base: toDOMFn|undefined, node: Node) {
   const output = base(node);
   output[1][STYLENAME] = node.attrs[STYLENAME];
   const { style, styleLevel, indentOverriden, bulletDetails } = getStyle(

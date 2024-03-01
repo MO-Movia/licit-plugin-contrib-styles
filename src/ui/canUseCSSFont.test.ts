@@ -1,24 +1,21 @@
-/ global global /;
 import { canUseCSSFont, cached } from './canUseCSSFont';
 
+
+const mockFonts = {
+  check: jest.fn(),
+  ready: Promise.resolve(),
+  status: 'loaded',
+  values: () => [],
+} as unknown as FontFaceSet;
+
+
+Object.defineProperty(global.document, 'fonts', {
+  value: mockFonts,
+});
+
+cached['Font1'] = Promise.resolve(true);
+
 describe('canUseCSSFont', () => {
-  const mockFonts = {
-    check: jest.fn(),
-    ready: Promise.resolve(),
-    status: 'loaded',
-    values: () => [],
-  } as unknown as FontFaceSet;
-  beforeEach(() => {
-    global.document = {
-      fonts: mockFonts,
-     } as unknown as Document;
-     cached['Font1'] = Promise.resolve(true);
-    });
-  // afterEach(() => {
-  //   jest.clearAllMocks();
-  //   delete global.document;
-  //   delete cached['Font1'];
-  // });
   it('should return true if the font is already in cache', async () => {
     const result = await canUseCSSFont('Font1');
     expect(result).toBe(true);

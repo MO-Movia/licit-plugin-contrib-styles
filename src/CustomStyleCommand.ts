@@ -1553,7 +1553,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
     content = textContent.split(' ').toString();
   }
   if ('' !== content[0]) {
-    textContent = content[0];
+    textContent = content;
   } else {
     if (content.length > 1) {
       for (let index = 0; index < content.length; index++) {

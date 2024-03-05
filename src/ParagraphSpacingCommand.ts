@@ -3,6 +3,7 @@ import { AllSelection, EditorState, TextSelection } from 'prosemirror-state';
 import { BLOCKQUOTE, HEADING, LIST_ITEM, PARAGRAPH } from './NodeNames.js';
 import { Schema } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
+import { EditorView } from 'prosemirror-view';
 
 export function setParagraphSpacing(
   tr: any,
@@ -80,6 +81,17 @@ export function setParagraphSpacing(
 }
 
 export class ParagraphSpacingCommand extends UICommand {
+
+  waitForUserInput(state: EditorState, dispatch?: (tr: Transform) => void, view?: EditorView, event?: any): Promise<any> {
+    return Promise.resolve(undefined);
+  }
+  executeWithUserInput(state: EditorState, dispatch?: (tr: Transform) => void, view?: EditorView, inputs?: any): boolean {
+    return false;
+  }
+  cancel(): void { }
+  executeCustom(state: EditorState, tr: Transform, from: number, to: number): Transform {
+    return tr;
+  }
   _paragraphSpacing?: string;
   _isAfter?: boolean;
 

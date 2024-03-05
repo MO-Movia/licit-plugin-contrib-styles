@@ -181,6 +181,18 @@ export function getCustomStyleCommands(customStyle: any) {
 }
 
 export class CustomStyleCommand extends UICommand {
+
+  waitForUserInput(state: EditorState, dispatch?: (tr: Transform) => void, view?: EditorView, event?: any): Promise<any> {
+    return Promise.resolve(undefined);
+  }
+  executeWithUserInput(state: EditorState, dispatch?: (tr: Transform) => void, view?: EditorView, inputs?: any): boolean {
+    return false;
+  }
+  cancel(): void { }
+  executeCustom(state: EditorState, tr: Transform, from: number, to: number): Transform {
+    return tr;
+  }
+
   _customStyleName: string;
   _customStyle: Style;
   _popUp = null;
@@ -205,7 +217,7 @@ export class CustomStyleCommand extends UICommand {
     return true;
   };
 
-  isEnabled = (
+  isStyleEnabled = (
     state: EditorState,
     _view: EditorView,
     menuTitle: string

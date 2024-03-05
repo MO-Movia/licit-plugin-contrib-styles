@@ -151,7 +151,7 @@ describe('CustomStyleCommand', () => {
       .mockReturnValue('Normal');
 
     expect(
-      customstylecommand.isEnabled(editorState, mockEditorView as unknown as EditorView, 'clearstyle')
+      customstylecommand.isStyleEnabled(editorState, mockEditorView as unknown as EditorView, 'clearstyle')
     ).toBeFalsy();
     spy.mockReset();
   });

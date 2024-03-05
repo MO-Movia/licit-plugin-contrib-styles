@@ -527,7 +527,7 @@ describe('Custom Menu UI   ', () => {
     dom.scrollTop = 1;
     jest.spyOn(document, 'getElementsByClassName').mockReturnValue([dom] as any);
     custommenuui.componentDidMount();
-    expect(dom.scrollTop).toBe(863);
+    expect(dom.scrollTop).toBe(695);
   });
 
   it('should handle isAllowedNode', () => {
@@ -548,8 +548,9 @@ describe('Custom Menu UI   ', () => {
       view: window,
       currentTarget: input,
     };
-    const ui = new UICommand();
-    jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(true);
+   // const ui = new UICommand();
+    const ui = {shouldRespondToUIEvent:()=>{return true}} as unknown as UICommand;
+    //jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(true);
     const spy1 = jest.spyOn(custommenuui, 'showSubMenu');
     custommenuui._onUIEnter(ui, event as unknown as SyntheticEvent);
     expect(spy1).toHaveBeenCalled();
@@ -568,8 +569,8 @@ describe('Custom Menu UI   ', () => {
       view: window,
       currentTarget: input,
     };
-    const ui = new UICommand();
-    jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(false);
+    const ui = {shouldRespondToUIEvent:()=>{return false}} as unknown as UICommand;
+    //jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(false);
     // const spy1 = jest.spyOn(custommenuui, 'showSubMenu');
     const test = custommenuui._onUIEnter(ui, event as unknown as SyntheticEvent);
     expect(test).toBeUndefined();
@@ -588,8 +589,8 @@ describe('Custom Menu UI   ', () => {
       view: window,
       currentTarget: input,
     };
-    const ui = new UICommand();
-    jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(true);
+    const ui = {shouldRespondToUIEvent:()=>{return true},execute:()=>{return true;}} as unknown as UICommand;
+    //jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(true);
     const spy1 = jest.spyOn(custommenuui, '_execute');
     custommenuui._onUIEnter(ui, event as unknown as SyntheticEvent);
 

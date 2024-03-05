@@ -19,7 +19,7 @@
     "lint:ts": "eslint src --ext .ts,.tsx --fix",
     "lint:css": "stylelint \"**/*.css\"",
     "lint": "npm run lint:css & npm run lint:ts",
-    "ci:build": "tsc --build && copyfiles --up 1 \"src/**/*.css\" dist  && copyfiles package.json dist",
+    "ci:build": "tsc --build && copyfiles --up 1 \"src/**/*.css\" dist  && copyfiles package.json dist && copyfiles --up 1 \"src/fonts/**\" dist ",
     "ci:bom": "cyclonedx-npm --ignore-npm-errors --short-PURLs --output-format XML --output-file dist/bom.xml"
   },
   "peerDependencies": {

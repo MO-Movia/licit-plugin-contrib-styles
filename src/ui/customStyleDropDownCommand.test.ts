@@ -1,7 +1,7 @@
 import { CustomstyleDropDownCommand } from './CustomstyleDropDownCommand';
 import { createEditor, doc, p } from 'jest-prosemirror';
 import { EditorState } from 'prosemirror-state';
-import { Schema } from 'prosemirror-model';
+import { Schema,Node } from 'prosemirror-model';
 import * as cusstyles from '../customStyle';
 
 describe('customstyledropdowncommand', () => {
@@ -446,18 +446,18 @@ describe('customstyledropdowncommand', () => {
   });
   it('should handle isValidCustomstyle', () => {
     customstyledropdowncommand.state = state;
-    expect(customstyledropdowncommand.isValidCustomstyle('test')).toBeFalsy();
+    expect(customstyledropdowncommand.isValidCustomstyle()).toBeFalsy();
   });
   it('should handle staticCommands', () => {
     expect(customstyledropdowncommand.staticCommands()).toBeInstanceOf(Array);
   });
   it('should handle isAllowedNode', () => {
     const node = { type: { name: 'paragraph' } } ;
-    expect(customstyledropdowncommand.isAllowedNode(node as any)).toBe(true);
+    expect(customstyledropdowncommand.isAllowedNode(node as unknown as Node)).toBe(true);
   });
   it('should handle isAllowedNode', () => {
     const node = { type: { name: 'ordered_list' } };
-    expect(customstyledropdowncommand.isAllowedNode(node as any)).toBe(true);
+    expect(customstyledropdowncommand.isAllowedNode(node as unknown as Node)).toBe(true);
   });
   it('should handle render when styleName null', () => {
     const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([
@@ -523,7 +523,7 @@ describe('customstyledropdowncommand', () => {
           },
           toDOM(node) {
             const { align, color } = node.attrs;
-            const style: string[] = [];            
+            const style: string[] = [];
             if (align) style.push(`text-align: ${align}`);
             if (color) style.push(`color: ${color}`);
             return ['p', { style: style.join('; ') }, 0];

@@ -2,7 +2,6 @@ import React, { SyntheticEvent } from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Schema, Node } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
-import { EditorView } from 'prosemirror-view';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { uuid } from './Uuid.js';
 import './listType.css';
@@ -448,7 +447,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
     doc.descendants(function (child, pos) {
       if (oldStyleName === child.attrs.styleName) {
-        (( child.attrs as { styleName: string }).styleName) = styleName
+        (( child.attrs as { styleName: string }).styleName) = styleName;
         // child.attrs.styleName = styleName;
         tr = tr.setNodeMarkup(pos, undefined, child.attrs);
       }

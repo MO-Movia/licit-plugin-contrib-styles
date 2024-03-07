@@ -1,15 +1,14 @@
-import { Node, DOMOutputSpec } from 'prosemirror-model';
+import { Node } from 'prosemirror-model';
 import type { KeyValuePair } from './Constants.js';
 
 // Always append to base calls.
 const ATTR_OVERRIDDEN = 'overridden';
 
-type toDOMFn = (node: Node) => DOMOutputSpec;
 type getAttrsFn = (p: Node | string) => KeyValuePair;
 
 function getAttrs(base: getAttrsFn | undefined, dom: HTMLElement) {
   if (typeof dom != 'string' && undefined !== base) {
-    const attrs = base(dom as any);
+    const attrs = base((dom as unknown as Node));
     // [FS] IRAD-1623 2021-11-11
     // Validate attrs
     if (attrs && typeof attrs === 'object') {

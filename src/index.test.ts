@@ -539,7 +539,7 @@ describe('Style Plugin', () => {
         boldNumbering: true,
         boldSentence: true,
         fontName: 'Arial',
-        fontSize: "11",
+        fontSize: '11',
         hasNumbering: true,
         nextLineStyleName: 'None',
         strong: true,
@@ -556,8 +556,8 @@ describe('Style Plugin', () => {
   });
 
   it('isCustomStyleExists in customstyle', () => {
-    
-    const customstyle : Style[] = [];;
+
+    const customstyle : Style[] = [];
     const style = {
       description: 'BIU',
       mode: 0,
@@ -1734,7 +1734,7 @@ describe('Cus Style Plugin-Pass', () => {
       capco: null,
       color: null,
       id: '',
-      indent: "10",
+      indent: '10',
       lineSpacing: '125%',
       paddingBottom: null,
       paddingTop: null,
@@ -1743,7 +1743,7 @@ describe('Cus Style Plugin-Pass', () => {
   });
   it('should return newAttrs when RESERVED_STYLE_NONE  is not nextLineStyle branch coverage  ', () => {
     jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
-      styles: { indent: '10', align: 'left', lineHeight: '' },     
+      styles: { indent: '10', align: 'left', lineHeight: '' },
       styleName: ''
     });
     const newattrs = {
@@ -1762,7 +1762,7 @@ describe('Cus Style Plugin-Pass', () => {
       capco: null,
       color: null,
       id: '',
-      indent: "10",
+      indent: '10',
       lineSpacing: '125%',
       paddingBottom: null,
       paddingTop: null,
@@ -2609,7 +2609,7 @@ describe('Cus Style Plugin-Pass', () => {
       input: { lastKeyCode: 46 },
     };
     const spymhod = jest.spyOn(ccommand, 'getStyleLevel').mockReturnValue(2);
-    jest.spyOn(CustStyl, 'getCustomStyleByLevel').mockReturnValue({ 
+    jest.spyOn(CustStyl, 'getCustomStyleByLevel').mockReturnValue({
       styles: {
         indent: '10',
         align: 'left',

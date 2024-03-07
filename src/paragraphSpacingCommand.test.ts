@@ -4,7 +4,7 @@ import {
 } from './ParagraphSpacingCommand';
 import * as paragraphspacingcommand from './ParagraphSpacingCommand';
 import { schema } from 'prosemirror-schema-basic';
-import { TextSelection,EditorState } from 'prosemirror-state';
+import { TextSelection,EditorState ,Transaction} from 'prosemirror-state';
 import { Attrs, ContentMatch, Fragment, Mark, MarkType, Node, NodeRange, NodeType, Schema, Slice } from 'prosemirror-model';
 import { Step, Transform, StepResult, Mapping } from 'prosemirror-transform';
 
@@ -21,7 +21,7 @@ describe('paragraphspacingcommand', () => {
     const trmock = {
       selection: TextSelection.create(doc, 0, 1), // Mock selection object
       doc: doc, // Mock doc object
-    };
+    } as unknown as Transaction;
 
     // Mock schema object with required nodes
     const mockschema = {
@@ -33,7 +33,7 @@ describe('paragraphspacingcommand', () => {
       },
     };
 
-    expect(setParagraphSpacing(trmock, mockschema as unknown as Schema)).toBeDefined();
+    expect(setParagraphSpacing(trmock , mockschema as unknown as Schema)).toBeDefined();
   });
   it('should handle setParagraphSpacing', () => {
     const doc = schema.node('doc', null, [
@@ -46,7 +46,7 @@ describe('paragraphspacingcommand', () => {
     const trmock = {
       selection: TextSelection.create(doc, 0, 1), // Mock selection object
       doc: doc, // Mock doc object
-    };
+    } as unknown as Transaction;
 
     // Mock schema object with required nodes
     const mockschema = {

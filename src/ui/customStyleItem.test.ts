@@ -1,37 +1,11 @@
 import { CustomStyleItem } from './CustomStyleItem';
 import * as cusstyle from '../customStyle';
+import { EditorState } from 'prosemirror-state';
+import { CustomStyleCommand } from '../CustomStyleCommand';
 
 describe('customstyleitem', () => {
-  const mockState = {
-    doc: {
-      type: 'doc',
-      attrs: {
-        layout: null,
-        padding: null,
-        width: null,
-        counterFlags: null,
-        capcoMode: 0,
-      },
-      content: [
-        {
-          type: 'paragraph',
-          attrs: {
-            align: null,
-            color: null,
-            id: null,
-            indent: null,
-            lineSpacing: null,
-            paddingBottom: null,
-            paddingTop: null,
-            capco: null,
-            styleName: 'Normal',
-          },
-        },
-      ],
-    },
-    selection: { type: 'text', anchor: 1, head: 1 },
-  } as any;
-  
+
+  const ed = new EditorState();
    const props = {
     command: {
       _customStyleName: 'Normal',
@@ -57,10 +31,10 @@ describe('customstyleitem', () => {
         isHidden: false,
       },
       _popUp: null,
-    } as any,
+    } as unknown as CustomStyleCommand,
     disabled: true,
     dispatch: () => undefined,
-    editorState: mockState,
+    editorState: ed,
     editorView: undefined,
     label: 'Normal',
     hasText: true,
@@ -77,8 +51,8 @@ describe('customstyleitem', () => {
     jest.spyOn(cusstyle, 'getCustomStyleByName').mockReturnValue({
       styles: undefined,
       styleName: ''
-    });   
- 
+    });
+    const ed = new EditorState();
     const props = {
       command: {
         _customStyleName: 'Normal',
@@ -106,10 +80,10 @@ describe('customstyleitem', () => {
           isHidden: false,
         },
         _popUp: null,
-      } as any,
+      } as unknown as CustomStyleCommand,
       disabled: true,
       dispatch: () => undefined,
-      editorState: mockState,
+      editorState: ed,
       editorView: undefined,
       label: '',
       hasText: false,
@@ -125,7 +99,7 @@ describe('customstyleitem', () => {
       styles: undefined,
       styleName: ''
     });
-  
+    const ed = new EditorState();
     const props = {
       command: {
         _customStyleName: 'Normal',
@@ -137,10 +111,10 @@ describe('customstyleitem', () => {
           isHidden: false,
         },
         _popUp: null,
-      } as any,
+      } as unknown as CustomStyleCommand,
       disabled: true,
       dispatch: () => undefined,
-      editorState: mockState,
+      editorState: ed,
       editorView: undefined,
       label: '',
       hasText: false,

@@ -2,9 +2,9 @@ import { AlertInfo } from './AlertInfo';
 import React from 'react';
 describe('alertinfo', () => {
   const props = {
-    title: 'Alert Title', 
+    title: 'Alert Title',
     content: 'Alert content',
-    close: () => {}, 
+    close: () => {},
   };
    const alertinfo = new AlertInfo(props);
   it('should handle alertinfo', () => {
@@ -12,9 +12,9 @@ describe('alertinfo', () => {
   });
   it('should handle _cancel ', () => {
     const props = {
-      title: 'Alert Title', 
+      title: 'Alert Title',
       content: 'Alert content',
-      close: () => undefined, 
+      close: () => undefined,
     };
     const alertinfo = new AlertInfo(props);
 
@@ -24,9 +24,9 @@ describe('alertinfo', () => {
   });
   it('should handle render ', () => {
     const props = {
-      title: '', 
+      title: '',
       content: '',
-      close: () => undefined, 
+      close: () => undefined,
     };
     const alertinfo = new AlertInfo(props);
     const AlertComponent = () => {

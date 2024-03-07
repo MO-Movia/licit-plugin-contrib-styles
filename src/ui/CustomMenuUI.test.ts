@@ -10,7 +10,7 @@ import { CustomStyleCommand } from '../CustomStyleCommand';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { SyntheticEvent } from 'react';
 import { Transform } from 'prosemirror-transform';
-import {DOMOutputSpec} from 'prosemirror-model'
+
 
 // Enzyme.configure({ adapter: new Adapter() });
 
@@ -549,7 +549,7 @@ describe('Custom Menu UI   ', () => {
       currentTarget: input,
     };
    // const ui = new UICommand();
-    const ui = {shouldRespondToUIEvent:()=>{return true}} as unknown as UICommand;
+    const ui = {shouldRespondToUIEvent:()=>{return true;}} as unknown as UICommand;
     //jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(true);
     const spy1 = jest.spyOn(custommenuui, 'showSubMenu');
     custommenuui._onUIEnter(ui, event as unknown as SyntheticEvent);
@@ -569,7 +569,7 @@ describe('Custom Menu UI   ', () => {
       view: window,
       currentTarget: input,
     };
-    const ui = {shouldRespondToUIEvent:()=>{return false}} as unknown as UICommand;
+    const ui = {shouldRespondToUIEvent:()=>{return false;}} as unknown as UICommand;
     //jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(false);
     // const spy1 = jest.spyOn(custommenuui, 'showSubMenu');
     const test = custommenuui._onUIEnter(ui, event as unknown as SyntheticEvent);
@@ -589,7 +589,7 @@ describe('Custom Menu UI   ', () => {
       view: window,
       currentTarget: input,
     };
-    const ui = {shouldRespondToUIEvent:()=>{return true},execute:()=>{return true;}} as unknown as UICommand;
+    const ui = {shouldRespondToUIEvent:()=>{return true;},execute:()=>{return true;}} as unknown as UICommand;
     //jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(true);
     const spy1 = jest.spyOn(custommenuui, '_execute');
     custommenuui._onUIEnter(ui, event as unknown as SyntheticEvent);
@@ -618,7 +618,7 @@ describe('Custom Menu UI   ', () => {
       },
       _popUp: null,
     };
-    
+
     expect(custommenuui.showSubMenu(ui as unknown as UICommand, null as unknown as SyntheticEvent)).toBeUndefined();
   });
   it('should handle showsubmenu when popup not null', () => {
@@ -938,7 +938,7 @@ describe('Custom Menu UI   ', () => {
       _customStyle: { description: 'description', styles: {} },
     };
     const event = new Event('click') as unknown as SyntheticEvent;
-    custommenuui._stylePopup = null
+    custommenuui._stylePopup = null;
     expect(custommenuui.showStyleWindow(uicommands, event, 0)).toBeUndefined();
   });
   it('should handle showStyleWindow', () => {

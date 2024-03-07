@@ -6,7 +6,7 @@ const mockFonts = {
   ready: Promise.resolve(),
   status: 'loaded',
   values: () => [],
-} as unknown as FontFaceSet;
+};
 
 
 Object.defineProperty(global.document, 'fonts', {

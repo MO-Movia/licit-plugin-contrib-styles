@@ -18,16 +18,16 @@ import {
   handleRemoveMarks,
 } from './CustomStyleCommand.js';
 import * as cusstylecommand from './CustomStyleCommand';
-import { EditorState, Selection } from 'prosemirror-state';
+import { EditorState, Selection , Transaction} from 'prosemirror-state';
 
 import { EditorView } from 'prosemirror-view';
 
-import { Schema, DOMParser, Mark, Node } from 'prosemirror-model';
+import { Schema, Mark, Node } from 'prosemirror-model';
 import { schema } from 'prosemirror-schema-basic';
 import * as customstyles from './customStyle';
 import { Transform } from 'prosemirror-transform';
 import type { Style } from './StyleRuntime.js';
-import { createEditor, doc, p } from 'jest-prosemirror';
+import { doc, p } from 'jest-prosemirror';
 
 describe('CustomStyleCommand', () => {
   const styl = {
@@ -59,7 +59,7 @@ describe('CustomStyleCommand', () => {
       nodes: schema.spec.nodes,
       marks: schema.spec.marks,
     });
-    const myDoc = doc(p('<cursor>'))
+    const myDoc = doc(p('<cursor>'));
     const mySelection = myDoc.content.findDiffEnd(myDoc.content);
     const myEditorState = EditorState.create({
       doc: myDoc,
@@ -79,7 +79,7 @@ describe('CustomStyleCommand', () => {
       nodes: schema.spec.nodes,
       marks: schema.spec.marks,
     });
-    const myDoc = doc(p('<cursor>'))
+    const myDoc = doc(p('<cursor>'));
     const mySelection = myDoc.content.findDiffEnd(myDoc.content);
     const myEditorState = EditorState.create({
       doc: myDoc,
@@ -449,8 +449,8 @@ describe('CustomStyleCommand', () => {
             return {
               key: 'markremoved tr'
             };
-          },
-        },
+          }  ,
+        } as unknown as Transform,
         {
           content: 'text*',
           group: 'block',
@@ -528,7 +528,7 @@ describe('CustomStyleCommand', () => {
       setSelection(_anchor, _head) {
         return true;
       },
-    };
+    } as unknown as Transaction;
     const mockstate = {
       doc: {
         type: 'doc',
@@ -557,7 +557,7 @@ describe('CustomStyleCommand', () => {
         ],
       },
       selection: { type: 'text', anchor: 1, head: 1 },
-    };
+    } as unknown as EditorState;
     const mockdoc = {
       type: 'doc',
       attrs: {
@@ -583,7 +583,7 @@ describe('CustomStyleCommand', () => {
           },
         },
       ],
-    };
+    } as unknown as Node;
     const mockdispatch = () => { };
     const mockval = {
       styles: {
@@ -1728,7 +1728,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
           },
         ],
         toDOM() {
-          return ['']
+          return [''];
         },
       },
       'mark-font-size': {
@@ -3627,7 +3627,9 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
 describe('updateOverrideFlag', () => {
   it('should handle updateOverrideFlag when styleprop null', () => {
     jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue(null as unknown as Style);
-    expect(updateOverrideFlag('', {} as unknown as Transform, {} as unknown as Node, 0, 1, {}, {} as unknown as EditorState)).toStrictEqual({});
+    expect(updateOverrideFlag('', {} as unknown as Transform, {} as unknown as Node, 0, 1, {
+      modified: false
+    }, {} as unknown as EditorState)).toStrictEqual({});
   });
 });
 describe('applyLatestStyle', () => {
@@ -3664,45 +3666,45 @@ describe('applyLatestStyle', () => {
       },
     });
     // Create a sample document
-    const mockdoc = mockschema.nodeFromJSON({
-      type: 'doc',
-      content: [
-        {
-          type: 'heading',
-          attrs: { level: 1, styleName: 'Normal' },
-          content: [
-            {
-              type: 'text',
-              text: 'Hello, ProseMirror!',
-            },
-          ],
-        },
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'This is a mock dummy document.',
-              attrs: { styleName: 'Normal' },
-            },
-          ],
-        },
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'It demonstrates the structure of a ProseMirror document.',
-            },
-          ],
-        },
-      ],
-    });
+    // const mockdoc = mockschema.nodeFromJSON({
+    //   type: 'doc',
+    //   content: [
+    //     {
+    //       type: 'heading',
+    //       attrs: { level: 1, styleName: 'Normal' },
+    //       content: [
+    //         {
+    //           type: 'text',
+    //           text: 'Hello, ProseMirror!',
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       type: 'paragraph',
+    //       content: [
+    //         {
+    //           type: 'text',
+    //           text: 'This is a mock dummy document.',
+    //           attrs: { styleName: 'Normal' },
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       type: 'paragraph',
+    //       content: [
+    //         {
+    //           type: 'text',
+    //           text: 'It demonstrates the structure of a ProseMirror document.',
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // });
     const doc = new Node;
     const tr = new Transform(doc);
     const myEditor = new EditorState();
     const style: Style = {
-      styleName: ""
+      styleName: ''
     };
     expect(
       applyLatestStyle(
@@ -3718,11 +3720,11 @@ describe('applyLatestStyle', () => {
     ).toBeDefined();
   });
   it('should handle applyLatestStyle when styleprops  not there', () => {
-    const doc = { resolve: () => { return document.createElement('div') } } as unknown as Node;
+    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
     const tr = new Transform(doc);
     const myEditor = new EditorState();
     const style: Style = {
-      styleName: ""
+      styleName: ''
     };
     expect(
       applyLatestStyle(
@@ -3835,10 +3837,10 @@ describe('allowCustomLevelIndent', () => {
       },
       type: { name: 'paragraph' },
     };
-    const element = {
-      parent: parentElement,
-    };
-    const doc = { resolve: () => { return document.createElement('div') } } as unknown as Node;
+    // const element = {
+    //   parent: parentElement,
+    // };
+    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
     const tr = new Transform(doc);
     expect(
       allowCustomLevelIndent(
@@ -3856,10 +3858,10 @@ describe('allowCustomLevelIndent', () => {
       },
       type: { name: 'paragraph' },
     };
-    const element = {
-      parent: parentElement,
-    };
-    const doc = { resolve: () => { return document.createElement('div') } } as unknown as Node;
+    // const element = {
+    //   parent: parentElement,
+    // };
+    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
     const tr = new Transform(doc);
     expect(
       allowCustomLevelIndent(
@@ -3877,10 +3879,10 @@ describe('allowCustomLevelIndent', () => {
       },
       type: { name: 'paragraph' },
     };
-    const element = {
-      parent: parentElement,
-    };
-    const doc = { resolve: () => { return document.createElement('div') } } as unknown as Node;
+    // const element = {
+    //   parent: parentElement,
+    // };
+    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
     const tr = new Transform(doc);
     expect(
       allowCustomLevelIndent(
@@ -3904,10 +3906,10 @@ describe('allowCustomLevelIndent', () => {
       },
       type: { name: 'paragraph' },
     };
-    const element = {
-      parent: parentElement,
-    };
-    const doc = { resolve: () => { return document.createElement('div') } } as unknown as Node;
+    // const element = {
+    //   parent: parentElement,
+    // };
+    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
     const tr = new Transform(doc);
     expect(
       allowCustomLevelIndent(
@@ -3931,10 +3933,10 @@ describe('allowCustomLevelIndent', () => {
       },
       type: { name: 'paragraph' },
     };
-    const element = {
-      parent: parentElement,
-    };
-    const doc = { resolve: () => { return document.createElement('div') } } as unknown as Node;
+    // const element = {
+    //   parent: parentElement,
+    // };
+    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
     const tr = new Transform(doc);
     expect(
       allowCustomLevelIndent(
@@ -3958,10 +3960,10 @@ describe('allowCustomLevelIndent', () => {
       },
       type: { name: 'span' },
     };
-    const element = {
-      parent: parentElement,
-    };
-    const doc = { resolve: () => { return document.createElement('div') } } as unknown as Node;
+    // const element = {
+    //   parent: parentElement,
+    // };
+    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
     const tr = new Transform(doc);
     expect(
       allowCustomLevelIndent(
@@ -3974,7 +3976,7 @@ describe('allowCustomLevelIndent', () => {
   });
 
   it('should handle allowCustomLevelIndent when element not present', () => {
-    const doc = { resolve: () => { return document.createElement('div') } } as unknown as Node;
+    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
     const tr = new Transform(doc);
     expect(
       allowCustomLevelIndent(
@@ -3992,10 +3994,10 @@ describe('allowCustomLevelIndent', () => {
       },
       type: { name: 'paragraph' },
     };
-    const element = {
-      parent: parentElement,
-    };
-    const doc = { resolve: () => { return document.createElement('div') }, nodeSize: 6 } as unknown as Node;
+    // const element = {
+    //   parent: parentElement,
+    // };
+    const doc = { resolve: () => { return document.createElement('div'); }, nodeSize: 6 } as unknown as Node;
     const tr = new Transform(doc);
     expect(
       allowCustomLevelIndent(
@@ -4007,7 +4009,7 @@ describe('allowCustomLevelIndent', () => {
     ).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when delta = 0 and when element not present', () => {
-    const doc = { resolve: () => { return document.createElement('div') }, nodeSize: 6 } as unknown as Node;
+    const doc = { resolve: () => { return document.createElement('div'); }, nodeSize: 6 } as unknown as Node;
     const tr = new Transform(doc);
     expect(
       allowCustomLevelIndent(
@@ -4025,10 +4027,10 @@ describe('allowCustomLevelIndent', () => {
       },
       type: { name: 'span' },
     };
-    const element = {
-      parent: parentElement,
-    };
-    const doc = { resolve: () => { return document.createElement('div') }, nodeSize: 6 } as unknown as Node;
+    // const element = {
+    //   parent: parentElement,
+    // };
+    const doc = { resolve: () => { return document.createElement('div'); }, nodeSize: 6 } as unknown as Node;
     const tr = new Transform(doc);
     expect(
       allowCustomLevelIndent(
@@ -4046,10 +4048,10 @@ describe('allowCustomLevelIndent', () => {
       },
       type: { name: 'paragraph' },
     };
-    const element = {
-      parent: parentElement,
-    };
-    const doc = { resolve: () => { return document.createElement('div') }, nodeSize: 6 } as unknown as Node;
+    // const element = {
+    //   parent: parentElement,
+    // };
+    const doc = { resolve: () => { return document.createElement('div'); }, nodeSize: 6 } as unknown as Node;
     const tr = new Transform(doc);
     expect(
       allowCustomLevelIndent(
@@ -4071,10 +4073,10 @@ describe('allowCustomLevelIndent', () => {
       },
       type: { name: 'paragraph' },
     };
-    const element = {
-      parent: parentElement,
-    };
-    const doc = { resolve: () => { return document.createElement('div') }, nodeSize: 6 } as unknown as Node;
+    // const element = {
+    //   parent: parentElement,
+    // };
+    const doc = { resolve: () => { return document.createElement('div'); }, nodeSize: 6 } as unknown as Node;
     const tr = new Transform(doc);
     expect(
       allowCustomLevelIndent(
@@ -4313,7 +4315,7 @@ describe('isLevelUpdated', () => {
     });
     const myEditor = { doc: mockdoc, schema: mockschema } as unknown as EditorState;
     const style: Style = {
-      styleName: ""
+      styleName: ''
     };
     expect(
       isLevelUpdated(myEditor, 'Normal', style)
@@ -4360,25 +4362,25 @@ describe('removeAllMarksExceptLink', () => {
     });
 
     // Create a sample document
-    const mockdoc = mockschema.nodeFromJSON({
-      type: 'doc',
-      content: [
-        {
-          type: 'heading',
-          attrs: { level: 1, styleName: 'Normal' },
-          content: [
-            {
-              type: 'text',
-              text: 'Hello, ProseMirror!',
-            },
-          ],
-          marks: [
-            // Example mark that satisfies the condition
-            { type: 'strong', attrs: { ['overridden']: false } },
-          ],
-        },
-      ],
-    });
+    // const mockdoc = mockschema.nodeFromJSON({
+    //   type: 'doc',
+    //   content: [
+    //     {
+    //       type: 'heading',
+    //       attrs: { level: 1, styleName: 'Normal' },
+    //       content: [
+    //         {
+    //           type: 'text',
+    //           text: 'Hello, ProseMirror!',
+    //         },
+    //       ],
+    //       marks: [
+    //         // Example mark that satisfies the condition
+    //         { type: 'strong', attrs: { ['overridden']: false } },
+    //       ],
+    //     },
+    //   ],
+    // });
     const mySchema = new Schema({
       nodes: {
         // Define the document node
@@ -4413,7 +4415,7 @@ describe('removeAllMarksExceptLink', () => {
 
     const myEditor = new EditorState();
     const style: Style = {
-      styleName: ""
+      styleName: ''
     };
     expect(
       removeAllMarksExceptLink(
@@ -4465,26 +4467,26 @@ describe('removeAllMarksExceptLink', () => {
     });
 
     // Create a sample document
-    const mockdoc = mockschema.nodeFromJSON({
-      type: 'doc',
-      content: [
-        {
-          type: 'heading',
-          attrs: { level: 1, styleName: 'Normal' },
-          content: [
-            {
-              type: 'text',
-              text: 'Hello, ProseMirror!',
-            },
-          ],
-          marks: [
-            // Example mark that satisfies the condition
-            { type: 'link', attrs: { ['overridden']: true } },
-          ],
-        },
-      ],
-    });
-    const doc = new Node;
+    // const mockdoc = mockschema.nodeFromJSON({
+    //   type: 'doc',
+    //   content: [
+    //     {
+    //       type: 'heading',
+    //       attrs: { level: 1, styleName: 'Normal' },
+    //       content: [
+    //         {
+    //           type: 'text',
+    //           text: 'Hello, ProseMirror!',
+    //         },
+    //       ],
+    //       marks: [
+    //         // Example mark that satisfies the condition
+    //         { type: 'link', attrs: { ['overridden']: true } },
+    //       ],
+    //     },
+    //   ],
+    // });
+    //const doc = new Node;
 
     const mySchema = new Schema({
       nodes: {
@@ -4519,7 +4521,7 @@ describe('removeAllMarksExceptLink', () => {
     const tr = { doc: mockDoc } as unknown as Transform;
     const myEditor = new EditorState();
     const style: Style = {
-      styleName: ""
+      styleName: ''
     };
     expect(
       removeAllMarksExceptLink(0, 1, tr, mySchema, myEditor, style)).toBeDefined();
@@ -4569,14 +4571,14 @@ describe('handleRemoveMarks', () => {
       },
     ];
     const style: Style = {
-      styleName: ""
+      styleName: ''
     };
     const testtr = handleRemoveMarks(tr, tasks, 0, 1, mySchema, myEditor, style);
     expect(testtr).toBeDefined();
   });
   it('should handle handleRemoveMarks when styleProps null', () => {
-    const doc = new Node();
-    const tr = { removeMark: () => { return {} } } as unknown as Transform
+    //const doc = new Node();
+    const tr = { removeMark: () => { return {}; } } as unknown as Transform;
     const mySchema = new Schema({
       nodes: {
         // Define the document node
@@ -4599,7 +4601,7 @@ describe('handleRemoveMarks', () => {
       },
     });
     const style: Style = {
-      styleName: ""
+      styleName: ''
     };
     const myEditor = new EditorState();
     expect(handleRemoveMarks(

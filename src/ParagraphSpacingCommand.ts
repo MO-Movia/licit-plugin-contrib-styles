@@ -1,17 +1,16 @@
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
-import { AllSelection, EditorState, TextSelection } from 'prosemirror-state';
+import { AllSelection, EditorState, TextSelection , Transaction} from 'prosemirror-state';
 import { BLOCKQUOTE, HEADING, LIST_ITEM, PARAGRAPH } from './NodeNames.js';
 import { Schema } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
-import { EditorView } from 'prosemirror-view';
 
 export function setParagraphSpacing(
-  tr: any,
+  tr: Transform,
   schema: Schema,
   paragraphSpacing?: string,
   isAfter?: boolean
 ): Transform {
-  const { selection , doc } = tr;
+  const { selection, doc } = tr as Transaction;
   if (!selection || !doc) {
     return tr;
   }
@@ -82,14 +81,14 @@ export function setParagraphSpacing(
 
 export class ParagraphSpacingCommand extends UICommand {
 
-  waitForUserInput(state: EditorState, dispatch?: (tr: Transform) => void, view?: EditorView, event?: any): Promise<any> {
+  waitForUserInput() {
     return Promise.resolve(undefined);
   }
-  executeWithUserInput(state: EditorState, dispatch?: (tr: Transform) => void, view?: EditorView, inputs?: any): boolean {
+  executeWithUserInput(): boolean {
     return false;
   }
   cancel(): void { }
-  executeCustom(state: EditorState, tr: Transform, from: number, to: number): Transform {
+  executeCustom(state: EditorState, tr: Transform): Transform {
     return tr;
   }
   _paragraphSpacing?: string;

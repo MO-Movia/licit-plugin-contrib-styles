@@ -1,5 +1,7 @@
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { CustomMenuButton } from './CustomMenuButton';
+import { EditorState } from 'prosemirror-state';
+
 
 describe('CustomMenuButton', () => {
   const mockState = {
@@ -30,7 +32,7 @@ describe('CustomMenuButton', () => {
       ],
     },
     selection: { type: 'text', anchor: 1, head: 1 },
-  } as any;
+  } as unknown as EditorState;
   const props = {
     className: 'width-100 stylemenu-backgroundcolor',
     commandGroups: [
@@ -144,7 +146,7 @@ describe('custommenubutton', () => {
         ],
       },
       selection: { type: 'text', anchor: 1, head: 1 },
-    } as any;
+    } as unknown as EditorState;
     const props = {
       className: 'width-100 stylemenu-backgroundcolor',
       commandGroups: [

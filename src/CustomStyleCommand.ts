@@ -1,4 +1,4 @@
-import { EditorState, TextSelection, Selection } from 'prosemirror-state';
+import { EditorState, TextSelection, Selection , Transaction} from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
 import { Node, Fragment, Schema } from 'prosemirror-model';
@@ -80,7 +80,7 @@ const nodesBeforeSelection = [];
 const selectedNodes = [];
 
 function getCustomStyleCommandsEx(
-  customStyle: any,
+  customStyle,
   property: string,
   commands: UICommand[]
 ): UICommand[] {
@@ -172,7 +172,7 @@ function getCustomStyleCommandsEx(
 
 // [FS] IRAD-1042 2020-10-01
 // Creates commands based on custom style JSon object
-export function getCustomStyleCommands(customStyle: any) {
+export function getCustomStyleCommands(customStyle) {
   let commands: UICommand[] = [];
   for (const property in customStyle) {
     commands = getCustomStyleCommandsEx(customStyle, property, commands);
@@ -182,14 +182,14 @@ export function getCustomStyleCommands(customStyle: any) {
 
 export class CustomStyleCommand extends UICommand {
 
-  waitForUserInput(state: EditorState, dispatch?: (tr: Transform) => void, view?: EditorView, event?: any): Promise<any> {
+  waitForUserInput() {
     return Promise.resolve(undefined);
   }
-  executeWithUserInput(state: EditorState, dispatch?: (tr: Transform) => void, view?: EditorView, inputs?: any): boolean {
+  executeWithUserInput(): boolean {
     return false;
   }
   cancel(): void { }
-  executeCustom(state: EditorState, tr: Transform, from: number, to: number): Transform {
+  executeCustom(state: EditorState, tr: Transform): Transform {
     return tr;
   }
 
@@ -198,13 +198,13 @@ export class CustomStyleCommand extends UICommand {
   _popUp = null;
   _level = 0;
 
-  constructor(customStyle: any, customStyleName: string) {
+  constructor(customStyle, customStyleName: string) {
     super();
     this._customStyle = customStyle;
     this._customStyleName = customStyleName;
   }
 
-  renderLabel = (_state: EditorState): any => {
+  renderLabel = (_state: EditorState) => {
     return this._customStyleName;
   };
 
@@ -246,11 +246,11 @@ export class CustomStyleCommand extends UICommand {
 
   executeClearStyle(
     state: EditorState,
-    dispatch?: (tr: Transform) => void,
-    node?: any,
+    dispatch?: (tr: Transform | Transaction) => void,
+    node?,
     startPos?: number,
     endPos?: number,
-    newattrs?: any,
+    newattrs?,
     selection?: Selection
   ) {
     let done = false;
@@ -347,7 +347,7 @@ export class CustomStyleCommand extends UICommand {
           : this._customStyle.styleName,
         state,
         tr
-      );
+      ) as Transaction;
       if (tr.docChanged || tr.storedMarksSet) {
         dispatch && dispatch(tr);
         return true;
@@ -405,8 +405,8 @@ export class CustomStyleCommand extends UICommand {
     return tr;
   }
 
-  removeMarks(marks: any[], tr: any, node: Node) {
-    const { selection } = tr;
+  removeMarks(marks, tr: Transform, node: Node) {
+    const { selection }  = tr as Transaction;
     // [FS] IRAD-1495 2021-06-25
     // FIX: Clear style not working on multi select paragraph
     const from = selection.$from.before(1);
@@ -455,7 +455,7 @@ export class CustomStyleCommand extends UICommand {
       }
     );
   }
-  createNewStyle(val: any, tr: any, state: any, dispatch: any, doc: any) {
+  createNewStyle(val, tr: Transaction, state: EditorState, dispatch: (tr: Transaction) => void, doc: Node) {
     delete val.editorView;
     // [FS] IRAD-1415 2021-06-02
     // Issue: Allow to create custom style numbering level 2 without level 1
@@ -487,7 +487,7 @@ export class CustomStyleCommand extends UICommand {
             endPos,
             val.styleName
           );
-          tr = applyStyle(val, val.styleName, state, tr);
+          tr = applyStyle(val, val.styleName, state, tr) as Transaction;
           dispatch(tr);
         }
       });
@@ -590,12 +590,12 @@ export function updateOverrideFlag(
   node: Node,
   startPos: number,
   endPos: number,
-  retObj: any,
+  retObj: { modified: boolean },
   state: EditorState
 ) {
   const styleProp = getCustomStyleByName(styleName);
   if (styleProp && styleProp.styles) {
-    node.descendants(function (child: Node, _pos: number, _parent: Node) {
+    node.descendants(function (child: Node) {
       if (child instanceof Node) {
         child.marks.forEach(function (mark, _index) {
           tr = compareMarkWithStyle(
@@ -623,7 +623,7 @@ function onLoadRemoveAllMarksExceptOverridden(
   state: EditorState
 ) {
   const tasks = [];
-  node.descendants(function (child: Node, pos: number, _parent: Node) {
+  node.descendants(function (child: Node, pos: number) {
     if (child instanceof Node) {
       child.marks.forEach(function (mark, _index) {
         // [FS] IRAD-1311 2021-05-06
@@ -711,7 +711,7 @@ function applyStyleEx(
   styleProp: Style,
   styleName: string,
   state: EditorState,
-  tr: any,
+  tr: Transform,
   node: Node,
   startPos: number,
   endPos: number,
@@ -807,7 +807,7 @@ function applyStyleEx(
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
-    tr.storedMarks = storedmarks;
+    (tr as  Transaction).storedMarks = storedmarks;
   }
   return tr;
 }
@@ -839,7 +839,7 @@ function isValidHeirarchy(
 function hasMismatchHeirarchy(
   _state: EditorState,
   tr: Transform,
-  node: any /* The current node */,
+  node /* The current node */,
   startPos: number,
   endPos: number,
   styleName? /* New style to be applied */
@@ -1375,7 +1375,7 @@ function _setNodeAttribute(
   tr: Transform,
   from: number,
   to: number,
-  attribute: any
+  attribute
 ) {
   tr.doc.nodesBetween(from, to, (node, startPos) => {
     if (isAllowedNode(node)) {
@@ -1465,7 +1465,7 @@ export function applyStyleToEachNode(
   state: EditorState,
   from: number,
   to: number,
-  tr: any,
+  tr: Transaction | Transform,
   style: Style,
   styleName: string
 ) {
@@ -1595,7 +1595,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
 // get text content from selected node
 function getNodeText(node: Node) {
   let textContent = '';
-  node.descendants(function (child: Node, _pos: number, _parent: Node) {
+  node.descendants(function (child: Node) {
     if ('text' === child.type.name) {
       textContent = `${textContent}${child.text}`;
     }

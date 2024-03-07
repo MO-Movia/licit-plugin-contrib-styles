@@ -19,7 +19,6 @@ import {
   getDetailsBullet,
   BULLET_POINTS,
 } from '../CustomStyleNodeSpec.js';
-import { EditorState } from 'prosemirror-state';
 import type { Style } from '../StyleRuntime.js';
 
 let customStyles: Style[] = [];

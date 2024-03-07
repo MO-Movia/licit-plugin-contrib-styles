@@ -66,7 +66,7 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     return [HEADING_COMMANDS];
   }
 
-  isValidCustomstyle(_styleName) {
+  isValidCustomstyle() {
     const bOK = isCustomStyleExists(this.state['styleName']);
     return bOK;
   }
@@ -127,7 +127,7 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
           node = { ...node, attrs: updatedAttrs } as unknown as Node;
           customStyleName = RESERVED_STYLE_NONE;
       }
-      
+
       }
     });
     let backgroundColorClass = 'width-100';

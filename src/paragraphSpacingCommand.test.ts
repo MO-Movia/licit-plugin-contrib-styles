@@ -5,8 +5,8 @@ import {
 import * as paragraphspacingcommand from './ParagraphSpacingCommand';
 import { schema } from 'prosemirror-schema-basic';
 import { TextSelection,EditorState ,Transaction} from 'prosemirror-state';
-import { Attrs, ContentMatch, Fragment, Mark, MarkType, Node, NodeRange, NodeType, Schema, Slice } from 'prosemirror-model';
-import { Step, Transform, StepResult, Mapping } from 'prosemirror-transform';
+import {  Node, Schema } from 'prosemirror-model';
+import { Transform, StepResult, Mapping } from 'prosemirror-transform';
 
 
 describe('paragraphspacingcommand', () => {
@@ -74,70 +74,70 @@ describe('ParagraphSpacingCommand ', () => {
         docs: [],
         mapping: new Mapping,
         before: new Node,
-        step: function (step: Step): Transform {
+        step: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        maybeStep: function (step: Step): StepResult {
+        maybeStep: function (): StepResult {
           throw new Error('Function not implemented.');
         },
-        replace: function (from: number, to?: number | undefined, slice?: Slice | undefined): Transform {
+        replace: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        replaceWith: function (from: number, to: number, content: Node | Fragment | readonly Node[]): Transform {
+        replaceWith: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        delete: function (from: number, to: number): Transform {
+        delete: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        insert: function (pos: number, content: Node | Fragment | readonly Node[]): Transform {
+        insert: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        replaceRange: function (from: number, to: number, slice: Slice): Transform {
+        replaceRange: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        replaceRangeWith: function (from: number, to: number, node: Node): Transform {
+        replaceRangeWith: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        deleteRange: function (from: number, to: number): Transform {
+        deleteRange: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        lift: function (range: NodeRange, target: number): Transform {
+        lift: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        join: function (pos: number, depth?: number | undefined): Transform {
+        join: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        wrap: function (range: NodeRange, wrappers: readonly { type: NodeType; attrs?: Attrs | null | undefined; }[]): Transform {
+        wrap: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        setBlockType: function (from: number, to: number | undefined, type: NodeType, attrs?: Attrs | null | undefined): Transform {
+        setBlockType: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        setNodeMarkup: function (pos: number, type?: NodeType | null | undefined, attrs?: Attrs | null | undefined, marks?: readonly Mark[] | undefined): Transform {
+        setNodeMarkup: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        setNodeAttribute: function (pos: number, attr: string, value: any): Transform {
+        setNodeAttribute: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        setDocAttribute: function (attr: string, value: any): Transform {
+        setDocAttribute: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        addNodeMark: function (pos: number, mark: Mark): Transform {
+        addNodeMark: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        removeNodeMark: function (pos: number, mark: Mark | MarkType): Transform {
+        removeNodeMark: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        split: function (pos: number, depth?: number | undefined, typesAfter?: ({ type: NodeType; attrs?: Attrs | null | undefined; } | null)[] | undefined): Transform {
+        split: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        addMark: function (from: number, to: number, mark: Mark): Transform {
+        addMark: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        removeMark: function (from: number, to: number, mark?: Mark | MarkType | null | undefined): Transform {
+        removeMark: function (): Transform {
           throw new Error('Function not implemented.');
         },
-        clearIncompatible: function (pos: number, parentType: NodeType, match?: ContentMatch | undefined): Transform {
+        clearIncompatible: function (): Transform {
           throw new Error('Function not implemented.');
         }
       });

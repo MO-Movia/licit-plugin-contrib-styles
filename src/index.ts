@@ -665,7 +665,6 @@ function updateStyleOverrideFlag(state, tr) {
         startPos,
         endPos,
         retObj,
-        state
       );
     }
   });

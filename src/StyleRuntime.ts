@@ -15,7 +15,7 @@ export type HTMLStyles = {
   paragraphSpacingAfter?: string; // Spacing after a Paragraph
   paragraphSpacingBefore?: string; // Spacing before a Paragraph
   styleLevel?: number; // Numbering heirachy level
-  bulletLevel?: any; // Numbering heirachy level
+  bulletLevel?: string| boolean; // Numbering heirachy level
   lineHeight?: string; // Line spacing
   isLevelbased?: boolean; // true= Text indent will be based on Level
   indent?: string; // Text indent

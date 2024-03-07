@@ -236,7 +236,7 @@ export class CustomStyleCommand extends UICommand {
     const { selection, doc } = editorState;
     const { from, to } = selection;
     let customStyleName = RESERVED_STYLE_NONE;
-    doc.nodesBetween(from, to, (node, _pos) => {
+    doc.nodesBetween(from, to, (node) => {
       if (node.attrs.styleName) {
         customStyleName = node.attrs.styleName;
       }
@@ -275,8 +275,6 @@ export class CustomStyleCommand extends UICommand {
       tr,
       node,
       startPos,
-      endPos,
-      node ? node.attrs : {}
     );
     if (dispatch && tr.docChanged) {
       dispatch(tr);
@@ -371,7 +369,7 @@ export class CustomStyleCommand extends UICommand {
       {
         anchor,
         position: atViewportCenter,
-        onClose: (_val) => {
+        onClose: () => {
           if (this._popUp) {
             this._popUp = null;
           }
@@ -389,7 +387,7 @@ export class CustomStyleCommand extends UICommand {
     const from = selection.$from.before(1);
     const to = selection.$to.after(1) - 1;
     let customStyleName = RESERVED_STYLE_NONE;
-    doc.nodesBetween(from, to, (node, _pos) => {
+    doc.nodesBetween(from, to, (node) => {
       if (
         node.attrs.styleName &&
         RESERVED_STYLE_NONE !== node.attrs.styleName
@@ -532,7 +530,6 @@ export function compareMarkWithStyle(
   _startPos,
   _endPos,
   retObj,
-  _state
 ) {
   let same = false;
   let overridden = false;
@@ -591,13 +588,12 @@ export function updateOverrideFlag(
   startPos: number,
   endPos: number,
   retObj: { modified: boolean },
-  state: EditorState
 ) {
   const styleProp = getCustomStyleByName(styleName);
   if (styleProp && styleProp.styles) {
     node.descendants(function (child: Node) {
       if (child instanceof Node) {
-        child.marks.forEach(function (mark, _index) {
+        child.marks.forEach(function (mark) {
           tr = compareMarkWithStyle(
             mark,
             styleProp.styles,
@@ -605,7 +601,6 @@ export function updateOverrideFlag(
             startPos,
             endPos,
             retObj,
-            state
           );
         });
       }
@@ -625,7 +620,7 @@ function onLoadRemoveAllMarksExceptOverridden(
   const tasks = [];
   node.descendants(function (child: Node, pos: number) {
     if (child instanceof Node) {
-      child.marks.forEach(function (mark, _index) {
+      child.marks.forEach(function (mark) {
         // [FS] IRAD-1311 2021-05-06
         // Issue fix: Applied URL is removed when applying number style and refresh.
         if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
@@ -962,8 +957,6 @@ function createEmptyElement(
   tr: Transform,
   _node: Node /* The current node */,
   startPos: number,
-  _endPos: number,
-  _attrs /* New style to be applied */
 ) {
   /* Validate the missed heirachy object details are availale */
   if (undefined !== MISSED_HEIRACHY_ELEMENT.attrs) {
@@ -1417,7 +1410,7 @@ export function removeAllMarksExceptLink(
 
 export function handleRemoveMarks(
   tr: Transform,
-  tasks: any,
+  tasks,
   from: number,
   to: number,
   schema: Schema,
@@ -1435,7 +1428,6 @@ export function handleRemoveMarks(
         from,
         to,
         retObj,
-        state
       );
     }
     if (!mark.attrs[ATTR_OVERRIDDEN]) {
@@ -1481,7 +1473,7 @@ export function applyStyleToEachNode(
   });
   const newattrs = Object.assign({}, _node ? _node.attrs : {});
   newattrs['styleName'] = styleName;
-  tr = createEmptyElement(state, tr, _node, from, to, newattrs);
+  tr = createEmptyElement(state, tr, _node, from);
   tr = applyLineStyle(state, tr, null, 0);
   return tr;
 }
@@ -1657,7 +1649,7 @@ export function isCustomStyleAlreadyApplied(
 ) {
   let found = false;
   const { doc } = editorState;
-  doc.nodesBetween(0, doc.nodeSize - 2, (node, _pos) => {
+  doc.nodesBetween(0, doc.nodeSize - 2, (node) => {
 
     if (node.content && node.content.size > 0) {
       const styleLevel = getStyleLevel(styleName);

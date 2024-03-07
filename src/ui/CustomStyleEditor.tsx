@@ -288,13 +288,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   // handles font name change
-  onFontNameChange(e: any) {
+  onFontNameChange(e) {
     this.setState({
       styles: { ...this.state.styles, fontName: e.target.value },
     });
   }
   // handles indent radio button event
-  onIndentRadioChanged(e: any) {
+  onIndentRadioChanged(e) {
     if ('0' === e.target.value) {
       this.setState({ styles: { ...this.state.styles, isLevelbased: true } });
     } else {
@@ -303,7 +303,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   // handles scentece bold event
-  onScentenceRadioChanged(e: any) {
+  onScentenceRadioChanged(e) {
     if ('0' === e.target.value) {
       this.setState({ styles: { ...this.state.styles, boldSentence: true } });
     } else {
@@ -312,33 +312,33 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   // handles font size change
-  onFontSizeChange(e: any) {
+  onFontSizeChange(e) {
     this.setState({
       styles: { ...this.state.styles, fontSize: e.target.value },
     });
   }
 
   // handles line space  change
-  onLineSpaceChange(e: any) {
+  onLineSpaceChange(e) {
     this.setState({
       styles: { ...this.state.styles, lineHeight: e.target.value },
     });
   }
   // handles Level drop down change
-  onLevelChange(e: any) {
+  onLevelChange(e) {
     const val = RESERVED_STYLE_NONE === e.target.value ? null : e.target.value;
     this.setState({ styles: { ...this.state.styles, styleLevel: val } });
   }
 
   // handles Bullet Level drop down change
-  onBulletLevelChange(e: any) {
+  onBulletLevelChange(e) {
     this.setState({
       styles: { ...this.state.styles, bulletLevel: e.target.value },
     });
   }
 
   // handles the bullet checkbox actions
-  handleBulletPoints(val: any) {
+  handleBulletPoints(val) {
     this.setState({
       styles: {
         ...this.state.styles,
@@ -357,7 +357,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   // handles indent dropdown change
-  onIndentChange(e: any) {
+  onIndentChange(e) {
     this.setState({
       styles: {
         ...this.state.styles,
@@ -368,7 +368,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   // [FS] IRAD-1201 2021-02-18
   // set the nextLineStyle to JSON on style selection changed
-  onOtherStyleSelectionChanged(e: any) {
+  onOtherStyleSelectionChanged(e) {
     if (this.state.otherStyleSelected) {
       this.setState({
         styles: { ...this.state.styles, nextLineStyleName: e.target.value },
@@ -423,7 +423,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   // [FS] IRAD-1127 2020-12-31
   // to populate the selected custom styles.
-  onSelectCustomStyle(e: any) {
+  onSelectCustomStyle(e) {
     if (null !== customStyles) {
       const value = customStyles.find((u) => u.styleName === e.target.value);
       // FIX: not able to modify and save the populated style
@@ -470,7 +470,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     this.setState({ styles: { ...this.state.styles, align: val } });
   }
 
-  handleNumbering(val: any) {
+  handleNumbering(val) {
     // if user select numbering, then always set nextLineStyle as continues this style.
     // [FS] IRAD-1221 2021-03-01
     // Issue fix: The next line style not switch back to RESERVED_STYLE_NONE when disable the numbering.
@@ -487,14 +487,14 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   // handles the boldNumbering checkbox actions
-  handleBoldNumbering(val: any) {
+  handleBoldNumbering(val) {
     this.setState({
       styles: { ...this.state.styles, boldNumbering: val.target.checked },
     });
   }
 
   // handles the boldNumbering checkbox actions
-  handleBoldPartial(val: any) {
+  handleBoldPartial(val) {
     this.setState({
       styles: { ...this.state.styles, boldPartial: val.target.checked },
     });

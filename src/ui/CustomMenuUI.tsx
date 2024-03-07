@@ -82,7 +82,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     let counter = 0;
     let selecteClassName = '';
     const selectedName = this.getTheSelectedCustomStyle(this.props.editorState);
-    commandGroups.forEach((group, _ii) => {
+    commandGroups.forEach((group) => {
       Object.keys(group).forEach((label) => {
         const command = group[label];
         counter++;
@@ -111,7 +111,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
         );
       });
     });
-    staticCommand.forEach((group, _ii) => {
+    staticCommand.forEach((group) => {
       Object.keys(group).forEach((label) => {
         const command = group[label];
         children1.push(
@@ -155,7 +155,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     return node.type.name === 'paragraph' || node.type.name === 'ordered_list';
   }
 
-  _onUIEnter = (command: UICommand, event: SyntheticEvent<any>) => {
+  _onUIEnter = (command: UICommand, event: SyntheticEvent<Element>) => {
     if (command.shouldRespondToUIEvent(event)) {
       // check the mouse clicked on down arror to show sub menu
       if (event.currentTarget.className === 'czi-custom-menu-item edit-icon') {
@@ -166,7 +166,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     }
   };
 
-  _execute = (command: UICommand, e: SyntheticEvent<any>) => {
+  _execute = (command: UICommand, e: SyntheticEvent<Element>) => {
     if (undefined !== command) {
       const { dispatch, editorState, editorView, onCommand } = this.props;
       command.execute(editorState, dispatch, editorView, e);
@@ -175,7 +175,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   };
 
   //shows the alignment and line spacing option
-  showSubMenu(command: UICommand, event: SyntheticEvent<any>) {
+  showSubMenu(command: UICommand, event: SyntheticEvent<Element>) {
     const anchor = event ? event.currentTarget : null;
 
     // close the popup toggling effect
@@ -207,7 +207,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                     this.props.editorState
                   )
                 ) {
-                  removeStyle(val.command._customStyleName).then((_success) => {
+                  removeStyle(val.command._customStyleName).then(() => {
                     // [FS] IRAD-1099 2020-11-17
                     // Issue fix: Even the applied style is removed the style name is showing in the editor
                     this.removeCustomStyleName(
@@ -317,7 +317,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
       {
         anchor,
         position: atViewportCenter,
-        onClose: (_val) => {
+        onClose: () => {
           if (this._popUp) {
             this._popUp = null;
           }
@@ -327,7 +327,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   }
 
   //shows the alignment and line spacing option
-  showStyleWindow(command, _event: SyntheticEvent<any>, mode) {
+  showStyleWindow(command, _event: SyntheticEvent<Element>, mode) {
     // const anchor = event ? event.currentTarget : null;
     // close the popup toggling effect
     if (this._stylePopup) {
@@ -461,7 +461,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     const { selection, doc } = editorState;
     const { from, to } = selection;
     let customStyleName = RESERVED_STYLE_NONE;
-    doc.nodesBetween(from, to, (node, _pos) => {
+    doc.nodesBetween(from, to, (node) => {
       if (this.isAllowedNode(node)) {
         if (node.attrs.styleName) {
           customStyleName = node.attrs.styleName;

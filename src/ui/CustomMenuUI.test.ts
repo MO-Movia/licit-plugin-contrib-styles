@@ -451,7 +451,7 @@ describe('Custom Menu UI   ', () => {
     commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
     staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
     disabled: false,
-    dispatch: (_tr) => {},
+    dispatch: () => {},
     editorState: state,
     editorView: editor.view,
     icon: 'button',
@@ -472,7 +472,7 @@ describe('Custom Menu UI   ', () => {
   }
   document.getElementsByClassName = jest
     .fn()
-    .mockImplementation((_className) => {
+    .mockImplementation(() => {
       // Return a custom Element instance with the given class name
       const mockElement = new MockElement('div');
       // mockElement.classList.add(className);
@@ -490,7 +490,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: (_tr) => {},
+      dispatch: () => {},
       editorState: state,
       editorView: { disabled: true },
       icon: 'button',
@@ -509,7 +509,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: (_tr) => {},
+      dispatch: () => {},
       editorState: state,
       editorView: { disabled: true },
       icon: 'button',
@@ -829,7 +829,7 @@ describe('Custom Menu UI   ', () => {
               style: 'font-size',
             },
           ],
-          toDOM(_mark, _inline) {
+          toDOM() {
             return ['Test Mark'];
           },
         },
@@ -904,7 +904,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: (_tr) => {},
+      dispatch: () => {},
       editorState: state,
       editorView: editor.view,
       icon: 'button',
@@ -965,7 +965,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: (_tr) => {},
+      dispatch: () => {},
       editorState: state,
       editorView: view,
       icon: 'button',

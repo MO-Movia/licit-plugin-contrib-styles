@@ -256,7 +256,7 @@ const mockSchema = new Schema({
           style: 'font-size',
         },
       ],
-      toDOM(_mark, _inline) {
+      toDOM() {
         return ['Test Mark'];
       },
     },
@@ -309,7 +309,7 @@ describe('Style Plugin', () => {
   };
   const plugin = new CustomstylePlugin(TestCustomStyleRuntime, true);
   const toDOMMock = jest.spyOn(DOMfunc, 'toCustomStyleDOM');
-  toDOMMock.mockImplementation((_base, _node) => {
+  toDOMMock.mockImplementation(() => {
     return ['p', attrs, 0];
   });
   const state = EditorState.create({

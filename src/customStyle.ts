@@ -83,7 +83,7 @@ export function setStyleRuntime(runtime, callback) {
 
 function saveDefaultStyle() {
   if (!isCustomStyleExists(RESERVED_STYLE_NONE)) {
-    saveStyle(DEFAULT_NORMAL_STYLE as any).then(() => {
+    saveStyle(DEFAULT_NORMAL_STYLE).then(() => {
       /* This is intentional */
     });
   }

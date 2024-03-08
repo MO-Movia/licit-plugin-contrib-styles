@@ -584,6 +584,7 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       newattrs.styleName = nextLineStyleName;
       newattrs.indent = nextLineStyle.styles.indent;
       newattrs.align = nextLineStyle.styles.align;
+      // KNITE-864 08-03-2024 InnerLink functionality change
       if(newattrs.innerLink){
         newattrs.innerLink=null;
         }

@@ -584,6 +584,9 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       newattrs.styleName = nextLineStyleName;
       newattrs.indent = nextLineStyle.styles.indent;
       newattrs.align = nextLineStyle.styles.align;
+      if(newattrs.innerLink){
+        newattrs.innerLink=null;
+        }
       // [FS] IRAD-1223 2021-03-04
       // Line spacing not working for next line style
       newattrs.lineSpacing = getLineSpacingValue(

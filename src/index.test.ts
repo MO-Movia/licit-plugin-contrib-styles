@@ -32,7 +32,7 @@ import {
   getHidenumberingFlag,
   setHidenumberingFlag,
 } from './customStyle';
-import { Schema, Mark } from 'prosemirror-model';
+import { Schema, Mark, Node } from 'prosemirror-model';
 import { isTransparent, toCSSColor } from './toCSSColor';
 import { EditorView } from 'prosemirror-view';
 import * as DOMfunc from './CustomStyleNodeSpec';
@@ -138,7 +138,7 @@ const mockSchema = new Schema({
   marks: {
     link: {
       attrs: {
-        href: 'test_href' as any,
+      //  href: 'test_href' as any,
       },
     },
     em: {
@@ -906,7 +906,7 @@ describe('Style Plugin', () => {
     };
     // const plugin = new CustomstylePlugin(TestCustomStyleRuntime, false);
     const toDOMMock = jest.spyOn(DOMfunc, 'toCustomStyleDOM');
-    toDOMMock.mockImplementation((_base, _node) => {
+    toDOMMock.mockImplementation(() => {
       return ['p', attrs, 0];
     });
     const effSchema = mockSchema;
@@ -989,7 +989,7 @@ describe('Style Plugin Execute', () => {
       dispatch: () => {
         return {};
       },
-    } as any;
+    };
 
     if (val != 'none') {
       const customcommand = new CustomStyleCommand(val, val);
@@ -998,7 +998,7 @@ describe('Style Plugin Execute', () => {
       // view.updateState(
       //   view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
       // );
-      const res = customcommand.execute(state, view.dispatch, view);
+      const res = customcommand.execute(state, view.dispatch, view as unknown as EditorView);
       if (val != 'clearstyle') {
         expect(res).toStrictEqual(false);
       } else {
@@ -1006,18 +1006,7 @@ describe('Style Plugin Execute', () => {
       }
     } else {
       const customcommand = new CustomStyleCommand(val, val);
-      //     const selection = TextSelection.create(view.state.doc, 1, 2);
-      //     view.state.tr.setSelection(selection);
-      //     view.updateState(
-      //       view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
-      //     );
-      //     // view.dispatch(tr);
-      const res = customcommand.execute(state, view.dispatch, view);
-      // if (val != 'clearstyle') {
-      //   expect(res).toStrictEqual(true);
-      // } else {
-      //   //expect(res).toStrictEqual(true);
-      // }
+      customcommand.execute(state, view.dispatch, view as unknown as EditorView);
     }
   });
 });
@@ -1666,8 +1655,8 @@ describe('Cus Style Plugin-Pass', () => {
   for (const nodeType in mockSchema.nodes) {
     if (Object.prototype.hasOwnProperty.call(mockSchema.nodes, nodeType)) {
       const nodeSpec = mockSchema.nodes[nodeType];
-      const validContent = [] as any;
-      for (let i = 0; i < nodeSpec.content.length; i++) {
+      const validContent: string[] = [];
+    for (let i = 0; i < nodeSpec.content.length; i++) {
         const type = nodeSpec.content[i];
         if (typeof type === 'string') {
           validContent.push(type);
@@ -1817,7 +1806,7 @@ describe('Cus Style Plugin-Pass', () => {
       .spyOn(ccommand, 'getMarkByStyleName')
       .mockReturnValue([
         { type: 'mark-font-type', attrs: { name: 'Arial', overridden: false }},
-      ] as any);
+      ] as unknown as []);
     const schema1 = new Schema({
       nodes: {
         doc: {
@@ -2165,7 +2154,7 @@ describe('Cus Style Plugin-Pass', () => {
             styleName: { default: 'AFDP Bullet' },
           },
           parseDOM: [{ tag: 'p' }],
-          toDOM(_node) {
+          toDOM() {
             return ['p', 0];
           },
         },
@@ -2186,8 +2175,8 @@ describe('Cus Style Plugin-Pass', () => {
           parseDOM: [
             {
               style: 'font-size',
-              getAttrs(value: any) {
-                return { pt: parseInt(value), overridden: false };
+              getAttrs(value) {
+                return { pt: parseInt(value as string), overridden: false };
               },
             },
           ],
@@ -2214,7 +2203,7 @@ describe('Cus Style Plugin-Pass', () => {
         },
       },
     });
-   const transaction1 = new Transaction(schematr as any);
+   const transaction1 = new Transaction(schematr as unknown as Node);
 
     const json = {
       doc: {
@@ -2299,11 +2288,11 @@ describe('Cus Style Plugin-Pass', () => {
     };
 
     transaction1.doc = schematr.nodeFromJSON(json.doc);
-    transaction1.addStoredMark = (_x) => {
+    transaction1.addStoredMark = () => {
       return {} as unknown as Transaction;
     };
     transaction1.storedMarks = json.storedMarks;
-    transaction1.setNodeMarkup = (_a, _b, _c) => {
+    transaction1.setNodeMarkup = () => {
       return transaction1;
     };
 
@@ -2476,12 +2465,12 @@ describe('Cus Style Plugin-Pass', () => {
           parseDOM: [
             {
               tag: 'img[src]',
-              getAttrs(dom: any) {
+              getAttrs(dom) {
                 return {
-                  src: dom.getAttribute('src'),
-                  alt: dom.getAttribute('alt'),
-                  title: dom.getAttribute('title'),
-                  styleName: dom.getAttribute('styleName'),
+                  src: (dom as unknown as HTMLElement).getAttribute('src') ,
+                  alt: (dom as unknown as HTMLElement).getAttribute('alt'),
+                  title: (dom as unknown as HTMLElement).getAttribute('title'),
+                  styleName: (dom as unknown as HTMLElement).getAttribute('styleName'),
                 };
               },
             },
@@ -2604,10 +2593,7 @@ describe('Cus Style Plugin-Pass', () => {
       }),
       selection: { from: 2, to: 4 },
     };
-    const mockview1 = {
-      state: mockState,
-      input: { lastKeyCode: 46 },
-    };
+
     const spymhod = jest.spyOn(ccommand, 'getStyleLevel').mockReturnValue(2);
     jest.spyOn(CustStyl, 'getCustomStyleByLevel').mockReturnValue({
       styles: {

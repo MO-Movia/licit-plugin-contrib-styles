@@ -1,7 +1,7 @@
 import { EditorState, TextSelection, Selection , Transaction} from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
-import { Node, Fragment, Schema } from 'prosemirror-model';
+import { Node, Fragment, Schema} from 'prosemirror-model';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import {
   atViewportCenter,
@@ -204,13 +204,13 @@ export class CustomStyleCommand extends UICommand {
     this._customStyleName = customStyleName;
   }
 
-  renderLabel = (_state: EditorState) => {
+  renderLabel = () => {
     return this._customStyleName;
   };
 
   isEmpty = (obj) => {
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         return false;
       }
     }
@@ -746,6 +746,7 @@ function applyStyleEx(
 
   if (styleProp && styleProp.styles) {
     const _commands = getCustomStyleCommands(styleProp.styles);
+    // eslint-disable-next-line
     const newattrs = Object.assign({}, node.attrs as any);
  //   const newattrs = node.attrs as { [key: string]: any };
     // [FS] IRAD-1074 2020-10-22

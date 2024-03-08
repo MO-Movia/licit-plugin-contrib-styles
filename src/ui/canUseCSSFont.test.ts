@@ -9,9 +9,9 @@ const mockFonts = {
 };
 
 
-Object.defineProperty(global.document, 'fonts', {
-  value: mockFonts,
-});
+// Object.defineProperty(global.document, 'fonts', {
+//   value: mockFonts,
+// });
 
 cached['Font1'] = Promise.resolve(true);
 

@@ -1,5 +1,5 @@
 import { CustomstyleDropDownCommand } from './CustomstyleDropDownCommand';
-import { createEditor, doc, p } from 'jest-prosemirror';
+import { TestEditorView, createEditor, doc, p } from 'jest-prosemirror';
 import { EditorState } from 'prosemirror-state';
 import { Schema,Node } from 'prosemirror-model';
 import * as cusstyles from '../customStyle';
@@ -666,11 +666,13 @@ describe('customstyledropdowncommand', () => {
       selection: { from: 0, to: 2 },
     };
 
-    (customstyledropdowncommand as any).props = {
+    const props = {
       dispatch: () => undefined,
-      editorState: mockeditorState,
-      editorView: null,
+      editorState: mockeditorState as EditorState,
+      editorView: null as unknown as TestEditorView,
     };
+
+    const customstyledropdowncommand = new CustomstyleDropDownCommand(props);
     expect(customstyledropdowncommand.render()).toBeDefined();
     spy.mockRestore();
   });
@@ -1031,14 +1033,14 @@ describe('customstyledropdowncommand 1', () => {
       }),
       selection: { from: 0, to: 2 },
     };
-
-    (customstyledropdowncommand as any).props = {
+    const props = {
       dispatch: () => undefined,
-      editorState: mockeditorState,
+      editorState: mockeditorState as EditorState,
       editorView: {
         disabled: true,
-      },
+      } as  unknown as TestEditorView ,
     };
+    const customstyledropdowncommand = new CustomstyleDropDownCommand(props);
     expect(customstyledropdowncommand.render()).toBeDefined();
     spy.mockRestore();
   });

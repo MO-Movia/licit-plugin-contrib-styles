@@ -18,7 +18,7 @@ import {
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec.js';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
-import { Node, Schema } from 'prosemirror-model';
+import { Node, Schema ,Slice} from 'prosemirror-model';
 import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand.js';
 import { applyEffectiveSchema } from './EditorSchema.js';
 import type { StyleRuntime } from './StyleRuntime.js';
@@ -49,13 +49,13 @@ export class CustomstylePlugin extends Plugin {
     super({
       key: new PluginKey('CustomstylePlugin'),
       state: {
-        init(_config, _state) {
+        init() {
           loaded = false;
           firstTime = true;
           setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
           setHidenumberingFlag(hideNumbering || false);
         },
-        apply(tr, _prev, _oldState, _newState) {
+        apply(tr) {
           // [FS] IRAD-1202 2021-02-15
           remapCounterFlags(tr);
         },
@@ -76,18 +76,18 @@ export class CustomstylePlugin extends Plugin {
       },
 
       props: {
-        handlePaste(_view, _event, slice) {
-          if ((slice.content as any)?.content[0]?.attrs) {
+        handlePaste(_view, _event, slice ) {
+          if ((slice.content as unknown as Slice)?.content[0]?.attrs) {     //LINTFIX
             slice1 = slice;
           }
           return false;
         },
         handleDOMEvents: {
-          keydown(view, _event) {
+          keydown(view) {
             csview = view;
           },
         },
-        nodeViews: [] as any,
+        nodeViews: {},
       },
       appendTransaction: (transactions, prevState, nextState) => {
         let tr = null;
@@ -274,7 +274,7 @@ export function remapCounterFlags(tr) {
   // set counters for numbering.
   const cFlags = tr.doc.attrs.counterFlags;
   for (const key in cFlags) {
-    if (cFlags.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(cFlags, key)) {
       window[key] = true;
     }
   }
@@ -546,7 +546,7 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
                 : '',
               nextState.schema
             );
-            node.descendants((child, _pos) => {
+            node.descendants((child) => {
               if (child.type.name === 'text') {
                 marks.forEach((mark) => {
                   tr = tr.addStoredMark(mark);
@@ -653,7 +653,7 @@ function updateStyleOverrideFlag(state, tr) {
     tr = state.tr;
   }
 
-  tr.doc.descendants(function (child, _pos) {
+  tr.doc.descendants(function (child) {
     const contentLen = child.content.size;
     if (tr && haveEligibleChildren(child, contentLen)) {
       const startPos = tr.curSelection.$anchor.pos; //pos

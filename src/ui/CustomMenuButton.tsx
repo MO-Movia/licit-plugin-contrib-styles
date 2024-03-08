@@ -33,7 +33,7 @@ export class CustomMenuButton extends React.PureComponent<
   state = {
     expanded: false,
   };
-  _menu : any = null;
+  _menu  = null;
   _id = uuid();
 
   render(): React.ReactElement {

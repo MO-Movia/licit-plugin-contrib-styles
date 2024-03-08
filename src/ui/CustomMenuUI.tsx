@@ -31,7 +31,7 @@ import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec.js';
 
 // [FS] IRAD-1039 2020-09-24
 // UI to show the list buttons
-
+// eslint-disable-next-line
 export class CustomMenuUI extends React.PureComponent<any, any> {
   _activeCommand?: UICommand = null;
   _popUp = null;
@@ -410,7 +410,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                                 this.props.editorState.tr,
                                 this._styleName,
                                 val.styleName,
-                                obj.styles
+                                // obj.styles
                               );
                             }
                           });
@@ -441,7 +441,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     tr: Transform,
     oldStyleName,
     styleName,
-    _style
+    // _style
   ) {
     const { doc } = state;
 

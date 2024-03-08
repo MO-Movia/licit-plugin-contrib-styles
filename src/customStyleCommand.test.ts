@@ -75,19 +75,11 @@ describe('CustomStyleCommand', () => {
     expect(customstylecommand).toBeDefined();
   });
   it('should handle renderLabel ', () => {
-    const mySchema = new Schema({
-      nodes: schema.spec.nodes,
-      marks: schema.spec.marks,
-    });
+
     const myDoc = doc(p('<cursor>'));
-    const mySelection = myDoc.content.findDiffEnd(myDoc.content);
-    const myEditorState = EditorState.create({
-      doc: myDoc,
-      schema: mySchema,
-      selection: mySelection as unknown as Selection,
-    });
+    myDoc.content.findDiffEnd(myDoc.content);
     customstylecommand._customStyleName = 'test';
-    expect(customstylecommand.renderLabel(myEditorState)).toBe('test');
+    expect(customstylecommand.renderLabel()).toBe('test');
   });
   it('should handle isEmpty  ', () => {
     expect(customstylecommand.isEmpty({})).toBeTruthy();

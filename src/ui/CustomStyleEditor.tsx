@@ -66,6 +66,7 @@ const LEVEL_VALUES = [
 
 const SAMPLE_TEXT = `Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample.
 Sample Text Sample Text Sample Text Sample Text Sample Text`;
+// eslint-disable-next-line
 export class CustomStyleEditor extends React.PureComponent<any, any> {
   _popUp = null;
 
@@ -554,6 +555,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     }
   }
 
+  // eslint-disable-next-line
   render(): JSX.Element {
     return (
       <div className="molsp-customedit-div">
@@ -1345,6 +1347,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         customstyles: []
       });
       // delete this.state.customStyles;
+      // eslint-disable-next-line
       const { customStyles, ...newState } = this.state;
       // Update the state with the new state object
       this.setState(newState);
@@ -1356,6 +1359,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   _save = (): void => {
     // delete this.state.otherStyleSelected;
+    // eslint-disable-next-line
     const { otherStyleSelected, ...newState } = this.state;
     // Update the state with the new state object
     this.setState(newState);
@@ -1375,6 +1379,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     } else {
       if ('' !== this.state.styleName) {
         // delete this.state.customStyles;
+        // eslint-disable-next-line
         const { customStyles, ...newState } = this.state;
         // Update the state with the new state object
         this.setState(newState);

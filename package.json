@@ -52,6 +52,7 @@
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "^1.16.1",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@types/jest": "^29.1.2",
     "@types/node": "^18.11.0",

@@ -12,6 +12,7 @@
     "url": "git+https://github.com/MO-Movia/licit.git"
   },
   "scripts": {
+    "verify": "npm run lint && npm run ci:build && npm run test:coverage",
     "test": "jest",
     "test:unit": "jest",
     "test:coverage": "jest --coverage",

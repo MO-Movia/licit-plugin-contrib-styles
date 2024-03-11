@@ -1,7 +1,12 @@
-import { EditorState, TextSelection, Selection , Transaction} from 'prosemirror-state';
+import {
+  EditorState,
+  TextSelection,
+  Selection,
+  Transaction,
+} from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
-import { Node, Fragment, Schema} from 'prosemirror-model';
+import { Node, Fragment, Schema } from 'prosemirror-model';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import {
   atViewportCenter,
@@ -71,9 +76,9 @@ export const LEVEL = 'styleLevel';
 export const BOLDPARTIAL = 'boldPartial';
 const MISSED_HEIRACHY_ELEMENT = {
   isAfter: '',
-  attrs:{styleName:'',styleLevel:0},
-  previousLevel:'',
-  startPos:''
+  attrs: { styleName: '', styleLevel: 0 },
+  previousLevel: '',
+  startPos: '',
 };
 const nodesAfterSelection = [];
 const nodesBeforeSelection = [];
@@ -181,6 +186,9 @@ export function getCustomStyleCommands(customStyle) {
 }
 
 export class CustomStyleCommand extends UICommand {
+  isActive(): boolean {
+    return true;
+  }
 
   waitForUserInput() {
     return Promise.resolve(undefined);
@@ -188,7 +196,9 @@ export class CustomStyleCommand extends UICommand {
   executeWithUserInput(): boolean {
     return false;
   }
-  cancel(): void { }
+  cancel(): void {
+    //ignore
+  }
   executeCustom(state: EditorState, tr: Transform): Transform {
     return tr;
   }
@@ -270,12 +280,7 @@ export class CustomStyleCommand extends UICommand {
     }
 
     tr = removeTextAlignAndLineSpacing(tr, state.schema);
-    tr = createEmptyElement(
-      state,
-      tr,
-      node,
-      startPos,
-    );
+    tr = createEmptyElement(state, tr, node, startPos);
     if (dispatch && tr.docChanged) {
       dispatch(tr);
       done = true;
@@ -332,7 +337,7 @@ export class CustomStyleCommand extends UICommand {
         startPos,
         endPos,
         this._customStyle ? this._customStyle.styleName : ''
-       // this._customStyle ? (this._customStyle as Style).styleName : ''
+        // this._customStyle ? (this._customStyle as Style).styleName : ''
       )
     ) {
       isValidated = checkLevlsAvailable();
@@ -404,7 +409,7 @@ export class CustomStyleCommand extends UICommand {
   }
 
   removeMarks(marks, tr: Transform, node: Node) {
-    const { selection }  = tr as Transaction;
+    const { selection } = tr as Transaction;
     // [FS] IRAD-1495 2021-06-25
     // FIX: Clear style not working on multi select paragraph
     const from = selection.$from.before(1);
@@ -453,7 +458,13 @@ export class CustomStyleCommand extends UICommand {
       }
     );
   }
-  createNewStyle(val, tr: Transaction, state: EditorState, dispatch: (tr: Transaction) => void, doc: Node) {
+  createNewStyle(
+    val,
+    tr: Transaction,
+    state: EditorState,
+    dispatch: (tr: Transaction) => void,
+    doc: Node
+  ) {
     delete val.editorView;
     // [FS] IRAD-1415 2021-06-02
     // Issue: Allow to create custom style numbering level 2 without level 1
@@ -529,7 +540,7 @@ export function compareMarkWithStyle(
   tr,
   _startPos,
   _endPos,
-  retObj,
+  retObj
 ) {
   let same = false;
   let overridden = false;
@@ -587,7 +598,7 @@ export function updateOverrideFlag(
   node: Node,
   startPos: number,
   endPos: number,
-  retObj: { modified: boolean },
+  retObj: { modified: boolean }
 ) {
   const styleProp = getCustomStyleByName(styleName);
   if (styleProp && styleProp.styles) {
@@ -600,7 +611,7 @@ export function updateOverrideFlag(
             tr,
             startPos,
             endPos,
-            retObj,
+            retObj
           );
         });
       }
@@ -748,7 +759,7 @@ function applyStyleEx(
     const _commands = getCustomStyleCommands(styleProp.styles);
     // eslint-disable-next-line
     const newattrs = Object.assign({}, node.attrs as any);
- //   const newattrs = node.attrs as { [key: string]: any };
+    //   const newattrs = node.attrs as { [key: string]: any };
     // [FS] IRAD-1074 2020-10-22
     // Issue fix on not removing center alignment when switch style with center
     // alignment to style with left alignment
@@ -803,7 +814,7 @@ function applyStyleEx(
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
-    (tr as  Transaction).storedMarks = storedmarks;
+    (tr as Transaction).storedMarks = storedmarks;
   }
   return tr;
 }
@@ -957,7 +968,7 @@ function createEmptyElement(
   state: EditorState,
   tr: Transform,
   _node: Node /* The current node */,
-  startPos: number,
+  startPos: number
 ) {
   /* Validate the missed heirachy object details are availale */
   if (undefined !== MISSED_HEIRACHY_ELEMENT.attrs) {
@@ -1387,7 +1398,7 @@ export function removeAllMarksExceptLink(
   tr: Transform,
   schema: Schema,
   state: EditorState,
-  styleProp?: Style,
+  styleProp?: Style
 ) {
   const { doc } = tr;
   const tasks = [];
@@ -1416,20 +1427,13 @@ export function handleRemoveMarks(
   to: number,
   schema: Schema,
   state: EditorState,
-  styleProp?: Style,
+  styleProp?: Style
 ) {
   tasks.forEach((job) => {
     const { mark } = job;
     const retObj = { modified: false };
     if (styleProp && MARKTEXTHIGHLIGHT === mark.type.name) {
-      tr = compareMarkWithStyle(
-        mark,
-        styleProp.styles,
-        tr,
-        from,
-        to,
-        retObj,
-      );
+      tr = compareMarkWithStyle(mark, styleProp.styles, tr, from, to, retObj);
     }
     if (!mark.attrs[ATTR_OVERRIDDEN]) {
       tr = tr.removeMark(from, to, mark.type);
@@ -1651,7 +1655,6 @@ export function isCustomStyleAlreadyApplied(
   let found = false;
   const { doc } = editorState;
   doc.nodesBetween(0, doc.nodeSize - 2, (node) => {
-
     if (node.content && node.content.size > 0) {
       const styleLevel = getStyleLevel(styleName);
       if (!found && 0 < styleLevel && node.attrs.styleName === styleName) {

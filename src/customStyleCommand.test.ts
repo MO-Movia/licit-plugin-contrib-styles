@@ -18,7 +18,7 @@ import {
   handleRemoveMarks,
 } from './CustomStyleCommand.js';
 import * as cusstylecommand from './CustomStyleCommand';
-import { EditorState, Selection , Transaction} from 'prosemirror-state';
+import { EditorState, Selection, Transaction } from 'prosemirror-state';
 
 import { EditorView } from 'prosemirror-view';
 
@@ -53,6 +53,27 @@ describe('CustomStyleCommand', () => {
   };
   const customstylecommand = new CustomStyleCommand(styl, 'A_12');
 
+  it('should resolve with undefined', async () => {
+    const result = await customstylecommand.waitForUserInput();
+    expect(result).toBeUndefined();
+  });
+  it('should return false', () => {
+    const result = customstylecommand.executeWithUserInput();
+    expect(result).toBe(false);
+  });
+  it('should not throw an error', () => {
+    expect(() => customstylecommand.cancel()).not.toThrow();
+  });
+  it('should return the same transform', () => {
+    const initialState = {} as EditorState;
+    const initialTransform = {} as Transform;
+    const resultingTransform = customstylecommand.executeCustom(
+      initialState,
+      initialTransform
+    );
+    expect(resultingTransform).toBe(initialTransform);
+  });
+
   it('should handle isCustomStyleApplied', () => {
     jest.clearAllMocks();
     const mySchema = new Schema({
@@ -81,6 +102,72 @@ describe('CustomStyleCommand', () => {
     customstylecommand._customStyleName = 'test';
     expect(customstylecommand.renderLabel()).toBe('test');
   });
+
+  describe('updateOverrideFlag', () => {
+    it('should handle updateOverrideFlag when styleprop null', () => {
+      const child = new Node();
+      const mockNode = {
+        type: {
+          name: 'paragraph',
+        },
+        content: [
+          child,
+          {
+            type: {
+              name: 'text',
+            },
+            text: 'This is a mock paragraph with some text.',
+            marks: [
+              {
+                type: {
+                  name: 'strong',
+                },
+              },
+            ],
+          } as unknown as Node,
+          {
+            type: {
+              name: 'text',
+            },
+            text: ' More text in the same paragraph.',
+            marks: [
+              {
+                type: {
+                  name: 'em',
+                },
+              },
+            ],
+          },
+        ],
+        descendants: function (callback) {
+          function traverse(node, callback) {
+            callback(node);
+            if (node.content) {
+              node.content.forEach((child) => traverse(child, callback));
+            }
+          }
+          traverse(this, callback);
+        },
+      };
+
+      jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
+        styles: 'color: red; font-size: 16px; font-weight: bold;',
+      }  as unknown as Style);
+      expect(
+        updateOverrideFlag(
+          '',
+          {} as Transform,
+          mockNode as unknown as Node,
+          0,
+          1,
+          {
+            modified: true,
+          }
+        )
+      ).toStrictEqual({});
+    });
+  });
+
   it('should handle isEmpty  ', () => {
     expect(customstylecommand.isEmpty({})).toBeTruthy();
   });
@@ -143,7 +230,11 @@ describe('CustomStyleCommand', () => {
       .mockReturnValue('Normal');
 
     expect(
-      customstylecommand.isStyleEnabled(editorState, mockEditorView as unknown as EditorView, 'clearstyle')
+      customstylecommand.isStyleEnabled(
+        editorState,
+        mockEditorView as unknown as EditorView,
+        'clearstyle'
+      )
     ).toBeFalsy();
     spy.mockReset();
   });
@@ -263,19 +354,28 @@ describe('CustomStyleCommand', () => {
         },
       },
     };
-    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue(null as unknown as Style);
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValue(null as unknown as Style);
     expect(
       customstylecommand.executeClearStyle(
         mockeditorstate as unknown as EditorState,
-        () => { },
+        () => {},
         0,
         1,
         2,
-        {},
+        {}
       )
     ).toBeFalsy();
     expect(
-      customstylecommand.executeClearStyle(mockeditorstate as unknown as EditorState, undefined, 0, 1, 2, {})
+      customstylecommand.executeClearStyle(
+        mockeditorstate as unknown as EditorState,
+        undefined,
+        0,
+        1,
+        2,
+        {}
+      )
     ).toBeFalsy();
   });
   it('should handle clearCustomStyles', () => {
@@ -427,7 +527,6 @@ describe('CustomStyleCommand', () => {
               ],
               attrs: {
                 overridden: {
-
                   default: false,
                 },
               },
@@ -439,9 +538,9 @@ describe('CustomStyleCommand', () => {
           selection: { $from: { before: () => 0 }, $to: { after: () => 1 } },
           removeMark: () => {
             return {
-              key: 'markremoved tr'
+              key: 'markremoved tr',
             };
-          }  ,
+          },
         } as unknown as Transform,
         {
           content: 'text*',
@@ -576,7 +675,7 @@ describe('CustomStyleCommand', () => {
         },
       ],
     } as unknown as Node;
-    const mockdispatch = () => { };
+    const mockdispatch = () => {};
     const mockval = {
       styles: {
         hasBullet: true,
@@ -658,7 +757,6 @@ describe('getMarkByStyleName', () => {
           },
           attrs: {
             overridden: {
-
               default: false,
             },
           },
@@ -680,7 +778,6 @@ describe('getMarkByStyleName', () => {
           },
           attrs: {
             overridden: {
-
               default: false,
             },
           },
@@ -702,7 +799,6 @@ describe('getMarkByStyleName', () => {
           },
           attrs: {
             overridden: {
-
               default: false,
             },
           },
@@ -713,7 +809,6 @@ describe('getMarkByStyleName', () => {
               default: '',
             },
             overridden: {
-
               default: false,
             },
           },
@@ -734,7 +829,6 @@ describe('getMarkByStyleName', () => {
               default: '',
             },
             overridden: {
-
               default: false,
             },
           },
@@ -746,10 +840,7 @@ describe('getMarkByStyleName', () => {
             },
           ],
           toDOM() {
-            return [
-              'highlightColor'
-
-            ];
+            return ['highlightColor'];
           },
         },
         'mark-font-size': {
@@ -758,7 +849,6 @@ describe('getMarkByStyleName', () => {
               default: null,
             },
             overridden: {
-
               default: false,
             },
           },
@@ -779,7 +869,6 @@ describe('getMarkByStyleName', () => {
               default: '',
             },
             overridden: {
-
               default: false,
             },
           },
@@ -833,7 +922,7 @@ describe('getMarkByStyleName', () => {
         hasNumbering: true,
         textHighlight: 'blue',
         underline: true,
-      }
+      },
     } as unknown as Style);
     const mockSchema = new Schema({
       nodes: {
@@ -882,7 +971,6 @@ describe('getMarkByStyleName', () => {
           },
           attrs: {
             overridden: {
-
               default: false,
             },
           },
@@ -904,7 +992,6 @@ describe('getMarkByStyleName', () => {
           },
           attrs: {
             overridden: {
-
               default: false,
             },
           },
@@ -926,7 +1013,6 @@ describe('getMarkByStyleName', () => {
           },
           attrs: {
             overridden: {
-
               default: false,
             },
           },
@@ -937,7 +1023,6 @@ describe('getMarkByStyleName', () => {
               default: '',
             },
             overridden: {
-
               default: false,
             },
           },
@@ -958,7 +1043,6 @@ describe('getMarkByStyleName', () => {
               default: '',
             },
             overridden: {
-
               default: false,
             },
           },
@@ -979,7 +1063,6 @@ describe('getMarkByStyleName', () => {
               default: null,
             },
             overridden: {
-
               default: false,
             },
           },
@@ -1000,7 +1083,6 @@ describe('getMarkByStyleName', () => {
               default: '',
             },
             overridden: {
-
               default: false,
             },
           },
@@ -1571,7 +1653,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       },
     ],
     addMark: () => {
-      return { removeMark: () => { } };
+      return { removeMark: () => {} };
     },
     removeMark: () => {
       return { key: 'mocktr' };
@@ -1617,7 +1699,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         attrs: {
           href: {
             default: 'test_href',
-          }
+          },
         },
       },
       em: {
@@ -1747,7 +1829,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         attrs: {
           test_href: {
             default: 'test_href',
-          }
+          },
         },
         inline: true,
         group: 'inline',
@@ -1839,7 +1921,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         attrs: {
           test_href: {
             default: 'test_href',
-          }
+          },
         },
       },
       em: {
@@ -1901,7 +1983,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         },
         attrs: {
           overridden: {
-
             default: false,
           },
         },
@@ -1912,7 +1993,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
             default: '',
           },
           overridden: {
-
             default: false,
           },
         },
@@ -1933,7 +2013,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
             default: '',
           },
           overridden: {
-
             default: false,
           },
         },
@@ -1954,7 +2033,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
             default: null,
           },
           overridden: {
-
             default: false,
           },
         },
@@ -1975,7 +2053,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
             default: '',
           },
           overridden: {
-
             default: false,
           },
         },
@@ -2090,6 +2167,62 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       manageElementsAfterSelection([{ node: nodemock }], statemock, trmock)
     ).toBeDefined();
   });
+
+  // fdescribe('manageElementsAfterSelection', () => {
+  //   it('should update node attributes when style exists', () => {
+  //     const nodeArray = [
+  //       {
+  //         node: { attrs: { styleName: 'existingStyle' } },
+  //         pos: 1,
+  //       },
+  //     ];
+  //     const state = {}; // Mocked state object
+  //     let tr = {}; // Mocked transaction object
+
+  //     // Mocking getStyleLevel and getCustomStyleByLevel functions
+  //     const originalGetStyleLevel = getStyleLevel;
+  //     const originalGetCustomStyleByLevel = customstyles.getCustomStyleByLevel;
+  //     //getStyleLevel = jest.fn().mockReturnValue(2); // Mocking a style level
+
+  //     const getCustomStyleByLevel = jest
+  //       .spyOn(customstyles, 'getCustomStyleByLevel')
+  //       .mockReturnValue(null);
+
+  //     tr = manageElementsAfterSelection(nodeArray, state, tr);
+
+  //     expect(getStyleLevel).toHaveBeenCalledWith('existingStyle');
+  //     expect(getCustomStyleByLevel).toHaveBeenCalledWith(1); // Assuming 1 is the expected new style level
+  //     // expect(tr.setNodeMarkup).toHaveBeenCalledWith(1, undefined, { styleName: 'newStyle' });
+
+  //     // // Reset the mocks
+  //     // getStyleLevel = originalGetStyleLevel;
+  //     // getCustomStyleByLevel = originalGetCustomStyleByLevel;
+  //   });
+
+  //   // it('should exit loop when condition is met', () => {
+  //   //   const nodeArray = [{
+  //   //     node: { attrs: { styleName: 'existingStyle' } },
+  //   //     pos: 1,
+  //   //   }];
+  //   //   const state = {}; // Mocked state object
+  //   //   let tr = {}; // Mocked transaction object
+
+  //   //   // Mocking getStyleLevel function to always return the same level
+  //   //   const originalGetStyleLevel = getStyleLevel;
+  //   //   getStyleLevel = jest.fn().mockReturnValue(2); // Mocking a style level
+
+  //   //   // Call the function
+  //   //   tr = manageElementsAfterSelection(nodeArray, state, tr);
+
+  //   //   // Expectations
+  //   //   expect(getStyleLevel).toHaveBeenCalledWith('existingStyle');
+  //   //   // Assuming the loop should exit without calling setNodeMarkup
+  //   //   expect(tr.setNodeMarkup).not.toHaveBeenCalled();
+
+  //   //   // Reset the mocks
+  //   //   getStyleLevel = originalGetStyleLevel;
+  //   // });
+  // });
 
   it('should handle insertParagraph', () => {
     const nodeattrs = {
@@ -2259,7 +2392,10 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       },
     };
     expect(
-      customstylecommand.getCustomStyles('Normal', editorview as unknown as EditorView)
+      customstylecommand.getCustomStyles(
+        'Normal',
+        editorview as unknown as EditorView
+      )
     ).toBeUndefined();
   });
   it('should handle getCustomStyles when styleName null', () => {
@@ -2270,7 +2406,10 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       },
     };
     expect(
-      customstylecommand.getCustomStyles(null as unknown as string, editorview as unknown as EditorView)
+      customstylecommand.getCustomStyles(
+        null as unknown as string,
+        editorview as unknown as EditorView
+      )
     ).toBeUndefined();
   });
   it('should handle getCustomStyles when styleName not equal obj.styleName', () => {
@@ -2309,7 +2448,10 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       },
     };
     expect(
-      customstylecommand.getCustomStyles('Normal', editorview as unknown as EditorView)
+      customstylecommand.getCustomStyles(
+        'Normal',
+        editorview as unknown as EditorView
+      )
     ).toBeUndefined();
   });
 
@@ -3053,7 +3195,7 @@ describe('updateDocument', () => {
       },
     ],
     addMark: () => {
-      return { removeMark: () => { } };
+      return { removeMark: () => {} };
     },
     removeMark: () => {
       return { key: 'mocktr' };
@@ -3113,7 +3255,6 @@ describe('updateDocument', () => {
         },
         attrs: {
           overridden: {
-
             default: false,
           },
         },
@@ -3135,7 +3276,6 @@ describe('updateDocument', () => {
         },
         attrs: {
           overridden: {
-
             default: false,
           },
         },
@@ -3157,7 +3297,6 @@ describe('updateDocument', () => {
         },
         attrs: {
           overridden: {
-
             default: false,
           },
         },
@@ -3168,7 +3307,6 @@ describe('updateDocument', () => {
             default: '',
           },
           overridden: {
-
             default: false,
           },
         },
@@ -3189,7 +3327,6 @@ describe('updateDocument', () => {
             default: '',
           },
           overridden: {
-
             default: false,
           },
         },
@@ -3210,7 +3347,6 @@ describe('updateDocument', () => {
             default: null,
           },
           overridden: {
-
             default: false,
           },
         },
@@ -3231,7 +3367,6 @@ describe('updateDocument', () => {
             default: '',
           },
           overridden: {
-
             default: false,
           },
         },
@@ -3296,7 +3431,14 @@ describe('updateDocument', () => {
   const statemock = { schema: schema, doc: doc, selection: { from: 0, to: 1 } };
   // Create the ProseMirror node from JSON
   it('updateDocument', () => {
-    expect(updateDocument(statemock as unknown as EditorState, trmock as unknown as Transform, 'Normal', styl as unknown as Style)).toBeDefined();
+    expect(
+      updateDocument(
+        statemock as unknown as EditorState,
+        trmock as unknown as Transform,
+        'Normal',
+        styl as unknown as Style
+      )
+    ).toBeDefined();
   });
 });
 describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
@@ -3353,7 +3495,6 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
         },
         attrs: {
           overridden: {
-
             default: false,
           },
         },
@@ -3375,7 +3516,6 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
         },
         attrs: {
           overridden: {
-
             default: false,
           },
         },
@@ -3397,7 +3537,6 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
         },
         attrs: {
           overridden: {
-
             default: false,
           },
         },
@@ -3408,7 +3547,6 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
             default: '',
           },
           overridden: {
-
             default: false,
           },
         },
@@ -3429,7 +3567,6 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
             default: '',
           },
           overridden: {
-
             default: false,
           },
         },
@@ -3450,7 +3587,6 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
             default: null,
           },
           overridden: {
-
             default: false,
           },
         },
@@ -3471,7 +3607,6 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
             default: '',
           },
           overridden: {
-
             default: false,
           },
         },
@@ -3536,7 +3671,10 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
   const statemock = { schema: schema, doc: doc, selection: { from: 0, to: 1 } };
   it('should handle isCustomStyleAlreadyApplied', () => {
     expect(
-      isCustomStyleAlreadyApplied('10Normal-@#$-10', statemock as unknown as EditorState)
+      isCustomStyleAlreadyApplied(
+        '10Normal-@#$-10',
+        statemock as unknown as EditorState
+      )
     ).toBeTruthy();
   });
   it('should handle isLevelUpdated', () => {
@@ -3561,7 +3699,13 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
       toc: false,
       isHidden: false,
     };
-    expect(isLevelUpdated(statemock as unknown as EditorState, '10Normal-@#$-10', styl as unknown as Style)).toBeTruthy();
+    expect(
+      isLevelUpdated(
+        statemock as unknown as EditorState,
+        '10Normal-@#$-10',
+        styl as unknown as Style
+      )
+    ).toBeTruthy();
   });
   it('should handle isLevelUpdated branch coverage', () => {
     const styl = {
@@ -3585,7 +3729,13 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
       toc: false,
       isHidden: false,
     };
-    expect(isLevelUpdated(statemock as unknown as EditorState, '10Normal-@#$-10', styl)).toBeTruthy();
+    expect(
+      isLevelUpdated(
+        statemock as unknown as EditorState,
+        '10Normal-@#$-10',
+        styl
+      )
+    ).toBeTruthy();
   });
   it('should handle isLevelUpdated branch coverage', () => {
     const styl = {
@@ -3609,60 +3759,69 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
       toc: false,
       isHidden: false,
     };
-    expect(isLevelUpdated(statemock as unknown as EditorState, '10Normal-@#$-10', styl as unknown as Style)).toBeTruthy();
+    expect(
+      isLevelUpdated(
+        statemock as unknown as EditorState,
+        '10Normal-@#$-10',
+        styl as unknown as Style
+      )
+    ).toBeTruthy();
   });
   it('should handle isLevelUpdated branch coverage when style undefined', () => {
-    expect(isLevelUpdated(statemock as unknown as EditorState, '10Normal-@#$-10', undefined as unknown as Style)).toBeFalsy();
+    expect(
+      isLevelUpdated(
+        statemock as unknown as EditorState,
+        '10Normal-@#$-10',
+        undefined as unknown as Style
+      )
+    ).toBeFalsy();
   });
 });
 
 describe('updateOverrideFlag', () => {
   it('should handle updateOverrideFlag when styleprop null', () => {
-    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue(null as unknown as Style);
-    expect(updateOverrideFlag('', {} as unknown as Transform, {} as unknown as Node, 0, 1, {
-      modified: false
-    })).toStrictEqual({});
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValue(null as unknown as Style);
+    expect(
+      updateOverrideFlag(
+        '',
+        {} as unknown as Transform,
+        {} as unknown as Node,
+        0,
+        1,
+        {
+          modified: false,
+        }
+      )
+    ).toStrictEqual({});
   });
 });
 describe('applyLatestStyle', () => {
   it('should handle applyLatestStyle if keepmarks is true', () => {
-    const doc = new Node;
+    const doc = new Node();
     const tr = new Transform(doc);
     const myEditor = new EditorState();
     const style: Style = {
-      styleName: ''
+      styleName: '',
     };
     expect(
-      applyLatestStyle(
-        '',
-        myEditor,
-        tr,
-        doc,
-        0,
-        1,
-        style,
-        1
-      )
+      applyLatestStyle('', myEditor, tr, doc, 0, 1, style, 1)
     ).toBeDefined();
   });
   it('should handle applyLatestStyle when styleprops  not there', () => {
-    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+    } as unknown as Node;
     const tr = new Transform(doc);
     const myEditor = new EditorState();
     const style: Style = {
-      styleName: ''
+      styleName: '',
     };
     expect(
-      applyLatestStyle(
-        '',
-        myEditor,
-        tr,
-        doc,
-        0,
-        1,
-        style,
-        1
-      )
+      applyLatestStyle('', myEditor, tr, doc, 0, 1, style, 1)
     ).toBeDefined();
   });
   it('should handle applyLatestStyle if element is instance of indent', () => {
@@ -3757,176 +3916,141 @@ describe('applyLatestStyle', () => {
 });
 describe('allowCustomLevelIndent', () => {
   it('should handle allowCustomLevelIndent', () => {
-    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+    } as unknown as Node;
     const tr = new Transform(doc);
-    expect(
-      allowCustomLevelIndent(
-        tr,
-        5,
-        'Normal',
-        1
-      )
-    ).toBeFalsy();
+    expect(allowCustomLevelIndent(tr, 5, 'Normal', 1)).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when startPos not less than 2', () => {
-    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+    } as unknown as Node;
     const tr = new Transform(doc);
-    expect(
-      allowCustomLevelIndent(
-        tr,
-        2,
-        'Normal',
-        1
-      )
-    ).toBeFalsy();
+    expect(allowCustomLevelIndent(tr, 2, 'Normal', 1)).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when RESERVED_STYLE_NONE == node.attrs.styleName', () => {
-    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+    } as unknown as Node;
     const tr = new Transform(doc);
-    expect(
-      allowCustomLevelIndent(
-        tr,
-        0,
-        'test',
-        1
-      )
-    ).toBeFalsy();
+    expect(allowCustomLevelIndent(tr, 0, 'test', 1)).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when nodeStyleLevel < styleLevel and styleLevel - nodeStyleLevel === 1', () => {
-    jest
-      .spyOn(customstyles, 'getCustomStyleByName')
-      .mockReturnValue({
-        styles: { styleLevel: 1, hasNumbering: true },
-        styleName: ''
-      });
-    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
+    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
+      styles: { styleLevel: 1, hasNumbering: true },
+      styleName: '',
+    });
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+    } as unknown as Node;
     const tr = new Transform(doc);
-    expect(
-      allowCustomLevelIndent(
-        tr,
-        0,
-        'test',
-        1
-      )
-    ).toBeFalsy();
+    expect(allowCustomLevelIndent(tr, 0, 'test', 1)).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when nodeStyleLevel < styleLevel and styleLevel - nodeStyleLevel === 1 and styleLevel - nodeStyleLevel != 1', () => {
-    jest
-      .spyOn(customstyles, 'getCustomStyleByName')
-      .mockReturnValue({
-        styles: { styleLevel: 2, hasNumbering: true },
-        styleName: ''
-      });
+    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
+      styles: { styleLevel: 2, hasNumbering: true },
+      styleName: '',
+    });
 
-    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+    } as unknown as Node;
     const tr = new Transform(doc);
-    expect(
-      allowCustomLevelIndent(
-        tr,
-        0,
-        'test',
-        1
-      )
-    ).toBeFalsy();
+    expect(allowCustomLevelIndent(tr, 0, 'test', 1)).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when  isAllowedNode(node) is false', () => {
-    jest
-      .spyOn(customstyles, 'getCustomStyleByName')
-      .mockReturnValue({
-        styles: { styleLevel: 2, hasNumbering: true },
-        styleName: ''
-      });
+    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
+      styles: { styleLevel: 2, hasNumbering: true },
+      styleName: '',
+    });
 
-    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+    } as unknown as Node;
     const tr = new Transform(doc);
-    expect(
-      allowCustomLevelIndent(
-        tr,
-        0,
-        'test',
-        1
-      )
-    ).toBeFalsy();
+    expect(allowCustomLevelIndent(tr, 0, 'test', 1)).toBeFalsy();
   });
 
   it('should handle allowCustomLevelIndent when element not present', () => {
-    const doc = { resolve: () => { return document.createElement('div'); } } as unknown as Node;
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+    } as unknown as Node;
     const tr = new Transform(doc);
-    expect(
-      allowCustomLevelIndent(
-        tr,
-        0,
-        'Normal',
-        1
-      )
-    ).toBeFalsy();
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 1)).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when delta = 0', () => {
-
-    const doc = { resolve: () => { return document.createElement('div'); }, nodeSize: 6 } as unknown as Node;
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+      nodeSize: 6,
+    } as unknown as Node;
     const tr = new Transform(doc);
-    expect(
-      allowCustomLevelIndent(
-        tr,
-        0,
-        'Normal',
-        0
-      )
-    ).toBeFalsy();
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 0)).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when delta = 0 and when element not present', () => {
-    const doc = { resolve: () => { return document.createElement('div'); }, nodeSize: 6 } as unknown as Node;
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+      nodeSize: 6,
+    } as unknown as Node;
     const tr = new Transform(doc);
-    expect(
-      allowCustomLevelIndent(
-        tr,
-        0,
-        'Normal',
-        0
-      )
-    ).toBeFalsy();
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 0)).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when delta = 0 when not isAllowed(node)', () => {
-
-    const doc = { resolve: () => { return document.createElement('div'); }, nodeSize: 6 } as unknown as Node;
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+      nodeSize: 6,
+    } as unknown as Node;
     const tr = new Transform(doc);
-    expect(
-      allowCustomLevelIndent(
-        tr,
-        0,
-        'Normal',
-        0
-      )
-    ).toBeFalsy();
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 0)).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when delta = 0 when normal is node.attrs.styleName', () => {
-    const doc = { resolve: () => { return document.createElement('div'); }, nodeSize: 6 } as unknown as Node;
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+      nodeSize: 6,
+    } as unknown as Node;
     const tr = new Transform(doc);
-    expect(
-      allowCustomLevelIndent(
-        tr,
-        0,
-        'Normal',
-        0
-      )
-    ).toBeFalsy();
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 0)).toBeFalsy();
   });
   it('should handle allowCustomLevelIndent when nodeStyleLevel < styleLevel', () => {
     jest
       .spyOn(customstyles, 'getCustomStyleByName')
-      .mockReturnValueOnce({ styles: { styleLevel: 2, hasNumbering: true } } as unknown as Style)
-      .mockReturnValueOnce({ styles: { styleLevel: 1, hasNumbering: true } } as unknown as Style);
+      .mockReturnValueOnce({
+        styles: { styleLevel: 2, hasNumbering: true },
+      } as unknown as Style)
+      .mockReturnValueOnce({
+        styles: { styleLevel: 1, hasNumbering: true },
+      } as unknown as Style);
 
-    const doc = { resolve: () => { return document.createElement('div'); }, nodeSize: 6 } as unknown as Node;
+    const doc = {
+      resolve: () => {
+        return document.createElement('div');
+      },
+      nodeSize: 6,
+    } as unknown as Node;
     const tr = new Transform(doc);
-    expect(
-      allowCustomLevelIndent(
-        tr,
-        0,
-        'Normal',
-        0
-      )
-    ).toBeFalsy();
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 0)).toBeFalsy();
   });
 });
 
@@ -3937,12 +4061,10 @@ describe('insertParagraph', () => {
 });
 describe('applyLineStyle', () => {
   it('should handle applyLineStyle ', () => {
-    jest
-      .spyOn(customstyles, 'getCustomStyleByName')
-      .mockReturnValue({
-        styles: { boldPartial: true },
-        styleName: ''
-      });
+    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
+      styles: { boldPartial: true },
+      styleName: '',
+    });
     expect(
       applyLineStyle(
         {
@@ -3997,44 +4119,45 @@ describe('applyLineStyle', () => {
   it('should handle applyLineStyle when tr is null', () => {
     const mockNode = {
       type: {
-        name: 'doc' // Type of the node
+        name: 'doc', // Type of the node
       },
-      content: [ // Children of the node
+      content: [
+        // Children of the node
         {
           type: {
-            name: 'paragraph'
+            name: 'paragraph',
           },
           content: [
             {
               type: {
-                name: 'text'
+                name: 'text',
               },
-              text: 'Hello'
+              text: 'Hello',
             },
             {
               type: {
-                name: 'text'
+                name: 'text',
               },
-              text: ' world'
-            }
-          ]
+              text: ' world',
+            },
+          ],
         },
         {
           type: {
-            name: 'heading'
+            name: 'heading',
           },
           attrs: {
-            level: 2
+            level: 2,
           },
           content: [
             {
               type: {
-                name: 'text'
+                name: 'text',
               },
-              text: 'ProseMirror'
-            }
-          ]
-        }
+              text: 'ProseMirror',
+            },
+          ],
+        },
       ],
       // Mocking the descendants method
       descendants: function (callback) {
@@ -4054,7 +4177,7 @@ describe('applyLineStyle', () => {
 
         // Start traversal from the document node
         traverse(this, 0);
-      }
+      },
     };
     expect(
       applyLineStyle(
@@ -4154,18 +4277,18 @@ describe('isLevelUpdated', () => {
         },
       ],
     });
-    const myEditor = { doc: mockdoc, schema: mockschema } as unknown as EditorState;
+    const myEditor = {
+      doc: mockdoc,
+      schema: mockschema,
+    } as unknown as EditorState;
     const style: Style = {
-      styleName: ''
+      styleName: '',
     };
-    expect(
-      isLevelUpdated(myEditor, 'Normal', style)
-    ).toBeDefined();
+    expect(isLevelUpdated(myEditor, 'Normal', style)).toBeDefined();
   });
 });
 describe('removeAllMarksExceptLink', () => {
   it('should handle removeAllMarksExceptLink', () => {
-
     const mySchema = new Schema({
       nodes: {
         // Define the document node
@@ -4200,21 +4323,13 @@ describe('removeAllMarksExceptLink', () => {
 
     const myEditor = new EditorState();
     const style: Style = {
-      styleName: ''
+      styleName: '',
     };
     expect(
-      removeAllMarksExceptLink(
-        0,
-        1,
-        tr,
-        mySchema,
-        myEditor,
-        style
-      )
+      removeAllMarksExceptLink(0, 1, tr, mySchema, myEditor, style)
     ).toBeDefined();
   });
   it('should handle removeAllMarksExceptLink when mark.attrs[ATTR_OVERRIDDEN] && link === mark.type.name', () => {
-
     const mySchema = new Schema({
       nodes: {
         // Define the document node
@@ -4248,10 +4363,11 @@ describe('removeAllMarksExceptLink', () => {
     const tr = { doc: mockDoc } as unknown as Transform;
     const myEditor = new EditorState();
     const style: Style = {
-      styleName: ''
+      styleName: '',
     };
     expect(
-      removeAllMarksExceptLink(0, 1, tr, mySchema, myEditor, style)).toBeDefined();
+      removeAllMarksExceptLink(0, 1, tr, mySchema, myEditor, style)
+    ).toBeDefined();
   });
 });
 describe('handleRemoveMarks', () => {
@@ -4286,7 +4402,12 @@ describe('handleRemoveMarks', () => {
         },
       ],
     });
-    const tr = {doc:mockdoc,removeMark:()=>{return {doc:mockdoc};}} as unknown as Transform;
+    const tr = {
+      doc: mockdoc,
+      removeMark: () => {
+        return { doc: mockdoc };
+      },
+    } as unknown as Transform;
 
     const myEditor = new EditorState();
     const tasks = [
@@ -4298,14 +4419,26 @@ describe('handleRemoveMarks', () => {
       },
     ];
     const style: Style = {
-      styleName: ''
+      styleName: '',
     };
-    const testtr = handleRemoveMarks(tr, tasks, 0, 1, mySchema, myEditor, style);
+    const testtr = handleRemoveMarks(
+      tr,
+      tasks,
+      0,
+      1,
+      mySchema,
+      myEditor,
+      style
+    );
     expect(testtr).toBeDefined();
   });
   it('should handle handleRemoveMarks when styleProps null', () => {
     //const doc = new Node();
-    const tr = { removeMark: () => { return {}; } } as unknown as Transform;
+    const tr = {
+      removeMark: () => {
+        return {};
+      },
+    } as unknown as Transform;
     const mySchema = new Schema({
       nodes: {
         // Define the document node
@@ -4328,25 +4461,26 @@ describe('handleRemoveMarks', () => {
       },
     });
     const style: Style = {
-      styleName: ''
+      styleName: '',
     };
     const myEditor = new EditorState();
-    expect(handleRemoveMarks(
-      tr,
-      [
-        {
-          mark: {
-            type: { name: 'mark-text-highlight' },
-            attrs: { overridden: true },
+    expect(
+      handleRemoveMarks(
+        tr,
+        [
+          {
+            mark: {
+              type: { name: 'mark-text-highlight' },
+              attrs: { overridden: true },
+            },
           },
-        },
-      ],
-      0,
-      1,
-      mySchema,
-      myEditor,
-      style
-    )
+        ],
+        0,
+        1,
+        mySchema,
+        myEditor,
+        style
+      )
     ).toBeDefined();
   });
 });

@@ -152,8 +152,12 @@ export class CustomStyleItem extends React.PureComponent<
   // To show Numbering in dropdown menu sample text
   sampleLevel(styles: HTMLStyles): string {
     let level = '';
-    if (this.props.hasText && styles?.hasNumbering) {
-      for (let i = 0; i < parseInt(`${styles.styleLevel}`); i++) {
+    if (
+      this.props.hasText &&
+      styles &&
+      (styles.hasNumbering || styles.isList)
+    ) {
+      for (let i = 0; i < styles.styleLevel; i++) {
         level = level + '1.';
       }
     }

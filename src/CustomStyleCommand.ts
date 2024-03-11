@@ -757,7 +757,7 @@ function applyStyleEx(
 
     // [FS] IRAD-1131 2021-01-12
     // Indent overriding not working on a paragraph where custom style is applied
-    newattrs.indent = null;
+    //newattrs.indent = null;
     newattrs.styleName = styleName;
 
     _commands.forEach((element) => {

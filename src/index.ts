@@ -483,6 +483,8 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
   }
 
   const node = nextState.tr.doc.nodeAt(startPos);
+  const style = getCustomStyleByName(node.attrs?.styleName);
+  if (!style?.styles?.isList) {
   if (validateStyleName(node)) {
     if (
       node.content?.content &&
@@ -500,6 +502,7 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
         null,
         opt
       );
+      }
     }
   }
   return tr;
@@ -529,6 +532,8 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
           IsActiveNode = true;
         }
         if (nextNode && IsActiveNode && nextNode.type.name === 'paragraph') {
+          const posList = prevState.selection.from - 1;
+          const Listnode = prevState.doc.nodeAt(posList);
           const style = getCustomStyleByName(newattrs.styleName);
           if (style?.styles?.nextLineStyleName) {
             // [FS] IRAD-1217 2021-02-24
@@ -537,6 +542,16 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
               resetTheDefaultStyleNameToNone(style.styles.nextLineStyleName),
               newattrs
             );
+            if (style.styles.isList === true) {
+              if (Listnode.isText === false) {
+                newattrs.indent = Listnode.attrs.indent;
+              } else {
+                const ListnodeAlt = prevState.doc.nodeAt(
+                  posList - Listnode.nodeSize
+                );
+                newattrs.indent = ListnodeAlt.attrs.indent;
+              }
+            }
             tr = tr.setNodeMarkup(nextNodePos, undefined, newattrs);
             // [FS] IRAD-1201 2021-02-18
             // get the nextLine Style from the current style object.

@@ -377,3 +377,11 @@ div[disabled='disabled'] {
   opacity: 0.4;
   pointer-events: none;
 }
+
+.alert {
+  background-color: #f44336;
+  box-sizing: border-box;
+  color: white;
+  padding: 20px;
+  width: 340px;
+}

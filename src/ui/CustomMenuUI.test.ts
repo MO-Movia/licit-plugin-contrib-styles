@@ -437,7 +437,7 @@ describe('Custom Menu UI   ', () => {
     },
   });
   const mockdoc = doc(p('Hello World!!!'));
- // mockdoc.styleName = '';
+  // mockdoc.styleName = '';
   const state = EditorState.create({
     doc: mockdoc,
     schema: schema,
@@ -470,14 +470,12 @@ describe('Custom Menu UI   ', () => {
 
     // Add any additional methods or properties that you need for testing
   }
-  document.getElementsByClassName = jest
-    .fn()
-    .mockImplementation(() => {
-      // Return a custom Element instance with the given class name
-      const mockElement = new MockElement('div');
-      // mockElement.classList.add(className);
-      return [mockElement];
-    });
+  document.getElementsByClassName = jest.fn().mockImplementation(() => {
+    // Return a custom Element instance with the given class name
+    const mockElement = new MockElement('div');
+    // mockElement.classList.add(className);
+    return [mockElement];
+  });
   const custommenuui = new CustomMenuUI(CustomMenuTestProps);
   //(custommenuui as any).props = CustomMenuTestProps;
 
@@ -665,7 +663,7 @@ describe('Custom Menu UI   ', () => {
       empty: null,
     };
     jest.spyOn(custommenuui, 'removeTextAlignAndLineSpacing').mockReturnValue({
-       key: 'tr',
+      key: 'tr',
       docChanged: true,
       setNodeMarkup: () => {
         return { key: 'tr', docChanged: true };
@@ -779,7 +777,7 @@ describe('Custom Menu UI   ', () => {
           attrs: {
             // color: '',
             overridden: {
-            //  hasDefault: true,
+              //  hasDefault: true,
               default: false,
             },
           },

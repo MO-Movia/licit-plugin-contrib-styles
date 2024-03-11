@@ -1,6 +1,9 @@
-import {toCustomStyleDOM,getCustomStyleAttrs} from './CustomStyleNodeSpec.js';
+import {
+  toCustomStyleDOM,
+  getCustomStyleAttrs,
+} from './CustomStyleNodeSpec.js';
 import * as customstyle from './customStyle';
-import { Node,DOMOutputSpec } from 'prosemirror-model';
+import { Node, DOMOutputSpec } from 'prosemirror-model';
 
 describe('getAttrs', () => {
   const base = () => {
@@ -41,7 +44,7 @@ describe('toCustomStyleDOM', () => {
         indent: '10',
         hasNumbering: true,
       },
-      styleName: ''
+      styleName: '',
     });
     //const base = undefined
 
@@ -108,7 +111,7 @@ describe('toCustomStyleDOM', () => {
         indent: '10',
         hasNumbering: false,
       },
-      styleName: ''
+      styleName: '',
     });
     //const base = undefined;
     const node = {
@@ -195,13 +198,13 @@ describe('toCustomStyleDOM', () => {
         'data-bullet-symbol': '● ',
         'data-indent': '10',
         'data-show-bullet': true,
-        'style': 'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
-        'styleName': '10Normal-@#$-10',
+        style:
+          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
+        styleName: '10Normal-@#$-10',
       },
     ]);
   });
   it('should handle toCustomStyleDOM when  hasBullet: false', () => {
-
     jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
       styles: {
         hasBullet: false,
@@ -219,7 +222,7 @@ describe('toCustomStyleDOM', () => {
         hasNumbering: true,
         align: 'null',
       },
-      styleName: ''
+      styleName: '',
     });
     //const base = undefined;
     const node = {
@@ -253,13 +256,14 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
       {
         'data-indent': 'null',
         'data-style-level': '1',
         'hide-style-level': false,
-        style: 'line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
+        style:
+          'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
         styleName: 'FS_B01',
       },
     ]);
@@ -282,7 +286,7 @@ describe('toCustomStyleDOM', () => {
         hasNumbering: true,
         align: 'null',
       },
-      styleName: ''
+      styleName: '',
     });
     //const base = undefined;
     const node = {
@@ -316,7 +320,7 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
       {
         style: 'line-height: 16pt;--czi-content-line-height: 16pt;',
@@ -342,7 +346,7 @@ describe('toCustomStyleDOM', () => {
         hasNumbering: true,
         align: 'null',
       },
-      styleName: ''
+      styleName: '',
     });
     //const base = undefined;
     const node = {
@@ -376,14 +380,15 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
       {
         'data-indent': 'null',
         'data-style-level': '10',
         'hide-style-level': false,
-        'style': 'line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;counter-increment: C2 C3 C4 C5 C6 C7 C8 C9 C10 ;',
-        'styleName': 'test',
+        style:
+          'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;counter-increment: C2 C3 C4 C5 C6 C7 C8 C9 C10 ;',
+        styleName: 'test',
       },
     ]);
   });
@@ -420,14 +425,15 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
       {
         'data-indent': 'null',
         'data-style-level': '10',
         'hide-style-level': false,
-        'style': 'line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
-        'styleName': 'test',
+        style:
+          'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
+        styleName: 'test',
       },
     ]);
   });
@@ -464,19 +470,20 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
       {
         'data-indent': 'null',
         'data-style-level': '10',
         'hide-style-level': false,
-        'style': 'line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
-        'styleName': '10Normal-@#$-',
+        style:
+          'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
+        styleName: '10Normal-@#$-',
       },
     ]);
   });
   it('should handle toCustomStyleDOM when  styleprops null and stylename has reservedStylenumbering and no styleLvel and 2 not equal to indices.length', () => {
-   // const base = undefined;
+    // const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -508,14 +515,15 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
       {
         'data-indent': 'null',
         'data-style-level': '10',
         'hide-style-level': false,
-        'style': 'line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
-        'styleName': 'Normal-@#$-Normal-@#$-Normal-@#$-',
+        style:
+          'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
+        styleName: 'Normal-@#$-Normal-@#$-Normal-@#$-',
       },
     ]);
   });
@@ -536,7 +544,7 @@ describe('toCustomStyleDOM', () => {
         indent: '10',
         hasNumbering: true,
       },
-      styleName: ''
+      styleName: '',
     });
     //const base = undefined;
     const node = {
@@ -570,7 +578,7 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
       {
         'data-bullet-color': '#000000',
@@ -603,9 +611,9 @@ describe('toCustomStyleDOM', () => {
         hasNumbering: true,
         align: 'left',
       },
-      styleName: ''
+      styleName: '',
     });
-   // const base = undefined;
+    // const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -637,7 +645,7 @@ describe('toCustomStyleDOM', () => {
         },
       ],
     };
-    expect(toCustomStyleDOM(base, node  as unknown as Node)).toStrictEqual([
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
       {
         'data-bullet-color': '#000000',
@@ -647,7 +655,8 @@ describe('toCustomStyleDOM', () => {
         'data-style-level': '1',
         'hide-style-level': false,
         style:
-          'line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
+          'line-height: 16pt;--czi-content-line-height: 16pt;text-align: left;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
+
         styleName: 'FS_B01',
       },
     ]);

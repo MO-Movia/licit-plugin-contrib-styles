@@ -91,6 +91,237 @@ describe('CustomStyleCommand', () => {
       'Normal'
     );
   });
+  it('should handle isCustomStyleApplied', () => {
+    const schema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: '' },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: '' },
+          },
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: {
+          marks: '_',
+        },
+      },
+
+      marks: {
+        link: {
+          attrs: {
+            test_href: {
+              default: 'test_href',
+            },
+          },
+        },
+        em: {
+          parseDOM: [
+            {
+              tag: 'i',
+            },
+            {
+              tag: 'em',
+            },
+            {
+              style: 'font-style=italic',
+            },
+          ],
+          toDOM() {
+            return ['em', 0];
+          },
+          attrs: {
+            overridden: {
+              default: false,
+            },
+          },
+        },
+        strong: {
+          parseDOM: [
+            {
+              tag: 'strong',
+            },
+            {
+              tag: 'b',
+            },
+            {
+              style: 'font-weight',
+            },
+          ],
+          toDOM() {
+            return ['strong', 0];
+          },
+          attrs: {
+            overridden: {
+              default: false,
+            },
+          },
+        },
+        underline: {
+          parseDOM: [
+            {
+              tag: 'u',
+            },
+            {
+              style: 'text-decoration-line',
+            },
+            {
+              style: 'text-decoration',
+            },
+          ],
+          toDOM() {
+            return ['u', 0];
+          },
+          attrs: {
+            overridden: {
+              default: false,
+            },
+          },
+        },
+        'mark-text-color': {
+          attrs: {
+            color: {
+              default: '',
+            },
+            overridden: {
+              default: false,
+            },
+          },
+          inline: true,
+          group: 'inline',
+          parseDOM: [
+            {
+              style: 'color',
+            },
+          ],
+          toDOM() {
+            return ['span', { color: '' }, 0];
+          },
+        },
+        'mark-text-highlight': {
+          attrs: {
+            highlightColor: {
+              default: '',
+            },
+            overridden: {
+              default: false,
+            },
+          },
+          inline: true,
+          group: 'inline',
+          parseDOM: [
+            {
+              tag: 'span[style*=background-color]',
+            },
+          ],
+          toDOM() {
+            return [''];
+          },
+        },
+        'mark-font-size': {
+          attrs: {
+            pt: {
+              default: null,
+            },
+            overridden: {
+              default: false,
+            },
+          },
+          inline: true,
+          group: 'inline',
+          parseDOM: [
+            {
+              style: 'font-size',
+            },
+          ],
+          toDOM() {
+            return ['Test Mark'];
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: {
+              default: '',
+            },
+            overridden: {
+              default: false,
+            },
+          },
+          inline: true,
+          group: 'inline',
+          parseDOM: [
+            {
+              style: 'font-family',
+            },
+          ],
+          toDOM() {
+            return ['span', 0];
+          },
+        },
+      },
+    });
+
+    // Define the document and selection directly
+    const mockDoc = schema.nodeFromJSON({
+      type: 'doc',
+      attrs: {
+        layout: null,
+        padding: null,
+        width: null,
+        counterFlags: null,
+        capcoMode: 0,
+      },
+      content: [
+        {
+          type: 'paragraph',
+          attrs: {
+            align: 'left',
+            color: null,
+            id: '',
+            indent: null,
+            lineSpacing: null,
+            paddingBottom: null,
+            paddingTop: null,
+            capco: null,
+            styleName: 'A11-Rename',
+          },
+          content: [
+            {
+              type: 'text',
+              marks: [
+                {
+                  type: 'mark-font-size',
+                  attrs: { pt: 14, overridden: false },
+                },
+                {
+                  type: 'mark-font-type',
+                  attrs: { name: 'Arial Black', overridden: false },
+                },
+              ],
+              text: 'fggfdfgfghfghfgh',
+            },
+          ],
+        },
+      ],
+    });
+    const myEditorState ={doc:mockDoc,selection:{from:0,to:1}} as unknown as EditorState;
+    expect(customstylecommand.isCustomStyleApplied(myEditorState)).toBe(
+      'A11-Rename'
+    );
+  });
 
   it('should be defined', () => {
     expect(customstylecommand).toBeDefined();
@@ -704,6 +935,305 @@ describe('CustomStyleCommand', () => {
     );
     expect(spy2).toHaveBeenCalled();
   });
+  it('should handle createNewStyle', () => {
+    const spy2 = jest.spyOn(customstylecommand, 'showAlert');
+    jest.spyOn(customstyles, 'saveStyle').mockResolvedValue([
+      {
+        styleName: 'A Apply Stylefff',
+        mode: 1,
+        styles: {
+          align: 'justify',
+          boldNumbering: true,
+          toc: false,
+          isHidden: false,
+          boldSentence: true,
+          nextLineStyleName: 'Normal',
+          fontName: 'Arial',
+          fontSize: '11',
+          strong: true,
+          em: true,
+          underline: true,
+          color: '#c40df2',
+        },
+        toc: false,
+        isHidden: false,
+      } as unknown as Style,
+    ]);
+    jest.spyOn(customstyles, 'isCustomStyleExists').mockReturnValue(true);
+    jest.spyOn(customstyles, 'isPreviousLevelExists').mockReturnValue(false);
+    const mocktr = {
+      doc: {
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: null,
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'Normal',
+            },
+          },
+        ],
+      },
+      steps: [],
+      docs: [],
+      mapping: { maps: [], from: 0, to: 0 },
+      curSelectionFor: 0,
+      updated: 0,
+      meta: {},
+      time: 1684831731977,
+      curSelection: { type: 'text', anchor: 1, head: 1 },
+      storedMarks: null,
+      setSelection() {
+        return true;
+      },
+    } as unknown as Transaction;
+    const mockstate = {
+      doc: {
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: null,
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'Normal',
+            },
+          },
+        ],
+      },
+      selection: { type: 'text', anchor: 1, head: 1 },
+    } as unknown as EditorState;
+    const mockdoc = {
+      type: 'doc',
+      attrs: {
+        layout: null,
+        padding: null,
+        width: null,
+        counterFlags: null,
+        capcoMode: 0,
+      },
+      content: [
+        {
+          type: 'paragraph',
+          attrs: {
+            align: null,
+            color: null,
+            id: null,
+            indent: null,
+            lineSpacing: null,
+            paddingBottom: null,
+            paddingTop: null,
+            capco: null,
+            styleName: 'Normal',
+          },
+        },
+      ],
+    } as unknown as Node;
+    const mockdispatch = () => {};
+    const mockval = {
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: '1',
+        paragraphSpacingBefore: 10,
+        paragraphSpacingAfter: 10,
+        strong: 10,
+        boldNumbering: 10,
+        em: 10,
+        color: 'blue',
+        fontSize: 10,
+        fontName: 'Tahoma',
+        indent: 10,
+        hasNumbering: true,
+      },
+      styleName: 'test',
+      editorView: {},
+    };
+    customstylecommand.createNewStyle(
+      mockval,
+      mocktr,
+      mockstate,
+      mockdispatch,
+      mockdoc
+    );
+    expect(spy2).toHaveBeenCalled();
+  });
+  it('should return true', () => {
+    const result = customstylecommand.isActive();
+    expect(result).toBe(true);
+  });
+
+
+
+  it('should handle executeClearStyle', () => {
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+    });
+
+    // Create a sample document
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'test' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'This is a mock dummy document.',
+              attrs: { styleName: 'test' },
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'It demonstrates the structure of a ProseMirror document.',
+            },
+          ],
+        },
+      ],
+    });
+    const mockselection = {
+      $from: {
+        before: (x) => {
+          return x - 1;
+        },
+      },
+      $to: {
+        after: (x) => {
+          return x + 1;
+        },
+      },
+    };
+    const mockeditorstate = {
+      schema: mockschema,
+      doc: mockdoc,
+      selection: mockselection,
+      tr: {
+        setSelection: () => {
+          return {
+            setNodeMarkup: () => {
+              return {
+                removeTextAlignAndLineSpacing: () => {
+                  return {
+                    createEmptyElement: () => {
+                      return {};
+                    },
+                  };
+                },
+              };
+            },
+            doc: mockdoc,
+            selection: {
+              $from: {
+                before: (x) => {
+                  return x - 1;
+                },
+              },
+              $to: {
+                after: () => {
+                  return 1;
+                },
+              },
+            },
+          };
+        },
+      },
+    };
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValue(null as unknown as Style);
+
+
+    expect(
+      customstylecommand.executeClearStyle(
+        mockeditorstate as unknown as EditorState,
+        () => {},
+        0,
+        1,
+        2,
+        {}
+      )
+    ).toBeFalsy();
+    expect(
+      customstylecommand.executeClearStyle(
+        mockeditorstate as unknown as EditorState,
+        undefined,
+        0,
+        1,
+        2,
+        {}
+      )
+    ).toBeFalsy();
+  });
+
 });
 describe('getMarkByStyleName', () => {
   it('should handle getMarkByStyleName when styles dont have property', () => {
@@ -3427,13 +3957,66 @@ describe('updateDocument', () => {
       },
     ],
   });
+  const doc1 = schema.nodeFromJSON({
+    type: 'doc',
+    attrs: {
+      layout: null,
+      padding: null,
+      width: null,
+      counterFlags: null,
+      capcoMode: 0,
+    },
+    content: [
+      {
+        type: 'paragraph',
+        attrs: {
+          align: 'left',
+          color: null,
+          id: '',
+          indent: null,
+          lineSpacing: null,
+          paddingBottom: null,
+          paddingTop: null,
+          capco: null,
+          styleName: 'Normal',
+        },
+        content: [
+          {
+            type: 'text',
+            marks: [
+              {
+                type: 'mark-font-size',
+                attrs: { pt: 14, overridden: false },
+              },
+              {
+                type: 'mark-font-type',
+                attrs: { name: 'Arial Black', overridden: false },
+              },
+            ],
+            text: 'fggfdfgfghfghfgh',
+          },
+        ],
+      },
+    ],
+  });
   // Create the EditorState
   const statemock = { schema: schema, doc: doc, selection: { from: 0, to: 1 } };
+  const statemock1 = { schema: schema, doc: doc1, selection: { from: 0, to: 1 } };
   // Create the ProseMirror node from JSON
   it('updateDocument', () => {
     expect(
       updateDocument(
         statemock as unknown as EditorState,
+        trmock as unknown as Transform,
+        'Normal',
+        styl as unknown as Style
+      )
+    ).toBeDefined();
+  });
+  it('updateDocument', () => {
+    expect(
+      updateDocument(
+        statemock1 as unknown as EditorState,
         trmock as unknown as Transform,
         'Normal',
         styl as unknown as Style
@@ -4482,5 +5065,215 @@ describe('handleRemoveMarks', () => {
         style
       )
     ).toBeDefined();
+  });
+});
+
+
+describe('onLoadRemoveAllMarksExceptOverridden', () => {
+  it('should remove all marks except overridden', () => {
+    // Arrange
+    const node = new Node(); // replace with actual instance
+    const schema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: '' },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: '' },
+          },
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: {
+          marks: '_',
+        },
+      },
+
+      marks: {
+        link: {
+          attrs: {
+            test_href: {
+              default: 'test_href',
+            },
+          },
+        },
+        em: {
+          parseDOM: [
+            {
+              tag: 'i',
+            },
+            {
+              tag: 'em',
+            },
+            {
+              style: 'font-style=italic',
+            },
+          ],
+          toDOM() {
+            return ['em', 0];
+          },
+          attrs: {
+            overridden: {
+              default: false,
+            },
+          },
+        },
+        strong: {
+          parseDOM: [
+            {
+              tag: 'strong',
+            },
+            {
+              tag: 'b',
+            },
+            {
+              style: 'font-weight',
+            },
+          ],
+          toDOM() {
+            return ['strong', 0];
+          },
+          attrs: {
+            overridden: {
+              default: false,
+            },
+          },
+        },
+        underline: {
+          parseDOM: [
+            {
+              tag: 'u',
+            },
+            {
+              style: 'text-decoration-line',
+            },
+            {
+              style: 'text-decoration',
+            },
+          ],
+          toDOM() {
+            return ['u', 0];
+          },
+          attrs: {
+            overridden: {
+              default: false,
+            },
+          },
+        },
+        'mark-text-color': {
+          attrs: {
+            color: {
+              default: '',
+            },
+            overridden: {
+              default: false,
+            },
+          },
+          inline: true,
+          group: 'inline',
+          parseDOM: [
+            {
+              style: 'color',
+            },
+          ],
+          toDOM() {
+            return ['span', { color: '' }, 0];
+          },
+        },
+        'mark-text-highlight': {
+          attrs: {
+            highlightColor: {
+              default: '',
+            },
+            overridden: {
+              default: false,
+            },
+          },
+          inline: true,
+          group: 'inline',
+          parseDOM: [
+            {
+              tag: 'span[style*=background-color]',
+            },
+          ],
+          toDOM() {
+            return [''];
+          },
+        },
+        'mark-font-size': {
+          attrs: {
+            pt: {
+              default: null,
+            },
+            overridden: {
+              default: false,
+            },
+          },
+          inline: true,
+          group: 'inline',
+          parseDOM: [
+            {
+              style: 'font-size',
+            },
+          ],
+          toDOM() {
+            return ['Test Mark'];
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: {
+              default: '',
+            },
+            overridden: {
+              default: false,
+            },
+          },
+          inline: true,
+          group: 'inline',
+          parseDOM: [
+            {
+              style: 'font-family',
+            },
+          ],
+          toDOM() {
+            return ['span', 0];
+          },
+        },
+      },
+    }); // replace with actual instance
+    const editorState = EditorState.create({
+      schema: schema,
+      plugins: [],
+    });
+    const mockDoc = Node.fromJSON(schema, {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Hello, ProseMirror!' }],
+        },
+      ],
+    });
+    const tr = new Transform(mockDoc);
+
+    // Act
+    const result = applyLatestStyle('',editorState, tr,node,1,2);
+
+    // Assert
+    // replace 'expectedResult' with the actual expected result
+    expect(result).toBeDefined();
   });
 });

@@ -145,7 +145,7 @@ function getRequiredMarks(marks, markName, schema) {
     marks.push(schema[SPEC]['marks'][markName]);
   }
 }
-function createMarkAttributes(mark, existingAttr) {
+export function createMarkAttributes(mark, existingAttr) {
   if (mark) {
     const requiredAttrs = [...NEWATTRS];
     requiredAttrs.forEach((key) => {

@@ -32,7 +32,7 @@ import {
   getHidenumberingFlag,
   setHidenumberingFlag,
 } from './customStyle';
-import { Schema, Mark, Node } from 'prosemirror-model';
+import { Schema, Mark, Node, Slice, ResolvedPos } from 'prosemirror-model';
 import { isTransparent, toCSSColor } from './toCSSColor';
 import { EditorView } from 'prosemirror-view';
 import * as DOMfunc from './CustomStyleNodeSpec';
@@ -128,17 +128,10 @@ const mockSchema = new Schema({
     },
     text: { inline: true },
   },
-  // marks1: {
-  //     link: {
-  //         attrs: {
-  //             href: 'test_href'
-  //         }
-  //     }
-  // },
+
   marks: {
     link: {
       attrs: {
-      //  href: 'test_href' as any,
       },
     },
     em: {
@@ -223,7 +216,7 @@ const mockSchema = new Schema({
     },
     'mark-text-highlight': {
       attrs: {
-      //  highlightColor: '',
+        //  highlightColor: '',
         overridden: {
           default: false,
         },
@@ -278,22 +271,977 @@ const mockSchema = new Schema({
       },
     },
   },
-  // spec: {
-  //   nodes: {
-  //     doc: {
-  //       content: 'paragraph+',
-  //     },
-  //     text: {},
-  //     paragraph: {
-  //       content: 'text*',
-  //       group: 'block',
-  //       parseDOM: [{ tag: 'p' }],
-  //       toDOM() {
-  //         return ['p', 0];
-  //       },
-  //     },
-  //   },
-  // },
+});
+
+
+
+describe('applyStyleForEmptyParagraph', () => {
+  it('applyStyleForEmptyParagraph', () => {
+    expect(
+      applyStyleForEmptyParagraph(
+        {
+          selection: {
+            $from: {
+              before: () => {
+                return 1;
+              },
+            },
+            $to: {
+              after: () => {
+                return 2;
+              },
+            },
+          },
+          tr: {
+            doc: {
+              nodeAt: () => {
+                return {};
+              },
+            },
+          },
+        },
+        {
+          doc: {
+            nodeAt: () => {
+              return {};
+            },
+          },
+        }
+      )
+    ).toBeDefined();
+  });
+});
+
+describe('',()=>{
+
+  it('should handle onUpdateAppendTransaction when ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$from.start() == tr.selection.$from.end() this condition should pass', () => {
+    const linkmark = new Mark();
+
+    class Transaction {
+      amount: any;
+      meta: any;
+      constructor(amount, meta) {
+        this.amount = amount;
+        this.meta = meta;
+      }
+
+      getMeta(key) {
+        return this.meta[key];
+      }
+    }
+
+
+    const mockTransactions = [
+      new Transaction(100, { type: 'deposit', paste: true }),
+      new Transaction(-50, { type: 'withdrawal', paste: false }),
+    ];
+
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+      },
+    });
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+    mockdoc.resolve = () => { return {type :{},parent:{content:{content:[{attrs:null}]}}} as unknown as ResolvedPos; };
+    mockdoc.nodeAt =()=>{return {nodeSize:20} as unknown as Node;};
+    const mockSlice1 = {
+      content: {
+        childCount: 3,
+        content: [
+          { type: { name: 'paragraph' }, attrs: { styleName: 'paragraph-style' }, content: { size: 10 } },
+          { type: { name: 'heading' }, attrs: { styleName: 'heading-style' }, content: { size: 8 } },
+          { type: { name: 'image' }, attrs: { styleName: 'image-style' }, content: { size: 4 } }
+
+        ]
+      }
+    };
+    expect(
+      onUpdateAppendTransaction(
+        { firstTime: false },
+        {
+          doc: mockdoc,
+          selection: {
+            $from: {
+              start: () => {
+                return 1;
+              },
+              end: () => {
+                return 1;
+              },
+            },
+          },
+        },
+        {
+          schema:{nodes:{paragraph:{}}},
+          selection: {
+            $cursor: null,
+            $from: {
+              before: () => {
+                return 0;
+              },
+              $start: () => {
+                return 1;
+              },
+              $end: () => {
+                return 1;
+              },
+            },
+            $to: {
+              after: () => {
+                return 1;
+              },
+              pos:0
+            },
+          },
+          tr: {
+            doc: mockdoc,
+            scrollIntoView: () => {
+              return {};
+            },
+            selection: {
+              $from: {
+                start: () => {
+                  return 1;
+                },
+                end: () => {
+                  return 1;
+                },
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        {
+          selection: {
+            from: {
+              before: () => {
+                return 0;
+              },
+            },
+            to: {
+              after: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: {
+              nodeAt: () => {
+                return { key: 'tr' };
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } } }, tr: { doc: { nodeAt() { return {type:{name:'table'}}; } } } } },
+        mockTransactions,
+        mockSlice1
+      )
+    ).toStrictEqual({});
+  });
+
+
+
+  it('should handle onUpdateAppendTransaction when ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$from.start() == tr.selection.$from.end() this condition should pass', () => {
+    const linkmark = new Mark();
+
+    class Transaction {
+      amount: any;
+      meta: any;
+      constructor(amount, meta) {
+        this.amount = amount;
+        this.meta = meta;
+      }
+
+      getMeta(key) {
+        return this.meta[key];
+      }
+    }
+
+
+    const mockTransactions = [
+      new Transaction(100, { type: 'deposit', paste: true }),
+      new Transaction(-50, { type: 'withdrawal', paste: false }),
+    ];
+
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+      },
+    });
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+    mockdoc.resolve = () => { return {parent:{content:{content:[{attrs:null}]}}} as unknown as ResolvedPos; };
+    mockdoc.nodeAt =()=>{return {nodeSize:20} as unknown as Node;};
+    const mockSlice1 = {
+      content: {
+        childCount: 3,
+        content: [
+          { type: { name: 'paragraph' }, attrs: { styleName: 'paragraph-style' }, content: { size: 10 } },
+          { type: { name: 'heading' }, attrs: { styleName: 'heading-style' }, content: { size: 8 } },
+          { type: { name: 'image' }, attrs: { styleName: 'image-style' }, content: { size: 4 } }
+
+        ]
+      }
+    };
+    expect(
+      onUpdateAppendTransaction(
+        { firstTime: false },
+        {
+          doc: mockdoc,
+          selection: {
+            $from: {
+              start: () => {
+                return 1;
+              },
+              end: () => {
+                return 1;
+              },
+            },
+          },
+        },
+        {
+          selection: {
+            $cursor: { pos: 0 },
+            $from: {
+              before: () => {
+                return 0;
+              },
+              $start: () => {
+                return 1;
+              },
+              $end: () => {
+                return 1;
+              },
+            },
+            $to: {
+              after: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: mockdoc,
+            scrollIntoView: () => {
+              return {};
+            },
+            selection: {
+              $from: {
+                start: () => {
+                  return 1;
+                },
+                end: () => {
+                  return 1;
+                },
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        {
+          selection: {
+            from: {
+              before: () => {
+                return 0;
+              },
+            },
+            to: {
+              after: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: {
+              nodeAt: () => {
+                return { key: 'tr' };
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } } }, tr: { doc: { nodeAt() { return {type:{name:'table'}}; } } } } },
+        mockTransactions,
+        mockSlice1
+      )
+    ).toStrictEqual({});
+  });
+  it('should handle onUpdateAppendTransaction when ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$from.start() == tr.selection.$from.end() this condition should pass', () => {
+    const linkmark = new Mark();
+
+    class Transaction {
+      amount: any;
+      meta: any;
+      constructor(amount, meta) {
+        this.amount = amount;
+        this.meta = meta;
+      }
+
+      getMeta(key) {
+        return this.meta[key];
+      }
+    }
+
+
+    const mockTransactions = [
+      new Transaction(100, { type: 'deposit', paste: true }),
+      new Transaction(-50, { type: 'withdrawal', paste: false }),
+    ];
+
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+      },
+    });
+
+    // Create a sample document
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+            // Example mark that satisfies the condition
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+
+
+    // Add the resolve method to the document
+    mockdoc.resolve = () => { return {parent:{content:{content:[{attrs:null}]}}} as unknown as ResolvedPos; };
+    mockdoc.nodeAt =()=>{return {nodeSize:20} as unknown as Node;};
+    const mockSlice1 = {
+      content: {
+        childCount: 3,
+        content: [
+          { type: { name: 'paragraph' }, attrs: { styleName: 'paragraph-style' }, content: { size: 10 } },
+          { type: { name: 'heading' }, attrs: { styleName: 'heading-style' }, content: { size: 8 } },
+          { type: { name: 'image' }, attrs: { styleName: 'image-style' }, content: { size: 4 } }
+
+        ]
+      }
+    };
+    expect(
+      onUpdateAppendTransaction(
+        { firstTime: false },
+        {
+          doc: mockdoc,
+          selection: {
+            $from: {
+              start: () => {
+                return 1;
+              },
+              end: () => {
+                return 1;
+              },
+            },
+          },
+        },
+        {
+          selection: {
+            $cursor: { pos: 0 },
+            $from: {
+              before: () => {
+                return 0;
+              },
+              $start: () => {
+                return 1;
+              },
+              $end: () => {
+                return 1;
+              },
+            },
+            $to: {
+              after: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: mockdoc,
+            scrollIntoView: () => {
+              return {};
+            },
+            selection: {
+              $from: {
+                start: () => {
+                  return 1;
+                },
+                end: () => {
+                  return 1;
+                },
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        {
+          selection: {
+            from: {
+              before: () => {
+                return 0;
+              },
+            },
+            to: {
+              after: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: {
+              nodeAt: () => {
+                return { key: 'tr' };
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } }, $to:{after(){return 10;}} }, tr: { doc: { nodeAt() { return {type:{name:'eatho onu'}}; } } } } },
+        mockTransactions,
+        mockSlice1
+      )
+    ).toStrictEqual({});
+  });
+  it('', () => {
+    const linkmark = new Mark();
+
+    class Transaction {
+      amount: any;
+      meta: any;
+      constructor(amount, meta) {
+        this.amount = amount;
+        this.meta = meta;
+      }
+
+      getMeta(key) {
+        return this.meta[key];
+      }
+    }
+
+
+    const mockTransactions = [
+      new Transaction(100, { type: 'deposit', paste: true }),
+      new Transaction(-50, { type: 'withdrawal', paste: false }),
+    ];
+
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+      },
+    });
+
+    // Create a sample document
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+            // Example mark that satisfies the condition
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+    mockdoc.resolve = () => { return {parent:{attrs:{styleName:'bold'},content:{content:[{attrs:{styleName:'bold'}}]}}} as unknown as ResolvedPos; };
+    mockdoc.nodeAt =()=>{return {nodeSize:10} as unknown as Node;};
+    const mockSlice1 = {
+      content: {
+        childCount: 3,
+        content: [
+          { type: { name: 'paragraph' }, attrs: { styleName: 'paragraph-style' }, content: { size: 10 } },
+          { type: { name: 'heading' }, attrs: { styleName: 'heading-style' }, content: { size: 8 } },
+          { type: { name: 'image' }, attrs: { styleName: 'image-style' }, content: { size: 4 } }
+
+        ]
+      }
+    };
+    expect(
+      onUpdateAppendTransaction(
+        { firstTime: false },
+        {
+          doc: mockdoc,
+          selection: {
+            $from: {
+              start: () => {
+                return 1;
+              },
+              end: () => {
+                return 1;
+              },
+            },
+          },
+        },
+        {
+          selection: {
+            $cursor: { pos: 0 },
+            $from: {
+              before: () => {
+                return 0;
+              },
+              $start: () => {
+                return 1;
+              },
+              $end: () => {
+                return 1;
+              },
+            },
+            $to: {
+              after: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: mockdoc,
+            scrollIntoView: () => {
+              return {};
+            },
+            selection: {
+              $from: {
+                start: () => {
+                  return 1;
+                },
+                end: () => {
+                  return 1;
+                },
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        {
+          selection: {
+            from: {
+              before: () => {
+                return 0;
+              },
+            },
+            to: {
+              after: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: {
+              nodeAt: () => {
+                return { key: 'tr' };
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } } }, tr: { doc: { nodeAt() { return {type:{name:'table'}}; } } } } },
+        mockTransactions,
+        mockSlice1
+      )
+    ).toStrictEqual({});
+  });
+
+  it('', () => {
+    const linkmark = new Mark();
+
+    class Transaction {
+      amount: any;
+      meta: any;
+      constructor(amount, meta) {
+        this.amount = amount;
+        this.meta = meta;
+      }
+
+      getMeta(key) {
+        return this.meta[key];
+      }
+    }
+
+
+    const mockTransactions = [
+      new Transaction(100, { type: 'deposit', paste: true }),
+      new Transaction(-50, { type: 'withdrawal', paste: false }),
+    ];
+
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+      },
+    });
+
+    // Create a sample document
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+            // Example mark that satisfies the condition
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+    mockdoc.resolve = () => { return {parent:{attrs:{styleName:'bold'},content:{content:[{attrs:{styleName:'bold'}}]}}} as unknown as ResolvedPos; };
+    mockdoc.nodeAt =()=>{return {nodeSize:10} as unknown as Node;};
+    const mockSlice1 = {
+      content: {
+        childCount: 3,
+        content: [
+          { type: { name: 'paragraph' }, attrs: { styleName: 'paragraph-style' }, content: { size: 10 } },
+          { type: { name: 'heading' }, attrs: { styleName: 'heading-style' }, content: { size: 8 } },
+          { type: { name: 'image' }, attrs: { styleName: 'image-style' }, content: { size: 4 } }
+
+        ]
+      }
+    };
+    expect(
+      onUpdateAppendTransaction(
+        { firstTime: false },
+        {
+          doc: mockdoc,
+          selection: {
+            $from: {
+              start: () => {
+                return 1;
+              },
+              end: () => {
+                return 1;
+              },
+            },
+          },
+        },
+        {
+          selection: {
+            $cursor: { pos: 0 },
+            $from: {
+              before: () => {
+                return 0;
+              },
+              $start: () => {
+                return 1;
+              },
+              $end: () => {
+                return 1;
+              },
+            },
+            $to: {
+              after: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: mockdoc,
+            scrollIntoView: () => {
+              return {};
+            },
+            selection: {
+              $from: {
+                start: () => {
+                  return 1;
+                },
+                end: () => {
+                  return 1;
+                },
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        {
+          selection: {
+            from: {
+              before: () => {
+                return 0;
+              },
+            },
+            to: {
+              after: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: {
+              nodeAt: () => {
+                return { key: 'tr' };
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } }, $to:{after(){return 10;}} }, tr: { doc: { nodeAt() { return {type:{name:'eatho onu'}}; } } } } },
+        mockTransactions,
+        mockSlice1
+      )
+    ).toStrictEqual({});
+  });
+});
+
+
+let mockTr = {
+  doc: {
+    content: {
+      size: 10
+    }
+  },
+  descendants: jest.fn()
+};
+
+const mockNextState = {
+  tr: {}
+};
+
+const mockNode = {
+  attrs: {
+    styleName: 'mockStyle'
+  },
+  content: {
+    size: 5
+  }
+};
+
+const mockOpt = {};
+
+const mockApplyLatestStyle = jest.fn((tr) => {
+  return tr;
+});
+
+xdescribe('applyNormalIfNoStyle', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should update styleName to RESERVED_STYLE_NONE if styleName is undefined', () => {
+    mockNode.attrs.styleName = undefined as any;
+    const result = applyNormalIfNoStyle(mockNextState, mockTr, mockNode, mockOpt);
+    expect(result).toEqual(mockTr);
+    expect(result.doc.content.size).toBe(10);
+    expect(mockApplyLatestStyle).toHaveBeenCalledWith('RESERVED_STYLE_NONE', mockNextState, mockTr, mockNode, expect.any(Number), expect.any(Number), mockOpt);
+  });
+
+  it('should update styleName to RESERVED_STYLE_NONE if styleName is RESERVED_STYLE_NONE', () => {
+    mockNode.attrs.styleName = 'RESERVED_STYLE_NONE';
+    const result = applyNormalIfNoStyle(mockNextState, mockTr, mockNode, mockOpt);
+    expect(result).toEqual(mockTr);
+    expect(result.doc.content.size).toBe(10);
+    expect(mockApplyLatestStyle).toHaveBeenCalledWith('RESERVED_STYLE_NONE', mockNextState, mockTr, mockNode, expect.any(Number), expect.any(Number), mockOpt);
+  });
+
+  it('should call applyLatestStyle with correct parameters if conditions met', () => {
+    const result = applyNormalIfNoStyle(mockNextState, mockTr, mockNode, mockOpt);
+    expect(result).toEqual(mockTr);
+    expect(result.doc.content.size).toBe(10);
+    expect(mockApplyLatestStyle).toHaveBeenCalledWith('mockStyle', mockNextState, mockTr, mockNode, expect.any(Number), expect.any(Number), mockOpt);
+  });
+
+  it('should not call applyLatestStyle if conditions not met', () => {
+    mockTr = null as any;
+    const result = applyNormalIfNoStyle(mockNextState, mockTr, mockNode, mockOpt);
+    expect(result).toBe(mockNextState.tr);
+    expect(mockApplyLatestStyle).not.toHaveBeenCalled();
+  });
 });
 
 describe('Style Plugin', () => {
@@ -337,7 +1285,7 @@ describe('Style Plugin', () => {
         toc: false,
       },
     };
-    const customStyleList : Style[] = [];
+    const customStyleList: Style[] = [];
     customStyleList.push(
       newProp,
       {
@@ -375,7 +1323,10 @@ describe('Style Plugin', () => {
     );
     expect(setStyles(customStyleList)).toBeUndefined();
   });
-
+  it('SHOULD HANDLE paste', () => {
+    const boundHandlePaste = plugin?.props?.handlePaste?.bind(plugin);
+    expect(boundHandlePaste(view, {} as unknown as Event, { content: { content: [{ attrs: true }] } } as unknown as Slice)).toBeFalsy();
+  });
   it('customStyle getCustomStyleByName', () => {
     const result = getCustomStyleByName('BIU');
     const style = {
@@ -473,7 +1424,7 @@ describe('Style Plugin', () => {
   });
 
   it('getCustomStyleByLevel in customstyle', () => {
-    const customstyle : Style[] = [];
+    const customstyle: Style[] = [];
     const style = {
       description: 'BIU',
       mode: 0,
@@ -557,7 +1508,7 @@ describe('Style Plugin', () => {
 
   it('isCustomStyleExists in customstyle', () => {
 
-    const customstyle : Style[] = [];
+    const customstyle: Style[] = [];
     const style = {
       description: 'BIU',
       mode: 0,
@@ -750,92 +1701,6 @@ describe('Style Plugin', () => {
     expect(bok).toEqual(true);
   });
 
-  // it('Remove CustomStyleByName if slice content is null', () => {
-  //   const customcommand = new CustomStyleCommand('NewStyle', 'NewStyle');
-
-  //   const selection = TextSelection.create(view.state.doc, 0, 1);
-
-  //   const tr = view.state.tr.setSelection(selection);
-  //   view.updateState(
-  //     view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
-  //   );
-
-  //   const disp = view.dispatch(tr);
-  //   const handlePasteViewArg = {
-  //     state: view.state,
-  //     dispatch: disp,
-  //   };
-
-  //   const mockSlice = { content: null };
-
-  //   view.state.plugins[0].props.handlePaste(
-  //     handlePasteViewArg,
-  //     null,
-  //     mockSlice
-  //   );
-  //   view.state.plugins[0].props.handleDOMEvents.keydown(
-  //     view,
-  //     new KeyboardEvent('enter')
-  //   );
-
-  //   const res = customcommand.execute(state, view.dispatch, view);
-
-  //   expect(res).toStrictEqual(true);
-  // });
-
-  // it('Remove CustomStyleByName', () => {
-  //   const customcommand = new CustomStyleCommand('NewStyle', 'NewStyle');
-
-  //   const selection = TextSelection.create(view.state.doc, 0, 1);
-
-  //   const tr = view.state.tr.setSelection(selection);
-  //   view.updateState(
-  //     view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
-  //   );
-
-  //   const disp = view.dispatch(tr);
-  //   const handlePasteViewArg = {
-  //     state: view.state,
-  //     dispatch: disp,
-  //   };
-  //   const mockAttrs = { attr1: 'value1', attr2: 'value2' };
-  //   const mockContent = { attrs: mockAttrs };
-  //   const mockSlice = { content: { content: [mockContent] } };
-
-  //   view.state.plugins[0].props.handlePaste?.call(view.state.plugins[0], handlePasteViewArg, null, mockSlice);
-
-
-  //   // view.state.plugins[0].props.handlePaste(
-  //   //   handlePasteViewArg,
-  //   //   null,
-  //   //   mockSlice
-  //   // );
-  //   view.state.plugins[0].props.handleDOMEvents.keydown(
-  //     view,
-  //     new KeyboardEvent('enter')
-  //   );
-
-  //   const res = customcommand.execute(state, view.dispatch, view);
-
-  //   expect(res).toStrictEqual(true);
-  // });
-
-  // it('execute called in CustomStyleCommand', () => {
-  //   const customcommand = new CustomStyleCommand('BIU', 'BIU');
-
-  //   const selection = TextSelection.create(view.state.doc, 1, 2);
-  //   const tr = view.state.tr.setSelection(selection);
-  //   view.updateState(
-  //     view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
-  //   );
-
-  //   view.dispatch(tr);
-
-  //   const res = customcommand.execute(state, view.dispatch, view);
-
-  //   expect(res).toStrictEqual(true);
-  // });
-
   it('getCustomStyleCommands in CustomStyleCommand', () => {
     const selection = TextSelection.create(view.state.doc, 1, 2);
     const tr = view.state.tr.setSelection(selection);
@@ -904,26 +1769,11 @@ describe('Style Plugin', () => {
       paddingBottom: { default: null },
       paddingTop: { default: null },
     };
-    // const plugin = new CustomstylePlugin(TestCustomStyleRuntime, false);
     const toDOMMock = jest.spyOn(DOMfunc, 'toCustomStyleDOM');
     toDOMMock.mockImplementation(() => {
       return ['p', attrs, 0];
     });
     const effSchema = mockSchema;
-    // const { doc, p } = builders(effSchema, { p: { nodeType: 'paragraph' } });
-    // const state = EditorState.create({
-    //   doc: doc(p('Hello World!!!')),
-    //   schema: mockSchema,
-    //   plugins: [plugin],
-    // });
-    // const view = new EditorView(document.querySelector('#editor'), {
-    //   state,
-    // });
-    // const selection = TextSelection.create(view.state.doc, 1, 2);
-    // view.state.tr.setSelection(selection);
-    // view.updateState(
-    //    view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
-    // );
     expect(ccommand.getMarkByStyleName('BIU', effSchema)).toBeDefined();
   });
 });
@@ -974,9 +1824,6 @@ describe('Style Plugin Execute', () => {
   const testData = ['none', 'newstyle', 'editall', 'clearstyle'];
   test.each(testData)('myFunc work correctly for %s', (val) => {
     jest.spyOn(DOMfunc, 'toCustomStyleDOM').mockReturnValue(['p', attrs, 0]);
-    //    toDOMMock.mockImplementation((_base, _node) => {
-    //     //   return ['p', attrs, 0];
-    //     // });
     const plugin = new CustomstylePlugin(TestCustomStyleRuntime, false);
     const effSchema = mockSchema;
     const { doc, p } = builders(effSchema, { p: { nodeType: 'paragraph' } });
@@ -993,11 +1840,6 @@ describe('Style Plugin Execute', () => {
 
     if (val != 'none') {
       const customcommand = new CustomStyleCommand(val, val);
-      // const selection = TextSelection.create(view.state.doc, 1, 2);
-      // view.state.tr.setSelection(selection);
-      // view.updateState(
-      //   view.state.reconfigure({ plugins: [plugin, new TestPlugin()] })
-      // );
       const res = customcommand.execute(state, view.dispatch, view as unknown as EditorView);
       if (val != 'clearstyle') {
         expect(res).toStrictEqual(false);
@@ -1017,7 +1859,6 @@ describe('Custom Style Plugin pass', () => {
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'childList' && mutation.addedNodes.length) {
-        // The docChange event has been dispatched
         console.log('docChange event dispatched!');
       }
     });
@@ -1026,7 +1867,7 @@ describe('Custom Style Plugin pass', () => {
   observer.observe(observedElement, { childList: true });
 
   const newNode = document.createElement('div');
-  observedElement.appendChild(newNode); // This will trigger the docChange event
+  observedElement.appendChild(newNode);
 
   jest.mock('./index', () => {
     const originalModule = jest.requireActual('./index');
@@ -1043,7 +1884,6 @@ describe('Custom Style Plugin pass', () => {
   const editor = createEditor(doc(p('<cursor>')), {
     plugins: [plugin],
   });
-  ///////jk
   const isStylesLoadedMock = jest.spyOn(CustStyl, 'isStylesLoaded');
   isStylesLoadedMock.mockImplementation(() => {
     return true;
@@ -1064,7 +1904,7 @@ describe('Custom Style Plugin pass', () => {
 
   it('Test 1 ', () => {
     const props = {
-      dispatch: () => {},
+      dispatch: () => { },
       editorState: state,
       editorView: editor.view,
     };
@@ -1656,7 +2496,7 @@ describe('Cus Style Plugin-Pass', () => {
     if (Object.prototype.hasOwnProperty.call(mockSchema.nodes, nodeType)) {
       const nodeSpec = mockSchema.nodes[nodeType];
       const validContent: string[] = [];
-    for (let i = 0; i < nodeSpec.content.length; i++) {
+      for (let i = 0; i < nodeSpec.content.length; i++) {
         const type = nodeSpec.content[i];
         if (typeof type === 'string') {
           validContent.push(type);
@@ -1776,21 +2616,6 @@ describe('Cus Style Plugin-Pass', () => {
     };
     expect(setNodeAttrs(null, newattrs)).toStrictEqual(newattrs);
   });
-  // it('should handle setNodeAttrs when nextLineStyleName is not normal ', () => {
-  //   jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue(null);
-  //   const newattrs = {
-  //     align: 'left',
-  //     color: null,
-  //     id: '',
-  //     indent: null,
-  //     lineSpacing: null,
-  //     paddingBottom: null,
-  //     paddingTop: null,
-  //     capco: null,
-  //     styleName: 'A11-Rename',
-  //   };
-  //   expect(setNodeAttrs('test', newattrs)).toStrictEqual(newattrs);
-  // });
 
   it('should handle applyStyleForNextParagraph', () => {
     jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
@@ -1805,7 +2630,7 @@ describe('Cus Style Plugin-Pass', () => {
     jest
       .spyOn(ccommand, 'getMarkByStyleName')
       .mockReturnValue([
-        { type: 'mark-font-type', attrs: { name: 'Arial', overridden: false }},
+        { type: 'mark-font-type', attrs: { name: 'Arial', overridden: false } },
       ] as unknown as []);
     const schema1 = new Schema({
       nodes: {
@@ -1854,8 +2679,6 @@ describe('Cus Style Plugin-Pass', () => {
       },
     });
 
-    // Create an empty document with the provided JSON as content
-    //const content = schema1.nodeFromJSON(yourJSON.doc);
     const prevstate = {
       schema: schema1,
       doc: schema1.nodeFromJSON({
@@ -1950,10 +2773,6 @@ describe('Cus Style Plugin-Pass', () => {
       },
     });
 
-    // Create an empty document with the provided JSON as content
-    //const content2 = schema2.nodeFromJSON(yourJSON.doc);
-
-    // Create the editor state with the schema and content
     const nextstate = {
       schema: schema2,
       doc: schema2.nodeFromJSON({
@@ -2080,16 +2899,7 @@ describe('Cus Style Plugin-Pass', () => {
         },
       },
     });
-    // nextstate.tr = {
-    //   setNodeMarkup: () => {
-    //     return {};
-    //   },
-    // };
 
-    // Create an empty document with the provided JSON as content
-    //const content = schema.nodeFromJSON(yourJSON.doc);
-
-    // Create the editor state with the schema, content, selection, and stored marks
     const mockState = {
       schema: schema3,
       doc: schema3.nodeFromJSON({
@@ -2129,7 +2939,6 @@ describe('Cus Style Plugin-Pass', () => {
     const editorContainer = document.createElement('div');
     document.body.appendChild(editorContainer);
 
-    // Create an editor view with the EditorState and the HTML element
     const mockview = {
       state: mockState,
       input: { lastKeyCode: 13 },
@@ -2467,7 +3276,7 @@ describe('Cus Style Plugin-Pass', () => {
               tag: 'img[src]',
               getAttrs(dom) {
                 return {
-                  src: (dom as unknown as HTMLElement).getAttribute('src') ,
+                  src: (dom as unknown as HTMLElement).getAttribute('src'),
                   alt: (dom as unknown as HTMLElement).getAttribute('alt'),
                   title: (dom as unknown as HTMLElement).getAttribute('title'),
                   styleName: (dom as unknown as HTMLElement).getAttribute('styleName'),
@@ -2499,9 +3308,6 @@ describe('Cus Style Plugin-Pass', () => {
         },
       },
     });
-
-    // Create an empty document with the provided JSON as content
-    //const content = schema1.nodeFromJSON(yourJSON.doc);
     const prevstatemhod = {
       schema: schemamhod,
       doc: schemamhod.nodeFromJSON({
@@ -2603,17 +3409,11 @@ describe('Cus Style Plugin-Pass', () => {
         nextLineStyleName: 'Normal',
       },
     } as unknown as null);
-    // expect(
-    //   manageHierarchyOnDelete(prevstatemhod, nextstate, null, mockview1)
-    // ).toBeDefined();
     spymhod.mockClear();
     const mockview2 = {
       state: mockState,
       input: { lastKeyCode: 8 },
     };
-    // expect(
-    //   manageHierarchyOnDelete(prevstatemhod, nextstate, null, mockview2)
-    // ).toBeDefined();
     const nextstatemhod = {
       schema: schema2,
       doc: schema2.nodeFromJSON({
@@ -2701,7 +3501,6 @@ describe('Cus Style Plugin-Pass', () => {
         mockview2
       )
     ).toBeDefined();
-    //expect(manageHierarchyOnDelete({doc:{key:'value'}},{selection:{from:0},doc:{key:'value'}},transaction1,mockview2)).toBeDefined();
   });
   it('should handle manageHierarchyOnDelete when prevState.doc === nextState.doc', () => {
     expect(
@@ -2752,7 +3551,6 @@ describe('applyNormalIfNoStyle', () => {
       },
     });
 
-    // Create a sample document
     const mockdoc = mockschema.nodeFromJSON({
       type: 'doc',
       content: [
@@ -2766,7 +3564,6 @@ describe('applyNormalIfNoStyle', () => {
             },
           ],
           marks: [
-            // Example mark that satisfies the condition
             { type: 'link', attrs: { ['overridden']: true } },
           ],
         },
@@ -2823,8 +3620,6 @@ describe('onUpdateAppendTransaction', () => {
         link: linkmark,
       },
     });
-
-    // Create a sample document
     const mockdoc = mockschema.nodeFromJSON({
       type: 'doc',
       content: [
@@ -2838,7 +3633,6 @@ describe('onUpdateAppendTransaction', () => {
             },
           ],
           marks: [
-            // Example mark that satisfies the condition
             { type: 'link', attrs: { ['overridden']: true } },
           ],
         },
@@ -2940,7 +3734,6 @@ describe('onUpdateAppendTransaction', () => {
       },
     });
 
-    // Create a sample document
     const mockdoc = mockschema.nodeFromJSON({
       type: 'doc',
       content: [
@@ -2954,7 +3747,7 @@ describe('onUpdateAppendTransaction', () => {
             },
           ],
           marks: [
-            // Example mark that satisfies the condition
+
             { type: 'link', attrs: { ['overridden']: true } },
           ],
         },
@@ -3048,42 +3841,7 @@ describe('onUpdateAppendTransaction', () => {
   });
 });
 
-describe('applyStyleForEmptyParagraph', () => {
-  it('applyStyleForEmptyParagraph', () => {
-    expect(
-      applyStyleForEmptyParagraph(
-        {
-          selection: {
-            $from: {
-              before: () => {
-                return 1;
-              },
-            },
-            $to: {
-              after: () => {
-                return 2;
-              },
-            },
-          },
-          tr: {
-            doc: {
-              nodeAt: () => {
-                return {};
-              },
-            },
-          },
-        },
-        {
-          doc: {
-            nodeAt: () => {
-              return {};
-            },
-          },
-        }
-      )
-    ).toBeDefined();
-  });
-});
+
 describe('remapCounterFlags', () => {
   it('should handle remapCounterFlags', () => {
     const tr = { doc: { attrs: { counterFlags: { key: {} } } } };

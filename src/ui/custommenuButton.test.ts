@@ -1,6 +1,7 @@
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { CustomMenuButton } from './CustomMenuButton';
 import { EditorState } from 'prosemirror-state';
+import { Schema } from 'prosemirror-model';
 
 
 describe('CustomMenuButton', () => {
@@ -81,6 +82,7 @@ describe('CustomMenuButton', () => {
     expect(spy).toHaveBeenCalled();
   });
   it('should handle _onClick ', () => {
+    custommenubutton.state = {expanded:true};
     custommenubutton._showMenu = () => undefined;
     const spy = jest.spyOn(custommenubutton, '_showMenu');
     custommenubutton._onClick();
@@ -88,8 +90,8 @@ describe('CustomMenuButton', () => {
     spy.mockReset();
   });
   it('should handle _onClick when this.state.expanded = true', () => {
-    custommenubutton.state.expanded = true;
-    custommenubutton._menu = { close: () => undefined };
+    custommenubutton.state = {expanded:true};
+    custommenubutton._menu = { close: () => undefined } as unknown as null;
     const spy = jest.spyOn(custommenubutton, '_hideMenu');
     custommenubutton._onClick();
     expect(spy).toBeDefined();
@@ -228,5 +230,118 @@ describe('custommenubutton', () => {
     const spy = jest.spyOn(custommenubutton._menu, 'update');
     custommenubutton._showMenu();
     expect(spy).toHaveBeenCalled();
+  });
+  it('should handle _showMenu ', () => {
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+    });
+
+    // Create a sample document
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'test' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'This is a mock dummy document.',
+              attrs: { styleName: 'test' },
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'It demonstrates the structure of a ProseMirror document.',
+            },
+          ],
+        },
+      ],
+    });
+    const mockState = {
+      doc:mockdoc ,
+      selection: { type: 'text', anchor: 1, head: 1 },
+    } as unknown as EditorState;
+    const props = {
+      className: 'width-100 stylemenu-backgroundcolor',
+      commandGroups: [
+        {
+          Normal: {
+            _customStyleName: 'Normal',
+            _customStyle: 'Normal',
+            _popUp: null,
+          },
+        },
+      ] as unknown as Array<{ [string: string]: UICommand }>,
+      staticCommand: [
+        {
+          newstyle: {
+            _customStyleName: 'New Style..',
+            _customStyle: 'newstyle',
+            _popUp: null,
+          },
+          editall: {
+            _customStyleName: 'Edit All',
+            _customStyle: 'editall',
+            _popUp: null,
+          },
+          clearstyle: {
+            _customStyleName: 'Clear Style',
+            _customStyle: 'clearstyle',
+            _popUp: null,
+          },
+        },
+      ] as unknown as  Array<{ [string: string]: UICommand }>,
+      disabled: true,
+      dispatch: () => undefined,
+      editorState: mockState,
+      editorView: null,
+      label: 'Normal',
+    };
+    const custommenubutton = new CustomMenuButton(props);
+    custommenubutton.state.expanded = true;
+    custommenubutton._menu = null;
+    expect(  custommenubutton._showMenu()).toBeUndefined();
   });
 });

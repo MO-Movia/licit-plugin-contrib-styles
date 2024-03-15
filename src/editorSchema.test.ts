@@ -1,4 +1,4 @@
-import { applyEffectiveSchema } from './EditorSchema';
+import { applyEffectiveSchema, createMarkAttributes } from './EditorSchema';
 import { Schema } from 'prosemirror-model';
 
 
@@ -1070,4 +1070,10 @@ describe('EditorSchema', () => {
         };
         expect(applyEffectiveSchema(mockSchema as unknown as Schema)).toBeDefined();
     });
+    it('should handle null existingAttr', () => {
+        const mark = { key: 'value' }; // Example mark
+        const result = createMarkAttributes(mark, null);
+        expect(result).toBeUndefined();
+      });
+
 });

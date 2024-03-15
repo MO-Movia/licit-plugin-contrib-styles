@@ -649,6 +649,34 @@ describe('Custom Menu UI   ', () => {
       } as unknown as SyntheticEvent)
     ).toBeUndefined();
   });
+  it('should handle showsubmenu when popup not null', () => {
+    custommenuui._stylePopup = {close:()=>{}} as unknown as null;
+    // custommenuui._stylePopup = {close:()=>{}};
+    const ui = {
+      _customStyleName: 'Normal',
+      _customStyle: {
+        styleName: 'Normal',
+        mode: 0,
+        description: 'Normal',
+        styles: {
+          align: 'left',
+          boldNumbering: true,
+          boldSentence: true,
+          fontName: 'Tahoma',
+          fontSize: '12',
+          nextLineStyleName: 'Normal',
+          paragraphSpacingAfter: '3',
+          toc: false,
+        },
+      },
+      _popUp: null,
+    } as unknown as UICommand;
+    expect(
+      custommenuui.showSubMenu(ui, {
+        currentTarget: document.createElement('span'),
+      } as unknown as SyntheticEvent)
+    ).toBeUndefined();
+  });
   it('should handle removeCustomStyleName', () => {
     expect(custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', null)).toBe(
       false
@@ -939,6 +967,7 @@ describe('Custom Menu UI   ', () => {
     const event = new Event('click') as unknown as SyntheticEvent;
     custommenuui._stylePopup = null;
     expect(custommenuui.showStyleWindow(uicommands, event, 0)).toBeUndefined();
+    expect(custommenuui.showStyleWindow(uicommands, event, 0)).toBeUndefined();
   });
   it('should handle showStyleWindow', () => {
     const event = new Event('click');
@@ -979,6 +1008,39 @@ describe('Custom Menu UI   ', () => {
       _customStyle: { description: 'description', styles: {} },
     };
     custommenuui._stylePopup = null;
+    expect(custommenuui.showStyleWindow(uicommands, event as unknown as SyntheticEvent, 0)).toBeUndefined();
+  });
+  it('should handle showStyleWindow', () => {
+    const view = new EditorView(document.createElement('div'), {
+      state,
+    });
+
+    // Mount the EditorView to the DOM
+    document.body.appendChild(view.dom);
+
+    // Set focus on the EditorView
+    view.focus();
+    const CustomMenuTestProps = {
+      className: 'molcs-menu-button',
+      commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
+      staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
+      disabled: false,
+      dispatch: () => {},
+      editorState: state,
+      editorView: view,
+      icon: 'button',
+      label: 'Normal',
+      title: 'styles',
+      _style: '',
+    };
+    const custommenuui = new CustomMenuUI(CustomMenuTestProps);
+    const event = new Event('click');
+    const uicommands = {
+      _customStyleName: 'test',
+      _customStyle: { description: 'description', styles: {} },
+    };
+    custommenuui._stylePopup = {close:()=>{}} as unknown as null;
+    expect(custommenuui.showStyleWindow(uicommands, event as unknown as SyntheticEvent, 0)).toBeUndefined();
     expect(custommenuui.showStyleWindow(uicommands, event as unknown as SyntheticEvent, 0)).toBeUndefined();
   });
 });

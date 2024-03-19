@@ -122,4 +122,30 @@ describe('customstyleitem', () => {
     const customstyleitem = new CustomStyleItem(props);
     expect(customstyleitem.render()).toBeDefined();
   });
+
+
+  it('should return an empty string when hasText is true and styles.hasBullet is true', () => {
+    const styles = {
+      hasNumbering: false,
+      isList: false,
+      styleLevel: 2, 
+      hasBullet: true,
+    };
+    const result = customstyleitem.sampleLevel(styles);
+    expect(result).toBe('');
+  });
+
+  it('should return a string of "1." repeated according to styleLevel when hasText is true and either styles.hasNumbering or styles.isList is true', () => {
+    const styles = {
+      hasNumbering: true, 
+      isList: true, 
+      styleLevel: 3, 
+      hasBullet: false,
+    };
+    const result = customstyleitem.sampleLevel(styles);
+    expect(result).toBe('1.1.1.');
+  });
+
+
+
 });

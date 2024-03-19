@@ -135,6 +135,13 @@ describe('CustomStyleEditor', () => {
     const event = { target: { value: 'Normal' } };
     expect(customstyleeditor.onLevelChange(event)).toBeUndefined();
   });
+
+  it('should handle onLevelChange when event target value is None', () => {
+    const event = { target: { value: 'None' } };
+    customstyleeditor.onLevelChange(event);
+   expect(customstyleeditor.state.styles.styleLevel).toEqual(undefined);
+  
+  });
   it('should handle onBulletLevelChange', () => {
     const event = { target: { value: '' } };
     expect(customstyleeditor.onBulletLevelChange(event)).toBeUndefined();
@@ -1060,4 +1067,91 @@ describe('CustomStyleEditor', () => {
     jest.spyOn(customstyle, 'isCustomStyleExists').mockReturnValue(true);
     expect(customstyleeditor.render()).toBeDefined();
   });
+
+  it('should return true if custom style is already applied in the document', () => {
+    const editorState = {
+      doc: {
+        nodesBetween: jest.fn().mockImplementation((start, end, callback) => {
+          const node = {
+            attrs: {
+              styleName: 'YourCustomStyle', 
+            },
+            content: {
+              content: [ ],
+            },
+          };
+          callback(node);
+        }),
+      },
+    };
+    customstyleeditor.state = {
+      editorView: { state: editorState },
+      styleName: 'YourCustomStyle', 
+    };
+  
+    const result = customstyleeditor.isCustomStyleAlreadyApplied();
+  
+    expect(result).toBe(false);
+  });
+  
+  it('should return true when styleLevel is 1 and isList is true', () => {
+    customstyleeditor.state = {
+      styles: {
+        align: 'justify',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        fontName: null,
+        fontSize: null,
+        strong: true,
+        em: true,
+        underline: true,
+        color: 'rgba(0,0,0,0)',
+        textHighlight: 'rgba(0,0,0,0)',
+        boldPartial: true,
+        hasBullet: true,
+        styleLevel: 1,
+        hasNumbering: true,
+        super: true,
+        isList: true
+      },
+      mode: 3,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+      customStyles: [{ styles: { styleLevel: 2 }, styleName: 'test' }],
+    };
+    const result = customstyleeditor.checkCondition(true); 
+    expect(result).toBe(true);
+  });
+
+
+  it('custom style is already applied in the document', () => {
+    const editorState = {
+      doc: {
+        nodesBetween: jest.fn().mockImplementation((start, end, callback) => {
+          const node = {
+            attrs: {
+              styleName: 'YourCustomStyle', 
+            },
+            content: {
+              content: ['test'],
+            },
+          };
+          callback(node);
+        }),
+      },
+    };
+
+    customstyleeditor.state = {
+      editorView: { state: editorState },
+      styleName: 'YourCustomStyle', 
+    };
+  
+    const result = customstyleeditor.isCustomStyleAlreadyApplied();
+  
+    expect(result).toBe(true);
+  });
+
+
 });

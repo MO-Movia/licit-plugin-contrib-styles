@@ -1,6 +1,8 @@
 import {
   toCustomStyleDOM,
   getCustomStyleAttrs,
+  countersRefresh,
+  ATTRIBUTE_LIST_STYLE_LEVEL,
 } from './CustomStyleNodeSpec.js';
 import * as customstyle from './customStyle';
 import { Node, DOMOutputSpec } from 'prosemirror-model';
@@ -661,4 +663,17 @@ describe('toCustomStyleDOM', () => {
       },
     ]);
   });
+
+  it('should reset list style counters in window variables', () => {
+    const styleLevel = 3;
+    const isListStyle = true;
+    window['set-cust-list-style-counter-1'] = false;
+    window['set-cust-list-style-counter-2'] = false;
+    const result = countersRefresh(styleLevel, isListStyle);
+    expect(result).toBe('counter-increment: L1 L2 L3 ;');
+    expect(window['set-cust-list-style-counter-1']).toBe(true);
+    expect(window['set-cust-list-style-counter-2']).toBe(true);
+  });
+
+
 });

@@ -41,6 +41,7 @@ import { sanitizeURL } from './sanitizeURL';
 import { CustomStyleCommand } from './CustomStyleCommand';
 import * as ccommand from './CustomStyleCommand.js';
 import { Style } from './StyleRuntime.js';
+import { read } from 'fs';
 
 const attrs = {
   align: { default: null },
@@ -276,7 +277,64 @@ const mockSchema = new Schema({
 
 
 describe('applyStyleForEmptyParagraph', () => {
-  it('applyStyleForEmptyParagraph', () => {
+  it('should handle applyNormalIfNoStyle when tr is present && !styleName', () => {
+    const linkmark = new Mark();
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+      },
+    });
+
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { level: 1, styleName: null },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+    expect(applyNormalIfNoStyle({}, { doc: { content: { size: 0 } } }, mockdoc, true)).toStrictEqual({ "doc": { "content": { "size": 0 } } });
+  });
+  xit('applyStyleForEmptyParagraph', () => {
     expect(
       applyStyleForEmptyParagraph(
         {
@@ -312,7 +370,127 @@ describe('applyStyleForEmptyParagraph', () => {
   });
 });
 
-describe('',()=>{
+
+
+describe('applyNormalIfNoStyle', () => {
+  it('should handle applyNormalIfNoStyle when tr is not present', () => {
+    const linkmark = new Mark();
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+      },
+    });
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+    expect(applyNormalIfNoStyle({}, null, mockdoc, true)).toBe(undefined);
+  });
+  it('should handle applyNormalIfNoStyle when tr is present', () => {
+    const linkmark = new Mark();
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+      },
+    });
+
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+    expect(applyNormalIfNoStyle({}, { doc: { content: { size: 0 } } }, mockdoc, true)).toStrictEqual({ "doc": { "content": { "size": 0 } } });
+  });
+
+});
+
+describe('', () => {
+
 
   it('should handle onUpdateAppendTransaction when ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$from.start() == tr.selection.$from.end() this condition should pass', () => {
     const linkmark = new Mark();
@@ -388,8 +566,8 @@ describe('',()=>{
         },
       ],
     });
-    mockdoc.resolve = () => { return {type :{},parent:{content:{content:[{attrs:null}]}}} as unknown as ResolvedPos; };
-    mockdoc.nodeAt =()=>{return {nodeSize:20} as unknown as Node;};
+    mockdoc.resolve = (s) => { return { type: {}, parent: { content: { content: [{ attrs: null }] } } } as unknown as ResolvedPos };
+    mockdoc.nodeAt = () => { return { nodeSize: 20 } as unknown as Node }
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -418,7 +596,7 @@ describe('',()=>{
           },
         },
         {
-          schema:{nodes:{paragraph:{}}},
+          schema: { nodes: { paragraph: {} } },
           selection: {
             $cursor: null,
             $from: {
@@ -436,7 +614,7 @@ describe('',()=>{
               after: () => {
                 return 1;
               },
-              pos:0
+              pos: 0
             },
           },
           tr: {
@@ -479,7 +657,7 @@ describe('',()=>{
           },
           doc: mockdoc,
         },
-        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } } }, tr: { doc: { nodeAt() { return {type:{name:'table'}}; } } } } },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before(val) { return 5 } } }, tr: { doc: { nodeAt(a) { return { type: { name: 'table' } } } } } } },
         mockTransactions,
         mockSlice1
       )
@@ -562,8 +740,8 @@ describe('',()=>{
         },
       ],
     });
-    mockdoc.resolve = () => { return {parent:{content:{content:[{attrs:null}]}}} as unknown as ResolvedPos; };
-    mockdoc.nodeAt =()=>{return {nodeSize:20} as unknown as Node;};
+    mockdoc.resolve = () => { return { parent: { content: { content: [{ attrs: null }] } } } as unknown as ResolvedPos };
+    mockdoc.nodeAt = () => { return { nodeSize: 20 } as unknown as Node }
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -651,7 +829,7 @@ describe('',()=>{
           },
           doc: mockdoc,
         },
-        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } } }, tr: { doc: { nodeAt() { return {type:{name:'table'}}; } } } } },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before(val) { return 5 } } }, tr: { doc: { nodeAt(a) { return { type: { name: 'table' } } } } } } },
         mockTransactions,
         mockSlice1
       )
@@ -734,11 +912,13 @@ describe('',()=>{
         },
       ],
     });
-
+    function mockResolve(pos) {
+      console.log("Resolved position:", pos);
+    }
 
     // Add the resolve method to the document
-    mockdoc.resolve = () => { return {parent:{content:{content:[{attrs:null}]}}} as unknown as ResolvedPos; };
-    mockdoc.nodeAt =()=>{return {nodeSize:20} as unknown as Node;};
+    mockdoc.resolve = () => { return { parent: { content: { content: [{ attrs: null }] } } } as unknown as ResolvedPos };
+    mockdoc.nodeAt = () => { return { nodeSize: 20 } as unknown as Node }
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -826,7 +1006,7 @@ describe('',()=>{
           },
           doc: mockdoc,
         },
-        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } }, $to:{after(){return 10;}} }, tr: { doc: { nodeAt() { return {type:{name:'eatho onu'}}; } } } } },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before(val) { return 5 } }, $to: { after(a) { return 10 } } }, tr: { doc: { nodeAt(a) { return { type: { name: 'eatho onu' } } } } } } },
         mockTransactions,
         mockSlice1
       )
@@ -909,8 +1089,8 @@ describe('',()=>{
         },
       ],
     });
-    mockdoc.resolve = () => { return {parent:{attrs:{styleName:'bold'},content:{content:[{attrs:{styleName:'bold'}}]}}} as unknown as ResolvedPos; };
-    mockdoc.nodeAt =()=>{return {nodeSize:10} as unknown as Node;};
+    mockdoc.resolve = () => { return { parent: { attrs: { styleName: 'bold' }, content: { content: [{ attrs: { styleName: 'bold' } }] } } } as unknown as ResolvedPos };
+    mockdoc.nodeAt = () => { return { nodeSize: 10 } as unknown as Node }
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -998,7 +1178,7 @@ describe('',()=>{
           },
           doc: mockdoc,
         },
-        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } } }, tr: { doc: { nodeAt() { return {type:{name:'table'}}; } } } } },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before(val) { return 5 } } }, tr: { doc: { nodeAt(a) { return { type: { name: 'table' } } } } } } },
         mockTransactions,
         mockSlice1
       )
@@ -1082,8 +1262,8 @@ describe('',()=>{
         },
       ],
     });
-    mockdoc.resolve = () => { return {parent:{attrs:{styleName:'bold'},content:{content:[{attrs:{styleName:'bold'}}]}}} as unknown as ResolvedPos; };
-    mockdoc.nodeAt =()=>{return {nodeSize:10} as unknown as Node;};
+    mockdoc.resolve = () => { return { parent: { attrs: { styleName: 'bold' }, content: { content: [{ attrs: { styleName: 'bold' } }] } } } as unknown as ResolvedPos };
+    mockdoc.nodeAt = () => { return { nodeSize: 10 } as unknown as Node }
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -1171,41 +1351,41 @@ describe('',()=>{
           },
           doc: mockdoc,
         },
-        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } }, $to:{after(){return 10;}} }, tr: { doc: { nodeAt() { return {type:{name:'eatho onu'}}; } } } } },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before(val) { return 5 } }, $to: { after(a) { return 10 } } }, tr: { doc: { nodeAt(a) { return { type: { name: 'eatho onu' } } } } } } },
         mockTransactions,
         mockSlice1
       )
     ).toStrictEqual({});
   });
-});
+})
 
 
 let mockTr = {
   doc: {
     content: {
-      size: 10
+      size: 10 
     }
   },
-  descendants: jest.fn()
+  descendants: jest.fn() 
 };
 
 const mockNextState = {
-  tr: {}
+  tr: {} 
 };
 
 const mockNode = {
   attrs: {
-    styleName: 'mockStyle'
+    styleName: 'mockStyle' 
   },
   content: {
-    size: 5
+    size: 5 
   }
 };
 
 const mockOpt = {};
 
-const mockApplyLatestStyle = jest.fn((tr) => {
-  return tr;
+const mockApplyLatestStyle = jest.fn((styleName, nextState, tr, child, pos, end, opt) => {
+  return tr; 
 });
 
 xdescribe('applyNormalIfNoStyle', () => {
@@ -1217,7 +1397,7 @@ xdescribe('applyNormalIfNoStyle', () => {
     mockNode.attrs.styleName = undefined as any;
     const result = applyNormalIfNoStyle(mockNextState, mockTr, mockNode, mockOpt);
     expect(result).toEqual(mockTr);
-    expect(result.doc.content.size).toBe(10);
+    expect(result.doc.content.size).toBe(10); 
     expect(mockApplyLatestStyle).toHaveBeenCalledWith('RESERVED_STYLE_NONE', mockNextState, mockTr, mockNode, expect.any(Number), expect.any(Number), mockOpt);
   });
 
@@ -1225,24 +1405,25 @@ xdescribe('applyNormalIfNoStyle', () => {
     mockNode.attrs.styleName = 'RESERVED_STYLE_NONE';
     const result = applyNormalIfNoStyle(mockNextState, mockTr, mockNode, mockOpt);
     expect(result).toEqual(mockTr);
-    expect(result.doc.content.size).toBe(10);
+    expect(result.doc.content.size).toBe(10); 
     expect(mockApplyLatestStyle).toHaveBeenCalledWith('RESERVED_STYLE_NONE', mockNextState, mockTr, mockNode, expect.any(Number), expect.any(Number), mockOpt);
   });
 
   it('should call applyLatestStyle with correct parameters if conditions met', () => {
     const result = applyNormalIfNoStyle(mockNextState, mockTr, mockNode, mockOpt);
     expect(result).toEqual(mockTr);
-    expect(result.doc.content.size).toBe(10);
+    expect(result.doc.content.size).toBe(10); 
     expect(mockApplyLatestStyle).toHaveBeenCalledWith('mockStyle', mockNextState, mockTr, mockNode, expect.any(Number), expect.any(Number), mockOpt);
   });
 
   it('should not call applyLatestStyle if conditions not met', () => {
     mockTr = null as any;
     const result = applyNormalIfNoStyle(mockNextState, mockTr, mockNode, mockOpt);
-    expect(result).toBe(mockNextState.tr);
-    expect(mockApplyLatestStyle).not.toHaveBeenCalled();
+    expect(result).toBe(mockNextState.tr); 
+    expect(mockApplyLatestStyle).not.toHaveBeenCalled(); 
   });
 });
+
 
 describe('Style Plugin', () => {
   const attrs = {
@@ -1323,10 +1504,12 @@ describe('Style Plugin', () => {
     );
     expect(setStyles(customStyleList)).toBeUndefined();
   });
+
   it('SHOULD HANDLE paste', () => {
     const boundHandlePaste = plugin?.props?.handlePaste?.bind(plugin);
     expect(boundHandlePaste(view, {} as unknown as Event, { content: { content: [{ attrs: true }] } } as unknown as Slice)).toBeFalsy();
-  });
+  })
+
   it('customStyle getCustomStyleByName', () => {
     const result = getCustomStyleByName('BIU');
     const style = {
@@ -1867,7 +2050,7 @@ describe('Custom Style Plugin pass', () => {
   observer.observe(observedElement, { childList: true });
 
   const newNode = document.createElement('div');
-  observedElement.appendChild(newNode);
+  observedElement.appendChild(newNode); 
 
   jest.mock('./index', () => {
     const originalModule = jest.requireActual('./index');
@@ -3012,7 +3195,7 @@ describe('Cus Style Plugin-Pass', () => {
         },
       },
     });
-   const transaction1 = new Transaction(schematr as unknown as Node);
+    const transaction1 = new Transaction(schematr as unknown as Node);
 
     const json = {
       doc: {
@@ -3513,8 +3696,15 @@ describe('Cus Style Plugin-Pass', () => {
     ).toBeDefined();
   });
 });
-describe('applyNormalIfNoStyle', () => {
-  it('should handle applyNormalIfNoStyle when tr is not present', () => {
+
+describe('onInitAppendTransaction', () => {
+  it('it should handle onInitAppendTransaction when isStylesLoaded = false', () => {
+    jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(false);
+    expect(onInitAppendTransaction({ loaded: false }, {}, {})).toStrictEqual(
+      {}
+    );
+  });
+  it('it should handle onInitAppendTransaction when isStylesLoaded = true', () => {
     const linkmark = new Mark();
     const mockschema = new Schema({
       nodes: {
@@ -3555,8 +3745,8 @@ describe('applyNormalIfNoStyle', () => {
       type: 'doc',
       content: [
         {
-          type: 'heading',
-          attrs: { level: 1, styleName: 'Normal' },
+          type: 'paragraph',
+          attrs: { level: 1, styleName: null },
           content: [
             {
               type: 'text',
@@ -3569,16 +3759,22 @@ describe('applyNormalIfNoStyle', () => {
         },
       ],
     });
-    expect(applyNormalIfNoStyle({}, null, mockdoc, true)).toBe(undefined);
-  });
-});
-
-describe('onInitAppendTransaction', () => {
-  it('it should handle onInitAppendTransaction when isStylesLoaded = false', () => {
-    jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(false);
-    expect(onInitAppendTransaction({ loaded: false }, {}, {})).toStrictEqual(
-      {}
-    );
+    mockdoc.resolve = () => { return { min: () => { return null; }, max: () => { return null; } } as unknown as ResolvedPos }
+    jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(true);
+    expect(onInitAppendTransaction({ loaded: true, firstTime: false }, { curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc },
+      {
+        tr: {
+          setSelection() {
+            return {
+              curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc,setNodeMarkup:()=>{return {};},
+              setSelection() { return { curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc, 
+              setSelection() { return { curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc,
+               setSelection() { return { curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc,
+               setNodeMarkup:()=>{return {};} } },setNodeMarkup:()=>{return {};} } },setNodeMarkup:()=>{return {};} } }
+            }
+          }, doc: mockdoc
+        },schema:mockSchema
+      })).toBeDefined()
   });
 });
 

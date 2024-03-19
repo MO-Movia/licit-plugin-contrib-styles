@@ -1631,7 +1631,7 @@ export function updateDocument(
   const { doc } = state;
   doc.descendants(function (child, pos) {
     const contentLen = child.content.size;
-    if (haveEligibleChildren(child, contentLen, styleName)) {
+    if (haveEligibleChildren(child, styleName)) {
       tr = applyLatestStyle(
         child.attrs.styleName,
         state,
@@ -1665,16 +1665,8 @@ export function isCustomStyleAlreadyApplied(
   return found;
 }
 
-function haveEligibleChildren(
-  node: Node,
-  contentLen: number,
-  styleName: string
-) {
-  return (
-    node.type.name === 'paragraph' &&
-    0 < contentLen &&
-    styleName === node.attrs.styleName
-  );
+function haveEligibleChildren(node: Node, styleName: string) {
+  return node.type.name === 'paragraph' && styleName === node.attrs.styleName;
 }
 
 // [FS] IRAD-1350 2021-05-19

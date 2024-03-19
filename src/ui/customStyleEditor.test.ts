@@ -100,7 +100,7 @@ describe('CustomStyleEditor', () => {
     expect(customstyleeditor.onStyleClick('', event)).toBeUndefined();
   });
   it('should handle getNumberingLevel', () => {
-    expect(customstyleeditor.getNumberingLevel('2')).toBe('1.1. ');
+    expect(customstyleeditor.getNumberingLevel('2', 'A')).toBe('A1.1. ');
   });
 
   it('should handle onFontNameChange', () => {
@@ -552,7 +552,8 @@ describe('CustomStyleEditor', () => {
     const mockSelectElement = document.createElement('div');
     mockSelectElement.innerHTML = jest
       .spyOn(document, 'getElementById')
-      .mockReturnValue(mockSelectElement).toString();
+      .mockReturnValue(mockSelectElement)
+      .toString();
     customstyleeditor.state = {
       styles: {
         align: 'left',
@@ -579,7 +580,7 @@ describe('CustomStyleEditor', () => {
         hasBullet: true,
       },
       mode: 0,
-      close: () => { },
+      close: () => {},
     };
     expect(customstyleeditor.buildStyle()).toStrictEqual({
       backgroundColor: true,
@@ -599,7 +600,8 @@ describe('CustomStyleEditor', () => {
     const mockSelectElement = document.createElement('div');
     mockSelectElement.innerHTML = jest
       .spyOn(document, 'getElementById')
-      .mockReturnValue(mockSelectElement).toString();
+      .mockReturnValue(mockSelectElement)
+      .toString();
     customstyleeditor.state = {
       styles: {
         align: 'left',
@@ -679,7 +681,9 @@ describe('CustomStyleEditor', () => {
   });
   it('should handle showColorDialog when event is null', () => {
     customstyleeditor._popUp = null;
-    expect(customstyleeditor.showColorDialog(true, null as unknown as SyntheticEvent)).toBeUndefined();
+    expect(
+      customstyleeditor.showColorDialog(true, null as unknown as SyntheticEvent)
+    ).toBeUndefined();
   });
   it('should handle onAlignButtonClick', () => {
     expect(customstyleeditor.onAlignButtonClick('')).toBeUndefined();
@@ -795,7 +799,7 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 0,
-      close: () => { },
+      close: () => {},
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
     jest.spyOn(customstyle, 'isCustomStyleExists').mockReturnValue(true);
@@ -836,22 +840,18 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 3,
-      close: () => { },
+      close: () => {},
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
-    CustomStyleEditors.modifyCustomStyle = () => { };
+    CustomStyleEditors.modifyCustomStyle = () => {};
     const spy = jest.spyOn(CustomStyleEditors, 'modifyCustomStyle');
     CustomStyleEditors._save();
     expect(spy).toHaveBeenCalled();
   });
 
-
-
-
-
   it('should handle handleKeyDown ', () => {
     const dom1 = document.createElement('div');
-    dom1.focus = () => { };
+    dom1.focus = () => {};
     jest.spyOn(document, 'getElementById').mockReturnValue(dom1);
     const spy = jest.spyOn(dom1, 'focus');
     customstyleeditor.handleKeyDown();
@@ -890,7 +890,7 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 1,
-      close: () => { },
+      close: () => {},
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
 
@@ -929,7 +929,7 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 1,
-      close: () => { },
+      close: () => {},
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
 
@@ -970,14 +970,16 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 1,
-      close: () => { },
+      close: () => {},
     };
     // customstyleeditor.props.mode = 1;
     const CustomStyleEditors = new CustomStyleEditor(props);
 
     const dom = document.createElement('div');
     const dom1 = document.createElement('div');
-    jest.spyOn(document, 'getElementsByClassName').mockReturnValue([dom, dom1] as unknown as HTMLCollectionOf<Element>);
+    jest
+      .spyOn(document, 'getElementsByClassName')
+      .mockReturnValue([dom, dom1] as unknown as HTMLCollectionOf<Element>);
     expect(CustomStyleEditors.componentDidMount()).toBeUndefined();
   });
   it('should handle render', () => {

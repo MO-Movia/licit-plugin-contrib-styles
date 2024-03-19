@@ -158,7 +158,11 @@ export class CustomStyleItem extends React.PureComponent<
       (styles.hasNumbering || styles.isList)
     ) {
       for (let i = 0; i < styles.styleLevel; i++) {
-        level = level + '1.';
+        if (i === 0 && styles.prefixValue) {
+          level = level + styles.prefixValue + '1.';
+        } else {
+          level = level + '1.';
+        }
       }
     }
 

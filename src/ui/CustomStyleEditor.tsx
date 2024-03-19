@@ -263,11 +263,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         if (sampleDiv) {
           if (this.state.styles.boldNumbering) {
             sampleDiv.innerHTML = `<strong>${this.getNumberingLevel(
-              this.state.styles.styleLevel
+              this.state.styles.styleLevel,
+              this.state.styles.prefixValue
             )}</strong>${textSample}`;
           } else {
             sampleDiv.innerText = `${this.getNumberingLevel(
-              this.state.styles.styleLevel
+              this.state.styles.styleLevel,
+              this.state.styles.prefixValue
             )}${textSample}`;
           }
         }
@@ -285,10 +287,14 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
   // [FS] IRAD-1111 2020-12-10
   // get the numbering corresponding to the level
-  getNumberingLevel(level: string | number) {
+  getNumberingLevel(level: string | number, prefixValue: string | number) {
     let levelStyle = '';
     for (let i = 0; i < parseInt(`${level}`); i++) {
-      levelStyle = levelStyle + '1.';
+      if (i === 0 && prefixValue) {
+        levelStyle = levelStyle + prefixValue + '1.';
+      } else {
+        levelStyle = levelStyle + '1.';
+      }
     }
     return levelStyle + ' ';
   }
@@ -545,6 +551,16 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         },
       });
     }
+  }
+
+  handlePrefix(val) {
+    //edit mode
+    this.setState({
+      styles: {
+        ...this.state.styles,
+        prefixValue: val.target.value,
+      },
+    });
   }
 
   isCustomStyleAlreadyApplied() {
@@ -1180,33 +1196,80 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                 className="molsp-panel2 molsp-formp"
                 style={{ maxHeight: '100%' }}
               >
-                <div
-                  className="molsp-hierarchydiv"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
+                {this.state.styles.hasNumbering || this.state.styles.isList ? (
+                  <div
+                    className="molsp-hierarchydiv"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginLeft: '-1px',
+                    }}
+                  >
+                    <p className="molsp-formp" style={{ margin: '0' }}>
+                      Prefix:
+                    </p>
+                    <div
+                      className="molsp-hierarchydiv"
+                      style={{ textAlign: 'right' }}
+                    >
+                      <input
+                        onChange={this.handlePrefix.bind(this)}
+                        style={{ width: '48px' }}
+                        type="text"
+                        value={this.state.styles.prefixValue}
+                      />
+                    </div>
+                    <div
+                      className="molsp-hierarchydiv"
+                      style={{ textAlign: 'right' }}
+                    >
+                      <label>
+                        <input
+                          checked={this.state.styles.isList}
+                          onChange={this.handleList.bind(this)}
+                          type="checkbox"
+                        />
+                        List-style
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="molsp-hierarchydiv"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginLeft: '-1px',
+                    }}
+                  >
+                    <div
+                      className="molsp-hierarchydiv"
+                      style={{ textAlign: 'right' }}
+                    >
+                      <label>
+                        <input
+                          checked={this.state.styles.isList}
+                          onChange={this.handleList.bind(this)}
+                          type="checkbox"
+                        />
+                        List-style
+                      </label>
+                    </div>
+                  </div>
+                )}
+                <div className="molsp-hierarchydiv" style={{ display: 'flex' }}>
                   <p className="molsp-formp" style={{ margin: '0' }}>
                     Level:
                   </p>
                   <div
-                    className="molsp-hierarchydiv"
-                    style={{ textAlign: 'right' }}
+                    style={{
+                      float: 'left',
+                      marginTop: '19px',
+                      marginLeft: '-42px',
+                    }}
                   >
-                    <label>
-                      <input
-                        checked={this.state.styles.isList}
-                        onChange={this.handleList.bind(this)}
-                        type="checkbox"
-                      />
-                      List-style
-                    </label>
-                  </div>
-                </div>
-                <div className="molsp-hierarchydiv" style={{ display: 'flex' }}>
-                  <div style={{ float: 'left', marginTop: '8px' }}>
                     <select
                       className="molsp-leveltype molsp-fontstyle"
                       disabled={this.state.styles.isList === true}

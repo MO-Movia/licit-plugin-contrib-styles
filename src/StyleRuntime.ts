@@ -24,6 +24,7 @@ export type HTMLStyles = {
   isHidden?: boolean;
   strike?: string;
   isList?: boolean;
+  prefixValue?: string;
 };
 
 export type Style = {
@@ -53,6 +54,7 @@ export type CSSStyle = {
   textAlign?: string; //css text-align property
   lineHeight?: string; //css line-height property
   isList?: boolean;
+  prefixValue?: string;
 };
 
 export type StyleRuntime = {

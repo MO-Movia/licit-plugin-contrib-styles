@@ -6,6 +6,7 @@ import { getCustomStyleByName, getHidenumberingFlag } from './customStyle.js';
 import './ui/czi-cust-style-numbered.css';
 
 // This assumes that every 36pt maps to one indent level.
+export const ATTRIBUTE_PREFIX = 'prefix';
 export const INDENT_MARGIN_PT_SIZE = 36;
 export const MIN_INDENT_LEVEL = 0;
 export const MAX_INDENT_LEVEL = 7;
@@ -50,8 +51,14 @@ function getAttrs(base: getAttrsFn | undefined, dom: HTMLElement) {
 function toDOM(base: toDOMFn | undefined, node: Node) {
   const output = base(node);
   output[1][STYLENAME] = node.attrs[STYLENAME];
-  const { style, styleLevel, indentOverriden, bulletDetails, isListStyle } =
-    getStyle(node.attrs);
+  const {
+    style,
+    styleLevel,
+    indentOverriden,
+    bulletDetails,
+    isListStyle,
+    prefix,
+  } = getStyle(node.attrs);
   style && (output[1].style = style);
   if (styleLevel) {
     if (isListStyle) {
@@ -71,6 +78,10 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
     output[1][ATTRIBUTE_INDENT] = String(indentOverriden);
   }
 
+  if (prefix) {
+    output[1][ATTRIBUTE_PREFIX] = prefix;
+  }
+
   if (bulletDetails?.symbol?.length > 0) {
     output[1][ATTRIBUTE_BULLET_SYMBOL] = bulletDetails.symbol;
     output[1][ATTRIBUTE_SHOW_SYMBOL] = bulletDetails.symbol.length > 0;
@@ -86,7 +97,7 @@ function getStyle(attrs) {
   return getStyleEx(
     attrs.align,
     attrs.lineSpacing,
-    attrs.styleName,
+    attrs.styleName
     // attrs.indent
   );
 }
@@ -146,6 +157,7 @@ function getStyleEx(align, lineSpacing, styleName) {
   let styleLevel = 0;
   let indentOverriden = '';
   let isListStyle = false;
+  let prefix = '';
   let bulletDetails: {
     symbol: string;
     color: string;
@@ -213,6 +225,7 @@ function getStyleEx(align, lineSpacing, styleName) {
             ? styleProps.styles.styleLevel
             : 0;
         isListStyle = styleProps.styles.isList;
+        prefix = styleProps.styles.prefixValue;
         style += refreshCounters(styleLevel, isListStyle);
       }
     } else if (styleName?.includes(RESERVED_STYLE_NONE_NUMBERING)) {
@@ -225,7 +238,14 @@ function getStyleEx(align, lineSpacing, styleName) {
       }
     }
   }
-  return { style, styleLevel, indentOverriden, bulletDetails, isListStyle };
+  return {
+    style,
+    styleLevel,
+    indentOverriden,
+    bulletDetails,
+    isListStyle,
+    prefix,
+  };
 }
 
 export const toCustomStyleDOM = toDOM;

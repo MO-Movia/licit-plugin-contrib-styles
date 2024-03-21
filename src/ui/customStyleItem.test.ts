@@ -146,6 +146,18 @@ describe('customstyleitem', () => {
     expect(result).toBe('1.1.1.');
   });
 
+  it('should prepend prefixValue only for the first level', () => {
+    const styles = {
+      hasNumbering: true,
+      isList: true,
+      styleLevel: 3,
+      hasBullet: false,
+      prefixValue: 'A', 
+    };
+    const result = customstyleitem.sampleLevel(styles);
+    expect(result).toBe('A1.1.1.');
+  });
+
 
 
 });

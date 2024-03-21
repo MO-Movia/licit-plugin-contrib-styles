@@ -13,7 +13,7 @@ import {
   onUpdateAppendTransaction,
   applyNormalIfNoStyle,
   applyStyleForEmptyParagraph,
-  remapCounterFlags,
+  remapCounterFlags
 } from './index';
 import { builders } from 'prosemirror-test-builder';
 import {
@@ -334,37 +334,39 @@ describe('applyStyleForEmptyParagraph', () => {
     });
     expect(applyNormalIfNoStyle({}, { doc: { content: { size: 0 } } }, mockdoc, true)).toStrictEqual({ "doc": { "content": { "size": 0 } } });
   });
-  xit('applyStyleForEmptyParagraph', () => {
-    expect(
-      applyStyleForEmptyParagraph(
-        {
-          selection: {
-            $from: {
-              before: () => {
-                return 1;
-              },
-            },
-            $to: {
-              after: () => {
-                return 2;
-              },
-            },
-          },
-          tr: {
-            doc: {
-              nodeAt: () => {
-                return {};
-              },
-            },
+  it('applyStyleForEmptyParagraph should be check the condition  subsequantLevel !== 0', () => {
+    const nex_state_ = {
+      selection: {
+        $from: {
+          before: () => {
+            return 1;
           },
         },
-        {
-          doc: {
-            nodeAt: () => {
-              return {};
-            },
+        $to: {
+          after: () => {
+            return 2;
           },
-        }
+        },
+      },
+      tr: {
+        doc: {
+          nodeAt: () => {
+            return {attrs:{styleName:'Normal'}, content:{content:[{marks:[]}]}};
+          },
+        },
+      },
+    }
+
+    const tr = {
+      doc: {
+        nodeAt: () => {
+          return {};
+        },
+      },
+    }
+    expect(
+      applyStyleForEmptyParagraph(
+       nex_state_, tr
       )
     ).toBeDefined();
   });
@@ -489,8 +491,8 @@ describe('applyNormalIfNoStyle', () => {
 
 });
 
-describe('', () => {
 
+describe('', () => {
 
   it('should handle onUpdateAppendTransaction when ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$from.start() == tr.selection.$from.end() this condition should pass', () => {
     const linkmark = new Mark();
@@ -1358,17 +1360,6 @@ describe('', () => {
     ).toStrictEqual({});
   });
 })
-
-
-let mockTr = {
-  doc: {
-    content: {
-      size: 10 
-    }
-  },
-  descendants: jest.fn() 
-};
-
 const mockNextState = {
   tr: {} 
 };
@@ -1382,49 +1373,11 @@ const mockNode = {
   }
 };
 
-const mockOpt = {};
+const mockOpt = {}; 
 
 const mockApplyLatestStyle = jest.fn((styleName, nextState, tr, child, pos, end, opt) => {
   return tr; 
 });
-
-xdescribe('applyNormalIfNoStyle', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should update styleName to RESERVED_STYLE_NONE if styleName is undefined', () => {
-    mockNode.attrs.styleName = undefined as any;
-    const result = applyNormalIfNoStyle(mockNextState, mockTr, mockNode, mockOpt);
-    expect(result).toEqual(mockTr);
-    expect(result.doc.content.size).toBe(10); 
-    expect(mockApplyLatestStyle).toHaveBeenCalledWith('RESERVED_STYLE_NONE', mockNextState, mockTr, mockNode, expect.any(Number), expect.any(Number), mockOpt);
-  });
-
-  it('should update styleName to RESERVED_STYLE_NONE if styleName is RESERVED_STYLE_NONE', () => {
-    mockNode.attrs.styleName = 'RESERVED_STYLE_NONE';
-    const result = applyNormalIfNoStyle(mockNextState, mockTr, mockNode, mockOpt);
-    expect(result).toEqual(mockTr);
-    expect(result.doc.content.size).toBe(10); 
-    expect(mockApplyLatestStyle).toHaveBeenCalledWith('RESERVED_STYLE_NONE', mockNextState, mockTr, mockNode, expect.any(Number), expect.any(Number), mockOpt);
-  });
-
-  it('should call applyLatestStyle with correct parameters if conditions met', () => {
-    const result = applyNormalIfNoStyle(mockNextState, mockTr, mockNode, mockOpt);
-    expect(result).toEqual(mockTr);
-    expect(result.doc.content.size).toBe(10); 
-    expect(mockApplyLatestStyle).toHaveBeenCalledWith('mockStyle', mockNextState, mockTr, mockNode, expect.any(Number), expect.any(Number), mockOpt);
-  });
-
-  it('should not call applyLatestStyle if conditions not met', () => {
-    mockTr = null as any;
-    const result = applyNormalIfNoStyle(mockNextState, mockTr, mockNode, mockOpt);
-    expect(result).toBe(mockNextState.tr); 
-    expect(mockApplyLatestStyle).not.toHaveBeenCalled(); 
-  });
-});
-
-
 describe('Style Plugin', () => {
   const attrs = {
     align: { default: null },
@@ -1504,12 +1457,10 @@ describe('Style Plugin', () => {
     );
     expect(setStyles(customStyleList)).toBeUndefined();
   });
-
   it('SHOULD HANDLE paste', () => {
     const boundHandlePaste = plugin?.props?.handlePaste?.bind(plugin);
     expect(boundHandlePaste(view, {} as unknown as Event, { content: { content: [{ attrs: true }] } } as unknown as Slice)).toBeFalsy();
   })
-
   it('customStyle getCustomStyleByName', () => {
     const result = getCustomStyleByName('BIU');
     const style = {
@@ -1884,6 +1835,8 @@ describe('Style Plugin', () => {
     expect(bok).toEqual(true);
   });
 
+
+
   it('getCustomStyleCommands in CustomStyleCommand', () => {
     const selection = TextSelection.create(view.state.doc, 1, 2);
     const tr = view.state.tr.setSelection(selection);
@@ -2042,6 +1995,7 @@ describe('Custom Style Plugin pass', () => {
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'childList' && mutation.addedNodes.length) {
+        // The docChange event has been dispatched
         console.log('docChange event dispatched!');
       }
     });
@@ -2050,7 +2004,7 @@ describe('Custom Style Plugin pass', () => {
   observer.observe(observedElement, { childList: true });
 
   const newNode = document.createElement('div');
-  observedElement.appendChild(newNode); 
+  observedElement.appendChild(newNode); // This will trigger the docChange event
 
   jest.mock('./index', () => {
     const originalModule = jest.requireActual('./index');
@@ -2067,6 +2021,7 @@ describe('Custom Style Plugin pass', () => {
   const editor = createEditor(doc(p('<cursor>')), {
     plugins: [plugin],
   });
+  ///////jk
   const isStylesLoadedMock = jest.spyOn(CustStyl, 'isStylesLoaded');
   isStylesLoadedMock.mockImplementation(() => {
     return true;
@@ -2768,6 +2723,7 @@ describe('Cus Style Plugin-Pass', () => {
       paddingTop: null,
       capco: null,
       styleName: 'A11-Rename',
+      innerLink:'#uuid'
     };
     expect(setNodeAttrs('test', newattrs)).toStrictEqual({
       align: 'left',
@@ -2779,6 +2735,7 @@ describe('Cus Style Plugin-Pass', () => {
       paddingBottom: null,
       paddingTop: null,
       styleName: 'test',
+      innerLink:null
     });
   });
   it('should handle setNodeAttrs when nextLineStyleName is null ', () => {
@@ -2956,6 +2913,7 @@ describe('Cus Style Plugin-Pass', () => {
       },
     });
 
+    
     const nextstate = {
       schema: schema2,
       doc: schema2.nodeFromJSON({
@@ -3082,7 +3040,6 @@ describe('Cus Style Plugin-Pass', () => {
         },
       },
     });
-
     const mockState = {
       schema: schema3,
       doc: schema3.nodeFromJSON({
@@ -3122,6 +3079,7 @@ describe('Cus Style Plugin-Pass', () => {
     const editorContainer = document.createElement('div');
     document.body.appendChild(editorContainer);
 
+    // Create an editor view with the EditorState and the HTML element
     const mockview = {
       state: mockState,
       input: { lastKeyCode: 13 },
@@ -3350,7 +3308,7 @@ describe('Cus Style Plugin-Pass', () => {
           },
         ],
       }),
-      selection: { from: 3, to: 8 },
+      selection: { from: 2, to: 8 },
     };
     const prevstate1 = {
       schema: schema1,
@@ -3592,6 +3550,1786 @@ describe('Cus Style Plugin-Pass', () => {
         nextLineStyleName: 'Normal',
       },
     } as unknown as null);
+    // expect(
+    //   manageHierarchyOnDelete(prevstatemhod, nextstate, null, mockview1)
+    // ).toBeDefined();
+    spymhod.mockClear();
+    const mockview2 = {
+      state: mockState,
+      input: { lastKeyCode: 8 },
+    };
+    // expect(
+    //   manageHierarchyOnDelete(prevstatemhod, nextstate, null, mockview2)
+    // ).toBeDefined();
+    const nextstatemhod = {
+      schema: schema2,
+      doc: schema2.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'N',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'N',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'N',
+              },
+            ],
+          },
+        ],
+      }),
+      selection: { from: 2, to: 8 },
+    };
+    expect(
+      manageHierarchyOnDelete(
+        prevstatemhod,
+        nextstatemhod,
+        transaction1,
+        mockview2
+      )
+    ).toBeDefined();
+    //expect(manageHierarchyOnDelete({doc:{key:'value'}},{selection:{from:0},doc:{key:'value'}},transaction1,mockview2)).toBeDefined();
+  });
+  it('should handle function manageHierarchyOnDelete nodesBeforeSelection.length > 0', () => {
+    jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styles: {
+        indent: '10',
+        align: 'left',
+        lineHeight: '',
+        nextLineStyleName: 'Normal',
+      },
+      styleName: ''
+    });
+    jest
+      .spyOn(ccommand, 'getMarkByStyleName')
+      .mockReturnValue([
+        { type: 'mark-font-type', attrs: { name: 'Arial', overridden: false } },
+      ] as unknown as []);
+    const schema1 = new Schema({
+      nodes: {
+        doc: {
+          attrs: {
+            layout: { default: null },
+            padding: { default: null },
+            width: { default: null },
+            counterFlags: { default: null },
+            capcoMode: { default: 0 },
+          },
+          content: 'paragraph+',
+        },
+        paragraph: {
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: 'AFDP Bullet' },
+          },
+          content: 'text*',
+          marks: '',
+        },
+        text: {
+          marks: 'mark-font-size mark-font-type',
+        },
+      },
+      marks: {
+        'mark-font-size': {
+          attrs: {
+            pt: { default: 11 },
+            overridden: { default: false },
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: { default: 'Arial' },
+            overridden: { default: false },
+          },
+        },
+      },
+    });
+    const prevstate = {
+      schema: schema1,
+      doc: schema1.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'Your text here previous',
+              },
+            ],
+          },
+        ],
+      }),
+      selection: { from: 2, to: 4 },
+    };
+
+    const schema2 = new Schema({
+      nodes: {
+        doc: {
+          attrs: {
+            layout: { default: null },
+            padding: { default: null },
+            width: { default: null },
+            counterFlags: { default: null },
+            capcoMode: { default: 0 },
+          },
+          content: 'paragraph+',
+        },
+        paragraph: {
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: 'AFDP Bullet' },
+          },
+          content: 'text*',
+          marks: '',
+        },
+        hard_break: {
+          inline: true,
+          group: 'inline',
+          selectable: false,
+          parseDOM: [{ tag: 'br' }],
+          toDOM() {
+            return ['br'];
+          },
+        },
+        text: {
+          marks: 'mark-font-size mark-font-type',
+        },
+      },
+      marks: {
+        'mark-font-size': {
+          attrs: {
+            pt: { default: 11 },
+            overridden: { default: false },
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: { default: 'Arial' },
+            overridden: { default: false },
+          },
+        },
+      },
+    });
+
+    
+    const nextstate = {
+      schema: schema2,
+      doc: schema2.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'N',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'N',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'N',
+              },
+            ],
+          },
+        ],
+      }),
+      selection: { from: 4, to: 8 },
+    };
+
+    const schema3 = new Schema({
+      nodes: {
+        doc: {
+          attrs: {
+            layout: { default: null },
+            padding: { default: null },
+            width: { default: null },
+            counterFlags: { default: null },
+            capcoMode: { default: 0 },
+          },
+          content: 'paragraph+',
+        },
+        paragraph: {
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: 'AFDP Bullet' },
+          },
+          content: 'text*',
+          marks: '',
+        },
+        text: {
+          marks: 'mark-font-size mark-font-type',
+        },
+      },
+      marks: {
+        'mark-font-size': {
+          attrs: {
+            pt: { default: 11 },
+            overridden: { default: false },
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: { default: 'Arial' },
+            overridden: { default: false },
+          },
+        },
+      },
+    });
+    const mockState = {
+      schema: schema3,
+      doc: schema3.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'Your text here',
+              },
+            ],
+          },
+        ],
+      }),
+    };
+    const editorContainer = document.createElement('div');
+    document.body.appendChild(editorContainer);
+
+    // Create an editor view with the EditorState and the HTML element
+    const mockview = {
+      state: mockState,
+      input: { lastKeyCode: 13 },
+    };
+
+    const schematr = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: 'AFDP Bullet' },
+          },
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: {
+          marks: 'mark-font-size mark-font-type',
+          parseDOM: [{ tag: 'span' }],
+          toDOM() {
+            return ['span', 0];
+          },
+        },
+      },
+      marks: {
+        'mark-font-size': {
+          attrs: {
+            pt: { default: 11 },
+            overridden: { default: false },
+          },
+          parseDOM: [
+            {
+              style: 'font-size',
+              getAttrs(value) {
+                return { pt: parseInt(value as string), overridden: false };
+              },
+            },
+          ],
+          toDOM(mark) {
+            return ['span', { style: `font-size: ${mark.attrs.pt}px` }, 0];
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: { default: 'Arial' },
+            overridden: { default: false },
+          },
+          parseDOM: [
+            {
+              style: 'font-family',
+              getAttrs(value) {
+                return { name: value, overridden: false };
+              },
+            },
+          ],
+          toDOM(mark) {
+            return ['span', { style: `font-family: ${mark.attrs.name}` }, 0];
+          },
+        },
+      },
+    });
+    const transaction1 = new Transaction(schematr as unknown as Node);
+
+    const json = {
+      doc: {
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [
+                  {
+                    type: 'mark-font-size',
+                    attrs: {
+                      pt: 11,
+                      overridden: false,
+                    },
+                  },
+                  {
+                    type: 'mark-font-type',
+                    attrs: {
+                      name: 'Arial',
+                      overridden: false,
+                    },
+                  },
+                ],
+                text: 'gdsdfgfhfgsh',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: 'TBD',
+              styleName: 'AFDP Bullet',
+            },
+          },
+        ],
+      },
+      steps: [],
+      docs: [],
+      mapping: {
+        maps: [],
+        from: 0,
+        to: 0,
+      },
+      curSelectionFor: 0,
+      updated: 0,
+      meta: {},
+      time: 1685513344299,
+      curSelection: {
+        type: 'text',
+        anchor: 15,
+        head: 15,
+      },
+      storedMarks: null,
+    };
+
+    transaction1.doc = schematr.nodeFromJSON(json.doc);
+    transaction1.addStoredMark = () => {
+      return {} as unknown as Transaction;
+    };
+    transaction1.storedMarks = json.storedMarks;
+    transaction1.setNodeMarkup = () => {
+      return transaction1;
+    };
+
+    expect(
+      applyStyleForNextParagraph(prevstate, nextstate, transaction1, mockview)
+    ).toBeDefined();
+    const nextstate1 = {
+      schema: schema2,
+      doc: schema2.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [],
+          },
+        ],
+      }),
+      selection: { from: 2, to: 8 },
+    };
+    const prevstate1 = {
+      schema: schema1,
+      doc: schema1.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'Your text here previous',
+              },
+            ],
+          },
+        ],
+      }),
+      selection: { from: 1, to: 4 },
+    };
+    expect(
+      applyStyleForNextParagraph(prevstate1, nextstate1, transaction1, mockview)
+    ).toBeDefined();
+    jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styles: {
+        indent: '10',
+        align: 'left',
+        lineHeight: '',
+        nextLineStyleName: '',
+      },
+      styleName: ''
+    });
+    expect(
+      applyStyleForNextParagraph(prevstate1, nextstate1, transaction1, mockview)
+    ).toBeNull();
+    expect(
+      applyStyleForNextParagraph(prevstate1, nextstate1, null, mockview)
+    ).toBeDefined();
+    expect(
+      applyStyleForNextParagraph(prevstate1, nextstate1, null, null)
+    ).toBeDefined();
+    expect(
+      applyStyleForNextParagraph({}, {}, {}, { input: { lastKeyCode: 10 } })
+    ).toBeDefined();
+    expect(nodeAssignment(prevstate)).toBeDefined();
+    const schemamhod = new Schema({
+      nodes: {
+        doc: {
+          attrs: {
+            layout: { default: null },
+            padding: { default: null },
+            width: { default: null },
+            counterFlags: { default: null },
+            capcoMode: { default: 0 },
+          },
+          content: 'paragraph+',
+        },
+        paragraph: {
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: 'AFDP Bullet' },
+          },
+          content: 'inline*',
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        image: {
+          attrs: {
+            src: {},
+            alt: { default: '' },
+            title: { default: null },
+            styleName: { default: null },
+          },
+          inline: true,
+          group: 'inline',
+          draggable: true,
+          parseDOM: [
+            {
+              tag: 'img[src]',
+              getAttrs(dom) {
+                return {
+                  src: (dom as unknown as HTMLElement).getAttribute('src'),
+                  alt: (dom as unknown as HTMLElement).getAttribute('alt'),
+                  title: (dom as unknown as HTMLElement).getAttribute('title'),
+                  styleName: (dom as unknown as HTMLElement).getAttribute('styleName'),
+                };
+              },
+            },
+          ],
+          toDOM(node) {
+            const { src, alt, title, styleName } = node.attrs;
+            return ['img', { src, alt, title, styleName }];
+          },
+        },
+        text: {
+          marks: 'mark-font-size mark-font-type',
+        },
+      },
+      marks: {
+        'mark-font-size': {
+          attrs: {
+            pt: { default: 11 },
+            overridden: { default: false },
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: { default: 'Arial' },
+            overridden: { default: false },
+          },
+        },
+      },
+    });
+    const prevstatemhod = {
+      schema: schemamhod,
+      doc: schemamhod.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'image',
+                attrs: {
+                  src: 'path/to/image.jpg',
+                  alt: 'Image Alt Text',
+                  title: 'Image Title',
+                  styleName: '2',
+                },
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'image',
+                attrs: {
+                  src: 'path/to/image.jpg',
+                  alt: 'Image Alt Text',
+                  title: 'Image Title',
+                  styleName: '2',
+                },
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'image',
+                attrs: {
+                  src: 'path/to/image.jpg',
+                  alt: 'Image Alt Text',
+                  title: 'Image Title',
+                  styleName: '2',
+                },
+              },
+            ],
+          },
+        ],
+      }),
+      selection: { from: 2, to: 4 },
+    };
+
+    const spymhod = jest.spyOn(ccommand, 'getStyleLevel').mockReturnValue(2);
+    jest.spyOn(CustStyl, 'getCustomStyleByLevel').mockReturnValue({
+      styles: {
+        indent: '10',
+        align: 'left',
+        lineHeight: '',
+        nextLineStyleName: 'Normal',
+      },
+    } as unknown as null);
+    
+    spymhod.mockClear();
+    const mockview2 = {
+      state: mockState,
+      input: { lastKeyCode: 46 },
+    };
+    const nextstatemhod = {
+      schema: schema2,
+      doc: schema2.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'N',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'N',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'N',
+              },
+            ],
+          },
+        ],
+      }),
+      selection: { from: 2, to: 8 },
+    };
+    expect(
+      manageHierarchyOnDelete(
+        prevstatemhod,
+        nextstatemhod,
+        transaction1,
+        mockview2
+      )
+    ).toBeDefined();
+    
+  });
+ it('should handle applyStyleForNextParagraph', () => {
+    jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styles: {
+        indent: '10',
+        align: 'left',
+        lineHeight: '',
+        nextLineStyleName: 'Normal',
+      },
+      styleName: ''
+    });
+    jest
+      .spyOn(ccommand, 'getMarkByStyleName')
+      .mockReturnValue([
+        { type: 'mark-font-type', attrs: { name: 'Arial', overridden: false } },
+      ] as unknown as []);
+    const schema1 = new Schema({
+      nodes: {
+        doc: {
+          attrs: {
+            layout: { default: null },
+            padding: { default: null },
+            width: { default: null },
+            counterFlags: { default: null },
+            capcoMode: { default: 0 },
+          },
+          content: 'paragraph+',
+        },
+        paragraph: {
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: 'AFDP Bullet' },
+          },
+          content: 'text*',
+          marks: '',
+        },
+        text: {
+          marks: 'mark-font-size mark-font-type',
+        },
+      },
+      marks: {
+        'mark-font-size': {
+          attrs: {
+            pt: { default: 11 },
+            overridden: { default: false },
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: { default: 'Arial' },
+            overridden: { default: false },
+          },
+        },
+      },
+    });
+    const prevstate = {
+      schema: schema1,
+      doc: schema1.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'Your text here previous',
+              },
+            ],
+          },
+        ],
+      }),
+      selection: { from: 2, to: 4 },
+    };
+
+    const schema2 = new Schema({
+      nodes: {
+        doc: {
+          attrs: {
+            layout: { default: null },
+            padding: { default: null },
+            width: { default: null },
+            counterFlags: { default: null },
+            capcoMode: { default: 0 },
+          },
+          content: 'paragraph+',
+        },
+        paragraph: {
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: 'AFDP Bullet' },
+          },
+          content: 'text*',
+          marks: '',
+        },
+        hard_break: {
+          inline: true,
+          group: 'inline',
+          selectable: false,
+          parseDOM: [{ tag: 'br' }],
+          toDOM() {
+            return ['br'];
+          },
+        },
+        text: {
+          marks: 'mark-font-size mark-font-type',
+        },
+      },
+      marks: {
+        'mark-font-size': {
+          attrs: {
+            pt: { default: 11 },
+            overridden: { default: false },
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: { default: 'Arial' },
+            overridden: { default: false },
+          },
+        },
+      },
+    });
+
+    
+    const nextstate = {
+      schema: schema2,
+      doc: schema2.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'N',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'N',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'N',
+              },
+            ],
+          },
+        ],
+      }),
+      selection: { from: 4, to: 8 },
+    };
+
+    const schema3 = new Schema({
+      nodes: {
+        doc: {
+          attrs: {
+            layout: { default: null },
+            padding: { default: null },
+            width: { default: null },
+            counterFlags: { default: null },
+            capcoMode: { default: 0 },
+          },
+          content: 'paragraph+',
+        },
+        paragraph: {
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: 'AFDP Bullet' },
+          },
+          content: 'text*',
+          marks: '',
+        },
+        text: {
+          marks: 'mark-font-size mark-font-type',
+        },
+      },
+      marks: {
+        'mark-font-size': {
+          attrs: {
+            pt: { default: 11 },
+            overridden: { default: false },
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: { default: 'Arial' },
+            overridden: { default: false },
+          },
+        },
+      },
+    });
+    const mockState = {
+      schema: schema3,
+      doc: schema3.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'Your text here',
+              },
+            ],
+          },
+        ],
+      }),
+    };
+    const editorContainer = document.createElement('div');
+    document.body.appendChild(editorContainer);
+
+    // Create an editor view with the EditorState and the HTML element
+    const mockview = {
+      state: mockState,
+      input: { lastKeyCode: 13 },
+    };
+
+    const schematr = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: 'AFDP Bullet' },
+          },
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: {
+          marks: 'mark-font-size mark-font-type',
+          parseDOM: [{ tag: 'span' }],
+          toDOM() {
+            return ['span', 0];
+          },
+        },
+      },
+      marks: {
+        'mark-font-size': {
+          attrs: {
+            pt: { default: 11 },
+            overridden: { default: false },
+          },
+          parseDOM: [
+            {
+              style: 'font-size',
+              getAttrs(value) {
+                return { pt: parseInt(value as string), overridden: false };
+              },
+            },
+          ],
+          toDOM(mark) {
+            return ['span', { style: `font-size: ${mark.attrs.pt}px` }, 0];
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: { default: 'Arial' },
+            overridden: { default: false },
+          },
+          parseDOM: [
+            {
+              style: 'font-family',
+              getAttrs(value) {
+                return { name: value, overridden: false };
+              },
+            },
+          ],
+          toDOM(mark) {
+            return ['span', { style: `font-family: ${mark.attrs.name}` }, 0];
+          },
+        },
+      },
+    });
+    const transaction1 = new Transaction(schematr as unknown as Node);
+
+    const json = {
+      doc: {
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [
+                  {
+                    type: 'mark-font-size',
+                    attrs: {
+                      pt: 11,
+                      overridden: false,
+                    },
+                  },
+                  {
+                    type: 'mark-font-type',
+                    attrs: {
+                      name: 'Arial',
+                      overridden: false,
+                    },
+                  },
+                ],
+                text: 'gdsdfgfhfgsh',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: 'TBD',
+              styleName: 'AFDP Bullet',
+            },
+          },
+        ],
+      },
+      steps: [],
+      docs: [],
+      mapping: {
+        maps: [],
+        from: 0,
+        to: 0,
+      },
+      curSelectionFor: 0,
+      updated: 0,
+      meta: {},
+      time: 1685513344299,
+      curSelection: {
+        type: 'text',
+        anchor: 15,
+        head: 15,
+      },
+      storedMarks: null,
+    };
+
+    transaction1.doc = schematr.nodeFromJSON(json.doc);
+    transaction1.addStoredMark = () => {
+      return {} as unknown as Transaction;
+    };
+    transaction1.storedMarks = json.storedMarks;
+    transaction1.setNodeMarkup = () => {
+      return transaction1;
+    };
+
+    expect(
+      applyStyleForNextParagraph(prevstate, nextstate, transaction1, mockview)
+    ).toBeDefined();
+    const nextstate1 = {
+      schema: schema2,
+      doc: schema2.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [],
+          },
+        ],
+      }),
+      selection: { from: 2, to: 8 },
+    };
+    const prevstate1 = {
+      schema: schema1,
+      doc: schema1.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'Your text here previous',
+              },
+            ],
+          },
+        ],
+      }),
+      selection: { from: 1, to: 4 },
+    };
+    expect(
+      applyStyleForNextParagraph(prevstate1, nextstate1, transaction1, mockview)
+    ).toBeDefined();
+    jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styles: {
+        indent: '10',
+        align: 'left',
+        lineHeight: '',
+        nextLineStyleName: '',
+      },
+      styleName: ''
+    });
+    expect(
+      applyStyleForNextParagraph(prevstate1, nextstate1, transaction1, mockview)
+    ).toBeNull();
+    expect(
+      applyStyleForNextParagraph(prevstate1, nextstate1, null, mockview)
+    ).toBeDefined();
+    expect(
+      applyStyleForNextParagraph(prevstate1, nextstate1, null, null)
+    ).toBeDefined();
+    expect(
+      applyStyleForNextParagraph({}, {}, {}, { input: { lastKeyCode: 10 } })
+    ).toBeDefined();
+    expect(nodeAssignment(prevstate)).toBeDefined();
+    const schemamhod = new Schema({
+      nodes: {
+        doc: {
+          attrs: {
+            layout: { default: null },
+            padding: { default: null },
+            width: { default: null },
+            counterFlags: { default: null },
+            capcoMode: { default: 0 },
+          },
+          content: 'paragraph+',
+        },
+        paragraph: {
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: 'AFDP Bullet' },
+          },
+          content: 'inline*',
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        image: {
+          attrs: {
+            src: {},
+            alt: { default: '' },
+            title: { default: null },
+            styleName: { default: null },
+          },
+          inline: true,
+          group: 'inline',
+          draggable: true,
+          parseDOM: [
+            {
+              tag: 'img[src]',
+              getAttrs(dom) {
+                return {
+                  src: (dom as unknown as HTMLElement).getAttribute('src'),
+                  alt: (dom as unknown as HTMLElement).getAttribute('alt'),
+                  title: (dom as unknown as HTMLElement).getAttribute('title'),
+                  styleName: (dom as unknown as HTMLElement).getAttribute('styleName'),
+                };
+              },
+            },
+          ],
+          toDOM(node) {
+            const { src, alt, title, styleName } = node.attrs;
+            return ['img', { src, alt, title, styleName }];
+          },
+        },
+        text: {
+          marks: 'mark-font-size mark-font-type',
+        },
+      },
+      marks: {
+        'mark-font-size': {
+          attrs: {
+            pt: { default: 11 },
+            overridden: { default: false },
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: { default: 'Arial' },
+            overridden: { default: false },
+          },
+        },
+      },
+    });
+    const prevstatemhod = {
+      schema: schemamhod,
+      doc: schemamhod.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'image',
+                attrs: {
+                  src: 'path/to/image.jpg',
+                  alt: 'Image Alt Text',
+                  title: 'Image Title',
+                  styleName: '2',
+                },
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'image',
+                attrs: {
+                  src: 'path/to/image.jpg',
+                  alt: 'Image Alt Text',
+                  title: 'Image Title',
+                  styleName: '2',
+                },
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'image',
+                attrs: {
+                  src: 'path/to/image.jpg',
+                  alt: 'Image Alt Text',
+                  title: 'Image Title',
+                  styleName: '2',
+                },
+              },
+            ],
+          },
+        ],
+      }),
+      selection: { from: 2, to: 4 },
+    };
+
+    const spymhod = jest.spyOn(ccommand, 'getStyleLevel').mockReturnValue(2);
+    jest.spyOn(CustStyl, 'getCustomStyleByLevel').mockReturnValue({
+      styles: {
+        indent: '10',
+        align: 'left',
+        lineHeight: '',
+        nextLineStyleName: 'Normal',
+      },
+    } as unknown as null);
+    
     spymhod.mockClear();
     const mockview2 = {
       state: mockState,
@@ -3684,8 +5422,9 @@ describe('Cus Style Plugin-Pass', () => {
         mockview2
       )
     ).toBeDefined();
+    
   });
-  it('should handle manageHierarchyOnDelete when prevState.doc === nextState.doc', () => {
+ it('should handle manageHierarchyOnDelete when prevState.doc === nextState.doc', () => {
     expect(
       manageHierarchyOnDelete(
         { doc: 1 },
@@ -3750,13 +5489,24 @@ describe('onInitAppendTransaction', () => {
           content: [
             {
               type: 'text',
-              text: 'Hello, ProseMirror!',
+              text: 'H',
             },
+            {
+              type: 'text',
+              text: 't',
+            },
+            {
+              type: 'text',
+              text: 't',
+            },
+            
           ],
           marks: [
             { type: 'link', attrs: { ['overridden']: true } },
           ],
+          
         },
+   
       ],
     });
     mockdoc.resolve = () => { return { min: () => { return null; }, max: () => { return null; } } as unknown as ResolvedPos }
@@ -4037,10 +5787,10 @@ describe('onUpdateAppendTransaction', () => {
   });
 });
 
-
 describe('remapCounterFlags', () => {
   it('should handle remapCounterFlags', () => {
     const tr = { doc: { attrs: { counterFlags: { key: {} } } } };
     expect(remapCounterFlags(tr)).toBeUndefined();
   });
 });
+

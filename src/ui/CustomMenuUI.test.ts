@@ -677,12 +677,12 @@ describe('Custom Menu UI   ', () => {
       } as unknown as SyntheticEvent)
     ).toBeUndefined();
   });
-  it('should handle removeCustomStyleName', () => {
+  it('should handle removeCustomStyleName1', () => {
     expect(custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', null)).toBe(
       false
     );
   });
-  it('should handle removeCustomStyleName', () => {
+  it('should handle removeCustomStyleName2', () => {
     const state = {
       doc: mockdoc,
       schema: schema,
@@ -703,6 +703,46 @@ describe('Custom Menu UI   ', () => {
       })
     ).toBe(true);
   });
+
+
+  it('should handle removeCustomStyleName3', () => {
+    const state = {
+      doc: {
+        nodesBetween(from, to, callback) {
+          for (let i = from; i < to; i++) {
+            const node = {
+              content: {
+                content: [{
+                  marks: [
+                    { attrs: { styleName: 'AFDP_Bullet' } }
+                  ]
+                }]
+              },
+              type:{name:'paragraph'},
+              attrs: { styleName: 'AFDP_Bullet' } 
+            };
+            callback(node, i); 
+          }
+        },
+        nodeSize: 10 
+      },
+      schema: {}, 
+      selection: { from: 0, to: 1 }, 
+      plugins: [], 
+      empty: null ,
+      tr:{removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};},
+      removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};},
+      removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};},
+      removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};},
+      removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};}}}}}}}}}}}}}}}}}}}}}}
+    };
+  
+    const dispatchMock = jest.fn();
+  
+    const result = custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', dispatchMock);
+    expect(result).toBeTruthy();
+  });
+    
   it('should handle showStyleWindow', () => {
     const schema = new Schema({
       nodes: {

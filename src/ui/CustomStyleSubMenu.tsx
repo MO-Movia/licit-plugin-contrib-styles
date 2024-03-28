@@ -1,4 +1,4 @@
-import '@modusoperandi/licit-ui-commands/dist/ui/czi-custom-button.css';
+import '@modusoperandi/licit-ui-commands/ui/czi-custom-button.css';
 import React from 'react';
 import './custom-dropdown.css';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';

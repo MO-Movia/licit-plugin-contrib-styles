@@ -145,7 +145,7 @@ function getRequiredMarks(marks, markName, schema) {
     marks.push(schema[SPEC]['marks'][markName]);
   }
 }
-function createMarkAttributes(mark, existingAttr) {
+export function createMarkAttributes(mark, existingAttr) {
   if (mark) {
     const requiredAttrs = [...NEWATTRS];
     requiredAttrs.forEach((key) => {
@@ -178,21 +178,8 @@ function createNewAttributes(schema) {
   ALLOWED_MARKS.forEach((name) => {
     getRequiredMarks(marks, name, schema);
   });
-  for (let i = 0, name = ''; i < marks.length; i++) {
-    if (i < marks.length - 1) {
-      // even items are content.
-      // odd items are marks.
-      // Hence name is available only in the node.
-      if (0 === i % 2) {
-        const mark = marks[i + 1];
-        if (mark) {
-          name = mark.name;
-        }
-      }
-    } else {
-      name = '';
-    }
-    createMarkAttributes(marks[i], name, existingAttr);
+  for (let i = 0; i < marks.length; i++) {
+    createMarkAttributes(marks[i], existingAttr);
   }
   return schema;
 }

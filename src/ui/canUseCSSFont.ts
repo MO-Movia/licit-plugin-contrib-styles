@@ -16,7 +16,7 @@ export function canUseCSSFont(fontName: string): Promise<boolean> {
   ) {
     // Feature is not supported, install the CSS anyway
     // https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/check#Browser_compatibility
-    // TODO: Polyfill this.
+    // SL-1
     console.log('FontFaceSet is not supported');
     cached[fontName] = Promise.resolve(false);
   } else {

@@ -26,9 +26,11 @@ export function removeTextAlignAndLineSpacing(
 export function clearCustomStyleAttribute(node: Node) {
   if (node.attrs) {
     if (node.attrs.styleName) {
-      node.attrs.styleName = RESERVED_STYLE_NONE;
+      ((node.attrs as { styleName: string }).styleName) = RESERVED_STYLE_NONE;
     }
-    //ToDo: Need to handle indent override
-    node.attrs.indent = null;
+    //SL-3
+
+    ((node.attrs as { indent: string }).indent) = null;
+
   }
 }

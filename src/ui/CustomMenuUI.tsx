@@ -1,17 +1,12 @@
-import React from 'react';
+import React, { SyntheticEvent } from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Schema, Node } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
-import { EditorView } from 'prosemirror-view';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { uuid } from './Uuid.js';
 import './listType.css';
 import { CustomStyleItem } from './CustomStyleItem.js';
-
-import { atViewportCenter } from '@modusoperandi/licit-ui-commands';
-import { createPopUp } from '@modusoperandi/licit-ui-commands';
 import { AlertInfo } from './AlertInfo.js';
-
 import { CustomStyleSubMenu } from './CustomStyleSubMenu.js';
 import { CustomStyleEditor } from './CustomStyleEditor.js';
 import {
@@ -25,14 +20,13 @@ import {
   renameStyle,
   removeStyle,
 } from '../customStyle.js';
-import { setTextAlign } from '@modusoperandi/licit-ui-commands';
-import { setTextLineSpacing } from '@modusoperandi/licit-ui-commands';
+import { setTextAlign , setTextLineSpacing , atViewportCenter, createPopUp} from '@modusoperandi/licit-ui-commands';
 import { setParagraphSpacing } from '../ParagraphSpacingCommand.js';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec.js';
 
 // [FS] IRAD-1039 2020-09-24
 // UI to show the list buttons
-
+// eslint-disable-next-line
 export class CustomMenuUI extends React.PureComponent<any, any> {
   _activeCommand?: UICommand = null;
   _popUp = null;
@@ -40,19 +34,22 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   _styleName = null;
   _menuItemHeight = 28;
   // _popUpId = uuid();
-  props: {
-    className?: string;
-    commandGroups: Array<{ [key: string]: UICommand }>;
-    staticCommand: Array<{ [key: string]: UICommand }>;
-    disabled?: boolean;
-    dispatch: (tr: Transform) => void;
-    editorState: EditorState;
-    editorView?: EditorView;
-    icon?: string | React.Element<any> | null;
-    label?: string | React.Element<any> | null;
-    title?: string;
-    _style?: any;
-  };
+  // props: {
+  //   className?: string;
+  //   commandGroups: Array<{ [key: string]: UICommand }>;
+  //   staticCommand: Array<{ [key: string]: UICommand }>;
+  //   disabled?: boolean;
+  //   dispatch: (tr: Transform) => void;
+  //   editorState: EditorState;
+  //   editorView?: EditorView;
+  //   // icon?: string | React.Element<any> | null;
+  //   icon?: string | JSX.Element | null;
+  //   // label?: string | React.Element<any> | null;
+  //   label?: string | JSX.Element | null;
+  //   title?: string;
+  //   _style?: any;
+  //   onCommand?:any
+  // };
 
   _id = uuid();
   _selectedIndex = 0;
@@ -80,7 +77,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     let counter = 0;
     let selecteClassName = '';
     const selectedName = this.getTheSelectedCustomStyle(this.props.editorState);
-    commandGroups.forEach((group, _ii) => {
+    commandGroups.forEach((group) => {
       Object.keys(group).forEach((label) => {
         const command = group[label];
         counter++;
@@ -109,7 +106,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
         );
       });
     });
-    staticCommand.forEach((group, _ii) => {
+    staticCommand.forEach((group) => {
       Object.keys(group).forEach((label) => {
         const command = group[label];
         children1.push(
@@ -153,7 +150,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     return node.type.name === 'paragraph' || node.type.name === 'ordered_list';
   }
 
-  _onUIEnter = (command: UICommand, event: SyntheticEvent<*>) => {
+  _onUIEnter = (command: UICommand, event: SyntheticEvent<Element>) => {
     if (command.shouldRespondToUIEvent(event)) {
       // check the mouse clicked on down arror to show sub menu
       if (event.currentTarget.className === 'czi-custom-menu-item edit-icon') {
@@ -164,16 +161,16 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     }
   };
 
-  _execute = (command: UICommand, e: SyntheticEvent<*>) => {
+  _execute = (command: UICommand, e: SyntheticEvent<Element>) => {
     if (undefined !== command) {
       const { dispatch, editorState, editorView, onCommand } = this.props;
       command.execute(editorState, dispatch, editorView, e);
-      onCommand && onCommand();
+      onCommand?.();
     }
   };
 
   //shows the alignment and line spacing option
-  showSubMenu(command: UICommand, event: SyntheticEvent<*>) {
+  showSubMenu(command: UICommand, event: SyntheticEvent<Element>) {
     const anchor = event ? event.currentTarget : null;
 
     // close the popup toggling effect
@@ -205,7 +202,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                     this.props.editorState
                   )
                 ) {
-                  removeStyle(val.command._customStyleName).then((_success) => {
+                  removeStyle(val.command._customStyleName).then(() => {
                     // [FS] IRAD-1099 2020-11-17
                     // Issue fix: Even the applied style is removed the style name is showing in the editor
                     this.removeCustomStyleName(
@@ -246,13 +243,9 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     const textAlignNode = [];
 
     doc.nodesBetween(0, doc.nodeSize - 2, (node, pos) => {
-      if (node.content && node.content.content && node.content.content.length) {
-        if (
-          node.content &&
-          node.content.content &&
-          node.content.content[0].marks &&
-          node.content.content[0].marks.length
-        ) {
+      if (node.content?.content?.length) {
+        if (node?.content?.content?.[0]?.marks?.length)
+       {
           node.content.content[0].marks.some((mark) => {
             if (node.attrs.styleName === removedStyleName) {
               tasks.push({ node, pos, mark });
@@ -315,7 +308,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
       {
         anchor,
         position: atViewportCenter,
-        onClose: (_val) => {
+        onClose: () => {
           if (this._popUp) {
             this._popUp = null;
           }
@@ -325,7 +318,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   }
 
   //shows the alignment and line spacing option
-  showStyleWindow(command: UICommand, _event: SyntheticEvent<*>, mode) {
+  showStyleWindow(command, _event: SyntheticEvent<Element>, mode) {
     // const anchor = event ? event.currentTarget : null;
     // close the popup toggling effect
     if (this._stylePopup) {
@@ -408,7 +401,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                                 this.props.editorState.tr,
                                 this._styleName,
                                 val.styleName,
-                                obj.styles
+                                // obj.styles
                               );
                             }
                           });
@@ -439,13 +432,13 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     tr: Transform,
     oldStyleName,
     styleName,
-    _style
+    // _style
   ) {
     const { doc } = state;
 
     doc.descendants(function (child, pos) {
       if (oldStyleName === child.attrs.styleName) {
-        child.attrs.styleName = styleName;
+        (( child.attrs as { styleName: string }).styleName) = styleName;
         tr = tr.setNodeMarkup(pos, undefined, child.attrs);
       }
     });
@@ -458,7 +451,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     const { selection, doc } = editorState;
     const { from, to } = selection;
     let customStyleName = RESERVED_STYLE_NONE;
-    doc.nodesBetween(from, to, (node, _pos) => {
+    doc.nodesBetween(from, to, (node) => {
       if (this.isAllowedNode(node)) {
         if (node.attrs.styleName) {
           customStyleName = node.attrs.styleName;

@@ -4,7 +4,10 @@ import {
 } from './ParagraphSpacingCommand';
 import * as paragraphspacingcommand from './ParagraphSpacingCommand';
 import { schema } from 'prosemirror-schema-basic';
-import { TextSelection } from 'prosemirror-state';
+import { TextSelection,EditorState ,Transaction} from 'prosemirror-state';
+import {  Node, Schema } from 'prosemirror-model';
+import { Transform, StepResult, Mapping } from 'prosemirror-transform';
+
 
 describe('paragraphspacingcommand', () => {
   it('should handle setParagraphSpacing', () => {
@@ -18,7 +21,7 @@ describe('paragraphspacingcommand', () => {
     const trmock = {
       selection: TextSelection.create(doc, 0, 1), // Mock selection object
       doc: doc, // Mock doc object
-    };
+    } as unknown as Transaction;
 
     // Mock schema object with required nodes
     const mockschema = {
@@ -30,7 +33,7 @@ describe('paragraphspacingcommand', () => {
       },
     };
 
-    expect(setParagraphSpacing(trmock, mockschema)).toBeDefined();
+    expect(setParagraphSpacing(trmock , mockschema as unknown as Schema)).toBeDefined();
   });
   it('should handle setParagraphSpacing', () => {
     const doc = schema.node('doc', null, [
@@ -43,7 +46,7 @@ describe('paragraphspacingcommand', () => {
     const trmock = {
       selection: TextSelection.create(doc, 0, 1), // Mock selection object
       doc: doc, // Mock doc object
-    };
+    } as unknown as Transaction;
 
     // Mock schema object with required nodes
     const mockschema = {
@@ -54,7 +57,7 @@ describe('paragraphspacingcommand', () => {
         BLOCKQUOTE: 'blockquote-node',
       },
     };
-    expect(setParagraphSpacing(trmock, mockschema)).toBeDefined();
+    expect(setParagraphSpacing(trmock, mockschema as unknown as Schema)).toBeDefined();
   });
 });
 describe('ParagraphSpacingCommand ', () => {
@@ -64,7 +67,80 @@ describe('ParagraphSpacingCommand ', () => {
   it('should handle execute', () => {
     jest
       .spyOn(paragraphspacingcommand, 'setParagraphSpacing')
-      .mockReturnValue({ docChanged: true });
+      .mockReturnValue({
+        docChanged: true,
+        doc: new Node,
+        steps: [],
+        docs: [],
+        mapping: new Mapping,
+        before: new Node,
+        step: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        maybeStep: function (): StepResult {
+          throw new Error('Function not implemented.');
+        },
+        replace: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        replaceWith: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        delete: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        insert: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        replaceRange: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        replaceRangeWith: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        deleteRange: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        lift: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        join: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        wrap: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        setBlockType: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        setNodeMarkup: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        setNodeAttribute: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        setDocAttribute: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        addNodeMark: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        removeNodeMark: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        split: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        addMark: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        removeMark: function (): Transform {
+          throw new Error('Function not implemented.');
+        },
+        clearIncompatible: function (): Transform {
+          throw new Error('Function not implemented.');
+        }
+      });
     const doc = schema.node('doc', null, [
       schema.node('paragraph'),
       schema.node('heading'),
@@ -76,7 +152,7 @@ describe('ParagraphSpacingCommand ', () => {
       tr: {
         selection: TextSelection.create(doc, 0, 1), // Mock selection object
         doc: doc,
-        setSelection: (_x) => {
+        setSelection: () => {
           return {
             tr: {
               selection: {}, // Mock selection object
@@ -86,12 +162,12 @@ describe('ParagraphSpacingCommand ', () => {
         },
       },
     };
-    const mockview = {};
+   // const mockview = {};
     const dispatch = () => undefined;
     const psc = new ParagraphSpacingCommand('', true).execute(
-      mockstate,
+      mockstate as unknown as EditorState,
       dispatch,
-      mockview
+      // mockview
     );
     expect(psc).toBeDefined();
   });
@@ -119,15 +195,15 @@ describe('ParagraphSpacingCommand ', () => {
         },
         docChanged: true,
       },
-    };
-    const mockview = {};
+    } as unknown as EditorState;
+   // const mockview = {};
     const dispatch = () => {
       return true;
     };
     const psc = new ParagraphSpacingCommand('', true).execute(
       mockstate,
       dispatch,
-      mockview
+     // mockview
     );
     expect(psc).toBeDefined();
   });
@@ -141,7 +217,7 @@ describe('ParagraphSpacingCommand ', () => {
           return { docChanged: true };
         },
       },
-    };
+    } as unknown as EditorState;
     const psc = new ParagraphSpacingCommand().execute(mockstate, () => {
       return true;
     });

@@ -3,20 +3,21 @@ import { CustomStyleSubMenu } from './CustomStyleSubMenu';
 
 describe('CustomStyleSubMenu', () => {
   it('should handle onclick', () => {
-    const customstylesubmenu = new CustomStyleSubMenu({
-      command: {} as unknown as UICommand,
+    const props = {
+      command: {} as UICommand,
       disabled: true,
-      close: () => undefined,
-    });
-    customstylesubmenu.props = {
-      command: {},
-      disables: false,
-      close: () => {
-        return { key: 'closed' };
-      },
+      close: jest.fn(),
     };
-    const spy = jest.spyOn(customstylesubmenu.props, 'close');
-    customstylesubmenu.onButtonClick('close');
-    expect(spy).toHaveBeenLastCalledWith('close');
+
+
+    const customstylesubmenu = new CustomStyleSubMenu(props);
+
+
+    customstylesubmenu.onButtonClick({ type: 'close', command: props.command });
+
+
+    expect(props.close).toHaveBeenCalledWith({ type: 'close', command: props.command });
   });
 });
+
+

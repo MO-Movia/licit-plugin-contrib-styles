@@ -86,6 +86,7 @@ module.exports = {
     requestAnimationFrame: false,
     setTimeout: false,
     window: false,
+    HTMLCollectionOf:false
   },
 
   overrides: [

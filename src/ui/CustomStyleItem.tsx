@@ -1,4 +1,4 @@
-import '@modusoperandi/licit-ui-commands/dist/ui/czi-custom-button.css';
+import '@modusoperandi/licit-ui-commands/ui/czi-custom-button.css';
 import React from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
@@ -152,9 +152,17 @@ export class CustomStyleItem extends React.PureComponent<
   // To show Numbering in dropdown menu sample text
   sampleLevel(styles: HTMLStyles): string {
     let level = '';
-    if (this.props.hasText && styles?.hasNumbering) {
-      for (let i = 0; i < parseInt(`${styles.styleLevel}`); i++) {
-        level = level + '1.';
+    if (
+      this.props.hasText &&
+      styles &&
+      (styles.hasNumbering || styles.isList)
+    ) {
+      for (let i = 0; i < styles.styleLevel; i++) {
+        if (i === 0 && styles.prefixValue) {
+          level = level + styles.prefixValue + '1.';
+        } else {
+          level = level + '1.';
+        }
       }
     }
 

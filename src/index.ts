@@ -18,7 +18,7 @@ import {
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec.js';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
-import { Node, Schema } from 'prosemirror-model';
+import { Node, Schema ,Slice} from 'prosemirror-model';
 import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand.js';
 import { applyEffectiveSchema } from './EditorSchema.js';
 import type { StyleRuntime } from './StyleRuntime.js';
@@ -42,20 +42,20 @@ const requiredAddAttr = (node) => {
 // [FS] IRAD-1503 2021-07-02
 // Fix: Update the private plugin classes as a named export rather than the default
 export class CustomstylePlugin extends Plugin {
-  constructor(runtime: StyleRuntime, hideNumbering: boolean) {
+  constructor(runtime: StyleRuntime, hideNumbering?: boolean) {
     let csview = null;
     let firstTime = true;
     let loaded = false;
     super({
       key: new PluginKey('CustomstylePlugin'),
       state: {
-        init(_config, _state) {
+        init() {
           loaded = false;
           firstTime = true;
           setStyleRuntime(runtime, refreshToApplyStyles.bind(this));
           setHidenumberingFlag(hideNumbering || false);
         },
-        apply(tr, _prev, _oldState, _newState) {
+        apply(tr) {
           // [FS] IRAD-1202 2021-02-15
           remapCounterFlags(tr);
         },
@@ -64,7 +64,7 @@ export class CustomstylePlugin extends Plugin {
         // [FS] IRAD-1668 2022-01-21
         // dummy plugin view so that EditorView is accessible when refreshing the document
         // to apply styles after getting the styles.
-        this.csview = view;
+        csview = view;
         return {
           update: () => {
             /* This is intentional */
@@ -76,18 +76,18 @@ export class CustomstylePlugin extends Plugin {
       },
 
       props: {
-        handlePaste(_view, _event, slice) {
-          if (slice.content?.content[0]?.attrs) {
+        handlePaste(_view, _event, slice ) {
+          if ((slice.content as unknown as Slice)?.content[0]?.attrs) {     //LINTFIX
             slice1 = slice;
           }
           return false;
         },
         handleDOMEvents: {
-          keydown(view, _event) {
+          keydown(view) {
             csview = view;
           },
         },
-        nodeViews: [],
+        nodeViews: {},
       },
       appendTransaction: (transactions, prevState, nextState) => {
         let tr = null;
@@ -206,6 +206,7 @@ export function onUpdateAppendTransaction(
                   node,
                   startPos,
                   endPos,
+                  null,
                   opt
                 );
               } else {
@@ -221,6 +222,7 @@ export function onUpdateAppendTransaction(
                   node,
                   startPos,
                   endPos,
+                  null,
                   opt
                 );
               }
@@ -272,7 +274,7 @@ export function remapCounterFlags(tr) {
   // set counters for numbering.
   const cFlags = tr.doc.attrs.counterFlags;
   for (const key in cFlags) {
-    if (cFlags.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(cFlags, key)) {
       window[key] = true;
     }
   }
@@ -481,6 +483,8 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
   }
 
   const node = nextState.tr.doc.nodeAt(startPos);
+  const style = getCustomStyleByName(node.attrs?.styleName);
+  if (!style?.styles?.isList) {
   if (validateStyleName(node)) {
     if (
       node.content?.content &&
@@ -495,8 +499,10 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
         node,
         startPos,
         endPos,
+        null,
         opt
       );
+      }
     }
   }
   return tr;
@@ -526,6 +532,8 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
           IsActiveNode = true;
         }
         if (nextNode && IsActiveNode && nextNode.type.name === 'paragraph') {
+          const posList = prevState.selection.from - 1;
+          const Listnode = prevState.doc.nodeAt(posList);
           const style = getCustomStyleByName(newattrs.styleName);
           if (style?.styles?.nextLineStyleName) {
             // [FS] IRAD-1217 2021-02-24
@@ -534,6 +542,16 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
               resetTheDefaultStyleNameToNone(style.styles.nextLineStyleName),
               newattrs
             );
+            if (style.styles.isList === true) {
+              if (Listnode.isText === false) {
+                newattrs.indent = Listnode.attrs.indent;
+              } else {
+                const ListnodeAlt = prevState.doc.nodeAt(
+                  posList - Listnode.nodeSize
+                );
+                newattrs.indent = ListnodeAlt.attrs.indent;
+              }
+            }
             tr = tr.setNodeMarkup(nextNodePos, undefined, newattrs);
             // [FS] IRAD-1201 2021-02-18
             // get the nextLine Style from the current style object.
@@ -543,7 +561,7 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
                 : '',
               nextState.schema
             );
-            node.descendants((child, _pos) => {
+            node.descendants((child) => {
               if (child.type.name === 'text') {
                 marks.forEach((mark) => {
                   tr = tr.addStoredMark(mark);
@@ -581,6 +599,10 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       newattrs.styleName = nextLineStyleName;
       newattrs.indent = nextLineStyle.styles.indent;
       newattrs.align = nextLineStyle.styles.align;
+      // KNITE-864 08-03-2024 InnerLink functionality change
+      if(newattrs.innerLink){
+        newattrs.innerLink=null;
+        }
       // [FS] IRAD-1223 2021-03-04
       // Line spacing not working for next line style
       newattrs.lineSpacing = getLineSpacingValue(
@@ -619,7 +641,7 @@ function isDocChanged(transactions) {
   return transactions.some((transaction) => transaction.docChanged);
 }
 
-export function applyNormalIfNoStyle(nextState, tr, node, opt) {
+export function applyNormalIfNoStyle(nextState, tr, node, opt?) {
   if (!tr) {
     tr = nextState.tr;
   }
@@ -650,7 +672,7 @@ function updateStyleOverrideFlag(state, tr) {
     tr = state.tr;
   }
 
-  tr.doc.descendants(function (child, _pos) {
+  tr.doc.descendants(function (child) {
     const contentLen = child.content.size;
     if (tr && haveEligibleChildren(child, contentLen)) {
       const startPos = tr.curSelection.$anchor.pos; //pos
@@ -662,7 +684,6 @@ function updateStyleOverrideFlag(state, tr) {
         startPos,
         endPos,
         retObj,
-        state
       );
     }
   });

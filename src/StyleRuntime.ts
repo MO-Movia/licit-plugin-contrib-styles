@@ -15,13 +15,16 @@ export type HTMLStyles = {
   paragraphSpacingAfter?: string; // Spacing after a Paragraph
   paragraphSpacingBefore?: string; // Spacing before a Paragraph
   styleLevel?: number; // Numbering heirachy level
-  bulletLevel?: number; // Numbering heirachy level
+  bulletLevel?: string | boolean; // Numbering heirachy level
   lineHeight?: string; // Line spacing
   isLevelbased?: boolean; // true= Text indent will be based on Level
   indent?: string; // Text indent
   nextLineStyleName?: string;
   toc?: boolean;
   isHidden?: boolean;
+  strike?: string;
+  isList?: boolean;
+  prefixValue?: string;
 };
 
 export type Style = {
@@ -50,6 +53,8 @@ export type CSSStyle = {
   textDecoration?: string; //css text-decoration property
   textAlign?: string; //css text-align property
   lineHeight?: string; //css line-height property
+  isList?: boolean;
+  prefixValue?: string;
 };
 
 export type StyleRuntime = {

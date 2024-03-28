@@ -66,8 +66,8 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     return [HEADING_COMMANDS];
   }
 
-  isValidCustomstyle(_styleName) {
-    const bOK = isCustomStyleExists(this.state.styleName);
+  isValidCustomstyle() {
+    const bOK = isCustomStyleExists(this.state['styleName']);
     return bOK;
   }
 
@@ -123,9 +123,11 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
         // [FS] IRAD-1231 2021-03-02
         // Show the custom style as None for paste paragraph from outside.
         else {
-          node.attrs.styleName = RESERVED_STYLE_NONE;
+          const updatedAttrs = { ...node.attrs, styleName: RESERVED_STYLE_NONE };
+          node = { ...node, attrs: updatedAttrs } as unknown as Node;
           customStyleName = RESERVED_STYLE_NONE;
-        }
+      }
+
       }
     });
     let backgroundColorClass = 'width-100';
@@ -139,12 +141,11 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
         // [FS] IRAD-1008 2020-07-16
         // Disable font type menu on editor disable state
         commandGroups={this.getCommandGroups()}
-        disabled={!!(editorView?.disabled || !this.hasRuntime)}
+        disabled={!this.hasRuntime}
         dispatch={dispatch}
         editorState={editorState}
         editorView={editorView}
         label={customStyleName}
-        parent={this}
         staticCommand={this.staticCommands()}
       />
     );

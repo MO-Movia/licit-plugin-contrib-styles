@@ -47,7 +47,6 @@
 }
 
 #container1 {
-  /* background-color: #f9f9f9; */
   display: flex;
   justify-content: space-between;
   line-height: 2;

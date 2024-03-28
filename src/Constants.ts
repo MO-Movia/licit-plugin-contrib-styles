@@ -6,7 +6,7 @@ export const MARKFROM = 'markFrom';
 export const PARAGRAPH = 'paragraph';
 export const STYLEKEY = 'styleName';
 export const ATTR_OVERRIDDEN = 'overridden';
-
+// eslint-disable-next-line
 export type KeyValuePair = { [key: string]: any };
 
 export const DEFAULT_NORMAL_STYLE = {

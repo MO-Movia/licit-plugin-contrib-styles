@@ -140,7 +140,7 @@ describe('CustomStyleEditor', () => {
     const event = { target: { value: 'None' } };
     customstyleeditor.onLevelChange(event);
    expect(customstyleeditor.state.styles.styleLevel).toEqual(undefined);
-  
+
   });
   it('should handle onBulletLevelChange', () => {
     const event = { target: { value: '' } };
@@ -1076,7 +1076,7 @@ describe('CustomStyleEditor', () => {
         nodesBetween: jest.fn().mockImplementation((start, end, callback) => {
           const node = {
             attrs: {
-              styleName: 'YourCustomStyle', 
+              styleName: 'YourCustomStyle',
             },
             content: {
               content: [ ],
@@ -1088,14 +1088,14 @@ describe('CustomStyleEditor', () => {
     };
     customstyleeditor.state = {
       editorView: { state: editorState },
-      styleName: 'YourCustomStyle', 
+      styleName: 'YourCustomStyle',
     };
-  
+
     const result = customstyleeditor.isCustomStyleAlreadyApplied();
-  
+
     expect(result).toBe(false);
   });
-  
+
   it('should return true when styleLevel is 1 and isList is true', () => {
     customstyleeditor.state = {
       styles: {
@@ -1123,7 +1123,7 @@ describe('CustomStyleEditor', () => {
       otherStyleSelected: '',
       customStyles: [{ styles: { styleLevel: 2 }, styleName: 'test' }],
     };
-    const result = customstyleeditor.checkCondition(true); 
+    const result = customstyleeditor.checkCondition(true);
     expect(result).toBe(true);
   });
 
@@ -1134,7 +1134,7 @@ describe('CustomStyleEditor', () => {
         nodesBetween: jest.fn().mockImplementation((start, end, callback) => {
           const node = {
             attrs: {
-              styleName: 'YourCustomStyle', 
+              styleName: 'YourCustomStyle',
             },
             content: {
               content: ['test'],
@@ -1147,11 +1147,11 @@ describe('CustomStyleEditor', () => {
 
     customstyleeditor.state = {
       editorView: { state: editorState },
-      styleName: 'YourCustomStyle', 
+      styleName: 'YourCustomStyle',
     };
-  
+
     const result = customstyleeditor.isCustomStyleAlreadyApplied();
-  
+
     expect(result).toBe(true);
   });
 

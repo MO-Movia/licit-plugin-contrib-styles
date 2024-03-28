@@ -6,11 +6,7 @@ import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { uuid } from './Uuid.js';
 import './listType.css';
 import { CustomStyleItem } from './CustomStyleItem.js';
-
-import { atViewportCenter } from '@modusoperandi/licit-ui-commands';
-import { createPopUp } from '@modusoperandi/licit-ui-commands';
 import { AlertInfo } from './AlertInfo.js';
-
 import { CustomStyleSubMenu } from './CustomStyleSubMenu.js';
 import { CustomStyleEditor } from './CustomStyleEditor.js';
 import {
@@ -24,8 +20,7 @@ import {
   renameStyle,
   removeStyle,
 } from '../customStyle.js';
-import { setTextAlign } from '@modusoperandi/licit-ui-commands';
-import { setTextLineSpacing } from '@modusoperandi/licit-ui-commands';
+import { setTextAlign , setTextLineSpacing , atViewportCenter, createPopUp} from '@modusoperandi/licit-ui-commands';
 import { setParagraphSpacing } from '../ParagraphSpacingCommand.js';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec.js';
 
@@ -170,7 +165,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     if (undefined !== command) {
       const { dispatch, editorState, editorView, onCommand } = this.props;
       command.execute(editorState, dispatch, editorView, e);
-      onCommand && onCommand();
+      onCommand?.();
     }
   };
 
@@ -248,13 +243,9 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     const textAlignNode = [];
 
     doc.nodesBetween(0, doc.nodeSize - 2, (node, pos) => {
-      if (node.content && node.content.content && node.content.content.length) {
-        if (
-          node.content &&
-          node.content.content &&
-          node.content.content[0].marks &&
-          node.content.content[0].marks.length
-        ) {
+      if (node.content?.content?.length) {
+        if (node?.content?.content?.[0]?.marks?.length)
+       {
           node.content.content[0].marks.some((mark) => {
             if (node.attrs.styleName === removedStyleName) {
               tasks.push({ node, pos, mark });
@@ -448,7 +439,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     doc.descendants(function (child, pos) {
       if (oldStyleName === child.attrs.styleName) {
         (( child.attrs as { styleName: string }).styleName) = styleName;
-        // child.attrs.styleName = styleName;
         tr = tr.setNodeMarkup(pos, undefined, child.attrs);
       }
     });

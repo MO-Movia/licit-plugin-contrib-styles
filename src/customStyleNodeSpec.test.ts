@@ -2,7 +2,6 @@ import {
   toCustomStyleDOM,
   getCustomStyleAttrs,
   countersRefresh,
-  ATTRIBUTE_LIST_STYLE_LEVEL,
 } from './CustomStyleNodeSpec.js';
 import * as customstyle from './customStyle';
 import { Node, DOMOutputSpec } from 'prosemirror-model';

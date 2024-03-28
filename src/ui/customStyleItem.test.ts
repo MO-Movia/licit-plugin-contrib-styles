@@ -128,7 +128,7 @@ describe('customstyleitem', () => {
     const styles = {
       hasNumbering: false,
       isList: false,
-      styleLevel: 2, 
+      styleLevel: 2,
       hasBullet: true,
     };
     const result = customstyleitem.sampleLevel(styles);
@@ -137,9 +137,9 @@ describe('customstyleitem', () => {
 
   it('should return a string of "1." repeated according to styleLevel when hasText is true and either styles.hasNumbering or styles.isList is true', () => {
     const styles = {
-      hasNumbering: true, 
-      isList: true, 
-      styleLevel: 3, 
+      hasNumbering: true,
+      isList: true,
+      styleLevel: 3,
       hasBullet: false,
     };
     const result = customstyleitem.sampleLevel(styles);
@@ -152,7 +152,7 @@ describe('customstyleitem', () => {
       isList: true,
       styleLevel: 3,
       hasBullet: false,
-      prefixValue: 'A', 
+      prefixValue: 'A',
     };
     const result = customstyleitem.sampleLevel(styles);
     expect(result).toBe('A1.1.1.');

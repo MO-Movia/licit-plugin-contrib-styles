@@ -53,6 +53,52 @@ describe('CustomStyleCommand', () => {
   };
   const customstylecommand = new CustomStyleCommand(styl, 'A_12');
 
+  it('should handle allowCustomLevelIndent when condition check delta < 0 1114 else ku', () => {
+    const doc = {
+      nodeSize:10,
+      resolve: () => {
+        return{parent:{type:{name:'paragraph'}, attrs:{styleName:'dont know'}}};
+      },
+    } as unknown as Node;
+    const tr = new Transform(doc);
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValueOnce({
+        styles: { styleLevel: 1, hasNumbering: true },
+      } as unknown as Style);
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 0)).toBeFalsy();
+  });
+
+  it('should handle allowCustomLevelIndent when condition check nodeStyleLevel >= styleLevel && styleLevel - nodeStyleLevel === 1', () => {
+    const doc = {
+      resolve: () => {
+        return{parent:{type:{name:'paragraph'}, attrs:{styleName:'dont know'}}};
+      },
+    } as unknown as Node;
+    const tr = new Transform(doc);
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValueOnce({
+        styles: { styleLevel: 1, hasNumbering: true },
+      } as unknown as Style);
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 1)).toBeTruthy();
+  });
+  it('should handle allowCustomLevelIndent when condition check !nodeStyleLevel >= styleLevel && styleLevel - nodeStyleLevel === 1', () => {
+    const doc = {
+      resolve: () => {
+        return{parent:{type:{name:'paragraph'}, attrs:{styleName:'dont know'}}};
+      },
+    } as unknown as Node;
+    const tr = new Transform(doc);
+    jest
+      .spyOn(customstyles, 'getCustomStyleByName')
+      .mockReturnValueOnce({
+        styles: { styleLevel: 2, hasNumbering: true },
+      } as unknown as Style);
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 1)).toBeFalsy();
+  });
+
+
   it('should resolve with undefined', async () => {
     const result = await customstylecommand.waitForUserInput();
     expect(result).toBeUndefined();
@@ -884,7 +930,22 @@ describe('getMarkByStyleName', () => {
           },
         },
       },
-
+      // spec: {
+      //   nodes: {
+      //     doc: {
+      //       content: 'paragraph+',
+      //     },
+      //     text: {},
+      //     paragraph: {
+      //       content: 'text*',
+      //       group: 'block',
+      //       parseDOM: [{ tag: 'p' }],
+      //       toDOM() {
+      //         return ['p', 0];
+      //       },
+      //     },
+      //   },
+      // },
     });
     expect(getMarkByStyleName('test', mockSchema)).toBeDefined();
   });
@@ -2071,7 +2132,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
     ],
   });
 
-  // Create the EditorState
+
   const statemock = { schema: schema, doc: doc, selection: { from: 0, to: 1 } };
   const schema1 = new Schema({
     nodes: {
@@ -2288,9 +2349,8 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
     ],
   };
 
-  // Create the ProseMirror node from JSON
   const nodemock = schema1.nodeFromJSON(json);
-  //const nodemock = {type:'paragraph',attrs:{align:'left',color:null,id:null,indent:0,lineSpacing:null,paddingBottom:null,paddingTop:null,capco:null,styleName:'FM_chpara'},content:[{type:'text',marks:[{type:'mark-font-size',attrs:{pt:18,overridden:false}},{type:'mark-font-type',attrs:{name:'Times New Roman',overridden:false}},{type:'mark-text-color',attrs:{color:'#0d69f2',overridden:false}}],text:'fggfdfgfghfghfgh'}]}
+
   it('should handle addMarksToLine', () => {
     expect(
       addMarksToLine(trmock, statemock, nodemock, 0, true)
@@ -2332,8 +2392,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         },
       ],
     };
-
-    // Create the ProseMirror node from JSON
     const nodemock = schema1.nodeFromJSON(json);
     expect(
       addMarksToLine(trmock, statemock, nodemock, 0, false)
@@ -2344,68 +2402,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       manageElementsAfterSelection([{ node: nodemock }], statemock, trmock)
     ).toBeDefined();
   });
-  it('should handle manageElementsAfterSelection', () => {
-    expect(
-      manageElementsAfterSelection([{ node: nodemock }], statemock, trmock)
-    ).toBeDefined();
-  });
-
-  // fdescribe('manageElementsAfterSelection', () => {
-  //   it('should update node attributes when style exists', () => {
-  //     const nodeArray = [
-  //       {
-  //         node: { attrs: { styleName: 'existingStyle' } },
-  //         pos: 1,
-  //       },
-  //     ];
-  //     const state = {}; // Mocked state object
-  //     let tr = {}; // Mocked transaction object
-
-  //     // Mocking getStyleLevel and getCustomStyleByLevel functions
-  //     const originalGetStyleLevel = getStyleLevel;
-  //     const originalGetCustomStyleByLevel = customstyles.getCustomStyleByLevel;
-  //     //getStyleLevel = jest.fn().mockReturnValue(2); // Mocking a style level
-
-  //     const getCustomStyleByLevel = jest
-  //       .spyOn(customstyles, 'getCustomStyleByLevel')
-  //       .mockReturnValue(null);
-
-  //     tr = manageElementsAfterSelection(nodeArray, state, tr);
-
-  //     expect(getStyleLevel).toHaveBeenCalledWith('existingStyle');
-  //     expect(getCustomStyleByLevel).toHaveBeenCalledWith(1); // Assuming 1 is the expected new style level
-  //     // expect(tr.setNodeMarkup).toHaveBeenCalledWith(1, undefined, { styleName: 'newStyle' });
-
-  //     // // Reset the mocks
-  //     // getStyleLevel = originalGetStyleLevel;
-  //     // getCustomStyleByLevel = originalGetCustomStyleByLevel;
-  //   });
-
-  //   // it('should exit loop when condition is met', () => {
-  //   //   const nodeArray = [{
-  //   //     node: { attrs: { styleName: 'existingStyle' } },
-  //   //     pos: 1,
-  //   //   }];
-  //   //   const state = {}; // Mocked state object
-  //   //   let tr = {}; // Mocked transaction object
-
-  //   //   // Mocking getStyleLevel function to always return the same level
-  //   //   const originalGetStyleLevel = getStyleLevel;
-  //   //   getStyleLevel = jest.fn().mockReturnValue(2); // Mocking a style level
-
-  //   //   // Call the function
-  //   //   tr = manageElementsAfterSelection(nodeArray, state, tr);
-
-  //   //   // Expectations
-  //   //   expect(getStyleLevel).toHaveBeenCalledWith('existingStyle');
-  //   //   // Assuming the loop should exit without calling setNodeMarkup
-  //   //   expect(tr.setNodeMarkup).not.toHaveBeenCalled();
-
-  //   //   // Reset the mocks
-  //   //   getStyleLevel = originalGetStyleLevel;
-  //   // });
-  // });
-
   it('should handle insertParagraph', () => {
     const nodeattrs = {
       align: 'left',
@@ -4175,6 +4171,49 @@ describe('allowCustomLevelIndent', () => {
     const tr = new Transform(doc);
     expect(allowCustomLevelIndent(tr, 0, 'Normal', 1)).toBeFalsy();
   });
+
+  it('should handle allowCustomLevelIndent when condition check nodeStyleLevel >= styleLevel', () => {
+    const doc = {
+      resolve: () => {
+        return{parent:{type:{name:'paragraph'}, attrs:{styleName:'dont know'}}};
+      },
+    } as unknown as Node;
+    const tr = new Transform(doc);
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 1)).toBeTruthy();
+  });
+
+  it('should handle allowCustomLevelIndent when condition check delta < 0', () => {
+    const doc = {
+      nodeSize:10,
+      resolve: () => {
+        return{parent:{type:{name:'paragraph'}, attrs:{styleName:'dont know'}}};
+      },
+    } as unknown as Node;
+    const tr = new Transform(doc);
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 0)).toBeTruthy();
+  });
+
+  it('should handle allowCustomLevelIndent when condition check delta < 0 && !isAllowedNode(node)', () => {
+    const doc = {
+      nodeSize:10,
+      resolve: () => {
+        return{parent:{type:{name:'paragph'}, attrs:{styleName:'dont know'}}};
+      },
+    } as unknown as Node;
+    const tr = new Transform(doc);
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 0)).toBeFalsy();
+  });
+
+  it('should handle allowCustomLevelIndent when condition check !isAllowedNode(node)', () => {
+    const doc = {
+      resolve: () => {
+        return{parent:{type:{name:'paragra'}, attrs:{styleName:'dont know'}}};
+      },
+    } as unknown as Node;
+    const tr = new Transform(doc);
+    expect(allowCustomLevelIndent(tr, 0, 'Normal', 1)).toBeFalsy();
+  });
+
   it('should handle allowCustomLevelIndent when delta = 0', () => {
     const doc = {
       resolve: () => {

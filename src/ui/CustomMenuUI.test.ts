@@ -719,30 +719,30 @@ describe('Custom Menu UI   ', () => {
                 }]
               },
               type:{name:'paragraph'},
-              attrs: { styleName: 'AFDP_Bullet' } 
+              attrs: { styleName: 'AFDP_Bullet' }
             };
-            callback(node, i); 
+            callback(node, i);
           }
         },
-        nodeSize: 10 
+        nodeSize: 10
       },
-      schema: {}, 
-      selection: { from: 0, to: 1 }, 
-      plugins: [], 
+      schema: {},
+      selection: { from: 0, to: 1 },
+      plugins: [],
       empty: null ,
       tr:{removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};},
       removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};},
       removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};},
       removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};},
-      removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};}}}}}}}}}}}}}}}}}}}}}}
+      removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};}};}};}};}};}};}};}};}};}};}};}}
     };
-  
+
     const dispatchMock = jest.fn();
-  
+
     const result = custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', dispatchMock);
     expect(result).toBeTruthy();
   });
-    
+
   it('should handle showStyleWindow', () => {
     const schema = new Schema({
       nodes: {

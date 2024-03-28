@@ -68,7 +68,6 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
       } else {
         output[1][ATTRIBUTE_LIST_STYLE_LEVEL] = styleLevel;
       }
-      // output[1][HIDE_STYLE_LEVEL] = getHidenumberingFlag();
     } else {
       output[1][ATTRIBUTE_STYLE_LEVEL] = String(styleLevel);
       output[1][HIDE_STYLE_LEVEL] = getHidenumberingFlag();

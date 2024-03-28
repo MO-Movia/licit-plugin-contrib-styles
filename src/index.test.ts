@@ -497,8 +497,8 @@ describe('', () => {
     const linkmark = new Mark();
 
     class Transaction {
-      amount: any;
-      meta: any;
+      amount;
+      meta;
       constructor(amount, meta) {
         this.amount = amount;
         this.meta = meta;
@@ -671,8 +671,8 @@ describe('', () => {
     const linkmark = new Mark();
 
     class Transaction {
-      amount: any;
-      meta: any;
+      amount;
+      meta;
       constructor(amount, meta) {
         this.amount = amount;
         this.meta = meta;
@@ -830,7 +830,7 @@ describe('', () => {
           },
           doc: mockdoc,
         },
-        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before(val) { return 5; } } }, tr: { doc: { nodeAt(a) { return { type: { name: 'table' } }; } } } } },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } } }, tr: { doc: { nodeAt() { return { type: { name: 'table' } }; } } } } },
         mockTransactions,
         mockSlice1
       )
@@ -840,8 +840,8 @@ describe('', () => {
     const linkmark = new Mark();
 
     class Transaction {
-      amount: any;
-      meta: any;
+      amount;
+      meta;
       constructor(amount, meta) {
         this.amount = amount;
         this.meta = meta;
@@ -913,9 +913,7 @@ describe('', () => {
         },
       ],
     });
-    function mockResolve(pos) {
-      console.log('Resolved position:', pos);
-    }
+
 
     // Add the resolve method to the document
     mockdoc.resolve = () => { return { parent: { content: { content: [{ attrs: null }] } } } as unknown as ResolvedPos; };
@@ -1007,7 +1005,7 @@ describe('', () => {
           },
           doc: mockdoc,
         },
-        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before(val) { return 5; } }, $to: { after(a) { return 10; } } }, tr: { doc: { nodeAt(a) { return { type: { name: 'eatho onu' } }; } } } } },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } }, $to: { after() { return 10; } } }, tr: { doc: { nodeAt() { return { type: { name: 'eatho onu' } }; } } } } },
         mockTransactions,
         mockSlice1
       )
@@ -1017,8 +1015,8 @@ describe('', () => {
     const linkmark = new Mark();
 
     class Transaction {
-      amount: any;
-      meta: any;
+      amount;
+      meta;
       constructor(amount, meta) {
         this.amount = amount;
         this.meta = meta;
@@ -1179,7 +1177,7 @@ describe('', () => {
           },
           doc: mockdoc,
         },
-        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before(val) { return 5; } } }, tr: { doc: { nodeAt(a) { return { type: { name: 'table' } }; } } } } },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } } }, tr: { doc: { nodeAt() { return { type: { name: 'table' } }; } } } } },
         mockTransactions,
         mockSlice1
       )
@@ -1190,8 +1188,8 @@ describe('', () => {
     const linkmark = new Mark();
 
     class Transaction {
-      amount: any;
-      meta: any;
+      amount;
+      meta;
       constructor(amount, meta) {
         this.amount = amount;
         this.meta = meta;
@@ -1352,29 +1350,17 @@ describe('', () => {
           },
           doc: mockdoc,
         },
-        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before(val) { return 5; } }, $to: { after(a) { return 10; } } }, tr: { doc: { nodeAt(a) { return { type: { name: 'eatho onu' } }; } } } } },
+        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } }, $to: { after() { return 10; } } }, tr: { doc: { nodeAt() { return { type: { name: 'eatho onu' } }; } } } } },
         mockTransactions,
         mockSlice1
       )
     ).toStrictEqual({});
   });
 });
-const mockNextState = {
-  tr: {}
-};
 
-const mockNode = {
-  attrs: {
-    styleName: 'mockStyle'
-  },
-  content: {
-    size: 5
-  }
-};
 
-const mockOpt = {};
 
-const mockApplyLatestStyle = jest.fn((styleName, nextState, tr, child, pos, end, opt) => {
+jest.fn((tr) => {
   return tr;
 });
 describe('Style Plugin', () => {

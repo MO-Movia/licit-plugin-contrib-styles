@@ -29,7 +29,7 @@ export function clearCustomStyleAttribute(node: Node) {
       ((node.attrs as { styleName: string }).styleName) = RESERVED_STYLE_NONE;
     }
     //SL-3
- 
+
     ((node.attrs as { indent: string }).indent) = null;
 
   }

@@ -745,7 +745,7 @@ function applyStyleEx(
           state,
           styleProp
         );
-      
+
     }
   }
 
@@ -990,7 +990,7 @@ function createEmptyElement(
                   appliedLevel: appliedLevel,
                   currentLevel: subsequantLevel,
                 });
-              
+
             }
           } else if (startPos >= item.pos){
               if (
@@ -1020,9 +1020,9 @@ function createEmptyElement(
                     appliedLevel: appliedLevel,
                     currentLevel: subsequantLevel,
                   });
-                
+
               }
-            
+
           }
           counter++;
         });

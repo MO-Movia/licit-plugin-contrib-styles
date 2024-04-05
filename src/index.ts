@@ -155,13 +155,11 @@ export function onUpdateAppendTransaction(
   slice1
 ) {
   const opt = 1;
-  if (!ref.firstTime) {
-    // when user updates
-    if (!slice1) {
-      tr = updateStyleOverrideFlag(nextState, tr);
-    }
-    tr = manageHierarchyOnDelete(prevState, nextState, tr, csview);
+  // when user updates
+  if (!slice1) {
+    tr = updateStyleOverrideFlag(nextState, tr);
   }
+  tr = manageHierarchyOnDelete(prevState, nextState, tr, csview);
 
   tr = applyStyleForEmptyParagraph(nextState, tr);
 

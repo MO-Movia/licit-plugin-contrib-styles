@@ -721,8 +721,10 @@ function applyStyleEx(
   startPos: number,
   endPos: number,
   way: number,
-  opt?: number
+  opt?: number,
+  overriddenFlag?: Boolean
 ) {
+  let overriddenSave;
   const loading = !styleProp;
   if (!opt) {
     if (loading) {
@@ -761,6 +763,8 @@ function applyStyleEx(
     // [FS] IRAD-1074 2020-10-22
     // Issue fix on not removing center alignment when switch style with center
     // alignment to style with left alignment
+    overriddenSave = newattrs.align;
+
     newattrs.align = null;
     newattrs.lineSpacing = null;
 
@@ -810,6 +814,12 @@ function applyStyleEx(
     });
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
+    if (newattrs.overriddenAlign === true && overriddenFlag !== true) {
+      newattrs.align = overriddenSave;
+    }
+    if (overriddenFlag === true) {
+      newattrs.overriddenAlign = false;
+    }
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     (tr as Transaction).storedMarks = storedmarks;
   }
@@ -1338,7 +1348,8 @@ export function applyLatestStyle(
   startPos: number,
   endPos: number,
   style?: Style,
-  opt?: number
+  opt?: number,
+  overriddenFlag?: Boolean
 ) {
   const way = 1;
   tr = applyStyleEx(
@@ -1350,7 +1361,8 @@ export function applyLatestStyle(
     startPos,
     endPos,
     way,
-    opt
+    opt,
+    overriddenFlag
   );
   // apply bold first word/sentence custom style
   tr = applyLineStyle(state, tr, node, startPos);
@@ -1427,7 +1439,6 @@ export function handleRemoveMarks(
       tr = tr.removeMark(from, to, mark.type);
     }
   });
-  tr = setTextAlign(tr, schema, null);
   return tr;
 }
 
@@ -1610,7 +1621,8 @@ export function updateDocument(
   state: EditorState,
   tr: Transform,
   styleName: string,
-  style: Style
+  style: Style,
+  overriddenFlag?: Boolean
 ) {
   const { doc } = state;
   doc.descendants(function (child, pos) {
@@ -1623,7 +1635,9 @@ export function updateDocument(
         child,
         pos,
         pos + contentLen + 1,
-        style
+        style,
+        undefined,
+        overriddenFlag
       );
     }
   });

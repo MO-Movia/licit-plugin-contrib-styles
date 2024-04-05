@@ -360,13 +360,15 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                   saveStyle(val).then((result) => {
                     if (result) {
                       setStyles(result);
+                      let overriddenFlag = true;
                       result.forEach((obj) => {
                         if (val.styleName === obj.styleName) {
                           tr = updateDocument(
                             this.props.editorState,
                             this.props.editorState.tr,
                             val.styleName,
-                            obj
+                            obj,
+                            overriddenFlag
                           );
                         }
                       });

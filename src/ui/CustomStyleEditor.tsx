@@ -113,7 +113,12 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       case 'underline':
         // copy the current style values, and flip the matching value
         state = { styles: { ...this.state.styles } };
-        state.styles[style] = !state.styles[style];
+        if (state.styles[style] === true) {
+          state.styles[style] = undefined;
+        } else {
+          state.styles[style] = !state.styles[style];
+        }
+        
         break;
 
       case 'name':

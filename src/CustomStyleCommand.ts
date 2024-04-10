@@ -736,18 +736,17 @@ function applyStyleEx(
         tr,
         state
       );
-    } else if (way === 0)  {
+    } else if (way === 0) {
       // [FS] IRAD-1087 2020-11-02
       // Issue fix: applied link is missing after applying a custom style.
-        tr = removeAllMarksExceptLink(
-          startPos,
-          endPos,
-          tr,
-          state.schema,
-          state,
-          styleProp
-        );
-
+      tr = removeAllMarksExceptLink(
+        startPos,
+        endPos,
+        tr,
+        state.schema,
+        state,
+        styleProp
+      );
     }
   }
 
@@ -767,7 +766,9 @@ function applyStyleEx(
 
     newattrs.align = null;
     newattrs.lineSpacing = null;
-
+    if (way === 0) {
+      newattrs.overriddenAlign = false;
+    }
     // [FS] IRAD-1131 2021-01-12
     // Indent overriding not working on a paragraph where custom style is applied
     //newattrs.indent = null;
@@ -993,46 +994,43 @@ function createEmptyElement(
         nodesBeforeSelection.forEach((item) => {
           subsequantLevel = Number(getStyleLevel(item.node.attrs.styleName));
           if (0 === startPos && 0 === counter) {
-             if (subsequantLevel !== appliedLevel) {
+            if (subsequantLevel !== appliedLevel) {
+              newattrs = { ...item.node.attrs };
+              posArray.push({
+                pos: startPos,
+                appliedLevel: appliedLevel,
+                currentLevel: subsequantLevel,
+              });
+            }
+          } else if (startPos >= item.pos) {
+            if (
+              startPos !== 0 &&
+              RESERVED_STYLE_NONE !== item.node.attrs.styleName &&
+              Number(getStyleLevel(item.node.attrs.styleName)) > 0
+            ) {
+              if (appliedLevel - subsequantLevel > 1) {
                 newattrs = { ...item.node.attrs };
+                posArray = [];
                 posArray.push({
                   pos: startPos,
                   appliedLevel: appliedLevel,
                   currentLevel: subsequantLevel,
                 });
-
-            }
-          } else if (startPos >= item.pos){
-              if (
-                startPos !== 0 &&
-                RESERVED_STYLE_NONE !== item.node.attrs.styleName &&
-                Number(getStyleLevel(item.node.attrs.styleName)) > 0
-              ) {
-                if (appliedLevel - subsequantLevel > 1) {
-                  newattrs = { ...item.node.attrs };
-                  posArray = [];
-                  posArray.push({
-                    pos: startPos,
-                    appliedLevel: appliedLevel,
-                    currentLevel: subsequantLevel,
-                  });
-                } else if (1 === appliedLevel - subsequantLevel) {
-                  posArray = [];
-                  hasNodeAfter = true;
-                }
-              } else  if (
-                startPos !== 0 &&
-                RESERVED_STYLE_NONE === item.node.attrs.styleName
-              ){
-                  newattrs = { ...item.node.attrs };
-                  posArray.push({
-                    pos: startPos,
-                    appliedLevel: appliedLevel,
-                    currentLevel: subsequantLevel,
-                  });
-
+              } else if (1 === appliedLevel - subsequantLevel) {
+                posArray = [];
+                hasNodeAfter = true;
               }
-
+            } else if (
+              startPos !== 0 &&
+              RESERVED_STYLE_NONE === item.node.attrs.styleName
+            ) {
+              newattrs = { ...item.node.attrs };
+              posArray.push({
+                pos: startPos,
+                appliedLevel: appliedLevel,
+                currentLevel: subsequantLevel,
+              });
+            }
           }
           counter++;
         });
@@ -1122,11 +1120,11 @@ export function allowCustomLevelIndent(
               allowIndent = true;
               break;
             } else {
-              index = index - node.nodeSize || 0;   //NOSONAR Need to assign the index for the logic
+              index = index - node.nodeSize || 0; //NOSONAR Need to assign the index for the logic
             }
           }
         } else {
-          index = index - node.nodeSize || 0;  //NOSONAR Need to assign the index for the logic
+          index = index - node.nodeSize || 0; //NOSONAR Need to assign the index for the logic
         }
       }
     }
@@ -1141,14 +1139,14 @@ export function allowCustomLevelIndent(
             const nodeStyleLevel = Number(getStyleLevel(node.attrs.styleName));
             if (nodeStyleLevel >= styleLevel) {
               allowIndent = true;
-              index = index - node.nodeSize;   //NOSONAR Need to assign the index for the logic
+              index = index - node.nodeSize; //NOSONAR Need to assign the index for the logic
               break;
             } else {
-              index = index + node.nodeSize;   //NOSONAR Need to assign the index for the logic
+              index = index + node.nodeSize; //NOSONAR Need to assign the index for the logic
             }
           }
         } else {
-          index = index + node.nodeSize;   //NOSONAR Need to assign the index for the logic
+          index = index + node.nodeSize; //NOSONAR Need to assign the index for the logic
         }
       }
     }
@@ -1156,7 +1154,6 @@ export function allowCustomLevelIndent(
 
   return allowIndent;
 }
-
 
 // Mange heirarchy for the elements after selection
 export function manageElementsAfterSelection(nodeArray, state, tr) {
@@ -1181,13 +1178,17 @@ export function manageElementsAfterSelection(nodeArray, state, tr) {
       } else {
         index = nodeArray.length + 1;
       }
-    } else if (subsequantLevel !== 0 && counter === 0 && nodeArray.length === 0)  {
-        const style = getCustomStyleByLevel(1);
-        if (style) {
-          const newattrs = { ...item.node.attrs };
-          newattrs.styleName = style.styleName;
-          tr = addElement(newattrs, state, tr, item.pos, false, 2, 0);
-        }
+    } else if (
+      subsequantLevel !== 0 &&
+      counter === 0 &&
+      nodeArray.length === 0
+    ) {
+      const style = getCustomStyleByLevel(1);
+      if (style) {
+        const newattrs = { ...item.node.attrs };
+        newattrs.styleName = style.styleName;
+        tr = addElement(newattrs, state, tr, item.pos, false, 2, 0);
+      }
     }
   }
   return tr;
@@ -1313,10 +1314,10 @@ export function getStyleLevel(styleName: string) {
     ) {
       styleLevel = styleProp.styles.styleLevel;
     } else if (styleName.includes(RESERVED_STYLE_NONE_NUMBERING)) {
-        const indices = styleName.split(RESERVED_STYLE_NONE_NUMBERING);
-        if (indices && 2 === indices.length) {
-          styleLevel = parseInt(indices[1]);
-        }
+      const indices = styleName.split(RESERVED_STYLE_NONE_NUMBERING);
+      if (indices && 2 === indices.length) {
+        styleLevel = parseInt(indices[1]);
+      }
     }
   }
   return styleLevel;
@@ -1560,15 +1561,15 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   }
   if ('' !== content[0]) {
     textContent = content;
-  } else if (content.length > 1)  {
-      for (let index = 0; index < content.length; index++) {
-        if ('' === content[index]) {
-          counter++;
-        } else {
-          textContent = content[index];
-          index = content.length;
-        }
+  } else if (content.length > 1) {
+    for (let index = 0; index < content.length; index++) {
+      if ('' === content[index]) {
+        counter++;
+      } else {
+        textContent = content[index];
+        index = content.length;
       }
+    }
   }
   tr = tr.addMark(
     pos,
@@ -1684,10 +1685,7 @@ export function isLevelUpdated(
     // [FS] IRAD-1496 2021-06-25
     // Fix: warning message not showing if deselect numbering and save
     if (
-      (
-        style?.styles &&
-        currentLevel > 0 &&
-        !style.styles.hasNumbering) ||
+      (style?.styles && currentLevel > 0 && !style.styles.hasNumbering) ||
       (style?.styles && undefined === style?.styles?.styleLevel) ||
       (style && style.styles && style.styles.styleLevel !== currentLevel)
     ) {

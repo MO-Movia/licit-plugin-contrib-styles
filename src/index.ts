@@ -18,7 +18,7 @@ import {
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec.js';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
-import { Node, Schema ,Slice} from 'prosemirror-model';
+import { Node, Schema, Slice } from 'prosemirror-model';
 import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand.js';
 import { applyEffectiveSchema } from './EditorSchema.js';
 import type { StyleRuntime } from './StyleRuntime.js';
@@ -76,8 +76,9 @@ export class CustomstylePlugin extends Plugin {
       },
 
       props: {
-        handlePaste(_view, _event, slice ) {
-          if ((slice.content as unknown as Slice)?.content[0]?.attrs) {     //LINTFIX
+        handlePaste(_view, _event, slice) {
+          if ((slice.content as unknown as Slice)?.content[0]?.attrs) {
+            //LINTFIX
             slice1 = slice;
           }
           return false;
@@ -483,23 +484,23 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
   const node = nextState.tr.doc.nodeAt(startPos);
   const style = getCustomStyleByName(node.attrs?.styleName);
   if (!style?.styles?.isList) {
-  if (validateStyleName(node)) {
-    if (
-      node.content?.content &&
-      0 < node.content.content.length &&
-      node.content.content[0].marks &&
-      0 === node.content.content[0].marks.length
-    ) {
-      tr = applyLatestStyle(
-        node.attrs.styleName,
-        nextState,
-        tr,
-        node,
-        startPos,
-        endPos,
-        null,
-        opt
-      );
+    if (validateStyleName(node)) {
+      if (
+        node.content?.content &&
+        0 < node.content.content.length &&
+        node.content.content[0].marks &&
+        0 === node.content.content[0].marks.length
+      ) {
+        tr = applyLatestStyle(
+          node.attrs.styleName,
+          nextState,
+          tr,
+          node,
+          startPos,
+          endPos,
+          null,
+          opt
+        );
       }
     }
   }
@@ -550,6 +551,9 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
                 newattrs.indent = ListnodeAlt.attrs.indent;
               }
             }
+            if (newattrs.overriddenAlign === true) {
+              newattrs.overriddenAlign = false;
+            }
             tr = tr.setNodeMarkup(nextNodePos, undefined, newattrs);
             // [FS] IRAD-1201 2021-02-18
             // get the nextLine Style from the current style object.
@@ -598,9 +602,9 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       newattrs.indent = nextLineStyle.styles.indent;
       newattrs.align = nextLineStyle.styles.align;
       // KNITE-864 08-03-2024 InnerLink functionality change
-      if(newattrs.innerLink){
-        newattrs.innerLink=null;
-        }
+      if (newattrs.innerLink) {
+        newattrs.innerLink = null;
+      }
       // [FS] IRAD-1223 2021-03-04
       // Line spacing not working for next line style
       newattrs.lineSpacing = getLineSpacingValue(
@@ -681,7 +685,7 @@ function updateStyleOverrideFlag(state, tr) {
         child,
         startPos,
         endPos,
-        retObj,
+        retObj
       );
     }
   });

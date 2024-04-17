@@ -25,7 +25,7 @@ import './custom-dropdown.css';
 let HEADING_COMMANDS = {
   [RESERVED_STYLE_NONE]: new HeadingCommand(0),
 };
-
+let firstLoad = 0;
 export class CustomstyleDropDownCommand extends React.PureComponent<{
   dispatch: (tr: Transform) => void;
   editorState: EditorState;
@@ -49,7 +49,9 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     if (this.hasRuntime) {
       getStylesAsync().then((result) => {
         if (result) {
+          if (firstLoad === 0) {
           setStyles(result);
+          }
           HEADING_NAMES = result;
           if (null != HEADING_NAMES) {
             HEADING_NAMES.forEach((obj) => {
@@ -59,6 +61,7 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
               );
             });
           }
+          firstLoad++;
         }
         return [HEADING_COMMANDS];
       });

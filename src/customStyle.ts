@@ -8,7 +8,7 @@ import { DEFAULT_NORMAL_STYLE } from './Constants.js';
 let customStyles = new Array(0);
 let styleRuntime;
 let hideNumbering = false;
-
+let _view;
 // [FS] IRAD-1202 2021-02-15
 // None & None-@#$- have same effect of None.
 // None-@#$-<styleLevel> is used for numbering to set style level for None, based on the cursor level style level.
@@ -56,28 +56,37 @@ export function getCustomStyleByName(name: string): Style {
   return style;
 }
 
-// store styles in cache
-export function setStyles(style: Style[]) {
-  customStyles = style;
+export function setView(csview) {
+    _view=csview;
 }
 
-export function setHidenumberingFlag(hideNumberingFlag: boolean) {
-  hideNumbering = hideNumberingFlag;
+// store styles in cache
+export function setStyles(style) {
+    customStyles = style;
+    if(_view && style){
+    _view.dispatch(_view.state.tr.scrollIntoView());
+    }
+}
+export function setHidenumberingFlag(hideNumberingFlag) {
+    hideNumbering = hideNumberingFlag;
 }
 
 export function getHidenumberingFlag(): boolean {
   return hideNumbering;
 }
 
-export function setStyleRuntime(runtime, callback) {
-  styleRuntime = runtime;
+export function setStyleRuntime(runtime) {
+    styleRuntime = runtime;
+}
+
+export function setStyleCallback(callback) {
   getStylesAsync().then((result) => {
-    if (result) {
-      setStyles(result);
-      // save a Default style in server
-      saveDefaultStyle();
-      callback();
-    }
+      if (result) {
+          setStyles(result);
+          // save a Default style in server
+          saveDefaultStyle();
+          callback();
+      }
   });
 }
 

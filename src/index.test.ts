@@ -31,6 +31,7 @@ import {
   getCustomStyleByLevel,
   getHidenumberingFlag,
   setHidenumberingFlag,
+  setView,
 } from './customStyle';
 import { Schema, Mark, Node, Slice, ResolvedPos } from 'prosemirror-model';
 import { isTransparent, toCSSColor } from './toCSSColor';
@@ -331,7 +332,7 @@ describe('applyStyleForEmptyParagraph', () => {
         },
       ],
     });
-    expect(applyNormalIfNoStyle({}, { doc: { content: { size: 0 } } }, mockdoc, true)).toStrictEqual({ 'doc': { 'content': { 'size': 0 } } });
+    expect(applyNormalIfNoStyle({doc:mockdoc}, { doc: { content: { size: 0 } } }, mockdoc, true)).toStrictEqual({ 'doc': { 'content': { 'size': 0 } } });
   });
   it('applyStyleForEmptyParagraph should be check the condition  subsequantLevel !== 0', () => {
     const nex_state_ = {
@@ -1440,6 +1441,7 @@ describe('Style Plugin', () => {
         },
       }
     );
+    setView({dispatch:()=>{return {};},state:{tr:{scrollIntoView:()=>{return {};}}}})
     expect(setStyles(customStyleList)).toBeUndefined();
   });
   it('SHOULD HANDLE paste', () => {
@@ -1598,6 +1600,7 @@ describe('Style Plugin', () => {
         },
       }
     );
+    setView({dispatch:()=>{return {};},state:{tr:{scrollIntoView:()=>{return {};}}}})
     setStyles(customstyle);
     const levelstyle = getCustomStyleByLevel(2);
     const result = {
@@ -1680,6 +1683,7 @@ describe('Style Plugin', () => {
         },
       }
     );
+    setView({dispatch:()=>{return {};},state:{tr:{scrollIntoView:()=>{return {};}}}})
     setStyles(customstyle);
     const bOK = isCustomStyleExists('BIU');
 
@@ -1738,6 +1742,7 @@ describe('Style Plugin', () => {
         },
       }
     );
+    setView({dispatch:()=>{return {};},state:{tr:{scrollIntoView:()=>{return {};}}}})
     setStyles(customstyle);
     const result = getCustomStyleByName('Normal');
     const styleObj = {
@@ -1814,6 +1819,7 @@ describe('Style Plugin', () => {
         },
       }
     );
+    setView({dispatch:()=>{return {};},state:{tr:{scrollIntoView:()=>{return {};}}}})
     setStyles(customstyle);
     const bok = isStylesLoaded();
 

@@ -1540,16 +1540,16 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   const markType = state.schema.marks[MARKSTRONG];
   let textContent = getNodeText(node);
   const endPos = textContent.length;
-  let content = '';
+  let content = [];
   let counter = 0;
   if (boldSentence) {
-    content = textContent.split('.').toString();
+    content = textContent.split('.');
   } else {
-    content = textContent.split(' ').toString();
+    content = textContent.split(' ');
   }
   if ('' !== content[0]) {
-    textContent = content;
-  } else if (content.length > 1)  {
+    textContent = content[0];
+  } else if (content.length > 1) {
       for (let index = 0; index < content.length; index++) {
         if ('' === content[index]) {
           counter++;
@@ -1558,7 +1558,8 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
           index = content.length;
         }
       }
-  }
+    }
+  
   tr = tr.addMark(
     pos,
     pos + textContent.length + 1 + counter,

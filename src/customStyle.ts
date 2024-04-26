@@ -63,18 +63,18 @@ export function setView(csview) {
 }
 
 // store styles in cache
-export function setStyles(style: Style[]) {
+export function setStyles(style) {
   customStyles = style;
   let documentType;
   if (style && Array.isArray(style)) {
-    documentType = style.length > 0 && style[0].docType ? style[0].docType : null;
+    documentType =
+      style.length > 0 && style[0].docType ? style[0].docType : null;
   }
 
   if (docType !== documentType) {
     hasdocTypechanged = true;
     docType = documentType;
-  }
-  else {
+  } else {
     hasdocTypechanged = false;
     docType = documentType;
   }
@@ -97,7 +97,6 @@ export function setStyleRuntime(runtime) {
 
 export function setStyleCallback() {
   saveDefaultStyle();
-
 }
 
 function saveDefaultStyle() {

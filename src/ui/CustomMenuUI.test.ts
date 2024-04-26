@@ -5,7 +5,6 @@ import { CustomstylePlugin } from '../index';
 import { CustomMenuUI } from './CustomMenuUI';
 import { Schema } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
 import { CustomStyleCommand } from '../CustomStyleCommand';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { SyntheticEvent } from 'react';
@@ -729,12 +728,46 @@ describe('Custom Menu UI   ', () => {
       schema: {},
       selection: { from: 0, to: 1 },
       plugins: [],
-      empty: null ,
-      tr:{removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};},
-      removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};},
-      removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};},
-      removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};},
-      removeMark:()=>{return {setNodeMarkup:()=>{return {};},removeMark:()=>{return {setNodeMarkup:()=>{return {};}};}};}};}};}};}};}};}};}};}};}}
+      empty: null,
+      tr: {
+        removeMark: () => {
+          return {
+            setNodeMarkup: () => { return {}; }, removeMark: () => {
+              return {
+                setNodeMarkup: () => { return {}; },
+                removeMark: () => {
+                  return {
+                    setNodeMarkup: () => { return {}; }, removeMark: () => {
+                      return {
+                        setNodeMarkup: () => { return {}; },
+                        removeMark: () => {
+                          return {
+                            setNodeMarkup: () => { return {}; }, removeMark: () => {
+                              return {
+                                setNodeMarkup: () => { return {}; },
+                                removeMark: () => {
+                                  return {
+                                    setNodeMarkup: () => { return {}; }, removeMark: () => {
+                                      return {
+                                        setNodeMarkup: () => { return {}; },
+                                        removeMark: () => { return { setNodeMarkup: () => { return {}; }, removeMark: () => { return { setNodeMarkup: () => { return {}; } }; } }; }
+                                      };
+                                    }
+                                  };
+                                }
+                              };
+                            }
+                          };
+                        }
+                      };
+                    }
+                  };
+                }
+              };
+            }
+          };
+        }
+      }
     };
 
     const dispatchMock = jest.fn();

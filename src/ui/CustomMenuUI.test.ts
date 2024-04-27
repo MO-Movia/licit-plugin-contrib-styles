@@ -730,6 +730,14 @@ describe('Custom Menu UI   ', () => {
   });
 
   it('should handle removeCustomStyleName3', () => {
+    const removeMarkChain = {
+      setNodeMarkup: () => {
+        return removeMarkChain;
+      },
+      removeMark: () => {
+        return removeMarkChain;
+      },
+    };
     const state = {
       doc: {
         nodesBetween(from, to, callback) {
@@ -754,77 +762,8 @@ describe('Custom Menu UI   ', () => {
       selection: { from: 0, to: 1 },
       plugins: [],
       empty: null,
-      tr: {
-        removeMark: () => {
-          return {
-            setNodeMarkup: () => {
-              return {};
-            },
-            removeMark: () => {
-              return {
-                setNodeMarkup: () => {
-                  return {};
-                },
-                removeMark: () => {
-                  return {
-                    setNodeMarkup: () => {
-                      return {};
-                    },
-                    removeMark: () => {
-                      return {
-                        setNodeMarkup: () => {
-                          return {};
-                        },
-                        removeMark: () => {
-                          return {
-                            setNodeMarkup: () => {
-                              return {};
-                            },
-                            removeMark: () => {
-                              return {
-                                setNodeMarkup: () => {
-                                  return {};
-                                },
-                                removeMark: () => {
-                                  return {
-                                    setNodeMarkup: () => {
-                                      return {};
-                                    },
-                                    removeMark: () => {
-                                      return {
-                                        setNodeMarkup: () => {
-                                          return {};
-                                        },
-                                        removeMark: () => {
-                                          return {
-                                            setNodeMarkup: () => {
-                                              return {};
-                                            },
-                                            removeMark: () => {
-                                              return {
-                                                setNodeMarkup: () => {
-                                                  return {};
-                                                },
-                                              };
-                                            },
-                                          };
-                                        },
-                                      };
-                                    },
-                                  };
-                                },
-                              };
-                            },
-                          };
-                        },
-                      };
-                    },
-                  };
-                },
-              };
-            },
-          };
-        },
+      tr:  {
+        removeMark: () => removeMarkChain,
       },
     };
 

@@ -1485,7 +1485,7 @@ describe('Style Plugin', () => {
         },
       }
     );
-    setView({ dispatch: () => { return {}; }, state: { tr: { scrollIntoView: () => { return {}; } } } });
+    setView({ dispatch: () => { return {}; }, state: { tr: { scrollIntoView: () => { return {}; } } } } as unknown as EditorView);
     expect(setStyles(customStyleList)).toBeUndefined();
   });
   it('SHOULD HANDLE paste', () => {
@@ -1644,7 +1644,7 @@ describe('Style Plugin', () => {
         },
       }
     );
-    setView({ dispatch: () => { return {}; }, state: { tr: { scrollIntoView: () => { return {}; } } } });
+    setView({ dispatch: () => { return {}; }, state: { tr: { scrollIntoView: () => { return {}; } } } } as unknown as EditorView);
     setStyles(customstyle);
     const levelstyle = getCustomStyleByLevel(2);
     const result = {
@@ -1727,7 +1727,7 @@ describe('Style Plugin', () => {
         },
       }
     );
-    setView({ dispatch: () => { return {}; }, state: { tr: { scrollIntoView: () => { return {}; } } } });
+    setView({ dispatch: () => { return {}; }, state: { tr: { scrollIntoView: () => { return {}; } } } } as unknown as EditorView);
     setStyles(customstyle);
     const bOK = isCustomStyleExists('BIU');
 
@@ -1786,7 +1786,7 @@ describe('Style Plugin', () => {
         },
       }
     );
-    setView({ dispatch: () => { return {}; }, state: { tr: { scrollIntoView: () => { return {}; } } } });
+    setView({ dispatch: () => { return {}; }, state: { tr: { scrollIntoView: () => { return {}; } } } } as unknown as EditorView);
     setStyles(customstyle);
     const result = getCustomStyleByName('Normal');
     const styleObj = {
@@ -1863,7 +1863,7 @@ describe('Style Plugin', () => {
         },
       }
     );
-    setView({ dispatch: () => { return {}; }, state: { tr: { scrollIntoView: () => { return {}; } } } });
+    setView({ dispatch: () => { return {}; }, state: { tr: { scrollIntoView: () => { return {}; } } } } as unknown as EditorView);
     setStyles(customstyle);
     const bok = isStylesLoaded();
 

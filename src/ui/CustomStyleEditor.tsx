@@ -118,7 +118,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         } else {
           state.styles[style] = !state.styles[style];
         }
-        
+
         break;
 
       case 'name':

@@ -1438,11 +1438,19 @@ export function applyStyle(
   state: EditorState,
   tr: Transform
 ) {
+  let endPos;
   const { selection } = state;
-  const startPos = selection.$from.before(1);
-  const endPos = selection.$to.after(1) - 1;
+  let startPos = selection.$from.before(1);
+  if (state.doc.nodeAt(startPos).type.name == 'table') {
+       startPos = selection.from;
+      endPos = selection.$to.pos;
+  }
+  else {
+      endPos = selection.$to.after(1) - 1;
+  }
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
+
 
 // apply style to each selected node (when style applied to multiple paragraphs)
 export function applyStyleToEachNode(

@@ -388,9 +388,17 @@ describe('applyNormalIfNoStyle', () => {
         },
       ],
     });
+    const setSelection = () => {
+      return {
+        doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } },
+        setSelection: setSelection
+      };
+    };
+
     mockdoc.resolve = () => { return {} as unknown as ResolvedPos; };
     expect(applyNormalIfNoStyle({ schema: mockschema }, {
-      doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => { return { doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => { return { doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => { return { doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => { return { doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => { return { doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => { return {}; } }; } }; } }; } }; } }; }
+      doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } },
+      setSelection: setSelection
     },
       mockdoc, true)).toBeDefined();
   });
@@ -490,6 +498,21 @@ describe('', () => {
         ]
       }
     };
+    const setSelection = () => {
+      return {
+        doc: {
+          content: { size: 0 },
+          resolve: () => ({
+            min: () => 0,
+            max: () => 1
+          }) as unknown as ResolvedPos,
+          nodesBetween: () => ({})
+        },
+        setSelection: setSelection,
+        scrollIntoView: () => { return {}; }
+      };
+    };
+
     expect(
       onUpdateAppendTransaction(
         { firstTime: false },
@@ -506,7 +529,7 @@ describe('', () => {
             },
           },
           scrollIntoView: () => { return {}; },
-          setSelection: () => { return { doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => { return { doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => { return { doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => { return { doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => { return { doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => { return {}; }, scrollIntoView: () => { return {}; } }; }, scrollIntoView: () => { return {}; } }; }, scrollIntoView: () => { return {}; } }; }, scrollIntoView: () => { return {}; } }; }, scrollIntoView: () => { return {}; } }; }
+          setSelection: setSelection
         },
         {
           schema: {
@@ -552,30 +575,7 @@ describe('', () => {
                 },
               },
             },
-            setSelection: () => {
-              return {
-                doc: {
-                  content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; }
-                }, setSelection: () => {
-                  return {
-                    doc:
-                      { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => {
-                        return {
-                          doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => {
-                            return {
-                              doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => {
-                                return {
-                                  doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } }, setSelection: () => { return { scrollIntoView: () => { return {}; } }; }
-                                };
-                              }, scrollIntoView: () => { return {}; }
-                            };
-                          }, scrollIntoView: () => { return {}; }
-                        };
-                      }, scrollIntoView: () => { return {}; }
-                  };
-                }
-              };
-            }
+            setSelection: setSelection
 
           },
           doc: mockdoc,
@@ -5099,30 +5099,16 @@ describe('onInitAppendTransaction', () => {
     });
     mockdoc.resolve = () => { return { min: () => { return null; }, max: () => { return null; } } as unknown as ResolvedPos; };
     jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(true);
+    const setSelection = () => {
+      return {
+        curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc, setNodeMarkup: () => { return {}; },
+        setSelection: setSelection
+      };
+    };
     expect(onInitAppendTransaction({ loaded: true, firstTime: false }, { curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc },
       {
         tr: {
-          setSelection() {
-            return {
-              curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc, setNodeMarkup: () => { return {}; },
-              setSelection() {
-                return {
-                  curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc,
-                  setSelection() {
-                    return {
-                      curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc,
-                      setSelection() {
-                        return {
-                          curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc,
-                          setNodeMarkup: () => { return {}; }
-                        };
-                      }, setNodeMarkup: () => { return {}; }
-                    };
-                  }, setNodeMarkup: () => { return {}; }
-                };
-              }
-            };
-          }, doc: mockdoc
+          setSelection: setSelection, doc: mockdoc
         }, schema: mockSchema
       })).toBeDefined();
   });

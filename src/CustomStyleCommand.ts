@@ -1438,15 +1438,15 @@ export function applyStyle(
   state: EditorState,
   tr: Transform
 ) {
-  let endPos;
+  let endPos: number;
   const { selection } = state;
   let startPos = selection.$from.before(1);
   if (state.doc.nodeAt(startPos).type.name == 'table') {
-       startPos = selection.from;
-      endPos = selection.$to.pos;
+    startPos = selection.from;
+    endPos = selection.$to.pos;
   }
   else {
-      endPos = selection.$to.after(1) - 1;
+    endPos = selection.$to.after(1) - 1;
   }
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
@@ -1547,8 +1547,8 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   const markType = state.schema.marks[MARKSTRONG];
   let textContent = getNodeText(node);
   const endPos = textContent.length;
-  let content = [];
-  let counter = 0;
+  let content: string[] = [];
+  let counter:number = 0;
   if (boldSentence) {
     content = textContent.split('.');
   } else {

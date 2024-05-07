@@ -73,9 +73,8 @@ export function setStyles(style: Style[]) {
   }
   hasdocTypechanged = docType !== documentType;
   docType = documentType;
-  if (_view && style && hasdocTypechanged) {
-    _view.dispatch(_view.state.tr.scrollIntoView());
-    hasdocTypechanged = false;
+  if (docType) {
+    hasdocTypechanged = true;
   }
 }
 export function setHidenumberingFlag(hideNumberingFlag) {

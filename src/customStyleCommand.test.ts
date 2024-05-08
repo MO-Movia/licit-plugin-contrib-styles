@@ -55,9 +55,9 @@ describe('CustomStyleCommand', () => {
 
   it('should handle allowCustomLevelIndent when condition check delta < 0 1114 else ku', () => {
     const doc = {
-      nodeSize:10,
+      nodeSize: 10,
       resolve: () => {
-        return{parent:{type:{name:'paragraph'}, attrs:{styleName:'dont know'}}};
+        return { parent: { type: { name: 'paragraph' }, attrs: { styleName: 'dont know' } } };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
@@ -72,7 +72,7 @@ describe('CustomStyleCommand', () => {
   it('should handle allowCustomLevelIndent when condition check nodeStyleLevel >= styleLevel && styleLevel - nodeStyleLevel === 1', () => {
     const doc = {
       resolve: () => {
-        return{parent:{type:{name:'paragraph'}, attrs:{styleName:'dont know'}}};
+        return { parent: { type: { name: 'paragraph' }, attrs: { styleName: 'dont know' } } };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
@@ -86,7 +86,7 @@ describe('CustomStyleCommand', () => {
   it('should handle allowCustomLevelIndent when condition check !nodeStyleLevel >= styleLevel && styleLevel - nodeStyleLevel === 1', () => {
     const doc = {
       resolve: () => {
-        return{parent:{type:{name:'paragraph'}, attrs:{styleName:'dont know'}}};
+        return { parent: { type: { name: 'paragraph' }, attrs: { styleName: 'dont know' } } };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
@@ -135,6 +135,84 @@ describe('CustomStyleCommand', () => {
     });
     expect(customstylecommand.isCustomStyleApplied(myEditorState)).toBe(
       'Normal'
+    );
+  });
+  it('should handle isCustomStyleApplied when node.attrs has styleName', () => {
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' }, // 'doc' node type as the top-level node
+        paragraph: {
+          content: 'text*', // Ensure at least one text node within each paragraph
+          attrs: {
+            styleName: { default: null }
+          },
+          toDOM(node) {
+            return ['p', { style: `style-name: ${node.attrs.styleName}` }, 0];
+          },
+          parseDOM: [
+            {
+              tag: 'p',
+              getAttrs(dom) {
+                return {
+                  styleName: (dom as HTMLElement).getAttribute('style-name')
+                };
+              }
+            }
+          ]
+        },
+        text: {} // Define a text node type
+      }
+    });
+
+    // Create a dummy document with nodes that have styleName attributes
+    const doc = Node.fromJSON(schema, {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: {
+            styleName: 'custom-style-1'
+          },
+          content: [
+            {
+              type: 'text',
+              text: 'Paragraph 1'
+            }
+          ]
+        },
+        {
+          type: 'paragraph',
+          attrs: {
+            styleName: null // This paragraph doesn't have a styleName attribute
+          },
+          content: [
+            {
+              type: 'text',
+              text: 'Paragraph 2'
+            }
+          ]
+        },
+        {
+          type: 'paragraph',
+          attrs: {
+            styleName: 'custom-style-2'
+          },
+          content: [
+            {
+              type: 'text',
+              text: 'Paragraph 3'
+            }
+          ]
+        }
+      ]
+    });
+    const myEditorState = EditorState.create({
+      doc: doc,
+      schema: schema,
+      selection: { from: 0, to: doc.nodeSize - 2 } as unknown as Selection,
+    });
+    expect(customstylecommand.isCustomStyleApplied(myEditorState)).toBe(
+      'custom-style-2'
     );
   });
 
@@ -198,7 +276,7 @@ describe('CustomStyleCommand', () => {
 
       jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
         styles: 'color: red; font-size: 16px; font-weight: bold;',
-      }  as unknown as Style);
+      } as unknown as Style);
       expect(
         updateOverrideFlag(
           '',
@@ -406,7 +484,7 @@ describe('CustomStyleCommand', () => {
     expect(
       customstylecommand.executeClearStyle(
         mockeditorstate as unknown as EditorState,
-        () => {},
+        () => { },
         0,
         1,
         2,
@@ -721,7 +799,7 @@ describe('CustomStyleCommand', () => {
         },
       ],
     } as unknown as Node;
-    const mockdispatch = () => {};
+    const mockdispatch = () => { };
     const mockval = {
       styles: {
         hasBullet: true,
@@ -749,6 +827,150 @@ describe('CustomStyleCommand', () => {
       mockdoc
     );
     expect(spy2).toHaveBeenCalled();
+  });
+  it('should handle createNewStyle', () => {
+    const spy2 = jest.spyOn(customstylecommand, 'showAlert');
+    jest.spyOn(customstyles, 'saveStyle').mockResolvedValue([
+      {
+        styleName: 'A Apply Stylefff',
+        mode: 1,
+        styles: {
+          align: 'justify',
+          boldNumbering: true,
+          toc: false,
+          isHidden: false,
+          boldSentence: true,
+          nextLineStyleName: 'Normal',
+          fontName: 'Arial',
+          fontSize: '11',
+          strong: true,
+          em: true,
+          underline: true,
+          color: '#c40df2',
+        },
+        toc: false,
+        isHidden: false,
+      } as unknown as Style,
+    ]);
+    jest.spyOn(customstyles, 'isCustomStyleExists').mockReturnValue(true);
+    jest.spyOn(customstyles, 'isPreviousLevelExists').mockReturnValue(false);
+    const mocktr = {
+      doc: {
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: null,
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'Normal',
+            },
+          },
+        ],
+      },
+      steps: [],
+      docs: [],
+      mapping: { maps: [], from: 0, to: 0 },
+      curSelectionFor: 0,
+      updated: 0,
+      meta: {},
+      time: 1684831731977,
+      curSelection: { type: 'text', anchor: 1, head: 1 },
+      storedMarks: null,
+      setSelection() {
+        return { doc: mockdoc };
+      },
+    } as unknown as Transaction;
+    const mockstate = {
+      doc: {
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        nodeAt: () => { return { type: { name: 'table' } }; },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: null,
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'Normal',
+            },
+          },
+        ],
+      },
+      selection: { type: 'text', anchor: 1, head: 1, $from: { before: () => { return 0; } }, $to: { after: () => { return 1; }, pos: 1 }, from: 0 },
+    } as unknown as EditorState;
+    // Create a dummy document with nodes that have styleName attributes
+
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: { content: 'text*' },
+        text: {}
+      }
+    });
+
+    // Create a document with nodes containing inline content
+    const mockdoc = schema.node('doc', null, [
+      schema.node('paragraph', null, [
+        schema.text('This is some '),
+        schema.text('inline content'),
+        schema.text(' within a paragraph.')
+      ])
+    ]);
+
+    const mockdispatch = () => { };
+    const mockval = {
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: '1',
+        paragraphSpacingBefore: 10,
+        paragraphSpacingAfter: 10,
+        strong: 10,
+        boldNumbering: 10,
+        em: 10,
+        color: 'blue',
+        fontSize: 10,
+        fontName: 'Tahoma',
+        indent: 10,
+        hasNumbering: false,
+      },
+      styleName: 'test',
+      editorView: {},
+    };
+    customstylecommand.createNewStyle(
+      mockval,
+      mocktr,
+      mockstate,
+      mockdispatch,
+      mockdoc
+    );
+    expect(spy2).not.toHaveBeenCalled();
   });
 });
 describe('getMarkByStyleName', () => {
@@ -1896,7 +2118,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       },
     ],
     addMark: () => {
-      return { removeMark: () => {} };
+      return { removeMark: () => { } };
     },
     removeMark: () => {
       return { key: 'mocktr' };
@@ -2402,6 +2624,91 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       manageElementsAfterSelection([{ node: nodemock }], statemock, trmock)
     ).toBeDefined();
   });
+
+  it('should handle manageElementsAfterSelection', () => {
+    const json = {
+      type: 'paragraph',
+      attrs: {
+        align: 'left',
+        color: null,
+        id: null,
+        indent: 0,
+        lineSpacing: null,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: '1Normal-@#$-1',
+      },
+      content: [
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'mark-font-size',
+              attrs: { pt: 18, overridden: false },
+            },
+            {
+              type: 'mark-font-type',
+              attrs: { name: 'Times New Roman', overridden: false },
+            },
+            {
+              type: 'mark-text-color',
+              attrs: { color: '#0d69f2', overridden: false },
+            },
+          ],
+          text: '.fggf.dfgfgh.fghfgh',
+        },
+      ],
+    };
+
+    const nodemock = schema1.nodeFromJSON(json);
+    expect(
+      manageElementsAfterSelection([{ node: nodemock }], statemock, trmock)
+    ).toBeDefined();
+  });
+  it('should handle manageElementsAfterSelection', () => {
+    const json = {
+      type: 'paragraph',
+      attrs: {
+        align: 'left',
+        color: null,
+        id: null,
+        indent: 0,
+        lineSpacing: null,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: '0Normal-@#$-0',
+      },
+      content: [
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'mark-font-size',
+              attrs: { pt: 18, overridden: false },
+            },
+            {
+              type: 'mark-font-type',
+              attrs: { name: 'Times New Roman', overridden: false },
+            },
+            {
+              type: 'mark-text-color',
+              attrs: { color: '#0d69f2', overridden: false },
+            },
+          ],
+          text: '.fggf.dfgfgh.fghfgh',
+        },
+      ],
+    };
+
+    const nodemock = schema1.nodeFromJSON(json);
+    expect(
+      manageElementsAfterSelection([{ node: nodemock }], statemock, trmock)
+    ).toBeDefined();
+  });
+
+
   it('should handle insertParagraph', () => {
     const nodeattrs = {
       align: 'left',
@@ -3373,7 +3680,7 @@ describe('updateDocument', () => {
       },
     ],
     addMark: () => {
-      return { removeMark: () => {} };
+      return { removeMark: () => { } };
     },
     removeMark: () => {
       return { key: 'mocktr' };
@@ -4175,7 +4482,7 @@ describe('allowCustomLevelIndent', () => {
   it('should handle allowCustomLevelIndent when condition check nodeStyleLevel >= styleLevel', () => {
     const doc = {
       resolve: () => {
-        return{parent:{type:{name:'paragraph'}, attrs:{styleName:'dont know'}}};
+        return { parent: { type: { name: 'paragraph' }, attrs: { styleName: 'dont know' } } };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
@@ -4184,9 +4491,9 @@ describe('allowCustomLevelIndent', () => {
 
   it('should handle allowCustomLevelIndent when condition check delta < 0', () => {
     const doc = {
-      nodeSize:10,
+      nodeSize: 10,
       resolve: () => {
-        return{parent:{type:{name:'paragraph'}, attrs:{styleName:'dont know'}}};
+        return { parent: { type: { name: 'paragraph' }, attrs: { styleName: 'dont know' } } };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
@@ -4195,9 +4502,9 @@ describe('allowCustomLevelIndent', () => {
 
   it('should handle allowCustomLevelIndent when condition check delta < 0 && !isAllowedNode(node)', () => {
     const doc = {
-      nodeSize:10,
+      nodeSize: 10,
       resolve: () => {
-        return{parent:{type:{name:'paragph'}, attrs:{styleName:'dont know'}}};
+        return { parent: { type: { name: 'paragph' }, attrs: { styleName: 'dont know' } } };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
@@ -4207,7 +4514,7 @@ describe('allowCustomLevelIndent', () => {
   it('should handle allowCustomLevelIndent when condition check !isAllowedNode(node)', () => {
     const doc = {
       resolve: () => {
-        return{parent:{type:{name:'paragra'}, attrs:{styleName:'dont know'}}};
+        return { parent: { type: { name: 'paragra' }, attrs: { styleName: 'dont know' } } };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
@@ -4590,6 +4897,57 @@ describe('removeAllMarksExceptLink', () => {
       removeAllMarksExceptLink(0, 1, tr, mySchema, myEditor, style)
     ).toBeDefined();
   });
+  it('should handle removeAllMarksExceptLink when mark.attrs[ATTR_OVERRIDDEN] && link === mark.type.name', () => {
+    const mySchema = new Schema({
+      nodes: {
+        // Define the document node
+        doc: {
+          content: 'block+',
+        },
+        // Define the paragraph node
+        paragraph: {
+          content: 'text*',
+          group: 'block',
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        // Define the text node
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        // Define the strong mark
+        strong: {}
+      }
+    });
+
+    const mockDoc = Node.fromJSON(mySchema, {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+              marks: [{ type: 'strong' }] // Include the "strong" mark
+            },
+          ],
+        },
+      ],
+    });
+    const tr = { doc: mockDoc,removeMark:()=>{return {doc:mockDoc};} } as unknown as Transform;
+    const myEditor = new EditorState();
+    const style: Style = {
+      styleName: '',
+    };
+    expect(
+      removeAllMarksExceptLink(1, 2, tr, mySchema, myEditor, style)
+    ).toBeDefined();
+  });
 });
 describe('handleRemoveMarks', () => {
   it('should handle handleRemoveMarks', () => {
@@ -4704,4 +5062,32 @@ describe('handleRemoveMarks', () => {
       )
     ).toBeDefined();
   });
+
+  it('should handle isActive', () => {
+    const styl = {
+      styleName: 'A_12',
+      mode: 1,
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A_12',
+        fontName: 'Aclonica',
+        fontSize: '14',
+        strong: true,
+        styleLevel: '2',
+        hasBullet: true,
+        bulletLevel: '272A',
+        hasNumbering: false,
+      },
+      toc: false,
+      isHidden: false,
+    };
+    const customstylecommand = new CustomStyleCommand(styl, 'A_12');
+    expect(customstylecommand.isActive()).toBeTruthy();
+
+  });
+
 });

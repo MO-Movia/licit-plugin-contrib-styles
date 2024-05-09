@@ -118,7 +118,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         } else {
           state.styles[style] = !state.styles[style];
         }
-        
+
         break;
 
       case 'name':
@@ -340,10 +340,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   // handles line space  change
   onLineSpaceChange(e) {
-    const prevStates = this.state.styles;
-    this.setState({
-      styles: { ...prevStates, lineHeight: e.target.value },
-    });
+    this.setState(prevState=>({
+      styles: { ...prevState.styles, lineHeight: e.target.value },
+    }));
   }
 
 

@@ -5,10 +5,13 @@ import {
   RESERVED_STYLE_NONE_NUMBERING,
 } from './CustomStyleNodeSpec.js';
 import { DEFAULT_NORMAL_STYLE } from './Constants.js';
+import { EditorView } from 'prosemirror-view';
 let customStyles = new Array(0);
 let styleRuntime;
 let hideNumbering = false;
-
+let _view: EditorView;
+let hasdocTypechanged = false;
+let docType = null;
 // [FS] IRAD-1202 2021-02-15
 // None & None-@#$- have same effect of None.
 // None-@#$-<styleLevel> is used for numbering to set style level for None, based on the cursor level style level.
@@ -16,7 +19,7 @@ function isValidStyleName(styleName) {
   return (
     styleName &&
     !styleName.includes(RESERVED_STYLE_NONE_NUMBERING) &&
-    customStyles.length > 0
+    customStyles?.length > 0
   );
 }
 
@@ -56,12 +59,25 @@ export function getCustomStyleByName(name: string): Style {
   return style;
 }
 
+export function setView(csview: EditorView) {
+  _view = csview;
+}
+
 // store styles in cache
 export function setStyles(style: Style[]) {
   customStyles = style;
+  let documentType;
+  if (style && Array.isArray(style)) {
+    documentType =
+      style.length > 0 && style[0].docType ? style[0].docType : null;
+  }
+  hasdocTypechanged = docType !== documentType;
+  docType = documentType;
+  if (docType) {
+    hasdocTypechanged = true;
+  }
 }
-
-export function setHidenumberingFlag(hideNumberingFlag: boolean) {
+export function setHidenumberingFlag(hideNumberingFlag) {
   hideNumbering = hideNumberingFlag;
 }
 
@@ -69,16 +85,12 @@ export function getHidenumberingFlag(): boolean {
   return hideNumbering;
 }
 
-export function setStyleRuntime(runtime, callback) {
+export function setStyleRuntime(runtime) {
   styleRuntime = runtime;
-  getStylesAsync().then((result) => {
-    if (result) {
-      setStyles(result);
-      // save a Default style in server
-      saveDefaultStyle();
-      callback();
-    }
-  });
+}
+
+export function setStyleCallback() {
+  saveDefaultStyle();
 }
 
 function saveDefaultStyle() {
@@ -90,7 +102,7 @@ function saveDefaultStyle() {
 }
 
 export function isStylesLoaded() {
-  return customStyles.length > 0;
+  return customStyles?.length > 0 && hasdocTypechanged;
 }
 
 export function hasStyleRuntime() {

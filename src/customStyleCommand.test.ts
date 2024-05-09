@@ -57,47 +57,55 @@ describe('CustomStyleCommand', () => {
     const doc = {
       nodeSize: 10,
       resolve: () => {
-        return { parent: { type: { name: 'paragraph' }, attrs: { styleName: 'dont know' } } };
+        return {
+          parent: {
+            type: { name: 'paragraph' },
+            attrs: { styleName: 'dont know' },
+          },
+        };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
-    jest
-      .spyOn(customstyles, 'getCustomStyleByName')
-      .mockReturnValueOnce({
-        styles: { styleLevel: 1, hasNumbering: true },
-      } as unknown as Style);
+    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValueOnce({
+      styles: { styleLevel: 1, hasNumbering: true },
+    } as unknown as Style);
     expect(allowCustomLevelIndent(tr, 0, 'Normal', 0)).toBeFalsy();
   });
 
   it('should handle allowCustomLevelIndent when condition check nodeStyleLevel >= styleLevel && styleLevel - nodeStyleLevel === 1', () => {
     const doc = {
       resolve: () => {
-        return { parent: { type: { name: 'paragraph' }, attrs: { styleName: 'dont know' } } };
+        return {
+          parent: {
+            type: { name: 'paragraph' },
+            attrs: { styleName: 'dont know' },
+          },
+        };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
-    jest
-      .spyOn(customstyles, 'getCustomStyleByName')
-      .mockReturnValueOnce({
-        styles: { styleLevel: 1, hasNumbering: true },
-      } as unknown as Style);
+    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValueOnce({
+      styles: { styleLevel: 1, hasNumbering: true },
+    } as unknown as Style);
     expect(allowCustomLevelIndent(tr, 0, 'Normal', 1)).toBeTruthy();
   });
   it('should handle allowCustomLevelIndent when condition check !nodeStyleLevel >= styleLevel && styleLevel - nodeStyleLevel === 1', () => {
     const doc = {
       resolve: () => {
-        return { parent: { type: { name: 'paragraph' }, attrs: { styleName: 'dont know' } } };
+        return {
+          parent: {
+            type: { name: 'paragraph' },
+            attrs: { styleName: 'dont know' },
+          },
+        };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
-    jest
-      .spyOn(customstyles, 'getCustomStyleByName')
-      .mockReturnValueOnce({
-        styles: { styleLevel: 2, hasNumbering: true },
-      } as unknown as Style);
+    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValueOnce({
+      styles: { styleLevel: 2, hasNumbering: true },
+    } as unknown as Style);
     expect(allowCustomLevelIndent(tr, 0, 'Normal', 1)).toBeFalsy();
   });
-
 
   it('should resolve with undefined', async () => {
     const result = await customstylecommand.waitForUserInput();
@@ -144,7 +152,7 @@ describe('CustomStyleCommand', () => {
         paragraph: {
           content: 'text*', // Ensure at least one text node within each paragraph
           attrs: {
-            styleName: { default: null }
+            styleName: { default: null },
           },
           toDOM(node) {
             return ['p', { style: `style-name: ${node.attrs.styleName}` }, 0];
@@ -154,14 +162,14 @@ describe('CustomStyleCommand', () => {
               tag: 'p',
               getAttrs(dom) {
                 return {
-                  styleName: (dom as HTMLElement).getAttribute('style-name')
+                  styleName: (dom as HTMLElement).getAttribute('style-name'),
                 };
-              }
-            }
-          ]
+              },
+            },
+          ],
         },
-        text: {} // Define a text node type
-      }
+        text: {}, // Define a text node type
+      },
     });
 
     // Create a dummy document with nodes that have styleName attributes
@@ -171,40 +179,40 @@ describe('CustomStyleCommand', () => {
         {
           type: 'paragraph',
           attrs: {
-            styleName: 'custom-style-1'
+            styleName: 'custom-style-1',
           },
           content: [
             {
               type: 'text',
-              text: 'Paragraph 1'
-            }
-          ]
+              text: 'Paragraph 1',
+            },
+          ],
         },
         {
           type: 'paragraph',
           attrs: {
-            styleName: null // This paragraph doesn't have a styleName attribute
+            styleName: null, // This paragraph doesn't have a styleName attribute
           },
           content: [
             {
               type: 'text',
-              text: 'Paragraph 2'
-            }
-          ]
+              text: 'Paragraph 2',
+            },
+          ],
         },
         {
           type: 'paragraph',
           attrs: {
-            styleName: 'custom-style-2'
+            styleName: 'custom-style-2',
           },
           content: [
             {
               type: 'text',
-              text: 'Paragraph 3'
-            }
-          ]
-        }
-      ]
+              text: 'Paragraph 3',
+            },
+          ],
+        },
+      ],
     });
     const myEditorState = EditorState.create({
       doc: doc,
@@ -220,7 +228,6 @@ describe('CustomStyleCommand', () => {
     expect(customstylecommand).toBeDefined();
   });
   it('should handle renderLabel ', () => {
-
     const myDoc = doc(p('<cursor>'));
     myDoc.content.findDiffEnd(myDoc.content);
     customstylecommand._customStyleName = 'test';
@@ -484,7 +491,7 @@ describe('CustomStyleCommand', () => {
     expect(
       customstylecommand.executeClearStyle(
         mockeditorstate as unknown as EditorState,
-        () => { },
+        () => {},
         0,
         1,
         2,
@@ -799,7 +806,7 @@ describe('CustomStyleCommand', () => {
         },
       ],
     } as unknown as Node;
-    const mockdispatch = () => { };
+    const mockdispatch = () => {};
     const mockval = {
       styles: {
         hasBullet: true,
@@ -904,7 +911,9 @@ describe('CustomStyleCommand', () => {
           counterFlags: null,
           capcoMode: 0,
         },
-        nodeAt: () => { return { type: { name: 'table' } }; },
+        nodeAt: () => {
+          return { type: { name: 'table' } };
+        },
         content: [
           {
             type: 'paragraph',
@@ -922,7 +931,23 @@ describe('CustomStyleCommand', () => {
           },
         ],
       },
-      selection: { type: 'text', anchor: 1, head: 1, $from: { before: () => { return 0; } }, $to: { after: () => { return 1; }, pos: 1 }, from: 0 },
+      selection: {
+        type: 'text',
+        anchor: 1,
+        head: 1,
+        $from: {
+          before: () => {
+            return 0;
+          },
+        },
+        $to: {
+          after: () => {
+            return 1;
+          },
+          pos: 1,
+        },
+        from: 0,
+      },
     } as unknown as EditorState;
     // Create a dummy document with nodes that have styleName attributes
 
@@ -930,8 +955,8 @@ describe('CustomStyleCommand', () => {
       nodes: {
         doc: { content: 'paragraph+' },
         paragraph: { content: 'text*' },
-        text: {}
-      }
+        text: {},
+      },
     });
 
     // Create a document with nodes containing inline content
@@ -939,11 +964,11 @@ describe('CustomStyleCommand', () => {
       schema.node('paragraph', null, [
         schema.text('This is some '),
         schema.text('inline content'),
-        schema.text(' within a paragraph.')
-      ])
+        schema.text(' within a paragraph.'),
+      ]),
     ]);
 
-    const mockdispatch = () => { };
+    const mockdispatch = () => {};
     const mockval = {
       styles: {
         hasBullet: true,
@@ -2118,7 +2143,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       },
     ],
     addMark: () => {
-      return { removeMark: () => { } };
+      return { removeMark: () => {} };
     },
     removeMark: () => {
       return { key: 'mocktr' };
@@ -2353,7 +2378,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       },
     ],
   });
-
 
   const statemock = { schema: schema, doc: doc, selection: { from: 0, to: 1 } };
   const schema1 = new Schema({
@@ -2707,7 +2731,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       manageElementsAfterSelection([{ node: nodemock }], statemock, trmock)
     ).toBeDefined();
   });
-
 
   it('should handle insertParagraph', () => {
     const nodeattrs = {
@@ -3680,7 +3703,7 @@ describe('updateDocument', () => {
       },
     ],
     addMark: () => {
-      return { removeMark: () => { } };
+      return { removeMark: () => {} };
     },
     removeMark: () => {
       return { key: 'mocktr' };
@@ -4482,7 +4505,12 @@ describe('allowCustomLevelIndent', () => {
   it('should handle allowCustomLevelIndent when condition check nodeStyleLevel >= styleLevel', () => {
     const doc = {
       resolve: () => {
-        return { parent: { type: { name: 'paragraph' }, attrs: { styleName: 'dont know' } } };
+        return {
+          parent: {
+            type: { name: 'paragraph' },
+            attrs: { styleName: 'dont know' },
+          },
+        };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
@@ -4493,7 +4521,12 @@ describe('allowCustomLevelIndent', () => {
     const doc = {
       nodeSize: 10,
       resolve: () => {
-        return { parent: { type: { name: 'paragraph' }, attrs: { styleName: 'dont know' } } };
+        return {
+          parent: {
+            type: { name: 'paragraph' },
+            attrs: { styleName: 'dont know' },
+          },
+        };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
@@ -4504,7 +4537,12 @@ describe('allowCustomLevelIndent', () => {
     const doc = {
       nodeSize: 10,
       resolve: () => {
-        return { parent: { type: { name: 'paragph' }, attrs: { styleName: 'dont know' } } };
+        return {
+          parent: {
+            type: { name: 'paragph' },
+            attrs: { styleName: 'dont know' },
+          },
+        };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
@@ -4514,7 +4552,12 @@ describe('allowCustomLevelIndent', () => {
   it('should handle allowCustomLevelIndent when condition check !isAllowedNode(node)', () => {
     const doc = {
       resolve: () => {
-        return { parent: { type: { name: 'paragra' }, attrs: { styleName: 'dont know' } } };
+        return {
+          parent: {
+            type: { name: 'paragra' },
+            attrs: { styleName: 'dont know' },
+          },
+        };
       },
     } as unknown as Node;
     const tr = new Transform(doc);
@@ -4920,8 +4963,8 @@ describe('removeAllMarksExceptLink', () => {
       },
       marks: {
         // Define the strong mark
-        strong: {}
-      }
+        strong: {},
+      },
     });
 
     const mockDoc = Node.fromJSON(mySchema, {
@@ -4933,13 +4976,18 @@ describe('removeAllMarksExceptLink', () => {
             {
               type: 'text',
               text: 'Hello, ProseMirror!',
-              marks: [{ type: 'strong' }] // Include the "strong" mark
+              marks: [{ type: 'strong' }], // Include the "strong" mark
             },
           ],
         },
       ],
     });
-    const tr = { doc: mockDoc,removeMark:()=>{return {doc:mockDoc};} } as unknown as Transform;
+    const tr = {
+      doc: mockDoc,
+      removeMark: () => {
+        return { doc: mockDoc };
+      },
+    } as unknown as Transform;
     const myEditor = new EditorState();
     const style: Style = {
       styleName: '',
@@ -5087,7 +5135,5 @@ describe('handleRemoveMarks', () => {
     };
     const customstylecommand = new CustomStyleCommand(styl, 'A_12');
     expect(customstylecommand.isActive()).toBeTruthy();
-
   });
-
 });

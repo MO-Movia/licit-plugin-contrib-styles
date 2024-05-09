@@ -5,11 +5,9 @@ import {
   RESERVED_STYLE_NONE_NUMBERING,
 } from './CustomStyleNodeSpec.js';
 import { DEFAULT_NORMAL_STYLE } from './Constants.js';
-import { EditorView } from 'prosemirror-view';
 let customStyles = new Array(0);
 let styleRuntime;
 let hideNumbering = false;
-let _view: EditorView;
 let hasdocTypechanged = false;
 let docType = null;
 // [FS] IRAD-1202 2021-02-15
@@ -59,9 +57,7 @@ export function getCustomStyleByName(name: string): Style {
   return style;
 }
 
-export function setView(csview: EditorView) {
-  _view = csview;
-}
+
 
 // store styles in cache
 export function setStyles(style: Style[]) {

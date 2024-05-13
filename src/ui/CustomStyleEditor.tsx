@@ -466,10 +466,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       const value = customStyles.find((u) => u.styleName === e.target.value);
       // FIX: not able to modify and save the populated style
       value.mode = 3;
-      this.state = {
-        ...value,
-      };
-      this.setState(prevState => (prevState));
+      this.setState(prevState => ({ ...prevState, ...value }));
       this.setNextLineStyle(this.state.styles.nextLineStyleName);
     }
   }

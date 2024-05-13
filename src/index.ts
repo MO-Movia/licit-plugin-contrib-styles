@@ -14,7 +14,6 @@ import {
   setStyleRuntime,
   setHidenumberingFlag,
   isStylesLoaded,
-  setStyleCallback
 } from './customStyle.js';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec.js';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
@@ -65,7 +64,6 @@ export class CustomstylePlugin extends Plugin {
         // dummy plugin view so that EditorView is accessible when refreshing the document
         // to apply styles after getting the styles.
         csview = view;
-        setStyleCallback();
         setHidenumberingFlag(hideNumbering || false);
         return {
           update: () => {

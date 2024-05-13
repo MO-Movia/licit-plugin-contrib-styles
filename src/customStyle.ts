@@ -57,8 +57,6 @@ export function getCustomStyleByName(name: string): Style {
   return style;
 }
 
-
-
 // store styles in cache
 export function setStyles(style: Style[]) {
   customStyles = style;
@@ -71,6 +69,7 @@ export function setStyles(style: Style[]) {
   docType = documentType;
   if (docType) {
     hasdocTypechanged = true;
+    saveDefaultStyle();
   }
 }
 export function setHidenumberingFlag(hideNumberingFlag) {
@@ -83,10 +82,6 @@ export function getHidenumberingFlag(): boolean {
 
 export function setStyleRuntime(runtime) {
   styleRuntime = runtime;
-}
-
-export function setStyleCallback() {
-  saveDefaultStyle();
 }
 
 function saveDefaultStyle() {

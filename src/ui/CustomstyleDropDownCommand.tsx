@@ -16,6 +16,7 @@ import {
   getStylesAsync,
   hasStyleRuntime,
   isCustomStyleExists,
+  getCustomStyleByName
 } from '../customStyle.js';
 import './custom-dropdown.css';
 
@@ -39,7 +40,7 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
       // [FS] IRAD-1074 2020-12-09
       // When apply 'None' from style menu, not clearing the applied custom style.
       [RESERVED_STYLE_NONE]: new CustomStyleCommand(
-        RESERVED_STYLE_NONE,
+        getCustomStyleByName(RESERVED_STYLE_NONE),
         RESERVED_STYLE_NONE
       ),
     };
@@ -52,11 +53,20 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
           setStyles(result);
           HEADING_NAMES = result;
           if (null != HEADING_NAMES) {
-            HEADING_NAMES.forEach((obj) => {
-              HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
-                obj,
-                obj.styleName
+            const foundObject = result.find(obj => obj.styleName === RESERVED_STYLE_NONE);
+            if (foundObject) {
+              HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
+                foundObject,
+                foundObject.styleName
               );
+            }
+
+            HEADING_NAMES.forEach((obj) => {
+              if (RESERVED_STYLE_NONE != obj.styleName)
+                HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
+                  obj,
+                  obj.styleName
+                );
             });
           }
         }
@@ -126,7 +136,7 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
           const updatedAttrs = { ...node.attrs, styleName: RESERVED_STYLE_NONE };
           node = { ...node, attrs: updatedAttrs } as unknown as Node;
           customStyleName = RESERVED_STYLE_NONE;
-      }
+        }
 
       }
     });

@@ -4897,7 +4897,7 @@ describe('removeAllMarksExceptLink', () => {
       styleName: '',
     };
     expect(
-      removeAllMarksExceptLink(0, 1, tr, mySchema, myEditor, style)
+      removeAllMarksExceptLink(0, 1, tr, mySchema)
     ).toBeDefined();
   });
   it('should handle removeAllMarksExceptLink when mark.attrs[ATTR_OVERRIDDEN] && link === mark.type.name', () => {
@@ -4937,7 +4937,7 @@ describe('removeAllMarksExceptLink', () => {
       styleName: '',
     };
     expect(
-      removeAllMarksExceptLink(0, 1, tr, mySchema, myEditor, style)
+      removeAllMarksExceptLink(0, 1, tr, mySchema)
     ).toBeDefined();
   });
   it('should handle removeAllMarksExceptLink when mark.attrs[ATTR_OVERRIDDEN] && link === mark.type.name', () => {
@@ -4993,7 +4993,7 @@ describe('removeAllMarksExceptLink', () => {
       styleName: '',
     };
     expect(
-      removeAllMarksExceptLink(1, 2, tr, mySchema, myEditor, style)
+      removeAllMarksExceptLink(1, 2, tr, mySchema)
     ).toBeDefined();
   });
 });
@@ -5053,9 +5053,7 @@ describe('handleRemoveMarks', () => {
       tasks,
       0,
       1,
-      mySchema,
-      myEditor,
-      style
+      mySchema
     );
     expect(testtr).toBeDefined();
   });
@@ -5104,9 +5102,7 @@ describe('handleRemoveMarks', () => {
         ],
         0,
         1,
-        mySchema,
-        myEditor,
-        style
+        mySchema
       )
     ).toBeDefined();
   });

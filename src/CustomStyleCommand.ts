@@ -563,7 +563,11 @@ export function compareMarkWithStyle(
         break;
       case MARKSTRIKE:
       case MARKSUPER:
+        break;
       case MARKTEXTHIGHLIGHT:
+        // [FS] LIC-258 2024-05-09
+        // Highlight style not removing even after apply another custom style(without highlight mark)
+        same = mark.attrs['highlightColor'] === style['textHighlight'];
         break;
       case MARKUNDERLINE:
         same = undefined !== style[UNDERLINE];
@@ -625,7 +629,6 @@ function onLoadRemoveAllMarksExceptOverridden(
   from: number,
   to: number,
   tr: Transform,
-  state: EditorState
 ) {
   const tasks = [];
   node.descendants(function (child: Node, pos: number) {
@@ -644,7 +647,7 @@ function onLoadRemoveAllMarksExceptOverridden(
     }
   });
 
-  return handleRemoveMarks(tr, tasks, from, to, schema, state, null);
+  return handleRemoveMarks(tr, tasks, from, to, schema);
 }
 
 export function getMarkByStyleName(styleName: string, schema: Schema) {
@@ -720,7 +723,6 @@ function applyStyleEx(
   node: Node,
   startPos: number,
   endPos: number,
-  way: number,
   opt?: number
 ) {
   const loading = !styleProp;
@@ -731,21 +733,19 @@ function applyStyleEx(
         state.schema,
         startPos,
         endPos,
-        tr,
-        state
-      );
-    } else if (way === 0) {
-      // [FS] IRAD-1087 2020-11-02
-      // Issue fix: applied link is missing after applying a custom style.
-      tr = removeAllMarksExceptLink(
-        startPos,
-        endPos,
-        tr,
-        state.schema,
-        state,
-        styleProp
+        tr
       );
     }
+    // else if (way === 0) {
+    // [FS] IRAD-1087 2020-11-02
+    // Issue fix: applied link is missing after applying a custom style.
+    tr = removeAllMarksExceptLink(
+      startPos,
+      endPos,
+      tr,
+      state.schema
+    );
+    // }
   }
 
   if (loading || !opt) {
@@ -1339,7 +1339,6 @@ export function applyLatestStyle(
   style?: Style,
   opt?: number
 ) {
-  const way = 1;
   tr = applyStyleEx(
     style,
     styleName,
@@ -1348,7 +1347,6 @@ export function applyLatestStyle(
     node,
     startPos,
     endPos,
-    way,
     opt
   );
   // apply bold first word/sentence custom style
@@ -1384,8 +1382,6 @@ export function removeAllMarksExceptLink(
   to: number,
   tr: Transform,
   schema: Schema,
-  state: EditorState,
-  styleProp?: Style
 ) {
   const { doc } = tr;
   const tasks = [];
@@ -1404,7 +1400,7 @@ export function removeAllMarksExceptLink(
     }
     return true;
   });
-  return handleRemoveMarks(tr, tasks, from, to, schema, state, styleProp);
+  return handleRemoveMarks(tr, tasks, from, to, schema);
 }
 
 export function handleRemoveMarks(
@@ -1413,15 +1409,14 @@ export function handleRemoveMarks(
   from: number,
   to: number,
   schema: Schema,
-  state: EditorState,
-  styleProp?: Style
 ) {
   tasks.forEach((job) => {
     const { mark } = job;
-    const retObj = { modified: false };
-    if (styleProp && MARKTEXTHIGHLIGHT === mark.type.name) {
-      tr = compareMarkWithStyle(mark, styleProp.styles, tr, from, to, retObj);
-    }
+    // [FS] LIC-258 2024-05-09
+    // Highlight style not removing even after apply another custom style(without highlight mark)
+    // if (styleProp && MARKTEXTHIGHLIGHT === mark.type.name) {
+    //  tr = compareMarkWithStyle(mark, styleProp.styles, tr, from, to, retObj);
+    // }
     if (!mark.attrs[ATTR_OVERRIDDEN]) {
       tr = tr.removeMark(from, to, mark.type);
     }

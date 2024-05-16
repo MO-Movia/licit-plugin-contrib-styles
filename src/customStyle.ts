@@ -69,6 +69,8 @@ export function setStyles(style: Style[]) {
   docType = documentType;
   if (docType) {
     hasdocTypechanged = true;
+  }
+  if(style && style.length===0){
     saveDefaultStyle();
   }
 }
@@ -86,7 +88,7 @@ export function setStyleRuntime(runtime) {
 
 function saveDefaultStyle() {
   if (!isCustomStyleExists(RESERVED_STYLE_NONE)) {
-    saveStyle(DEFAULT_NORMAL_STYLE).then(() => {
+    saveStyle(DEFAULT_NORMAL_STYLE)?.then(() => {
       /* This is intentional */
     });
   }
@@ -211,7 +213,7 @@ export function getCustomStyle(customStyle) {
 // [FS] IRAD-1539 2021-08-02
 // method to save,retrive,rename and remove style from the style server.
 export function saveStyle(styleProps: Style): Promise<Style[]> {
-  return styleRuntime.saveStyle(styleProps);
+  return styleRuntime?.saveStyle(styleProps);
 }
 export function getStylesAsync(): Promise<Style[]> {
   return styleRuntime.getStylesAsync();

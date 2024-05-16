@@ -283,7 +283,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         sampleDiv.innerHTML = textSample;
       }
 
-      if (this.state.styles.styleLevel && this.state.styles.hasBullet) {
+      if (this.state.styles.styleLevel && this.state.styles?.hasBullet) {
         const bulletDetails = getDetailsBullet(this.state.styles.bulletLevel);
         sampleDiv.innerHTML = `<strong style=color:${bulletDetails.color}>${bulletDetails.symbol}</strong>${textSample}`;
       }
@@ -361,7 +361,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         hasNumbering: isCheckboxDisabled
           ? false
           : prevState.styles.hasNumbering,
-        hasBullet: isCheckboxDisabled ? false : prevState.style.hasBullet,
+        hasBullet: isCheckboxDisabled ? false : prevState.style?.hasBullet,
       },
     }));
   }
@@ -513,7 +513,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       styles: {
         ...prevState.styles,
         hasNumbering: val.target.checked,
-        hasBullet: val.target.checked ? false : prevState.styles.hasBullet,
+        hasBullet: val.target.checked ? false : prevState.styles?.hasBullet,
         nextLineStyleName: val.target.checked
           ? prevState.styleName
           : RESERVED_STYLE_NONE,
@@ -1309,7 +1309,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     </label>
                     <label>
                       <input
-                        checked={this.state.styles.hasBullet}
+                        checked={this.state.styles?.hasBullet}
                         className="molsp-chknumbering"
                         disabled={
                           this.state.styles.styleLevel === 'None' ||
@@ -1325,7 +1325,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         <select
                           className="molsp-fontstyle"
                           disabled={this.checkCondition(
-                            this.state.styles.hasBullet
+                            this.state.styles?.hasBullet
                           )}
                           id="bulletValue"
                           onChange={this.onBulletLevelChange.bind(this)}
@@ -1595,6 +1595,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       styles: val.styles,
     };
     saveStyle(styleObj).then((result) => {
+      customStyles=result;
       setStyles(result);
     });
   }

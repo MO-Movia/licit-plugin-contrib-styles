@@ -491,7 +491,7 @@ describe('CustomStyleCommand', () => {
     expect(
       customstylecommand.executeClearStyle(
         mockeditorstate as unknown as EditorState,
-        () => {},
+        () => { },
         0,
         1,
         2,
@@ -806,7 +806,7 @@ describe('CustomStyleCommand', () => {
         },
       ],
     } as unknown as Node;
-    const mockdispatch = () => {};
+    const mockdispatch = () => { };
     const mockval = {
       styles: {
         hasBullet: true,
@@ -968,7 +968,7 @@ describe('CustomStyleCommand', () => {
       ]),
     ]);
 
-    const mockdispatch = () => {};
+    const mockdispatch = () => { };
     const mockval = {
       styles: {
         hasBullet: true,
@@ -2143,7 +2143,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       },
     ],
     addMark: () => {
-      return { removeMark: () => {} };
+      return { removeMark: () => { } };
     },
     removeMark: () => {
       return { key: 'mocktr' };
@@ -3703,7 +3703,7 @@ describe('updateDocument', () => {
       },
     ],
     addMark: () => {
-      return { removeMark: () => {} };
+      return { removeMark: () => { } };
     },
     removeMark: () => {
       return { key: 'mocktr' };
@@ -4891,11 +4891,6 @@ describe('removeAllMarksExceptLink', () => {
       ],
     });
     const tr = { doc: mockDoc } as unknown as Transform;
-
-    const myEditor = new EditorState();
-    const style: Style = {
-      styleName: '',
-    };
     expect(
       removeAllMarksExceptLink(0, 1, tr, mySchema)
     ).toBeDefined();
@@ -4932,10 +4927,6 @@ describe('removeAllMarksExceptLink', () => {
       ],
     });
     const tr = { doc: mockDoc } as unknown as Transform;
-    const myEditor = new EditorState();
-    const style: Style = {
-      styleName: '',
-    };
     expect(
       removeAllMarksExceptLink(0, 1, tr, mySchema)
     ).toBeDefined();
@@ -4988,10 +4979,6 @@ describe('removeAllMarksExceptLink', () => {
         return { doc: mockDoc };
       },
     } as unknown as Transform;
-    const myEditor = new EditorState();
-    const style: Style = {
-      styleName: '',
-    };
     expect(
       removeAllMarksExceptLink(1, 2, tr, mySchema)
     ).toBeDefined();
@@ -5036,7 +5023,6 @@ describe('handleRemoveMarks', () => {
       },
     } as unknown as Transform;
 
-    const myEditor = new EditorState();
     const tasks = [
       {
         mark: {
@@ -5045,9 +5031,6 @@ describe('handleRemoveMarks', () => {
         },
       },
     ];
-    const style: Style = {
-      styleName: '',
-    };
     const testtr = handleRemoveMarks(
       tr,
       tasks,
@@ -5085,10 +5068,6 @@ describe('handleRemoveMarks', () => {
         },
       },
     });
-    const style: Style = {
-      styleName: '',
-    };
-    const myEditor = new EditorState();
     expect(
       handleRemoveMarks(
         tr,

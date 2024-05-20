@@ -405,7 +405,7 @@ describe('applyNormalIfNoStyle', () => {
 });
 
 
-describe('', () => {
+describe('onUpdateAppendTransaction', () => {
 
   it('should handle onUpdateAppendTransaction when ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$from.start() == tr.selection.$from.end() this condition should pass', () => {
     const linkmark = new Mark();
@@ -484,8 +484,8 @@ describe('', () => {
         },
       ],
     });
-    mockdoc.resolve = () => { return { type: {}, parent: { content: { content: [{ attrs: null }] } }, min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; };
-    mockdoc.nodeAt = () => { return { nodeSize: 20 } as unknown as Node; };
+    mockdoc.resolve = () => { return { type: 'paragraph', isTextblock: true, parent: { content: { content: [{ attrs: null }] } }, min: () => { return 0; }, max: () => { return 1; }, depth: 1, node: () => { return { type: 'paragraph' } }, before: () => { return 1 }, start: () => { return 1 } } as unknown as ResolvedPos; };
+    mockdoc.nodeAt = () => { return { nodeSize: 20, type: 'paragraph', isTextblock: true } as unknown as Node; };
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -532,7 +532,7 @@ describe('', () => {
         },
         {
           schema: {
-            nodes: { paragraph: {} }, marks: {
+            nodes: { paragraph: 'paragraph' }, marks: {
               link: linkmark,
               'fontName': { create: () => { return {}; } },
               'mark-font-type': { create: () => { return {}; } },
@@ -608,7 +608,7 @@ describe('', () => {
     ).toStrictEqual({});
   });
 
-  it('', () => {
+  it('onUpdateAppendTransaction', () => {
     const linkmark = new Mark();
 
     class Transaction {
@@ -685,7 +685,7 @@ describe('', () => {
         },
       ],
     });
-    mockdoc.resolve = () => { return { parent: { attrs: { styleName: 'bold' }, content: { content: [{ attrs: { styleName: 'bold' } }] } } } as unknown as ResolvedPos; };
+    mockdoc.resolve = () => { return { type: 'paragraph', isTextblock: true, parent: { attrs: { styleName: 'bold' }, content: { content: [{ attrs: { styleName: 'bold' } }] } }, min: () => { return 0; }, max: () => { return 1; }, depth: 1, node: () => { return { type: 'paragraph' } }, before: () => { return 1 }, start: () => { return 1 } } as unknown as ResolvedPos; };
     mockdoc.nodeAt = () => { return { nodeSize: 10 } as unknown as Node; };
     const mockSlice1 = {
       content: {
@@ -715,6 +715,14 @@ describe('', () => {
           },
         },
         {
+          schema: {
+            nodes: { paragraph: 'paragraph' }, marks: {
+              link: linkmark,
+              'fontName': { create: () => { return {}; } },
+              'mark-font-type': { create: () => { return {}; } },
+              'mark-font-size': { create: () => { return {}; } },
+            },
+          },
           selection: {
             $cursor: { pos: 0 },
             $from: {
@@ -781,7 +789,7 @@ describe('', () => {
     ).toStrictEqual({});
   });
 
-  it('', () => {
+  it('onUpdateAppendTransaction', () => {
     const linkmark = new Mark();
 
     class Transaction {
@@ -858,7 +866,8 @@ describe('', () => {
         },
       ],
     });
-    mockdoc.resolve = () => { return { parent: { attrs: { styleName: 'bold' }, content: { content: [{ attrs: { styleName: 'bold' } }] } } } as unknown as ResolvedPos; };
+    mockdoc.resolve = () => { return { type: 'paragraph', isTextblock: true, parent: { attrs: { styleName: 'bold' }, content: { content: [{ attrs: { styleName: 'bold' } }] } }, min: () => { return 0; }, max: () => { return 1; }, depth: 1, node: () => { return { type: 'paragraph' } }, before: () => { return 1 }, start: () => { return 1 } } as unknown as ResolvedPos; };
+
     mockdoc.nodeAt = () => { return { nodeSize: 10 } as unknown as Node; };
     const mockSlice1 = {
       content: {
@@ -888,6 +897,14 @@ describe('', () => {
           },
         },
         {
+          schema: {
+            nodes: { paragraph: 'paragraph' }, marks: {
+              link: linkmark,
+              'fontName': { create: () => { return {}; } },
+              'mark-font-type': { create: () => { return {}; } },
+              'mark-font-size': { create: () => { return {}; } },
+            },
+          },
           selection: {
             $cursor: { pos: 0 },
             $from: {

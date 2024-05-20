@@ -46,6 +46,7 @@ import {
   MARKFONTTYPE,
   MARKSTRIKE,
   MARKSUPER,
+  MARKSUB,
   MARKTEXTHIGHLIGHT,
   MARKUNDERLINE,
 } from './MarkNames.js';
@@ -563,6 +564,7 @@ export function compareMarkWithStyle(
         break;
       case MARKSTRIKE:
       case MARKSUPER:
+      case MARKSUB:
         break;
       case MARKTEXTHIGHLIGHT:
         // [FS] LIC-258 2024-05-09
@@ -629,6 +631,7 @@ function onLoadRemoveAllMarksExceptOverridden(
   from: number,
   to: number,
   tr: Transform,
+  state: EditorState
 ) {
   const tasks = [];
   node.descendants(function (child: Node, pos: number) {
@@ -723,6 +726,7 @@ function applyStyleEx(
   node: Node,
   startPos: number,
   endPos: number,
+  way: number,
   opt?: number
 ) {
   const loading = !styleProp;
@@ -733,7 +737,8 @@ function applyStyleEx(
         state.schema,
         startPos,
         endPos,
-        tr
+        tr,
+        state
       );
     }
     // else if (way === 0) {
@@ -1339,6 +1344,7 @@ export function applyLatestStyle(
   style?: Style,
   opt?: number
 ) {
+  const way = 1;
   tr = applyStyleEx(
     style,
     styleName,
@@ -1347,6 +1353,7 @@ export function applyLatestStyle(
     node,
     startPos,
     endPos,
+    way,
     opt
   );
   // apply bold first word/sentence custom style
@@ -1381,7 +1388,7 @@ export function removeAllMarksExceptLink(
   from: number,
   to: number,
   tr: Transform,
-  schema: Schema,
+  schema: Schema
 ) {
   const { doc } = tr;
   const tasks = [];
@@ -1408,15 +1415,11 @@ export function handleRemoveMarks(
   tasks,
   from: number,
   to: number,
-  schema: Schema,
+  schema: Schema
+
 ) {
   tasks.forEach((job) => {
     const { mark } = job;
-    // [FS] LIC-258 2024-05-09
-    // Highlight style not removing even after apply another custom style(without highlight mark)
-    // if (styleProp && MARKTEXTHIGHLIGHT === mark.type.name) {
-    //  tr = compareMarkWithStyle(mark, styleProp.styles, tr, from, to, retObj);
-    // }
     if (!mark.attrs[ATTR_OVERRIDDEN]) {
       tr = tr.removeMark(from, to, mark.type);
     }
@@ -1543,7 +1546,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   let textContent = getNodeText(node);
   const endPos = textContent.length;
   let content: string[] = [];
-  let counter:number = 0;
+  let counter: number = 0;
   if (boldSentence) {
     content = textContent.split('.');
   } else {

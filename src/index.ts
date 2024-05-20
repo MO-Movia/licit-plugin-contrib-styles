@@ -18,7 +18,7 @@ import {
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec.js';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
-import { Node, Schema ,Slice} from 'prosemirror-model';
+import { Node, Schema, Slice } from 'prosemirror-model';
 import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand.js';
 import { applyEffectiveSchema } from './EditorSchema.js';
 import type { StyleRuntime } from './StyleRuntime.js';
@@ -76,7 +76,7 @@ export class CustomstylePlugin extends Plugin {
       },
 
       props: {
-        handlePaste(_view, _event, slice ) {
+        handlePaste(_view, _event, slice) {
           if ((slice.content as unknown as Slice)?.content[0]?.attrs) {     //LINTFIX
             slice1 = slice;
           }
@@ -156,11 +156,11 @@ export function onUpdateAppendTransaction(
 ) {
   const opt = 1;
 
-    // when user updates
-    if (!slice1) {
-      tr = updateStyleOverrideFlag(nextState, tr);
-    }
-    tr = manageHierarchyOnDelete(prevState, nextState, tr, csview);
+  // when user updates
+  if (!slice1 && csview && BACKSPACEKEYCODE !== csview.input.lastKeyCode) {
+    tr = updateStyleOverrideFlag(nextState, tr);
+  }
+  tr = manageHierarchyOnDelete(prevState, nextState, tr, csview);
 
 
   tr = applyStyleForEmptyParagraph(nextState, tr);
@@ -168,6 +168,26 @@ export function onUpdateAppendTransaction(
   ref.firstTime = false;
   // custom style for next line
   if (csview) {
+    if (BACKSPACEKEYCODE === csview.input.lastKeyCode) {
+      let paraPositionDiff = prevState.selection.from - nextState.selection.from;
+      if (paraPositionDiff === 2 || paraPositionDiff === 0) {
+        const { schema } = nextState;
+        let para = findParentNodeClosestToPos(tr.curSelection.$head,
+          (node) => {
+            return node.type === schema.nodes.paragraph;
+          });
+        if (para) {
+          let styleName = para.node.attrs.styleName;
+          if (RESERVED_STYLE_NONE == styleName || !styleName) {
+            let newattrs = { ...para.node.attrs };
+            newattrs.styleName = RESERVED_STYLE_NONE;
+            tr = tr.setNodeMarkup(para.pos, undefined, newattrs);
+            styleName = RESERVED_STYLE_NONE;
+          }
+          tr = applyLatestStyle(styleName, nextState, tr, para.node, para.pos, para.pos + para.node.nodeSize - 1);
+        }
+      }
+    }
     if (
       ENTERKEYCODE === csview.input.lastKeyCode &&
       tr.selection.$from.start() == tr.selection.$from.end()
@@ -177,7 +197,7 @@ export function onUpdateAppendTransaction(
   }
   tr = applyLineStyleForBoldPartial(nextState, tr);
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
-    tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc, opt);
+    // tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc, opt);
     for (let index = 0; index < slice1.content.childCount; index++) {
       if (
         !(
@@ -263,8 +283,9 @@ export function onUpdateAppendTransaction(
         }
       }
     }
+    tr = tr?.scrollIntoView();
   }
-  tr = tr.scrollIntoView();
+
   return tr;
 }
 
@@ -479,23 +500,23 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
   const node = nextState.tr.doc.nodeAt(startPos);
   const style = getCustomStyleByName(node.attrs?.styleName);
   if (!style?.styles?.isList) {
-  if (validateStyleName(node)) {
-    if (
-      node.content?.content &&
-      0 < node.content.content.length &&
-      node.content.content[0].marks &&
-      0 === node.content.content[0].marks.length
-    ) {
-      tr = applyLatestStyle(
-        node.attrs.styleName,
-        nextState,
-        tr,
-        node,
-        startPos,
-        endPos,
-        null,
-        opt
-      );
+    if (validateStyleName(node)) {
+      if (
+        node.content?.content &&
+        0 < node.content.content.length &&
+        node.content.content[0].marks &&
+        0 === node.content.content[0].marks.length
+      ) {
+        tr = applyLatestStyle(
+          node.attrs.styleName,
+          nextState,
+          tr,
+          node,
+          startPos,
+          endPos,
+          null,
+          opt
+        );
       }
     }
   }
@@ -594,9 +615,9 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       newattrs.indent = nextLineStyle.styles.indent;
       newattrs.align = nextLineStyle.styles.align;
       // KNITE-864 08-03-2024 InnerLink functionality change
-      if(newattrs.innerLink){
-        newattrs.innerLink=null;
-        }
+      if (newattrs.innerLink) {
+        newattrs.innerLink = null;
+      }
       // [FS] IRAD-1223 2021-03-04
       // Line spacing not working for next line style
       newattrs.lineSpacing = getLineSpacingValue(
@@ -671,6 +692,9 @@ function updateStyleOverrideFlag(state, tr) {
     if (tr && haveEligibleChildren(child, contentLen)) {
       const startPos = tr.curSelection.$anchor.pos; //pos
       const endPos = tr.curSelection.$head.pos; //pos + contentLen
+      if (!child.attrs.styleName) {
+        child.attrs.styleName = 'Normal';
+      }
       tr = updateOverrideFlag(
         child.attrs.styleName,
         tr,

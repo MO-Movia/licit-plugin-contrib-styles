@@ -388,7 +388,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                   // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
 
                   if (null != result) {
-                    if (val.styleName === val.styles.nextLineStyleName) {
+                    // if (val.styleName === val.styles.nextLineStyleName) {
                       let tr;
                       delete val.editorView;
                       saveStyle(val).then((result) => {
@@ -413,7 +413,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                         this._stylePopup.close();
                         this._stylePopup = null;
                       });
-                    }
+                    // }
                   }
                 });
               }

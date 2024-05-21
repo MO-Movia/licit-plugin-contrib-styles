@@ -631,7 +631,6 @@ function onLoadRemoveAllMarksExceptOverridden(
   from: number,
   to: number,
   tr: Transform,
-  state: EditorState
 ) {
   const tasks = [];
   node.descendants(function (child: Node, pos: number) {
@@ -738,7 +737,6 @@ function applyStyleEx(
         startPos,
         endPos,
         tr,
-        state
       );
     }
     // else if (way === 0) {

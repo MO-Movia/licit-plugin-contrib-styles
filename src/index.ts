@@ -154,7 +154,6 @@ export function onUpdateAppendTransaction(
   transactions,
   slice1
 ) {
-  const opt = 1;
 
   // when user updates
   if (!slice1 && csview && BACKSPACEKEYCODE !== csview.input.lastKeyCode) {
@@ -169,17 +168,17 @@ export function onUpdateAppendTransaction(
   // custom style for next line
   if (csview) {
     if (BACKSPACEKEYCODE === csview.input.lastKeyCode) {
-      let paraPositionDiff = prevState.selection.from - nextState.selection.from;
+      const paraPositionDiff = prevState.selection.from - nextState.selection.from;
       if (paraPositionDiff === 2 || paraPositionDiff === 0) {
         const { schema } = nextState;
-        let para = findParentNodeClosestToPos(tr.curSelection.$head,
+        const para = findParentNodeClosestToPos(tr.curSelection.$head,
           (node) => {
             return node.type === schema.nodes.paragraph;
           });
         if (para) {
           let styleName = para.node.attrs.styleName;
           if (RESERVED_STYLE_NONE == styleName || !styleName) {
-            let newattrs = { ...para.node.attrs };
+            const newattrs = { ...para.node.attrs };
             newattrs.styleName = RESERVED_STYLE_NONE;
             tr = tr.setNodeMarkup(para.pos, undefined, newattrs);
             styleName = RESERVED_STYLE_NONE;

@@ -484,7 +484,7 @@ describe('onUpdateAppendTransaction', () => {
         },
       ],
     });
-    mockdoc.resolve = () => { return { type: 'paragraph', isTextblock: true, parent: { content: { content: [{ attrs: null }] } }, min: () => { return 0; }, max: () => { return 1; }, depth: 1, node: () => { return { type: 'paragraph' } }, before: () => { return 1 }, start: () => { return 1 } } as unknown as ResolvedPos; };
+    mockdoc.resolve = () => { return { type: 'paragraph', isTextblock: true, parent: { content: { content: [{ attrs: null }] } }, min: () => { return 0; }, max: () => { return 1; }, depth: 1, node: () => { return { type: 'paragraph' }; }, before: () => { return 1; }, start: () => { return 1; } } as unknown as ResolvedPos; };
     mockdoc.nodeAt = () => { return { nodeSize: 20, type: 'paragraph', isTextblock: true } as unknown as Node; };
     const mockSlice1 = {
       content: {
@@ -685,7 +685,7 @@ describe('onUpdateAppendTransaction', () => {
         },
       ],
     });
-    mockdoc.resolve = () => { return { type: 'paragraph', isTextblock: true, parent: { attrs: { styleName: 'bold' }, content: { content: [{ attrs: { styleName: 'bold' } }] } }, min: () => { return 0; }, max: () => { return 1; }, depth: 1, node: () => { return { type: 'paragraph' } }, before: () => { return 1 }, start: () => { return 1 } } as unknown as ResolvedPos; };
+    mockdoc.resolve = () => { return { type: 'paragraph', isTextblock: true, parent: { attrs: { styleName: 'bold' }, content: { content: [{ attrs: { styleName: 'bold' } }] } }, min: () => { return 0; }, max: () => { return 1; }, depth: 1, node: () => { return { type: 'paragraph' }; }, before: () => { return 1; }, start: () => { return 1; } } as unknown as ResolvedPos; };
     mockdoc.nodeAt = () => { return { nodeSize: 10 } as unknown as Node; };
     const mockSlice1 = {
       content: {
@@ -866,7 +866,7 @@ describe('onUpdateAppendTransaction', () => {
         },
       ],
     });
-    mockdoc.resolve = () => { return { type: 'paragraph', isTextblock: true, parent: { attrs: { styleName: 'bold' }, content: { content: [{ attrs: { styleName: 'bold' } }] } }, min: () => { return 0; }, max: () => { return 1; }, depth: 1, node: () => { return { type: 'paragraph' } }, before: () => { return 1 }, start: () => { return 1 } } as unknown as ResolvedPos; };
+    mockdoc.resolve = () => { return { type: 'paragraph', isTextblock: true, parent: { attrs: { styleName: 'bold' }, content: { content: [{ attrs: { styleName: 'bold' } }] } }, min: () => { return 0; }, max: () => { return 1; }, depth: 1, node: () => { return { type: 'paragraph' }; }, before: () => { return 1; }, start: () => { return 1; } } as unknown as ResolvedPos; };
 
     mockdoc.nodeAt = () => { return { nodeSize: 10 } as unknown as Node; };
     const mockSlice1 = {
@@ -5382,6 +5382,296 @@ describe('onUpdateAppendTransaction', () => {
       )
     ).toBeDefined();
   });
+  it('should handle onUpdateAppendTransaction when slice1 is null', () => {
+    const linkmark = new Mark();
+
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+      },
+    });
+
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+    expect(
+      onUpdateAppendTransaction(
+        { firstTime: false },
+        {
+          doc: mockdoc,
+          selection: {
+            $from: {
+              $start: () => {
+                return 1;
+              },
+              $end: () => {
+                return 1;
+              },
+            },
+          },
+        },
+        {
+          selection: {
+            $cursor: { pos: 0 },
+            $from: {
+              before: () => {
+                return 0;
+              },
+              $start: () => {
+                return 1;
+              },
+              $end: () => {
+                return 1;
+              },
+            },
+            $to: {
+              after: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: {
+              nodeAt: () => {
+                return {};
+              },
+            },
+            scrollIntoView: () => {
+              return {};
+            },
+            selection: {
+              $from: {
+                start: () => {
+                  return 1;
+                },
+                end: () => {
+                  return 2;
+                },
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        {
+          selection: {
+            $from: {
+              before: () => {
+                return 0;
+              },
+            },
+            $to: {
+              after: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: {
+              nodeAt: () => {
+                return { key: 'tr' };
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        { input: { lastKeyCode: 13 } },
+        {},
+        null
+      )
+    ).toBeDefined();
+  });
+  it('should handle onUpdateAppendTransaction when BACKSPACEKEYCODE === csview.input.lastKeyCode', () => {
+    const linkmark = new Mark();
+
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+      },
+    });
+
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+    expect(
+      onUpdateAppendTransaction(
+        { firstTime: false },
+        {
+          doc: mockdoc,
+          selection: {
+            $from: {
+              $start: () => {
+                return 1;
+              },
+              $end: () => {
+                return 1;
+              },
+            },
+          },
+          curSelection:{$head:1}
+        },
+        {
+          selection: {
+            $cursor: { pos: 0 },
+            $from: {
+              before: () => {
+                return 0;
+              },
+              $start: () => {
+                return 1;
+              },
+              $end: () => {
+                return 1;
+              },
+            },
+            $to: {
+              after: () => {
+                return 1;
+              },
+            },
+            from:0
+          },
+          tr: {
+            doc: {
+              nodeAt: () => {
+                return {};
+              },
+            },
+            scrollIntoView: () => {
+              return {};
+            },
+            selection: {
+              $from: {
+                start: () => {
+                  return 1;
+                },
+                end: () => {
+                  return 2;
+                },
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        {
+          selection: {
+            $from: {
+              before: () => {
+                return 0;
+              },
+            },
+            $to: {
+              after: () => {
+                return 1;
+              },
+            },
+            from:0
+          },
+          tr: {
+            doc: {
+              nodeAt: () => {
+                return { key: 'tr' };
+              },
+            },
+          },
+          doc: mockdoc,
+
+        },
+        { input: { lastKeyCode: 8 } },
+        {},
+        null
+      )
+    ).toBeDefined();
+  });
 });
 
 describe('remapCounterFlags', () => {
@@ -5390,4 +5680,5 @@ describe('remapCounterFlags', () => {
     expect(remapCounterFlags(tr)).toBeUndefined();
   });
 });
+
 

@@ -229,9 +229,10 @@ export function onUpdateAppendTransaction(
                   opt
                 );
               } else {
-                const startPos = csview.state.selection.$to.after(1) - 1;
-                const styleName = slice1.content.content[index].attrs.styleName;
+                const startPos = csview.state.selection.from - 1;
                 const node = nextState.tr.doc.nodeAt(startPos);
+                //FIX: Copied text show Normal style name instead of showing the applied style in the current paragraph.
+                const styleName = (null === slice1.content.content[index].attrs.styleName ? node.attrs.styleName : slice1.content.content[index].attrs.styleName);
                 const len = node.nodeSize;
                 const endPos = startPos + len;
                 tr = applyLatestStyle(

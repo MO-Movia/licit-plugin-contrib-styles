@@ -1300,8 +1300,9 @@ export function getStyleLevel(styleName: string) {
     if (
       null !== styleProp &&
       styleProp?.styles &&
-      styleProp?.styles?.styleLevel &&
-      styleProp?.styles?.hasNumbering
+      styleProp?.styles?.styleLevel
+      // FIX: show warning if we delete a custom style with bullet list which is already applied in doucment.
+      // &&styleProp?.styles?.hasNumbering
     ) {
       styleLevel = styleProp.styles.styleLevel;
     } else if (styleName.includes(RESERVED_STYLE_NONE_NUMBERING)) {

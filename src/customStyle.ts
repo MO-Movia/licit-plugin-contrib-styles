@@ -70,7 +70,10 @@ export function setStyles(style: Style[]) {
   if (docType) {
     hasdocTypechanged = true;
   }
-  if(style && style.length===0){
+  if (!Object.prototype.hasOwnProperty.call(style[0], 'docType')) {
+    hasdocTypechanged = true;
+  }
+  if (style && 0 === style.length) {
     saveDefaultStyle();
   }
 }

@@ -35,29 +35,21 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
   hasRuntime: boolean = hasStyleRuntime();
   //[FS] IRAD-1085 2020-10-09
   //method to build commands for list buttons
-  getCommandGroups() {
-    HEADING_COMMANDS = {
-      // [FS] IRAD-1074 2020-12-09
-      // When apply 'None' from style menu, not clearing the applied custom style.
-      [RESERVED_STYLE_NONE]: new CustomStyleCommand(
-        getCustomStyleByName(RESERVED_STYLE_NONE),
-        RESERVED_STYLE_NONE
-      ),
-    };
+  getCommandGroups() {    
     // Check runtime is avilable in editorview
     // Get styles form server configured in runtime
-    let HEADING_NAMES = null;
-    if (this.hasRuntime) {
+    let HEADING_NAMES = null;    
+    if (this.hasRuntime) {      
       getStylesAsync().then((result) => {
         if (result) {
           setStyles(result);
           HEADING_NAMES = result;
           if (null != HEADING_NAMES) {
-            const foundObject = result.find(obj => obj.styleName === RESERVED_STYLE_NONE);
-            if (foundObject) {
+            let foundNormal = result.find(obj => obj.styleName === RESERVED_STYLE_NONE);
+            if (foundNormal) {
               HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
-                foundObject,
-                foundObject.styleName
+                foundNormal,
+                foundNormal.styleName
               );
             }
 

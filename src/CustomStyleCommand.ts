@@ -1438,8 +1438,8 @@ export function applyStyle(
   const { selection } = state;
   let startPos = selection.$from.before(1);
   if (state.doc.nodeAt(startPos).type.name == 'table') {
-    startPos = selection.from;
-    endPos = selection.$to.pos;
+    startPos = selection.from - selection.$from.parentOffset - 1;
+    endPos = selection.$to.parent?.nodeSize + startPos - 1;
   }
   else {
     endPos = selection.$to.after(1) - 1;

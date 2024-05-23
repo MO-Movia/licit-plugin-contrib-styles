@@ -5197,6 +5197,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
+              nodeSize:1
             },
           },
           tr: {
@@ -5330,6 +5331,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
+              nodeSize:1
             },
           },
           tr: {
@@ -5365,6 +5367,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
+              nodeSize:1
             },
           },
           tr: {
@@ -5473,6 +5476,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
+              nodeSize:1
             },
           },
           tr: {
@@ -5508,6 +5512,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
+              nodeSize:1
             },
           },
           tr: {
@@ -5617,6 +5622,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
+              nodeSize:1
             },
             from:0
           },
@@ -5653,6 +5659,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
+              nodeSize:1
             },
             from:0
           },

@@ -193,6 +193,9 @@ export function onUpdateAppendTransaction(
     ) {
       tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
     }
+    else if (ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$cursor.pos == tr.selection.$from.start()) {
+      tr = applyStyleForPreviousEmptyParagraph(nextState, tr);
+  }
   }
   tr = applyLineStyleForBoldPartial(nextState, tr);
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
@@ -287,6 +290,16 @@ export function onUpdateAppendTransaction(
   }
 
   return tr;
+}
+
+
+
+export function applyStyleForPreviousEmptyParagraph(nextState, tr) {
+  if (tr.selection.$from.parentOffset === 0) {
+      const prevNode = nextState.doc.resolve(tr.selection.$anchor.pos - 1).nodeBefore
+      tr = applyLatestStyle(RESERVED_STYLE_NONE, nextState, tr, prevNode, tr.selection.$head.before() - 2, prevNode.nodeSize + (tr.selection.$head.before() - 2), null);
+      return tr;
+  }
 }
 
 // [FS] IRAD-1202 2021-02-15

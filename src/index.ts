@@ -295,10 +295,10 @@ export function onUpdateAppendTransaction(
 //LIC-254 Create new line by placing cursor at the beginning of a paragraph applies the current style instead of Normal style
 export function applyStyleForPreviousEmptyParagraph(nextState, tr) {
   if (tr.selection.$from.parentOffset === 0) {
-      const prevNode = nextState.doc.resolve(tr.selection.$anchor.pos - 1).nodeBefore
+      const prevNode = nextState.doc.resolve(tr.selection.$anchor.pos - 1).nodeBefore;
       tr = applyLatestStyle(RESERVED_STYLE_NONE, nextState, tr, prevNode, tr.selection.$head.before() - 2, prevNode.nodeSize + (tr.selection.$head.before() - 2), null);
-      return tr;
   }
+  return tr;
 }
 
 // [FS] IRAD-1202 2021-02-15

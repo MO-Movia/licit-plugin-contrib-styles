@@ -16,14 +16,13 @@ import {
   getStylesAsync,
   hasStyleRuntime,
   isCustomStyleExists,
-  getCustomStyleByName
 } from '../customStyle.js';
 import './custom-dropdown.css';
 
 // [FS] IRAD-1042 2020-09-09
 // To include custom styles in the toolbar
 
-let HEADING_COMMANDS = {
+const HEADING_COMMANDS = {
   [RESERVED_STYLE_NONE]: new HeadingCommand(0),
 };
 
@@ -35,17 +34,17 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
   hasRuntime: boolean = hasStyleRuntime();
   //[FS] IRAD-1085 2020-10-09
   //method to build commands for list buttons
-  getCommandGroups() {    
+  getCommandGroups() {
     // Check runtime is avilable in editorview
     // Get styles form server configured in runtime
-    let HEADING_NAMES = null;    
-    if (this.hasRuntime) {      
+    let HEADING_NAMES = null;
+    if (this.hasRuntime) {
       getStylesAsync().then((result) => {
         if (result) {
           setStyles(result);
           HEADING_NAMES = result;
           if (null != HEADING_NAMES) {
-            let foundNormal = result.find(obj => obj.styleName === RESERVED_STYLE_NONE);
+            const foundNormal = result.find(obj => obj.styleName === RESERVED_STYLE_NONE);
             if (foundNormal) {
               HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
                 foundNormal,

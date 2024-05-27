@@ -193,7 +193,7 @@ export function onUpdateAppendTransaction(
     ) {
       tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
     }
-    else if (ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$cursor.pos == tr.selection.$from.start()) {
+    else if (ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$cursor?.pos == tr.selection.$from.start()) {
       tr = applyStyleForPreviousEmptyParagraph(nextState, tr);
   }
   }

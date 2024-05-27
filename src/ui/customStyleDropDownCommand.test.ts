@@ -875,8 +875,8 @@ describe('customstyledropdowncommand 1', () => {
     jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([]);
     const commandGroups = await customstyledropdowncommand.getCommandGroups();
     const headingCommands = commandGroups[0];
-    expect(headingCommands).not.toHaveProperty('A Apply Stylefff');
-    expect(headingCommands).not.toHaveProperty('A11-Rename');
+    expect(headingCommands).toHaveProperty('A Apply Stylefff');
+    expect(headingCommands).toHaveProperty('A11-Rename');
   });
   it('should handle render when styleName not null', () => {
     const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([

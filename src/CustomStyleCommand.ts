@@ -739,7 +739,6 @@ function applyStyleEx(
         tr,
       );
     }
-    // else if (way === 0) {
     // [FS] IRAD-1087 2020-11-02
     // Issue fix: applied link is missing after applying a custom style.
     tr = removeAllMarksExceptLink(
@@ -748,7 +747,6 @@ function applyStyleEx(
       tr,
       state.schema
     );
-    // }
   }
 
   if (loading || !opt) {

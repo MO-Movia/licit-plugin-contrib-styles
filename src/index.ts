@@ -199,7 +199,6 @@ export function onUpdateAppendTransaction(
   }
   tr = applyLineStyleForBoldPartial(nextState, tr);
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
-    // tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc, opt);
     for (let index = 0; index < slice1.content.childCount; index++) {
       if (
         !(

@@ -33,23 +33,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   _stylePopup = null;
   _styleName = null;
   _menuItemHeight = 28;
-  // _popUpId = uuid();
-  // props: {
-  //   className?: string;
-  //   commandGroups: Array<{ [key: string]: UICommand }>;
-  //   staticCommand: Array<{ [key: string]: UICommand }>;
-  //   disabled?: boolean;
-  //   dispatch: (tr: Transform) => void;
-  //   editorState: EditorState;
-  //   editorView?: EditorView;
-  //   // icon?: string | React.Element<any> | null;
-  //   icon?: string | JSX.Element | null;
-  //   // label?: string | React.Element<any> | null;
-  //   label?: string | JSX.Element | null;
-  //   title?: string;
-  //   _style?: any;
-  //   onCommand?:any
-  // };
 
   _id = uuid();
   _selectedIndex = 0;
@@ -319,7 +302,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
   //shows the alignment and line spacing option
   showStyleWindow(command, _event: SyntheticEvent<Element>, mode) {
-    // const anchor = event ? event.currentTarget : null;
     // close the popup toggling effect
     if (this._stylePopup) {
       this._stylePopup.close();
@@ -388,7 +370,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                   // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
 
                   if (null != result) {
-                    // if (val.styleName === val.styles.nextLineStyleName) {
                       let tr;
                       delete val.editorView;
                       saveStyle(val).then((result) => {
@@ -401,7 +382,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                                 this.props.editorState.tr,
                                 this._styleName,
                                 val.styleName,
-                                // obj.styles
                               );
                             }
                           });
@@ -413,7 +393,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                         this._stylePopup.close();
                         this._stylePopup = null;
                       });
-                    // }
                   }
                 });
               }
@@ -432,7 +411,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     tr: Transform,
     oldStyleName,
     styleName,
-    // _style
   ) {
     const { doc } = state;
 

@@ -4983,6 +4983,62 @@ describe('removeAllMarksExceptLink', () => {
       removeAllMarksExceptLink(1, 2, tr, mySchema)
     ).toBeDefined();
   });
+  it('should handle removeAllMarksExceptLink when mark.attrs[ATTR_OVERRIDDEN] && link === mark.type.name', () => {
+    const mySchema = new Schema({
+      nodes: {
+        // Define the document node
+        doc: {
+          content: 'block+',
+        },
+        // Define the paragraph node
+        paragraph: {
+          content: 'text*',
+          group: 'block',
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        // Define the text node
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        // Define the strong mark
+        strong: {},
+      },
+    });
+
+    const mockDoc = Node.fromJSON(mySchema, {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+              marks: [{ type: 'strong' }], // Include the "strong" mark
+            },
+          ],
+        },
+      ],
+    });
+    const tr = {
+      doc: mockDoc,
+      removeMark: () => {
+        return { doc: mockDoc };
+      },
+    } as unknown as Transform;
+    const myEditor = new EditorState();
+    const style: Style = {
+      styleName: '',
+    };
+    expect(
+      removeAllMarksExceptLink(1, 2, tr, mySchema, myEditor, style)
+    ).toBeDefined();
+  });
 });
 describe('handleRemoveMarks', () => {
   it('should handle handleRemoveMarks', () => {

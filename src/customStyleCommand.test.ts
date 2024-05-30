@@ -5036,7 +5036,7 @@ describe('removeAllMarksExceptLink', () => {
       styleName: '',
     };
     expect(
-      removeAllMarksExceptLink(1, 2, tr, mySchema, myEditor, style)
+      removeAllMarksExceptLink(1, 2, tr, mySchema)
     ).toBeDefined();
   });
 });

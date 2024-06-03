@@ -5031,10 +5031,6 @@ describe('removeAllMarksExceptLink', () => {
         return { doc: mockDoc };
       },
     } as unknown as Transform;
-    const myEditor = new EditorState();
-    const style: Style = {
-      styleName: '',
-    };
     expect(
       removeAllMarksExceptLink(1, 2, tr, mySchema)
     ).toBeDefined();

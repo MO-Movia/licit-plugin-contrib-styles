@@ -1,5 +1,5 @@
 // Plugin to handle Styles.
-import { Plugin, PluginKey } from 'prosemirror-state';
+import { Plugin, PluginKey,TextSelection } from 'prosemirror-state';
 import {
   updateOverrideFlag,
   applyLatestStyle,
@@ -186,6 +186,7 @@ export function onUpdateAppendTransaction(
             styleName = RESERVED_STYLE_NONE;
           }
           tr = applyLatestStyle(styleName, nextState, tr, para.node, para.pos, para.pos + para.node.nodeSize - 1);
+          tr = tr.setSelection(TextSelection.create(tr.doc, nextState.selection.from));
         }
       }
     }

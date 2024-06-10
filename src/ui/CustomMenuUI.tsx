@@ -19,8 +19,9 @@ import {
   saveStyle,
   renameStyle,
   removeStyle,
+  addStyleToList
 } from '../customStyle.js';
-import { setTextAlign , setTextLineSpacing , atViewportCenter, createPopUp} from '@modusoperandi/licit-ui-commands';
+import { setTextAlign, setTextLineSpacing, atViewportCenter, createPopUp } from '@modusoperandi/licit-ui-commands';
 import { setParagraphSpacing } from '../ParagraphSpacingCommand.js';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec.js';
 
@@ -227,8 +228,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
     doc.nodesBetween(0, doc.nodeSize - 2, (node, pos) => {
       if (node.content?.content?.length) {
-        if (node?.content?.content?.[0]?.marks?.length)
-       {
+        if (node?.content?.content?.[0]?.marks?.length) {
           node.content.content[0].marks.some((mark) => {
             if (node.attrs.styleName === removedStyleName) {
               tasks.push({ node, pos, mark });
@@ -341,6 +341,11 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                 ) {
                   saveStyle(val).then((result) => {
                     if (result) {
+                      //in bladelicitruntime, the response of the saveStyle() changed from list to a object
+                      //so need to add that style object to the current style list
+                      if (typeof result === 'object') {
+                        result = addStyleToList(result);
+                      }
                       setStyles(result);
                       result.forEach((obj) => {
                         if (val.styleName === obj.styleName) {
@@ -370,29 +375,34 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                   // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
 
                   if (null != result) {
-                      let tr;
-                      delete val.editorView;
-                      saveStyle(val).then((result) => {
-                        if (result) {
-                          setStyles(result);
-                          result.forEach((obj) => {
-                            if (val.styleName === obj.styleName) {
-                              tr = this.renameStyleInDocument(
-                                this.props.editorState,
-                                this.props.editorState.tr,
-                                this._styleName,
-                                val.styleName,
-                              );
-                            }
-                          });
-                          if (tr) {
-                            dispatch(tr);
-                          }
+                    let tr;
+                    delete val.editorView;
+                    saveStyle(val).then((result) => {
+                      if (result) {
+                        //in bladelicitruntime, the response of the saveStyle() changed from list to a object
+                        //so need to add that style object to the current style list
+                        if (typeof result === 'object') {
+                          result = addStyleToList(result);
                         }
-                        this.props.editorView.focus();
-                        this._stylePopup.close();
-                        this._stylePopup = null;
-                      });
+                        setStyles(result);
+                        result.forEach((obj) => {
+                          if (val.styleName === obj.styleName) {
+                            tr = this.renameStyleInDocument(
+                              this.props.editorState,
+                              this.props.editorState.tr,
+                              this._styleName,
+                              val.styleName,
+                            );
+                          }
+                        });
+                        if (tr) {
+                          dispatch(tr);
+                        }
+                      }
+                      this.props.editorView.focus();
+                      this._stylePopup.close();
+                      this._stylePopup = null;
+                    });
                   }
                 });
               }
@@ -416,7 +426,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
     doc.descendants(function (child, pos) {
       if (oldStyleName === child.attrs.styleName) {
-        (( child.attrs as { styleName: string }).styleName) = styleName;
+        ((child.attrs as { styleName: string }).styleName) = styleName;
         tr = tr.setNodeMarkup(pos, undefined, child.attrs);
       }
     });

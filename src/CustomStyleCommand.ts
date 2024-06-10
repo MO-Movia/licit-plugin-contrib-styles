@@ -36,6 +36,7 @@ import {
   setStyles,
   saveStyle,
   getStylesAsync,
+  addStyleToList
 } from './customStyle.js';
 import type { Style } from './StyleRuntime.js';
 import {
@@ -475,6 +476,11 @@ export class CustomStyleCommand extends UICommand {
       this.showAlert();
     } else {
       saveStyle(val).then((result) => {
+        //in bladelicitruntime, the response of the saveStyle() changed from list to a object
+        //so need to add that style object to the current style list
+        if (typeof result === 'object') {
+          result = addStyleToList(result);
+        }
         setStyles(result);
         // Issue fix: Created custom style Numbering not applied to paragraph.
         tr = tr.setSelection(TextSelection.create(doc, 0, 0));
@@ -548,19 +554,29 @@ export function compareMarkWithStyle(
   if (style) {
     switch (mark.type.name) {
       case MARKSTRONG:
-        same = undefined !== style[STRONG];
+        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
+          same = undefined !== style[STRONG];
+        }
         break;
       case MARKEM:
-        same = undefined !== style[EM];
+        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
+          same = undefined !== style[EM];
+        }
         break;
       case MARKTEXTCOLOR:
-        same = mark.attrs['color'] === style[COLOR];
+        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
+          same = mark.attrs['color'] === style[COLOR];
+        }
         break;
       case MARKFONTSIZE:
-        same = mark.attrs['pt'] === Number(style[FONTSIZE]);
+        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
+          same = mark.attrs['pt'] === Number(style[FONTSIZE]);
+        }
         break;
       case MARKFONTTYPE:
-        same = mark.attrs['name'] === style[FONTNAME];
+        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
+          same = mark.attrs['name'] === style[FONTNAME];
+        }
         break;
       case MARKSTRIKE:
       case MARKSUPER:
@@ -569,10 +585,14 @@ export function compareMarkWithStyle(
       case MARKTEXTHIGHLIGHT:
         // [FS] LIC-258 2024-05-09
         // Highlight style not removing even after apply another custom style(without highlight mark)
-        same = mark.attrs['highlightColor'] === style['textHighlight'];
+        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
+          same = mark.attrs['highlightColor'] === style['textHighlight'];
+        }
         break;
       case MARKUNDERLINE:
-        same = undefined !== style[UNDERLINE];
+        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
+          same = undefined !== style[STRONG];
+        }
         break;
       default:
         break;
@@ -1389,7 +1409,9 @@ export function removeAllMarksExceptLink(
 ) {
   const { doc } = tr;
   const tasks = [];
-  doc.nodesBetween(from, to, (node, pos) => {
+  const posFrom = (tr as Transaction).selection.$from.start(1);
+  const posTo = (tr as Transaction).selection.$to.end(1) - 1;
+  doc.nodesBetween(posFrom, posTo, (node, pos) => {
     if (node.marks?.length) {
       node.marks.some((mark) => {
         if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
@@ -1418,7 +1440,8 @@ export function handleRemoveMarks(
   tasks.forEach((job) => {
     const { mark } = job;
     if (!mark.attrs[ATTR_OVERRIDDEN]) {
-      tr = tr.removeMark(from, to, mark.type);
+      const to = job.pos + tr.doc.nodeAt(job.pos)?.nodeSize;
+      tr = tr.removeMark(job.pos, to, mark.type);
     }
   });
   tr = setTextAlign(tr, schema, null);

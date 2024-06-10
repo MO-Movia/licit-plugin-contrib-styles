@@ -22,6 +22,19 @@ function isValidStyleName(styleName) {
   );
 }
 
+export function addStyleToList(style) {
+  if (0 < customStyles.length) {
+    let index = customStyles.findIndex(item => item.styleName === style.styleName);
+    if (index !== -1) {
+      customStyles[index] = style;
+    }
+    else {
+      customStyles.push(style);
+    }
+  }
+  return customStyles;
+}
+
 // [FS] IRAD-1137 2021-01-15
 // check if the entered style name already exist
 export function isCustomStyleExists(styleName: string) {
@@ -74,12 +87,12 @@ export function setStyles(style: Style[]) {
   docType = documentType;
   if (docType) {
     hasdocTypechanged = true;
-      if(_view){
-        _view.dispatch(_view.state.tr.scrollIntoView());
-        _view = null;
+    if (_view) {
+      _view.dispatch(_view.state.tr.scrollIntoView());
+      _view = null;
     }
   }
-  if (style[0] === undefined ||!Object.hasOwn(style[0], 'docType')) {
+  if (style[0] === undefined || !Object.hasOwn(style[0], 'docType')) {
     hasdocTypechanged = true;
   }
   if (style && 0 === style.length) {

@@ -5,10 +5,11 @@ import {
   RESERVED_STYLE_NONE_NUMBERING,
 } from './CustomStyleNodeSpec.js';
 import { DEFAULT_NORMAL_STYLE } from './Constants.js';
+import { EditorView } from 'prosemirror-view'
 let customStyles = new Array(0);
 let styleRuntime;
 let hideNumbering = false;
-let _view;
+let _view: EditorView;
 let hasdocTypechanged = false;
 let docType = null;
 // [FS] IRAD-1202 2021-02-15
@@ -74,12 +75,12 @@ export function setStyles(style: Style[]) {
   docType = documentType;
   if (docType) {
     hasdocTypechanged = true;
-      if(_view){
-        _view.dispatch(_view.state.tr.scrollIntoView());
-        _view = null;
+    if (_view) {
+      _view.dispatch(_view.state.tr.scrollIntoView());
+      _view = null;
     }
   }
-  if (style[0] === undefined ||!Object.hasOwn(style[0], 'docType')) {
+  if (style[0] === undefined || !Object.hasOwn(style[0], 'docType')) {
     hasdocTypechanged = true;
   }
   if (style && 0 === style.length) {

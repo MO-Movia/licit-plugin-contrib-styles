@@ -12,7 +12,8 @@ import {
   onInitAppendTransaction,
   onUpdateAppendTransaction,
   applyNormalIfNoStyle,
-  remapCounterFlags
+  remapCounterFlags,
+  applyStyleForPreviousEmptyParagraph
 } from './index';
 import { builders } from 'prosemirror-test-builder';
 import {
@@ -5685,6 +5686,177 @@ describe('remapCounterFlags', () => {
   it('should handle remapCounterFlags', () => {
     const tr = { doc: { attrs: { counterFlags: { key: {} } } } };
     expect(remapCounterFlags(tr)).toBeUndefined();
+  });
+});
+describe('applyStyleForPreviousEmptyParagraph', () => {
+  const mockSchema = new Schema({
+    nodes: {
+      doc: {
+        content: 'paragraph+',
+      },
+      paragraph: {
+        content: 'text*',
+        group: 'block',
+        parseDOM: [{ tag: 'p' }],
+        toDOM() {
+          return ['p', 0];
+        },
+      },
+      text: { inline: true },
+    },
+  
+    marks: {
+      link: {
+        attrs: {
+        },
+      },
+      em: {
+        parseDOM: [
+          {
+            tag: 'i',
+          },
+          {
+            tag: 'em',
+          },
+          {
+            style: 'font-style=italic',
+          },
+        ],
+        toDOM() {
+          return ['em', 0];
+        },
+        attrs: {
+          overridden: {
+            default: false,
+          },
+        },
+      },
+      strong: {
+        parseDOM: [
+          {
+            tag: 'strong',
+          },
+          {
+            tag: 'b',
+          },
+          {
+            style: 'font-weight',
+          },
+        ],
+        toDOM() {
+          return ['strong', 0];
+        },
+        attrs: {
+          overridden: {
+            default: false,
+          },
+        },
+      },
+      underline: {
+        parseDOM: [
+          {
+            tag: 'u',
+          },
+          {
+            style: 'text-decoration-line',
+          },
+          {
+            style: 'text-decoration',
+          },
+        ],
+        toDOM() {
+          return ['u', 0];
+        },
+        attrs: {
+          overridden: {
+            default: false,
+          },
+        },
+      },
+      'mark-text-color': {
+        attrs: {
+          overridden: {
+            default: false,
+          },
+        },
+        inline: true,
+        group: 'inline',
+        parseDOM: [
+          {
+            style: 'color',
+          },
+        ],
+        toDOM() {
+          return ['span', { color: '' }, 0];
+        },
+      },
+      'mark-text-highlight': {
+        attrs: {
+          //  highlightColor: '',
+          overridden: {
+            default: false,
+          },
+        },
+        inline: true,
+        group: 'inline',
+        parseDOM: [
+          {
+            tag: 'span[style*=background-color]',
+          },
+        ],
+  
+        toDOM() {
+          return ['span', { highlightColor: '' }, 0];
+        },
+      },
+      'mark-font-size': {
+        attrs: {
+          pt: {
+            default: null,
+          },
+          overridden: {
+            default: false,
+          },
+        },
+        inline: true,
+        group: 'inline',
+        parseDOM: [
+          {
+            style: 'font-size',
+          },
+        ],
+        toDOM() {
+          return ['Test Mark'];
+        },
+      },
+      'mark-font-type': {
+        attrs: {
+          overridden: {
+            default: false,
+          },
+        },
+        inline: true,
+        group: 'inline',
+        parseDOM: [
+          {
+            style: 'font-family',
+          },
+        ],
+        toDOM() {
+          return ['span', mark_type_attr, 0];
+        },
+      },
+    },
+  });
+  const setSelection = () => {
+    return {
+      doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } },
+      setSelection: setSelection
+    };
+  };
+  it('should handle applyStyleForPreviousEmptyParagraph', () => {
+    const tr = { doc: { attrs: { counterFlags: { key: {} } },nodesBetween:()=>{},resolve : () => { return { min: () => { return null; }, max: () => { return null; } } as unknown as ResolvedPos; }} ,selection:{$from:{parentOffset:0},$anchor:{pos:2},$head:{before:()=>{return 3}}},setSelection:setSelection};
+    expect(applyStyleForPreviousEmptyParagraph({schema:mockSchema,doc:{resolve:()=>{return {nodeBefore:{nodeSize :2,descendants:()=>{}}}},nodesBetween:()=>{}}} as unknown as EditorState,tr)).toBeDefined();
   });
 });
 

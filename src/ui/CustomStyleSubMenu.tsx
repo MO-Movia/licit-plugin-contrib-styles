@@ -15,7 +15,7 @@ export class CustomStyleSubMenu extends React.PureComponent<
     const { command } = this.props;
 
     return (
-      <div className="molsp-dropdown-content" id="mo-submenu">
+      <div data-cy="cyStyleEditDropdown" className="molsp-dropdown-content" id="mo-submenu">
         <a
           onClick={this.onButtonClick.bind(this, {
             type: 'modify',
@@ -33,6 +33,7 @@ export class CustomStyleSubMenu extends React.PureComponent<
           Rename Style..
         </a>
         <a
+          data-cy="cyStyleEditReset"
           onClick={this.onButtonClick.bind(this, {
             type: 'remove',
             command: command,

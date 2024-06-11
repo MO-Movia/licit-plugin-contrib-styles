@@ -130,12 +130,14 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     });
     return (
       <div>
-        <div className="molsp-dropbtn" id={this._id}>
-          <div className="molsp-stylenames">{children}</div>
+        <span data-cy="cyStyleDropdown">
+          <div className="molsp-dropbtn" id={this._id}>
+            <div className="molsp-stylenames">{children}</div>
 
-          <hr></hr>
-          {children1}
-        </div>
+            <hr></hr>
+            {children1}
+          </div>
+        </span>
       </div>
     );
   }

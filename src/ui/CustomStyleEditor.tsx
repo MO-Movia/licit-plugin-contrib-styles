@@ -853,7 +853,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       className={
                         this.state.styles.strong
                           ? 'czi-custom-button use-icon active molsp-markbuttons'
-                          : 'czi-custom-button use-icon molsp-markbuttons'
+                          : 'czi-custom-button use-icon molsp-markbuttons molsp-formatbuttons'
                       }
                     >
                       <span className="molsp-iconspan czi-icon format_bold editor-markbuttons">
@@ -875,7 +875,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       className={
                         this.state.styles.em
                           ? 'czi-custom-button use-icon active molsp-markbuttons'
-                          : 'czi-custom-button use-icon molsp-markbuttons'
+                          : 'czi-custom-button use-icon molsp-markbuttons molsp-formatbuttons'
                       }
                     >
                       <span className="molsp-iconspan czi-icon format_italic editor-markbuttons">
@@ -898,7 +898,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       className={
                         this.state.styles.underline
                           ? 'czi-custom-button use-icon active molsp-markbuttons'
-                          : 'czi-custom-button use-icon molsp-markbuttons'
+                          : 'czi-custom-button use-icon molsp-markbuttons molsp-formatbuttons'
                       }
                     >
                       <span className="molsp-iconspan czi-icon  format_underline editor-markbuttons">

@@ -22,7 +22,7 @@ import './custom-dropdown.css';
 // [FS] IRAD-1042 2020-09-09
 // To include custom styles in the toolbar
 
-const HEADING_COMMANDS = {
+let HEADING_COMMANDS = {
   [RESERVED_STYLE_NONE]: new HeadingCommand(0),
 };
 
@@ -35,6 +35,14 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
   //[FS] IRAD-1085 2020-10-09
   //method to build commands for list buttons
   getCommandGroups() {
+    HEADING_COMMANDS = {
+      // [FS] IRAD-1074 2020-12-09
+      // When apply 'None' from style menu, not clearing the applied custom style.
+      [RESERVED_STYLE_NONE]: new CustomStyleCommand(
+        RESERVED_STYLE_NONE,
+        RESERVED_STYLE_NONE
+      ),
+    };
     // Check runtime is avilable in editorview
     // Get styles form server configured in runtime
     let HEADING_NAMES = null;

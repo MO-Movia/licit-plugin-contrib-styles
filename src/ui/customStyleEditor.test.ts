@@ -45,6 +45,27 @@ describe('CustomStyleEditor', () => {
       customstyleeditor.onStyleClick('strong', new Event('click'))
     ).toBeUndefined();
   });
+  it('should handle onStyleClick when style = strong and styles[style] = true', () => {
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A Apply Stylefff',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: true,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+    };
+    expect(
+      customstyleeditor.onStyleClick('strong', new Event('click'))
+    ).toBeUndefined();
+  });
   it('should handle onStyleClick when style = name', () => {
     const event = { target: { value: 'A Apply Stylefff-new' } };
     expect(customstyleeditor.onStyleClick('name', event)).toBeUndefined();
@@ -1210,6 +1231,9 @@ describe('CustomStyleEditor', () => {
     customstyleeditor.handleList({ target: { value: '', checked: false } });
     expect(spy).not.toHaveBeenCalled();
   });
-
+it('should handle onSelectCustomStyle',()=>{
+  customstyleeditor.getCustomStyles();
+  expect(customstyleeditor.onSelectCustomStyle(()=>{})).toBeUndefined();
+});
 
 });

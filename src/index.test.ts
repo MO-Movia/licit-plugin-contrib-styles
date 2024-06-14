@@ -397,7 +397,7 @@ describe('applyNormalIfNoStyle', () => {
     mockdoc.resolve = () => { return {} as unknown as ResolvedPos; };
     expect(applyNormalIfNoStyle({ schema: mockschema }, {
       doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } },
-      setSelection: setSelection
+      setSelection: setSelection,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}
     },
       mockdoc, true)).toBeDefined();
   });
@@ -5116,10 +5116,10 @@ describe('onInitAppendTransaction', () => {
         setSelection: setSelection
       };
     };
-    expect(onInitAppendTransaction({ loaded: true, firstTime: false }, { curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc },
+    expect(onInitAppendTransaction({ loaded: true, firstTime: false }, { curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}  },
       {
         tr: {
-          setSelection: setSelection, doc: mockdoc
+          setSelection: setSelection, doc: mockdoc, selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}
         }, schema: mockSchema
       })).toBeDefined();
   });

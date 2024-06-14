@@ -24,7 +24,7 @@ function isValidStyleName(styleName) {
 
 export function addStyleToList(style) {
   if (0 < customStyles.length) {
-    let index = customStyles.findIndex(item => item.styleName === style.styleName);
+    const index = customStyles.findIndex(item => item.styleName === style.styleName);
     if (index !== -1) {
       customStyles[index] = style;
     }

@@ -4403,8 +4403,8 @@ describe('applyLatestStyle', () => {
     expect(
       applyLatestStyle(
         '',
-        {} as unknown as EditorState,
-        { doc: mockdoc } as Transform,
+        {schema:mockschema} as unknown as EditorState,
+        { doc: mockdoc,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}} } as unknown as Transform,
         {
           attrs: {
             lineSpacing: '',
@@ -4890,7 +4890,7 @@ describe('removeAllMarksExceptLink', () => {
         },
       ],
     });
-    const tr = { doc: mockDoc } as unknown as Transform;
+    const tr = { doc: mockDoc,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}  } as unknown as Transform;
     expect(
       removeAllMarksExceptLink(0, 1, tr, mySchema)
     ).toBeDefined();
@@ -4926,7 +4926,7 @@ describe('removeAllMarksExceptLink', () => {
         },
       ],
     });
-    const tr = { doc: mockDoc } as unknown as Transform;
+    const tr = { doc: mockDoc ,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}} } as unknown as Transform;
     expect(
       removeAllMarksExceptLink(0, 1, tr, mySchema)
     ).toBeDefined();
@@ -4978,6 +4978,7 @@ describe('removeAllMarksExceptLink', () => {
       removeMark: () => {
         return { doc: mockDoc };
       },
+      selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}
     } as unknown as Transform;
     expect(
       removeAllMarksExceptLink(1, 2, tr, mySchema)
@@ -5030,6 +5031,7 @@ describe('removeAllMarksExceptLink', () => {
       removeMark: () => {
         return { doc: mockDoc };
       },
+      selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}
     } as unknown as Transform;
     expect(
       removeAllMarksExceptLink(1, 2, tr, mySchema)
@@ -5068,6 +5070,7 @@ describe('handleRemoveMarks', () => {
         },
       ],
     });
+    mockdoc.nodeAt = ()=>{return {} as unknown as Node;};
     const tr = {
       doc: mockdoc,
       removeMark: () => {
@@ -5081,13 +5084,13 @@ describe('handleRemoveMarks', () => {
           type: { name: 'mark-text-highlight' },
           attrs: { overridden: undefined },
         },
-      },
+      }
     ];
     const testtr = handleRemoveMarks(
       tr,
       tasks,
-      0,
       1,
+      2,
       mySchema
     );
     expect(testtr).toBeDefined();

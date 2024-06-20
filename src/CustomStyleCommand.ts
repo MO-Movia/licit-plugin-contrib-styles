@@ -222,7 +222,7 @@ export class CustomStyleCommand extends UICommand {
 
   isEmpty = (obj) => {
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.hasOwn(obj, key)) {
         return false;
       }
     }
@@ -262,7 +262,6 @@ export class CustomStyleCommand extends UICommand {
     node?,
     startPos?: number,
     endPos?: number,
-    newattrs?,
     selection?: Selection
   ) {
     let done = false;
@@ -271,7 +270,7 @@ export class CustomStyleCommand extends UICommand {
     hasMismatchHeirarchy(state, tr, node, startPos, endPos);
     // [FS] IRAD-1480 2021-06-25
     // Indenting not remove when clear style is applied
-    newattrs = node.attrs;
+    const newattrs = node.attrs;
     if (newattrs) {
       newattrs['styleName'] = RESERVED_STYLE_NONE;
       newattrs['id'] = '';
@@ -300,7 +299,6 @@ export class CustomStyleCommand extends UICommand {
     const startPos = selection.$from.before(1);
     const endPos = selection.$to.after(1) - 1;
     const node = getNode(state, startPos, endPos, tr);
-    const newattrs = { ...(node ? node.attrs : {}) };
     let isValidated = true;
     if ('newstyle' === this._customStyle) {
       this.editWindow(state, view, 0);
@@ -321,7 +319,6 @@ export class CustomStyleCommand extends UICommand {
         node,
         startPos,
         endPos,
-        newattrs,
         selection
       );
     }
@@ -579,6 +576,10 @@ export function compareMarkWithStyle(
         }
         break;
       case MARKSTRIKE:
+        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
+          same = mark.attrs['strike'] === style['strike'];
+        }
+        break;
       case MARKSUPER:
       case MARKSUB:
         break;
@@ -591,7 +592,7 @@ export function compareMarkWithStyle(
         break;
       case MARKUNDERLINE:
         if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
-          same = undefined !== style[STRONG];
+          same = undefined !== style[UNDERLINE];
         }
         break;
       default:
@@ -1316,8 +1317,6 @@ export function getStyleLevel(styleName: string) {
   if (undefined !== styleName && styleName) {
     const styleProp = getCustomStyleByName(styleName);
     if (
-      null !== styleProp &&
-      styleProp?.styles &&
       styleProp?.styles?.styleLevel
       // FIX: show warning if we delete a custom style with bullet list which is already applied in doucment.
       // &&styleProp?.styles?.hasNumbering
@@ -1409,9 +1408,9 @@ export function removeAllMarksExceptLink(
 ) {
   const { doc } = tr;
   const tasks = [];
-  const posFrom = (tr as Transaction).selection.$from.start(1);
-  const posTo = (tr as Transaction).selection.$to.end(1) - 1;
-  doc.nodesBetween(posFrom, posTo, (node, pos) => {
+  // const posFrom = (tr as Transaction).selection.$from.start(1);
+  // const posTo = (tr as Transaction).selection.$to.end(1) - 1;
+  doc.nodesBetween(from, to, (node, pos) => {
     if (node.marks?.length) {
       node.marks.some((mark) => {
         if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
@@ -1440,7 +1439,7 @@ export function handleRemoveMarks(
   tasks.forEach((job) => {
     const { mark } = job;
     if (!mark.attrs[ATTR_OVERRIDDEN]) {
-      const to = job.pos + tr.doc.nodeAt(job.pos)?.nodeSize;
+      const to = job.pos + job.node?.nodeSize;
       tr = tr.removeMark(job.pos, to, mark.type);
     }
   });
@@ -1461,7 +1460,7 @@ export function applyStyle(
   let startPos = selection.$from.before(1);
   if (state.doc.nodeAt(startPos).type.name == 'table') {
     startPos = selection.from - selection.$from.parentOffset - 1;
-    endPos = selection.$to.parent?.nodeSize + startPos - 1;
+    endPos = selection.$to?.parent?.nodeSize + startPos - 1;
   }
   else {
     endPos = selection.$to.after(1) - 1;
@@ -1507,9 +1506,7 @@ export function applyLineStyle(
     if (node.attrs?.styleName) {
       const styleProp = getCustomStyleByName(node.attrs.styleName);
       if (
-        null !== styleProp &&
-        styleProp.styles &&
-        styleProp.styles.boldPartial
+        styleProp?.styles?.boldPartial
       ) {
         if (!tr) {
           tr = state.tr;
@@ -1539,9 +1536,7 @@ export function applyLineStyle(
         ) {
           const styleProp = getCustomStyleByName(node.attrs.styleName);
           if (
-            null !== styleProp &&
-            styleProp.styles &&
-            styleProp.styles.boldPartial
+            styleProp?.styles?.boldPartial
           ) {
             if (!tr) {
               tr = state.tr;
@@ -1697,7 +1692,7 @@ export function isLevelUpdated(
     if (
       (style?.styles && currentLevel > 0 && !style.styles.hasNumbering) ||
       (style?.styles && undefined === style?.styles?.styleLevel) ||
-      (style && style.styles && style.styles.styleLevel !== currentLevel)
+      (style?.styles?.styleLevel !== currentLevel)
     ) {
       bOK = true;
     }

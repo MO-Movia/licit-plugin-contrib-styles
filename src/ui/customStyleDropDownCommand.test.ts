@@ -444,10 +444,6 @@ describe('customstyledropdowncommand', () => {
     expect(headingCommands).not.toHaveProperty('A11-Rename');
     spy.mockRestore();
   });
-  it('should handle isValidCustomstyle', () => {
-    customstyledropdowncommand.state = state;
-    expect(customstyledropdowncommand.isValidCustomstyle()).toBeFalsy();
-  });
   it('should handle staticCommands', () => {
     expect(customstyledropdowncommand.staticCommands()).toBeInstanceOf(Array);
   });

@@ -495,7 +495,7 @@ describe('CustomStyleCommand', () => {
         0,
         1,
         2,
-        {}
+        {} as unknown as Selection
       )
     ).toBeFalsy();
     expect(
@@ -505,7 +505,7 @@ describe('CustomStyleCommand', () => {
         0,
         1,
         2,
-        {}
+        {} as unknown as Selection
       )
     ).toBeFalsy();
   });
@@ -4282,7 +4282,7 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
         '10Normal-@#$-10',
         undefined as unknown as Style
       )
-    ).toBeFalsy();
+    ).toBeTruthy();
   });
 });
 

@@ -16,7 +16,7 @@ function getAttrs(base: getAttrsFn | undefined, dom: HTMLElement) {
     }
     return attrs;
   } else {
-    return false;
+    return base?.(dom as unknown as Node);
   }
 }
 

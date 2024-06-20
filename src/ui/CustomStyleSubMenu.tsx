@@ -16,30 +16,30 @@ export class CustomStyleSubMenu extends React.PureComponent<
 
     return (
       <div className="molsp-dropdown-content" id="mo-submenu">
-        <a
+        <span
           onClick={this.onButtonClick.bind(this, {
             type: 'modify',
             command: command,
           })}
         >
           Modify Style..
-        </a>
-        <a
+        </span>
+        <span
           onClick={this.onButtonClick.bind(this, {
             type: 'rename',
             command: command,
           })}
         >
           Rename Style..
-        </a>
-        <a
+        </span>
+        <span
           onClick={this.onButtonClick.bind(this, {
             type: 'remove',
             command: command,
           })}
         >
           Reset Style to Normal..
-        </a>
+        </span>
       </div>
     );
   }

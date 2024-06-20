@@ -1,5 +1,5 @@
 // Plugin to handle Styles.
-import { Plugin, PluginKey,TextSelection } from 'prosemirror-state';
+import { Plugin, PluginKey, TextSelection } from 'prosemirror-state';
 import {
   updateOverrideFlag,
   applyLatestStyle,
@@ -198,7 +198,7 @@ export function onUpdateAppendTransaction(
     }
     else if (ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$cursor?.pos == tr.selection.$from.start()) {
       tr = applyStyleForPreviousEmptyParagraph(nextState, tr);
-  }
+    }
   }
   tr = applyLineStyleForBoldPartial(nextState, tr);
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
@@ -209,8 +209,8 @@ export function onUpdateAppendTransaction(
           slice1.content.content[index].type.name === 'doc'
         )
       ) {
-        if (!(index !== 0)) {
-          if (!(slice1.content.content[index].content.size === 0)) {
+        if (index === 0) {
+          if (slice1.content.content[index].content.size !== 0) {
             const tabPos = csview.state.selection.$from.before(1);
             const node2 = csview.state.tr.doc.nodeAt(tabPos);
             const demoPos = prevState.selection.from;
@@ -238,18 +238,9 @@ export function onUpdateAppendTransaction(
                 const node = nextState.tr.doc.nodeAt(startPos);
                 //FIX: Copied text show Normal style name instead of showing the applied style in the current paragraph.
                 const styleName = (null === slice1.content.content[index].attrs.styleName ? node.attrs.styleName : slice1.content.content[index].attrs.styleName);
-                const len = node.nodeSize;
-                const endPos = startPos + len;
-                tr = applyLatestStyle(
-                  styleName,
-                  nextState,
-                  tr,
-                  node,
-                  startPos,
-                  endPos,
-                  null,
-                  opt
-                );
+                const newattrs = { ...node.attrs };
+                newattrs.styleName = styleName;
+                tr = tr.setNodeMarkup(startPos, undefined, newattrs);
               }
             } else {
               if (node2.type.name === 'table') {
@@ -298,8 +289,8 @@ export function onUpdateAppendTransaction(
 //LIC-254 Create new line by placing cursor at the beginning of a paragraph applies the current style instead of Normal style
 export function applyStyleForPreviousEmptyParagraph(nextState, tr) {
   if (tr.selection.$from.parentOffset === 0) {
-      const prevNode = nextState.doc.resolve(tr.selection.$anchor.pos - 1).nodeBefore;
-      tr = applyLatestStyle(RESERVED_STYLE_NONE, nextState, tr, prevNode, tr.selection.$head.before() - 2, prevNode.nodeSize + (tr.selection.$head.before() - 2), null);
+    const prevNode = nextState.doc.resolve(tr.selection.$anchor.pos - 1).nodeBefore;
+    tr = applyLatestStyle(RESERVED_STYLE_NONE, nextState, tr, prevNode, tr.selection.$head.before() - 2, prevNode.nodeSize + (tr.selection.$head.before() - 2), null);
   }
   return tr;
 }
@@ -310,7 +301,7 @@ export function remapCounterFlags(tr) {
   // set counters for numbering.
   const cFlags = tr.doc.attrs.counterFlags;
   for (const key in cFlags) {
-    if (Object.prototype.hasOwnProperty.call(cFlags, key)) {
+    if (Object.hasOwn(cFlags, key)) {
       window[key] = true;
     }
   }
@@ -494,7 +485,7 @@ function applyLineStyleForBoldPartial(nextState, tr) {
     // Check styleName is available for node
     if (validateStyleName(node)) {
       const style = getCustomStyleByName(node.attrs.styleName);
-      if (null !== style && style.styles && style.styles.boldPartial) {
+      if (style?.styles?.boldPartial) {
         tr = applyLineStyle(nextState, tr, node, pos);
       }
     }

@@ -801,7 +801,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   >
                     text_format
                   </span>
-                  <label
+                  <span
                     style={{
                       marginLeft: '-10px',
                       marginTop: '2px',
@@ -809,7 +809,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     }}
                   >
                     Font
-                  </label>
+                  </span>
                 </div>
               </button>
               <div className="molsp-panel" style={{ marginBottom: '5px' }}>
@@ -843,7 +843,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     className="czi-tooltip-surface molsp-markbutton-container"
                     data-tooltip=" Bold"
                     id="86ba3aa0-ff11-11ea-930a-95c69ca4f97f"
-                    onClick={this.onStyleClick.bind(this, 'strong')}
                     role="tooltip"
                     style={{ marginLeft: '5px', marginRight: '5px' }}
                   >
@@ -855,6 +854,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           ? 'czi-custom-button use-icon active molsp-markbuttons'
                           : 'czi-custom-button use-icon molsp-markbuttons molsp-formatbuttons'
                       }
+                      onClick={this.onStyleClick.bind(this, 'strong')}
                     >
                       <span className="molsp-iconspan czi-icon format_bold editor-markbuttons">
                         format_bold
@@ -866,7 +866,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     className="czi-tooltip-surface molsp-fontstyle molsp-markbutton-container"
                     data-tooltip=" Italic"
                     id="86ba61b0-ff11-11ea-930a-95c69ca4f97f"
-                    onClick={this.onStyleClick.bind(this, 'em')}
                     role="tooltip"
                   >
                     <button
@@ -877,6 +876,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           ? 'czi-custom-button use-icon active molsp-markbuttons'
                           : 'czi-custom-button use-icon molsp-markbuttons molsp-formatbuttons'
                       }
+                      onClick={this.onStyleClick.bind(this, 'em')}
                     >
                       <span className="molsp-iconspan czi-icon format_italic editor-markbuttons">
                         format_italic
@@ -889,7 +889,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     className="czi-tooltip-surface molsp-fontstyle molsp-markbutton-container"
                     data-tooltip=" Underline"
                     id="86ba88c0-ff11-11ea-930a-95c69ca4f97f"
-                    onClick={this.onStyleClick.bind(this, 'underline')}
                     role="tooltip"
                   >
                     <button
@@ -900,6 +899,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           ? 'czi-custom-button use-icon active molsp-markbuttons'
                           : 'czi-custom-button use-icon molsp-markbuttons molsp-formatbuttons'
                       }
+                      onClick={this.onStyleClick.bind(this, 'underline')}
                     >
                       <span className="molsp-iconspan czi-icon  format_underline editor-markbuttons">
                         format_underline
@@ -912,13 +912,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     className="czi-tooltip-surface molsp-fontstyle molsp-markbutton-container"
                     data-tooltip=" Text color"
                     id="86bad6e1-ff11-11ea-930a-95c69ca4f97f"
-                    onClick={this.showColorDialog.bind(this, true)}
                     role="tooltip"
                   >
                     <button
                       aria-disabled="false"
                       aria-pressed="false"
                       className="czi-custom-button use-icon molsp-markbuttons"
+                      onClick={this.showColorDialog.bind(this, true)}
                     >
                       <span
                         className="molsp-iconspan czi-icon format_color_text editor-markbuttons"
@@ -939,13 +939,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     className="czi-tooltip-surface molsp-fontstyle molsp-markbutton-container"
                     data-tooltip=" Highlight color"
                     id="86bafdf0-ff11-11ea-930a-95c69ca4f97f"
-                    onClick={this.showColorDialog.bind(this, false)}
                     role="tooltip"
                   >
                     <button
                       aria-disabled="false"
                       aria-pressed="false"
                       className="czi-custom-button use-icon molsp-markbuttons"
+                      onClick={this.showColorDialog.bind(this, false)}
                     >
                       <span
                         className="molsp-iconspan czi-icon border_color editor-markbuttons"
@@ -983,7 +983,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       type="radio"
                       value="0"
                     />
-                    <label
+                    <span
                       style={{
                         marginLeft: '4px',
                         marginTop: '3px',
@@ -991,7 +991,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       }}
                     >
                       First Sentence
-                    </label>
+                    </span>
                     <input
                       checked={!this.state.styles.boldSentence}
                       disabled={!this.state.styles.boldPartial}
@@ -1001,7 +1001,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       type="radio"
                       value="1"
                     />
-                    <label
+                    <span
                       style={{
                         marginLeft: '4px',
                         marginTop: '3px',
@@ -1009,7 +1009,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       }}
                     >
                       First Word
-                    </label>
+                    </span>
                   </span>
                 </div>
                 <div>
@@ -1032,7 +1032,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   >
                     format_textdirection_l_to_r
                   </span>
-                  <label
+                  <span
                     style={{
                       marginLeft: '-10px',
                       marginTop: '2px',
@@ -1040,7 +1040,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     }}
                   >
                     Paragraph
-                  </label>
+                  </span>
                 </div>
               </button>
               <div className="molsp-panel1">
@@ -1150,7 +1150,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                 <p className="molsp-formp">Paragraph Spacing:</p>
 
                 <div className="molsp-spacingdiv">
-                  <label>Before: </label>
+                  <span>Before: </span>
                   <span>
                     <input
                       className="molsp-spacinginput molsp-fontstyle"
@@ -1160,9 +1160,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       value={this.state.styles.paragraphSpacingBefore || ''}
                     />
                   </span>
-                  <label style={{ marginLeft: '3px' }}> pts</label>
+                  <span style={{ marginLeft: '3px' }}> pts</span>
 
-                  <label style={{ marginLeft: '23px' }}>After: </label>
+                  <span style={{ marginLeft: '23px' }}>After: </span>
                   <span>
                     <input
                       className="molsp-spacinginput molsp-fontstyle"
@@ -1172,7 +1172,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       value={this.state.styles.paragraphSpacingAfter || ''}
                     />
                   </span>
-                  <label style={{ marginLeft: '3px' }}>pts</label>
+                  <span style={{ marginLeft: '3px' }}>pts</span>
                 </div>
               </div>
               <button className="molsp-licit-accordion molsp-accactive">
@@ -1180,7 +1180,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <span className="molsp-iconspan czi-icon account_tree">
                     account_tree
                   </span>
-                  <label
+                  <span
                     style={{
                       marginLeft: '-7px',
                       marginTop: '2px',
@@ -1188,7 +1188,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     }}
                   >
                     Hierarchy
-                  </label>
+                  </span>
                 </div>
               </button>
               <div
@@ -1357,7 +1357,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       type="radio"
                       value="0"
                     />
-                    <label
+                    <span
                       style={{
                         marginLeft: '4px',
                         marginTop: '3px',
@@ -1365,7 +1365,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       }}
                     >
                       Based On Level
-                    </label>
+                    </span>
                   </div>
                   <div className="molsp-indentdiv">
                     <input
@@ -1376,7 +1376,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       type="radio"
                       value="1"
                     />
-                    <label
+                    <span
                       style={{
                         marginLeft: '4px',
                         marginTop: '3px',
@@ -1384,7 +1384,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       }}
                     >
                       Specified
-                    </label>
+                    </span>
                     <span>
                       <select
                         className="molsp-leveltype molsp-specifiedindent molsp-fontstyle"
@@ -1406,7 +1406,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
               <button className="molsp-licit-accordion molsp-accactive">
                 <div className="molsp-indentdiv">
-                  <label
+                  <span
                     style={{
                       marginLeft: '-7px',
                       marginTop: '2px',
@@ -1414,7 +1414,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     }}
                   >
                     Style Settings
-                  </label>
+                  </span>
                 </div>
               </button>
 
@@ -1435,7 +1435,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       type="radio"
                       value="1"
                     />
-                    <label
+                    <span
                       style={{
                         marginLeft: '4px',
                         marginTop: '3px',
@@ -1443,7 +1443,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       }}
                     >
                       Continue this style
-                    </label>
+                    </span>
                   </div>
                   <div className="molsp-settingsdiv">
                     <input
@@ -1460,7 +1460,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       type="radio"
                       value="2"
                     />
-                    <label
+                    <span
                       style={{
                         marginLeft: '4px',
                         marginTop: '3px',
@@ -1468,7 +1468,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       }}
                     >
                       None
-                    </label>
+                    </span>
                   </div>
                   <div className="molsp-indentdiv">
                     <input
@@ -1482,7 +1482,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       type="radio"
                       value="0"
                     />
-                    <label
+                    <span
                       style={{
                         marginLeft: '4px',
                         marginTop: '3px',
@@ -1491,7 +1491,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       }}
                     >
                       Select style
-                    </label>
+                    </span>
                     <span id="nextStyle" style={{ display: 'none' }}>
                       <select
                         className="molsp-fontstyle molsp-stylenameinput"
@@ -1595,7 +1595,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       styles: val.styles,
     };
     saveStyle(styleObj).then((result) => {
-      customStyles=result;
+      customStyles = result;
       setStyles(result);
     });
   }

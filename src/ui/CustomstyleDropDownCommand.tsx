@@ -75,11 +75,6 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     return [HEADING_COMMANDS];
   }
 
-  isValidCustomstyle() {
-    const bOK = isCustomStyleExists(this.state['styleName']);
-    return bOK;
-  }
-
   staticCommands() {
     const MENU_COMMANDS = {
       ['newstyle']: new CustomStyleCommand('newstyle', 'New Style..'),

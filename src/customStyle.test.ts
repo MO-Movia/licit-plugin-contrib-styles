@@ -1,4 +1,4 @@
-import { isPreviousLevelExists, setStyles, isStylesLoaded, hasStyleRuntime, getCustomStyle, saveStyle, setStyleRuntime, renameStyle, removeStyle } from './customStyle';
+import { isPreviousLevelExists, setStyles, isStylesLoaded, hasStyleRuntime, getCustomStyle, saveStyle, setStyleRuntime, renameStyle, removeStyle, addStyleToList } from './customStyle';
 import type { Style } from './StyleRuntime.js';
 
 describe('customstyle', () => {
@@ -39,6 +39,10 @@ describe('customstyle', () => {
     it('should handle saveStyle', () => {
         setStyleRuntime({ removeStyle: () => { return null; } });
         expect(removeStyle('newStyle')).toBeDefined();
+    });
+    it('should handle addStyleToList', () => {
+        setStyleRuntime({ removeStyle: () => { return null; } });
+        expect(addStyleToList({})).toStrictEqual([{'styleName': ''}, {}]);
     });
 });
 

@@ -475,7 +475,7 @@ export class CustomStyleCommand extends UICommand {
       saveStyle(val).then((result) => {
         //in bladelicitruntime, the response of the saveStyle() changed from list to a object
         //so need to add that style object to the current style list
-        if (typeof result === 'object') {
+        if (!Array.isArray(result)) {
           result = addStyleToList(result);
         }
         setStyles(result);
@@ -646,33 +646,6 @@ export function updateOverrideFlag(
   return tr;
 }
 
-function onLoadRemoveAllMarksExceptOverridden(
-  node: Node,
-  schema: Schema,
-  from: number,
-  to: number,
-  tr: Transform,
-) {
-  const tasks = [];
-  node.descendants(function (child: Node, pos: number) {
-    if (child instanceof Node) {
-      child.marks.forEach(function (mark) {
-        // [FS] IRAD-1311 2021-05-06
-        // Issue fix: Applied URL is removed when applying number style and refresh.
-        if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
-          tasks.push({
-            child,
-            pos,
-            mark,
-          });
-        }
-      });
-    }
-  });
-
-  return handleRemoveMarks(tr, tasks, from, to, schema);
-}
-
 export function getMarkByStyleName(styleName: string, schema: Schema) {
   const styleProp = getCustomStyleByName(styleName);
   const marks = [];
@@ -751,15 +724,7 @@ function applyStyleEx(
 ) {
   const loading = !styleProp;
   if (!opt) {
-    if (loading) {
-      tr = onLoadRemoveAllMarksExceptOverridden(
-        node,
-        state.schema,
-        startPos,
-        endPos,
-        tr,
-      );
-    }
+
     // [FS] IRAD-1087 2020-11-02
     // Issue fix: applied link is missing after applying a custom style.
     tr = removeAllMarksExceptLink(
@@ -1411,7 +1376,7 @@ export function removeAllMarksExceptLink(
   // const posFrom = (tr as Transaction).selection.$from.start(1);
   // const posTo = (tr as Transaction).selection.$to.end(1) - 1;
   doc.nodesBetween(from, to, (node, pos) => {
-    if (node.marks?.length) {
+    if (node.marks?.length > 0) {
       node.marks.some((mark) => {
         if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
           tasks.push({

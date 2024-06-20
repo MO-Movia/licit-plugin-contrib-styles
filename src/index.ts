@@ -307,12 +307,12 @@ export function remapCounterFlags(tr) {
   }
 }
 
-function applyStyles(state, tr) {
+export function applyStyles(state, tr) {
   if (!tr) {
     tr = state.tr;
   }
 
-  tr.doc.descendants(function (child, pos) {
+  tr?.doc?.descendants(function (child, pos) {
     const contentLen = child.content.size;
     if (tr && haveEligibleChildren(child, contentLen)) {
       // [FS] IRAD-1170 2021-02-02
@@ -497,14 +497,14 @@ function applyLineStyleForBoldPartial(nextState, tr) {
 // Select multiple paragraph with empty paragraph and apply style not working.
 export function applyStyleForEmptyParagraph(nextState, tr) {
   const opt = 1;
-  const startPos = nextState.selection.$from.before(1);
-  const endPos = nextState.selection.$to.after(1) - 1;
+  const startPos = nextState.selection?.$from.before(1);
+  const endPos = nextState.selection?.$to.after(1) - 1;
   if (null === tr) {
     tr = nextState.tr;
   }
 
-  const node = nextState.tr.doc.nodeAt(startPos);
-  const style = getCustomStyleByName(node.attrs?.styleName);
+  const node = nextState.tr?.doc?.nodeAt(startPos);
+  const style = getCustomStyleByName(node?.attrs?.styleName);
   if (!style?.styles?.isList) {
     if (validateStyleName(node)) {
       if (
@@ -658,7 +658,7 @@ function isNewParagraph(prevState, nextState, view) {
   return bOk;
 }
 
-function isDocChanged(transactions) {
+export function isDocChanged(transactions) {
   return transactions.some((transaction) => transaction.docChanged);
 }
 
@@ -688,7 +688,7 @@ export function applyNormalIfNoStyle(nextState, tr, node, opt?) {
 }
 
 function updateStyleOverrideFlag(state, tr) {
-  const retObj = { modified: false };
+  const retObj = { modified: true };
   if (!tr) {
     tr = state.tr;
   }

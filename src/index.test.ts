@@ -12,7 +12,11 @@ import {
   onInitAppendTransaction,
   onUpdateAppendTransaction,
   applyNormalIfNoStyle,
-  remapCounterFlags
+  remapCounterFlags,
+  applyStyleForPreviousEmptyParagraph,
+  applyStyles,
+  applyStyleForEmptyParagraph,
+  isDocChanged
 } from './index';
 import { builders } from 'prosemirror-test-builder';
 import {
@@ -5108,7 +5112,7 @@ describe('onInitAppendTransaction', () => {
 
       ],
     });
-    mockdoc.resolve = () => { return { min: () => { return null; }, max: () => { return null; } } as unknown as ResolvedPos; };
+    mockdoc.resolve = () => { return { min: () => { return null; }, max: () => { return {}; } } as unknown as ResolvedPos; };
     jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(true);
     const setSelection = () => {
       return {
@@ -5116,7 +5120,7 @@ describe('onInitAppendTransaction', () => {
         setSelection: setSelection
       };
     };
-    expect(onInitAppendTransaction({ loaded: true, firstTime: false }, { curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}  },
+    expect(onInitAppendTransaction({ loaded: true, firstTime: false }, {setSelection: setSelection, curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}  },
       {
         tr: {
           setSelection: setSelection, doc: mockdoc, selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}
@@ -5304,10 +5308,10 @@ describe('onUpdateAppendTransaction', () => {
           doc: mockdoc,
           selection: {
             $from: {
-              $start: () => {
+              start: () => {
                 return 1;
               },
-              $end: () => {
+              end: () => {
                 return 1;
               },
             },
@@ -5449,10 +5453,10 @@ describe('onUpdateAppendTransaction', () => {
           doc: mockdoc,
           selection: {
             $from: {
-              $start: () => {
+              start: () => {
                 return 1;
               },
-              $end: () => {
+              end: () => {
                 return 1;
               },
             },
@@ -5687,5 +5691,86 @@ describe('remapCounterFlags', () => {
     expect(remapCounterFlags(tr)).toBeUndefined();
   });
 });
+describe('applyStyleForPreviousEmptyParagraph', () => {
+  it('should handle applyStyleForPreviousEmptyParagraph', () => {
+    const linkmark = new Mark();
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+      },
+    });
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+    const setSelection = () => {
+      return {
+        curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc, setNodeMarkup: () => { return {}; },
+        setSelection: setSelection
+      };
+    };
+    const tr = {setSelection:setSelection, doc: mockdoc ,selection:{$from:{parentOffset:0},$anchor:{pos:1},$head:{before:()=>{return 2;}}}};
+    expect(applyStyleForPreviousEmptyParagraph({schema:mockschema,doc:{resolve:()=>{return {nodeBefore:{nodeSize :1}};}}},tr)).toBeDefined();
+  });
+});
+describe('applyStyles', () => {
+  it('should handle applyStyles', () => {
+    expect(applyStyles({tr:{}},null)).toStrictEqual({});
+  });
+});
+describe('applyStyleForEmptyParagraph', () => {
+  it('should handle applyStyleForEmptyParagraph', () => {
+    expect(applyStyleForEmptyParagraph({tr:{}},null)).toStrictEqual({});
+  });
+});
+describe('isDocChanged', () => {
+  it('should handle isDocChanged', () => {
+    expect(isDocChanged([{docChanged:{}}])).toBeTruthy();
+  });
+});
+
 
 

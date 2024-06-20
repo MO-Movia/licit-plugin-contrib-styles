@@ -343,7 +343,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                     if (result) {
                       //in bladelicitruntime, the response of the saveStyle() changed from list to a object
                       //so need to add that style object to the current style list
-                      if (typeof result === 'object') {
+                      if (!Array.isArray(result)) {
                         result = addStyleToList(result);
                       }
                       setStyles(result);
@@ -381,7 +381,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                       if (result) {
                         //in bladelicitruntime, the response of the saveStyle() changed from list to a object
                         //so need to add that style object to the current style list
-                        if (typeof result === 'object') {
+                        if (!Array.isArray(result)) {
                           result = addStyleToList(result);
                         }
                         setStyles(result);

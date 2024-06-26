@@ -5752,8 +5752,8 @@ describe('applyStyleForPreviousEmptyParagraph', () => {
         setSelection: setSelection
       };
     };
-    const tr = {setSelection:setSelection, doc: mockdoc ,selection:{$from:{parentOffset:0},$anchor:{pos:1},$head:{before:()=>{return 2;}}}};
-    expect(applyStyleForPreviousEmptyParagraph({schema:mockschema,doc:{resolve:()=>{return {nodeBefore:{nodeSize :1}};}}},tr)).toBeDefined();
+    const tr = {setSelection:setSelection, doc: mockdoc ,selection:{$from:{parentOffset:0,end:()=>{return 0;}},$anchor:{pos:1},$head:{before:()=>{return 2;}}}};
+    expect(applyStyleForPreviousEmptyParagraph({schema:mockschema,doc:{resolve:()=>{return {nodeBefore:{nodeSize :1,attrs:{styleName:'Normal'}}};}}},tr)).toBeDefined();
   });
 });
 describe('applyStyles', () => {

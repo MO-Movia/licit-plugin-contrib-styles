@@ -180,8 +180,8 @@ function createNewAttributes(schema) {
   ALLOWED_MARKS.forEach((name) => {
     getRequiredMarks(marks, name, schema);
   });
-  for (const mark of marks) {
-    createMarkAttributes(mark, existingAttr);
+  for (let i = 0; i < marks.length; i++) {
+    createMarkAttributes(marks[i], existingAttr);
   }
   return schema;
 }

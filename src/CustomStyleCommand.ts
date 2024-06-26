@@ -262,6 +262,7 @@ export class CustomStyleCommand extends UICommand {
     node?,
     startPos?: number,
     endPos?: number,
+    newattrs?,
     selection?: Selection
   ) {
     let done = false;
@@ -270,7 +271,7 @@ export class CustomStyleCommand extends UICommand {
     hasMismatchHeirarchy(state, tr, node, startPos, endPos);
     // [FS] IRAD-1480 2021-06-25
     // Indenting not remove when clear style is applied
-    const newattrs = node.attrs;
+    newattrs = node.attrs;
     if (newattrs) {
       newattrs['styleName'] = RESERVED_STYLE_NONE;
       newattrs['id'] = '';
@@ -299,6 +300,7 @@ export class CustomStyleCommand extends UICommand {
     const startPos = selection.$from.before(1);
     const endPos = selection.$to.after(1) - 1;
     const node = getNode(state, startPos, endPos, tr);
+    const newattrs = { ...(node ? node.attrs : {}) };
     let isValidated = true;
     if ('newstyle' === this._customStyle) {
       this.editWindow(state, view, 0);
@@ -319,6 +321,7 @@ export class CustomStyleCommand extends UICommand {
         node,
         startPos,
         endPos,
+        newattrs,
         selection
       );
     }

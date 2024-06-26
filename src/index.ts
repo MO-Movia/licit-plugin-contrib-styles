@@ -140,7 +140,7 @@ export function onInitAppendTransaction(ref, tr, nextState) {
     // do this only once when the document is loaded.
     tr = applyStyles(nextState, tr);
     if (ref.firstTime) {
-      tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc);
+      // tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc);
     }
   }
 
@@ -179,7 +179,7 @@ export function onUpdateAppendTransaction(
           });
         if (para) {
           let styleName = para.node.attrs.styleName;
-          if (RESERVED_STYLE_NONE == styleName || !styleName) {
+          if (RESERVED_STYLE_NONE === styleName || undefined === styleName) {
             const newattrs = { ...para.node.attrs };
             newattrs.styleName = RESERVED_STYLE_NONE;
             tr = tr.setNodeMarkup(para.pos, undefined, newattrs);
@@ -238,6 +238,18 @@ export function onUpdateAppendTransaction(
                 const node = nextState.tr.doc.nodeAt(startPos);
                 //FIX: Copied text show Normal style name instead of showing the applied style in the current paragraph.
                 const styleName = (null === slice1.content.content[index].attrs.styleName ? node.attrs.styleName : slice1.content.content[index].attrs.styleName);
+                const len = node.nodeSize;
+                const endPos = startPos + len;
+                tr = applyLatestStyle(
+                  styleName,
+                  nextState,
+                  tr,
+                  node,
+                  startPos,
+                  endPos,
+                  null,
+                  opt
+                );
                 const newattrs = { ...node.attrs };
                 newattrs.styleName = styleName;
                 tr = tr.setNodeMarkup(startPos, undefined, newattrs);
@@ -290,7 +302,7 @@ export function onUpdateAppendTransaction(
 export function applyStyleForPreviousEmptyParagraph(nextState, tr) {
   if (tr.selection.$from.parentOffset === 0) {
     const prevNode = nextState.doc.resolve(tr.selection.$anchor.pos - 1).nodeBefore;
-    tr = applyLatestStyle(RESERVED_STYLE_NONE, nextState, tr, prevNode, tr.selection.$head.before() - 2, prevNode.nodeSize + (tr.selection.$head.before() - 2), null);
+    tr = applyLatestStyle(prevNode.attrs.styleName, nextState, tr, prevNode, tr.selection.$head.before(), (tr.selection.$from.end()), null);
   }
   return tr;
 }
@@ -301,7 +313,7 @@ export function remapCounterFlags(tr) {
   // set counters for numbering.
   const cFlags = tr.doc.attrs.counterFlags;
   for (const key in cFlags) {
-    if (Object.hasOwn(cFlags, key)) {
+     if (Object.hasOwn(cFlags, key)) {
       window[key] = true;
     }
   }
@@ -677,7 +689,7 @@ export function applyNormalIfNoStyle(nextState, tr, node, opt?) {
         end = docLen;
       }
       let styleName = child.attrs.styleName;
-      if (RESERVED_STYLE_NONE == styleName || !styleName) {
+      if (RESERVED_STYLE_NONE === styleName || undefined === styleName) {
         child.attrs.styleName = RESERVED_STYLE_NONE;
         styleName = RESERVED_STYLE_NONE;
       }

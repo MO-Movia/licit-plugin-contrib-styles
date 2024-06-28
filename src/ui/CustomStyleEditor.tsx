@@ -14,6 +14,7 @@ import {
   setStyles,
   saveStyle,
   getStylesAsync,
+  addStyleToList
 } from '../customStyle.js';
 import {
   RESERVED_STYLE_NONE,
@@ -25,7 +26,7 @@ import { AlertInfo } from './AlertInfo.js';
 
 let customStyles: Style[] = [];
 const otherStyleSelected = false;
-const editedStyles = [];
+let editedStyles = [];
 
 const FONT_PT_SIZES = [8, 9, 10, 11, 12, 14, 18, 24, 30, 36, 48, 60, 72, 90];
 
@@ -74,6 +75,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   constructor(props) {
     super(props);
+    editedStyles = [];
     this.state = {
       ...props,
       toc: false,
@@ -1595,6 +1597,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       styles: val.styles,
     };
     saveStyle(styleObj).then((result) => {
+      if (!Array.isArray(result)) {
+        result = addStyleToList(result);
+      }
       customStyles = result;
       setStyles(result);
     });

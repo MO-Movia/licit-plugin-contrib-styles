@@ -139,9 +139,6 @@ export function onInitAppendTransaction(ref, tr, nextState) {
     tr = updateStyleOverrideFlag(nextState, tr);
     // do this only once when the document is loaded.
     tr = applyStyles(nextState, tr);
-    if (ref.firstTime) {
-      // tr = applyNormalIfNoStyle(nextState, tr, nextState.tr.doc);
-    }
   }
 
   return tr;

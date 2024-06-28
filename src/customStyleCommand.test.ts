@@ -4307,9 +4307,76 @@ describe('updateOverrideFlag', () => {
 });
 describe('applyLatestStyle', () => {
   it('should handle applyLatestStyle if keepmarks is true', () => {
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+    });
+
+    // Create a sample document
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'This is a mock dummy document.',
+              attrs: { styleName: 'Normal' },
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'It demonstrates the structure of a ProseMirror document.',
+            },
+          ],
+        },
+      ],
+    });
     const doc = new Node();
-    const tr = new Transform(doc);
-    const myEditor = new EditorState();
+    const tr = {doc:mockdoc} as unknown as Transaction;
+    const myEditor = {} as unknown as EditorState;
     const style: Style = {
       styleName: '',
     };
@@ -4318,13 +4385,80 @@ describe('applyLatestStyle', () => {
     ).toBeDefined();
   });
   it('should handle applyLatestStyle when styleprops  not there', () => {
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+    });
+
+    // Create a sample document
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'This is a mock dummy document.',
+              attrs: { styleName: 'Normal' },
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'It demonstrates the structure of a ProseMirror document.',
+            },
+          ],
+        },
+      ],
+    });
     const doc = {
       resolve: () => {
         return document.createElement('div');
       },
     } as unknown as Node;
-    const tr = new Transform(doc);
-    const myEditor = new EditorState();
+    const tr = {doc:mockdoc} as unknown as Transaction;
+    const myEditor = {} as unknown as EditorState;
     const style: Style = {
       styleName: '',
     };

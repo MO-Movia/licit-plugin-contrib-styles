@@ -726,7 +726,7 @@ function applyStyleEx(
   opt?: number
 ) {
   const loading = !styleProp;
-  if (!opt) {
+
 
     // [FS] IRAD-1087 2020-11-02
     // Issue fix: applied link is missing after applying a custom style.
@@ -736,7 +736,7 @@ function applyStyleEx(
       tr,
       state.schema
     );
-  }
+
 
   if (loading || !opt) {
     styleProp = getCustomStyleByName(styleName);

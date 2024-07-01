@@ -1,4 +1,5 @@
-import { isPreviousLevelExists, setStyles, isStylesLoaded, hasStyleRuntime, getCustomStyle } from './customStyle';
+import { isPreviousLevelExists, setStyles, isStylesLoaded, hasStyleRuntime, getCustomStyle, saveStyle, setStyleRuntime, renameStyle, removeStyle, addStyleToList } from './customStyle';
+import type { Style } from './StyleRuntime.js';
 
 describe('customstyle', () => {
     it('should handle isPreviousLevelExists', () => {
@@ -10,7 +11,7 @@ describe('customstyle', () => {
         expect(isPreviousLevelExists(2)).toBeTruthy();
     });
     it('should handle isPreviousLevelExists when customStyles does not have styles', () => {
-        setStyles([{styleName: ''}]);
+        setStyles([{ styleName: '' }]);
         expect(isPreviousLevelExists(2)).toBeFalsy();
     });
     it('should handle isStylesLoaded', () => {
@@ -26,6 +27,22 @@ describe('customstyle', () => {
         const cstyle = { 'strong': {}, 'boldPartial': true, 'em': null, 'strike': null, 'textAlign': {}, 'underline': null };
         const test = getCustomStyle(cstyle);
         expect(test).toBeDefined();
+    });
+    it('should handle saveStyle', () => {
+        setStyleRuntime({ saveStyle: () => { return null; } });
+        expect(saveStyle({} as unknown as Style)).toBeDefined();
+    });
+    it('should handle saveStyle', () => {
+        setStyleRuntime({ renameStyle: () => { return null; } });
+        expect(renameStyle('old', 'new')).toBeDefined();
+    });
+    it('should handle saveStyle', () => {
+        setStyleRuntime({ removeStyle: () => { return null; } });
+        expect(removeStyle('newStyle')).toBeDefined();
+    });
+    it('should handle addStyleToList', () => {
+        setStyleRuntime({ removeStyle: () => { return null; } });
+        expect(addStyleToList({})).toStrictEqual([{'styleName': ''}, {}]);
     });
 });
 

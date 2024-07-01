@@ -177,7 +177,7 @@ function getStyleEx(align, lineSpacing, styleName) {
   if (null !== styleName && 'None' !== styleName) {
     // to get the styles of the corresponding style name
     const styleProps = getCustomStyleByName(styleName);
-    if (null !== styleProps && styleProps.styles) {
+    if (styleProps?.styles) {
       if (styleProps.styles.hasBullet) {
         bulletDetails = getBulletDetails(styleProps.styles.bulletLevel);
         styleLevel = styleProps.styles.styleLevel;

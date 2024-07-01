@@ -36,6 +36,7 @@ import {
   setStyles,
   saveStyle,
   getStylesAsync,
+  addStyleToList
 } from './customStyle.js';
 import type { Style } from './StyleRuntime.js';
 import {
@@ -46,6 +47,7 @@ import {
   MARKFONTTYPE,
   MARKSTRIKE,
   MARKSUPER,
+  MARKSUB,
   MARKTEXTHIGHLIGHT,
   MARKUNDERLINE,
 } from './MarkNames.js';
@@ -220,7 +222,7 @@ export class CustomStyleCommand extends UICommand {
 
   isEmpty = (obj) => {
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.hasOwn(obj, key)) {
         return false;
       }
     }
@@ -474,6 +476,11 @@ export class CustomStyleCommand extends UICommand {
       this.showAlert();
     } else {
       saveStyle(val).then((result) => {
+        //in bladelicitruntime, the response of the saveStyle() changed from list to a object
+        //so need to add that style object to the current style list
+        if (!Array.isArray(result)) {
+          result = addStyleToList(result);
+        }
         setStyles(result);
         // Issue fix: Created custom style Numbering not applied to paragraph.
         tr = tr.setSelection(TextSelection.create(doc, 0, 0));
@@ -533,6 +540,35 @@ export class CustomStyleCommand extends UICommand {
   }
 }
 
+const compareAttributes = (mark, style): boolean => {
+  if (mark.attrs[ATTR_OVERRIDDEN] !== undefined && mark.attrs[ATTR_OVERRIDDEN]) return false;
+
+  switch (mark.type.name) {
+    case MARKSTRONG:
+      return style[STRONG] !== undefined;
+    case MARKEM:
+      return style[EM] !== undefined;
+    case MARKTEXTCOLOR:
+      return mark.attrs['color'] === style[COLOR];
+    case MARKFONTSIZE:
+      return mark.attrs['pt'] === Number(style[FONTSIZE]);
+    case MARKFONTTYPE:
+      return mark.attrs['name'] === style[FONTNAME];
+    case MARKSTRIKE:
+      return mark.attrs['strike'] === style['strike'];
+    case MARKSUPER:
+    case MARKSUB:
+      return false;
+    case MARKTEXTHIGHLIGHT:
+      return mark.attrs['highlightColor'] === style['textHighlight'];
+    case MARKUNDERLINE:
+      return style[UNDERLINE] !== undefined;
+    default:
+      return false;
+  }
+}
+
+
 export function compareMarkWithStyle(
   mark,
   style,
@@ -541,39 +577,10 @@ export function compareMarkWithStyle(
   _endPos,
   retObj
 ) {
-  let same = false;
-  let overridden = false;
 
-  if (style) {
-    switch (mark.type.name) {
-      case MARKSTRONG:
-        same = undefined !== style[STRONG];
-        break;
-      case MARKEM:
-        same = undefined !== style[EM];
-        break;
-      case MARKTEXTCOLOR:
-        same = mark.attrs['color'] === style[COLOR];
-        break;
-      case MARKFONTSIZE:
-        same = mark.attrs['pt'] === Number(style[FONTSIZE]);
-        break;
-      case MARKFONTTYPE:
-        same = mark.attrs['name'] === style[FONTNAME];
-        break;
-      case MARKSTRIKE:
-      case MARKSUPER:
-      case MARKTEXTHIGHLIGHT:
-        break;
-      case MARKUNDERLINE:
-        same = undefined !== style[UNDERLINE];
-        break;
-      default:
-        break;
-    }
-  }
+  if (!style) return tr;
+  const overridden = !compareAttributes(mark, style);
 
-  overridden = !same;
   if (
     undefined !== mark.attrs[ATTR_OVERRIDDEN] &&
     mark.attrs[ATTR_OVERRIDDEN] !== overridden &&
@@ -617,34 +624,6 @@ export function updateOverrideFlag(
     });
   }
   return tr;
-}
-
-function onLoadRemoveAllMarksExceptOverridden(
-  node: Node,
-  schema: Schema,
-  from: number,
-  to: number,
-  tr: Transform,
-  state: EditorState
-) {
-  const tasks = [];
-  node.descendants(function (child: Node, pos: number) {
-    if (child instanceof Node) {
-      child.marks.forEach(function (mark) {
-        // [FS] IRAD-1311 2021-05-06
-        // Issue fix: Applied URL is removed when applying number style and refresh.
-        if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
-          tasks.push({
-            child,
-            pos,
-            mark,
-          });
-        }
-      });
-    }
-  });
-
-  return handleRemoveMarks(tr, tasks, from, to, schema, state, null);
 }
 
 export function getMarkByStyleName(styleName: string, schema: Schema) {
@@ -724,29 +703,17 @@ function applyStyleEx(
   opt?: number
 ) {
   const loading = !styleProp;
-  if (!opt) {
-    if (loading) {
-      tr = onLoadRemoveAllMarksExceptOverridden(
-        node,
-        state.schema,
-        startPos,
-        endPos,
-        tr,
-        state
-      );
-    } else if (way === 0) {
-      // [FS] IRAD-1087 2020-11-02
-      // Issue fix: applied link is missing after applying a custom style.
-      tr = removeAllMarksExceptLink(
-        startPos,
-        endPos,
-        tr,
-        state.schema,
-        state,
-        styleProp
-      );
-    }
-  }
+
+
+    // [FS] IRAD-1087 2020-11-02
+    // Issue fix: applied link is missing after applying a custom style.
+    tr = removeAllMarksExceptLink(
+      startPos,
+      endPos,
+      tr,
+      state.schema
+    );
+
 
   if (loading || !opt) {
     styleProp = getCustomStyleByName(styleName);
@@ -1295,10 +1262,9 @@ export function getStyleLevel(styleName: string) {
   if (undefined !== styleName && styleName) {
     const styleProp = getCustomStyleByName(styleName);
     if (
-      null !== styleProp &&
-      styleProp?.styles &&
-      styleProp?.styles?.styleLevel &&
-      styleProp?.styles?.hasNumbering
+      styleProp?.styles?.styleLevel
+      // FIX: show warning if we delete a custom style with bullet list which is already applied in doucment.
+      // &&styleProp?.styles?.hasNumbering
     ) {
       styleLevel = styleProp.styles.styleLevel;
     } else if (styleName.includes(RESERVED_STYLE_NONE_NUMBERING)) {
@@ -1383,14 +1349,14 @@ export function removeAllMarksExceptLink(
   from: number,
   to: number,
   tr: Transform,
-  schema: Schema,
-  state: EditorState,
-  styleProp?: Style
+  schema: Schema
 ) {
   const { doc } = tr;
   const tasks = [];
+  // const posFrom = (tr as Transaction).selection.$from.start(1);
+  // const posTo = (tr as Transaction).selection.$to.end(1) - 1;
   doc.nodesBetween(from, to, (node, pos) => {
-    if (node.marks?.length) {
+    if (node.marks?.length > 0) {
       node.marks.some((mark) => {
         if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
           tasks.push({
@@ -1404,7 +1370,7 @@ export function removeAllMarksExceptLink(
     }
     return true;
   });
-  return handleRemoveMarks(tr, tasks, from, to, schema, state, styleProp);
+  return handleRemoveMarks(tr, tasks, from, to, schema);
 }
 
 export function handleRemoveMarks(
@@ -1412,18 +1378,14 @@ export function handleRemoveMarks(
   tasks,
   from: number,
   to: number,
-  schema: Schema,
-  state: EditorState,
-  styleProp?: Style
+  schema: Schema
+
 ) {
   tasks.forEach((job) => {
     const { mark } = job;
-    const retObj = { modified: false };
-    if (styleProp && MARKTEXTHIGHLIGHT === mark.type.name) {
-      tr = compareMarkWithStyle(mark, styleProp.styles, tr, from, to, retObj);
-    }
     if (!mark.attrs[ATTR_OVERRIDDEN]) {
-      tr = tr.removeMark(from, to, mark.type);
+      const to = job.pos + job.node?.nodeSize;
+      tr = tr.removeMark(job.pos, to, mark.type);
     }
   });
   tr = setTextAlign(tr, schema, null);
@@ -1442,8 +1404,8 @@ export function applyStyle(
   const { selection } = state;
   let startPos = selection.$from.before(1);
   if (state.doc.nodeAt(startPos).type.name == 'table') {
-    startPos = selection.from;
-    endPos = selection.$to.pos;
+    startPos = selection.from - selection.$from.parentOffset - 1;
+    endPos = selection.$to?.parent?.nodeSize + startPos - 1;
   }
   else {
     endPos = selection.$to.after(1) - 1;
@@ -1489,9 +1451,7 @@ export function applyLineStyle(
     if (node.attrs?.styleName) {
       const styleProp = getCustomStyleByName(node.attrs.styleName);
       if (
-        null !== styleProp &&
-        styleProp.styles &&
-        styleProp.styles.boldPartial
+        styleProp?.styles?.boldPartial
       ) {
         if (!tr) {
           tr = state.tr;
@@ -1521,9 +1481,7 @@ export function applyLineStyle(
         ) {
           const styleProp = getCustomStyleByName(node.attrs.styleName);
           if (
-            null !== styleProp &&
-            styleProp.styles &&
-            styleProp.styles.boldPartial
+            styleProp?.styles?.boldPartial
           ) {
             if (!tr) {
               tr = state.tr;
@@ -1548,7 +1506,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   let textContent = getNodeText(node);
   const endPos = textContent.length;
   let content: string[] = [];
-  let counter:number = 0;
+  let counter: number = 0;
   if (boldSentence) {
     content = textContent.split('.');
   } else {
@@ -1679,7 +1637,7 @@ export function isLevelUpdated(
     if (
       (style?.styles && currentLevel > 0 && !style.styles.hasNumbering) ||
       (style?.styles && undefined === style?.styles?.styleLevel) ||
-      (style && style.styles && style.styles.styleLevel !== currentLevel)
+      (style?.styles?.styleLevel !== currentLevel)
     ) {
       bOK = true;
     }

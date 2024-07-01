@@ -223,4 +223,25 @@ describe('ParagraphSpacingCommand ', () => {
     });
     expect(psc).toBeTruthy();
   });
+
+  it('should handle renderLabel',()=>{
+    const psc = new ParagraphSpacingCommand().renderLabel();
+    expect(psc).toBeNull();
+  });
+  it('should handle isActive',()=>{
+    const psc = new ParagraphSpacingCommand().isActive();
+    expect(psc).toBeTruthy();
+  });
+  it('should handle waitForUserInput',()=>{
+    const psc = new ParagraphSpacingCommand().waitForUserInput();
+    expect(psc).toBeDefined();
+  });
+  it('should handle executeWithUserInput',()=>{
+    const psc = new ParagraphSpacingCommand().executeWithUserInput();
+    expect(psc).toBeFalsy();
+  });
+  it('should handle cancel',()=>{
+    const psc = new ParagraphSpacingCommand().cancel();
+    expect(psc).toBeUndefined();
+  });
 });

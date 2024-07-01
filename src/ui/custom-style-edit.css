@@ -321,6 +321,12 @@
   background: transparent;
 }
 
+.czi-editor-frameset .molsp-formatbuttons {
+  outline: none;
+  border-color: transparent;
+}
+
+
 .czi-editor-frameset .molsp-fontstyle {
   font-size: 13px;
 }

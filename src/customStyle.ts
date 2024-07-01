@@ -1,5 +1,6 @@
 // [FS] IRAD-1085 2020-10-09
 import type { Style, CSSStyle } from './StyleRuntime.js';
+import { EditorView } from 'prosemirror-view';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
@@ -8,7 +9,7 @@ import { DEFAULT_NORMAL_STYLE } from './Constants.js';
 let customStyles = new Array(0);
 let styleRuntime;
 let hideNumbering = false;
-let _view;
+let _view: EditorView;
 let hasdocTypechanged = false;
 let docType = null;
 // [FS] IRAD-1202 2021-02-15
@@ -22,7 +23,7 @@ function isValidStyleName(styleName) {
   );
 }
 
-export function addStyleToList(style) {
+export function addStyleToList(style: Style) {
   if (0 < customStyles.length) {
     const index = customStyles.findIndex(item => item.styleName === style.styleName);
     if (index !== -1) {
@@ -71,7 +72,7 @@ export function getCustomStyleByName(name: string): Style {
   return style;
 }
 
-export function setView(csview) {
+export function setView(csview : EditorView) {
   _view = csview;
 }
 

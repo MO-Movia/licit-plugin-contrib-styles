@@ -1,5 +1,6 @@
 // Plugin to handle Styles.
-import { Plugin, PluginKey, TextSelection } from 'prosemirror-state';
+import { Plugin, PluginKey, EditorState, TextSelection,Transaction } from 'prosemirror-state';
+import { Transform } from 'prosemirror-transform';
 import {
   updateOverrideFlag,
   applyLatestStyle,
@@ -296,10 +297,10 @@ export function onUpdateAppendTransaction(
 
 
 //LIC-254 Create new line by placing cursor at the beginning of a paragraph applies the current style instead of Normal style
-export function applyStyleForPreviousEmptyParagraph(nextState, tr) {
-  if (tr.selection.$from.parentOffset === 0) {
-    const prevNode = nextState.doc.resolve(tr.selection.$anchor.pos - 1).nodeBefore;
-    tr = applyLatestStyle(prevNode.attrs.styleName, nextState, tr, prevNode, tr.selection.$head.before(), (tr.selection.$from.end()), null);
+export function applyStyleForPreviousEmptyParagraph(nextState: EditorState, tr: Transform) {
+  if ((tr as Transaction).selection.$from.parentOffset === 0) {
+    const prevNode = nextState.doc.resolve((tr as Transaction).selection.$anchor.pos - 1).nodeBefore;
+    tr = applyLatestStyle(prevNode.attrs.styleName, nextState, tr, prevNode, (tr as Transaction).selection.$head.before(), ((tr as Transaction).selection.$from.end()), null);
   }
   return tr;
 }
@@ -310,7 +311,7 @@ export function remapCounterFlags(tr) {
   // set counters for numbering.
   const cFlags = tr.doc.attrs.counterFlags;
   for (const key in cFlags) {
-     if (Object.hasOwn(cFlags, key)) {
+    if (Object.hasOwn(cFlags, key)) {
       window[key] = true;
     }
   }

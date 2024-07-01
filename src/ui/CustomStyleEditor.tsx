@@ -26,7 +26,7 @@ import { AlertInfo } from './AlertInfo.js';
 
 let customStyles: Style[] = [];
 const otherStyleSelected = false;
-let editedStyles = [];
+const editedStyles = [];
 
 const FONT_PT_SIZES = [8, 9, 10, 11, 12, 14, 18, 24, 30, 36, 48, 60, 72, 90];
 
@@ -75,7 +75,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   constructor(props) {
     super(props);
-    editedStyles = [];
+    editedStyles.splice(0, editedStyles.length);
     this.state = {
       ...props,
       toc: false,

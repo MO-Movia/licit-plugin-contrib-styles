@@ -540,6 +540,35 @@ export class CustomStyleCommand extends UICommand {
   }
 }
 
+const compareAttributes = (mark, style): boolean => {
+  if (mark.attrs[ATTR_OVERRIDDEN] !== undefined && mark.attrs[ATTR_OVERRIDDEN]) return false;
+
+  switch (mark.type.name) {
+    case MARKSTRONG:
+      return style[STRONG] !== undefined;
+    case MARKEM:
+      return style[EM] !== undefined;
+    case MARKTEXTCOLOR:
+      return mark.attrs['color'] === style[COLOR];
+    case MARKFONTSIZE:
+      return mark.attrs['pt'] === Number(style[FONTSIZE]);
+    case MARKFONTTYPE:
+      return mark.attrs['name'] === style[FONTNAME];
+    case MARKSTRIKE:
+      return mark.attrs['strike'] === style['strike'];
+    case MARKSUPER:
+    case MARKSUB:
+      return false;
+    case MARKTEXTHIGHLIGHT:
+      return mark.attrs['highlightColor'] === style['textHighlight'];
+    case MARKUNDERLINE:
+      return style[UNDERLINE] !== undefined;
+    default:
+      return false;
+  }
+}
+
+
 export function compareMarkWithStyle(
   mark,
   style,
@@ -548,62 +577,10 @@ export function compareMarkWithStyle(
   _endPos,
   retObj
 ) {
-  let same = false;
-  let overridden = false;
 
-  if (style) {
-    switch (mark.type.name) {
-      case MARKSTRONG:
-        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
-          same = undefined !== style[STRONG];
-        }
-        break;
-      case MARKEM:
-        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
-          same = undefined !== style[EM];
-        }
-        break;
-      case MARKTEXTCOLOR:
-        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
-          same = mark.attrs['color'] === style[COLOR];
-        }
-        break;
-      case MARKFONTSIZE:
-        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
-          same = mark.attrs['pt'] === Number(style[FONTSIZE]);
-        }
-        break;
-      case MARKFONTTYPE:
-        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
-          same = mark.attrs['name'] === style[FONTNAME];
-        }
-        break;
-      case MARKSTRIKE:
-        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
-          same = mark.attrs['strike'] === style['strike'];
-        }
-        break;
-      case MARKSUPER:
-      case MARKSUB:
-        break;
-      case MARKTEXTHIGHLIGHT:
-        // [FS] LIC-258 2024-05-09
-        // Highlight style not removing even after apply another custom style(without highlight mark)
-        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
-          same = mark.attrs['highlightColor'] === style['textHighlight'];
-        }
-        break;
-      case MARKUNDERLINE:
-        if (undefined === mark.attrs[ATTR_OVERRIDDEN] || (undefined !== mark.attrs[ATTR_OVERRIDDEN] && !mark.attrs[ATTR_OVERRIDDEN])) {
-          same = undefined !== style[UNDERLINE];
-        }
-        break;
-      default:
-        break;
-    }
-  }
+  if (!style) return tr;
+  const overridden = !compareAttributes(mark, style);
 
-  overridden = !same;
   if (
     undefined !== mark.attrs[ATTR_OVERRIDDEN] &&
     mark.attrs[ATTR_OVERRIDDEN] !== overridden &&

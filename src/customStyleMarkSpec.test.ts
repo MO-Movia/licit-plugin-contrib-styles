@@ -15,7 +15,7 @@ describe('getAttrs', () => {
     });
     it('should handle getAttrs when base is undefined', () => {
         const base = undefined;
-        expect(getMarkAttrs(base, dom)).toBeDefined();
+        expect(getMarkAttrs(base, dom)).toBeUndefined();
     });
 });
 

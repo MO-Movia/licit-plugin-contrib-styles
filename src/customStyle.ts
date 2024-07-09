@@ -1,11 +1,11 @@
 // [FS] IRAD-1085 2020-10-09
 import type { Style, CSSStyle } from './StyleRuntime.js';
+import { EditorView } from 'prosemirror-view';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
 } from './CustomStyleNodeSpec.js';
 import { DEFAULT_NORMAL_STYLE } from './Constants.js';
-import { EditorView } from 'prosemirror-view';
 let customStyles = new Array(0);
 let styleRuntime;
 let hideNumbering = false;
@@ -21,6 +21,19 @@ function isValidStyleName(styleName) {
     !styleName.includes(RESERVED_STYLE_NONE_NUMBERING) &&
     customStyles?.length > 0
   );
+}
+
+export function addStyleToList(style: Style) {
+  if (0 < customStyles.length) {
+    const index = customStyles.findIndex(item => item.styleName === style.styleName);
+    if (index !== -1) {
+      customStyles[index] = style;
+    }
+    else {
+      customStyles.push(style);
+    }
+  }
+  return customStyles;
 }
 
 // [FS] IRAD-1137 2021-01-15
@@ -59,7 +72,7 @@ export function getCustomStyleByName(name: string): Style {
   return style;
 }
 
-export function setView(csview: EditorView) {
+export function setView(csview : EditorView) {
   _view = csview;
 }
 
@@ -75,6 +88,16 @@ export function setStyles(style: Style[]) {
   docType = documentType;
   if (docType) {
     hasdocTypechanged = true;
+    if (_view) {
+      _view.dispatch(_view.state.tr.scrollIntoView());
+      _view = null;
+    }
+  }
+  if (style[0] === undefined || !Object.hasOwn(style[0], 'docType')) {
+    hasdocTypechanged = true;
+  }
+  if (style && 0 === style.length) {
+    saveDefaultStyle();
   }
 }
 export function setHidenumberingFlag(hideNumberingFlag) {
@@ -89,13 +112,9 @@ export function setStyleRuntime(runtime) {
   styleRuntime = runtime;
 }
 
-export function setStyleCallback() {
-  saveDefaultStyle();
-}
-
 function saveDefaultStyle() {
   if (!isCustomStyleExists(RESERVED_STYLE_NONE)) {
-    saveStyle(DEFAULT_NORMAL_STYLE).then(() => {
+    saveStyle(DEFAULT_NORMAL_STYLE)?.then(() => {
       /* This is intentional */
     });
   }
@@ -220,7 +239,7 @@ export function getCustomStyle(customStyle) {
 // [FS] IRAD-1539 2021-08-02
 // method to save,retrive,rename and remove style from the style server.
 export function saveStyle(styleProps: Style): Promise<Style[]> {
-  return styleRuntime.saveStyle(styleProps);
+  return styleRuntime?.saveStyle(styleProps);
 }
 export function getStylesAsync(): Promise<Style[]> {
   return styleRuntime.getStylesAsync();

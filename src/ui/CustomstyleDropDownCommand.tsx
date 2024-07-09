@@ -52,11 +52,20 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
           setStyles(result);
           HEADING_NAMES = result;
           if (null != HEADING_NAMES) {
-            HEADING_NAMES.forEach((obj) => {
-              HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
-                obj,
-                obj.styleName
+            const foundNormal = result.find(obj => obj.styleName === RESERVED_STYLE_NONE);
+            if (foundNormal) {
+              HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
+                foundNormal,
+                foundNormal.styleName
               );
+            }
+
+            HEADING_NAMES.forEach((obj) => {
+              if (RESERVED_STYLE_NONE != obj.styleName)
+                HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
+                  obj,
+                  obj.styleName
+                );
             });
           }
         }
@@ -64,11 +73,6 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
       });
     }
     return [HEADING_COMMANDS];
-  }
-
-  isValidCustomstyle() {
-    const bOK = isCustomStyleExists(this.state['styleName']);
-    return bOK;
   }
 
   staticCommands() {
@@ -126,7 +130,7 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
           const updatedAttrs = { ...node.attrs, styleName: RESERVED_STYLE_NONE };
           node = { ...node, attrs: updatedAttrs } as unknown as Node;
           customStyleName = RESERVED_STYLE_NONE;
-      }
+        }
 
       }
     });

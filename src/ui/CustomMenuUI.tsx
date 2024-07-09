@@ -19,8 +19,9 @@ import {
   saveStyle,
   renameStyle,
   removeStyle,
+  addStyleToList
 } from '../customStyle.js';
-import { setTextAlign , setTextLineSpacing , atViewportCenter, createPopUp} from '@modusoperandi/licit-ui-commands';
+import { setTextAlign, setTextLineSpacing, atViewportCenter, createPopUp } from '@modusoperandi/licit-ui-commands';
 import { setParagraphSpacing } from '../ParagraphSpacingCommand.js';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec.js';
 
@@ -33,23 +34,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   _stylePopup = null;
   _styleName = null;
   _menuItemHeight = 28;
-  // _popUpId = uuid();
-  // props: {
-  //   className?: string;
-  //   commandGroups: Array<{ [key: string]: UICommand }>;
-  //   staticCommand: Array<{ [key: string]: UICommand }>;
-  //   disabled?: boolean;
-  //   dispatch: (tr: Transform) => void;
-  //   editorState: EditorState;
-  //   editorView?: EditorView;
-  //   // icon?: string | React.Element<any> | null;
-  //   icon?: string | JSX.Element | null;
-  //   // label?: string | React.Element<any> | null;
-  //   label?: string | JSX.Element | null;
-  //   title?: string;
-  //   _style?: any;
-  //   onCommand?:any
-  // };
 
   _id = uuid();
   _selectedIndex = 0;
@@ -244,8 +228,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
     doc.nodesBetween(0, doc.nodeSize - 2, (node, pos) => {
       if (node.content?.content?.length) {
-        if (node?.content?.content?.[0]?.marks?.length)
-       {
+        if (node?.content?.content?.[0]?.marks?.length) {
           node.content.content[0].marks.some((mark) => {
             if (node.attrs.styleName === removedStyleName) {
               tasks.push({ node, pos, mark });
@@ -319,7 +302,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
   //shows the alignment and line spacing option
   showStyleWindow(command, _event: SyntheticEvent<Element>, mode) {
-    // const anchor = event ? event.currentTarget : null;
     // close the popup toggling effect
     if (this._stylePopup) {
       this._stylePopup.close();
@@ -359,6 +341,11 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                 ) {
                   saveStyle(val).then((result) => {
                     if (result) {
+                      //in bladelicitruntime, the response of the saveStyle() changed from list to a object
+                      //so need to add that style object to the current style list
+                      if (!Array.isArray(result)) {
+                        result = addStyleToList(result);
+                      }
                       setStyles(result);
                       result.forEach((obj) => {
                         if (val.styleName === obj.styleName) {
@@ -388,32 +375,34 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                   // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
 
                   if (null != result) {
-                    if (val.styleName === val.styles.nextLineStyleName) {
-                      let tr;
-                      delete val.editorView;
-                      saveStyle(val).then((result) => {
-                        if (result) {
-                          setStyles(result);
-                          result.forEach((obj) => {
-                            if (val.styleName === obj.styleName) {
-                              tr = this.renameStyleInDocument(
-                                this.props.editorState,
-                                this.props.editorState.tr,
-                                this._styleName,
-                                val.styleName,
-                                // obj.styles
-                              );
-                            }
-                          });
-                          if (tr) {
-                            dispatch(tr);
-                          }
+                    let tr;
+                    delete val.editorView;
+                    saveStyle(val).then((result) => {
+                      if (result) {
+                        //in bladelicitruntime, the response of the saveStyle() changed from list to a object
+                        //so need to add that style object to the current style list
+                        if (!Array.isArray(result)) {
+                          result = addStyleToList(result);
                         }
-                        this.props.editorView.focus();
-                        this._stylePopup.close();
-                        this._stylePopup = null;
-                      });
-                    }
+                        setStyles(result);
+                        result.forEach((obj) => {
+                          if (val.styleName === obj.styleName) {
+                            tr = this.renameStyleInDocument(
+                              this.props.editorState,
+                              this.props.editorState.tr,
+                              this._styleName,
+                              val.styleName,
+                            );
+                          }
+                        });
+                        if (tr) {
+                          dispatch(tr);
+                        }
+                      }
+                      this.props.editorView.focus();
+                      this._stylePopup.close();
+                      this._stylePopup = null;
+                    });
                   }
                 });
               }
@@ -432,13 +421,12 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     tr: Transform,
     oldStyleName,
     styleName,
-    // _style
   ) {
     const { doc } = state;
 
     doc.descendants(function (child, pos) {
       if (oldStyleName === child.attrs.styleName) {
-        (( child.attrs as { styleName: string }).styleName) = styleName;
+        ((child.attrs as { styleName: string }).styleName) = styleName;
         tr = tr.setNodeMarkup(pos, undefined, child.attrs);
       }
     });

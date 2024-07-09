@@ -140,18 +140,20 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     }
 
     return (
-      <CustomMenuButton
-        className={backgroundColorClass}
-        // [FS] IRAD-1008 2020-07-16
-        // Disable font type menu on editor disable state
-        commandGroups={this.getCommandGroups()}
-        disabled={!this.hasRuntime}
-        dispatch={dispatch}
-        editorState={editorState}
-        editorView={editorView}
-        label={customStyleName}
-        staticCommand={this.staticCommands()}
-      />
+      <span data-cy="cyStyleBtn">
+        <CustomMenuButton
+          className={backgroundColorClass}
+          // [FS] IRAD-1008 2020-07-16
+          // Disable font type menu on editor disable state
+          commandGroups={this.getCommandGroups()}
+          disabled={!this.hasRuntime}
+          dispatch={dispatch}
+          editorState={editorState}
+          editorView={editorView}
+          label={customStyleName}
+          staticCommand={this.staticCommands()}
+        />
+      </span>
     );
   }
 }

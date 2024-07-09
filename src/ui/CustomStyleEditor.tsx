@@ -711,7 +711,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
               </span>
             </p>
             <span>
-              <input
+              <input data-cy="cyStyleName"
                 autoFocus
                 className="molsp-stylenameinput molsp-fontstyle"
                 disabled={
@@ -817,6 +817,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
               <div className="molsp-panel" style={{ marginBottom: '5px' }}>
                 <div className="molsp-sectiondiv">
                   <select
+                    data-cy="cyStyleFont"
                     className="molsp-fonttype molsp-fontstyle"
                     onChange={this.onFontNameChange.bind(this)}
                     value={this.state.styles.fontName || 'Arial'}
@@ -828,6 +829,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     ))}
                   </select>
                   <select
+                    data-cy="cyStyleFontSize"
                     className="molsp-fontsize molsp-fontstyle"
                     onChange={this.onFontSizeChange.bind(this)}
                     value={this.state.styles.fontSize || 11}
@@ -858,7 +860,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       }
                       onClick={this.onStyleClick.bind(this, 'strong')}
                     >
-                      <span className="molsp-iconspan czi-icon format_bold editor-markbuttons">
+                      <span data-cy="cyStyleBold" className="molsp-iconspan czi-icon format_bold editor-markbuttons">
                         format_bold
                       </span>
                     </button>
@@ -1018,6 +1020,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <span style={{ float: 'left', marginTop: '3px' }}>
                     <label style={{ fontSize: '12px', color: '#464343' }}>
                       <input
+                        data-cy="cyStyleTOC"
                         checked={this.state.styles.toc}
                         onChange={this.handleTOC.bind(this)}
                         type="checkbox"
@@ -1155,6 +1158,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <span>Before: </span>
                   <span>
                     <input
+                      data-cy="cyStyleBeforeSpace"
                       className="molsp-spacinginput molsp-fontstyle"
                       key="before"
                       onChange={this.onStyleClick.bind(this, 'before')}
@@ -1167,6 +1171,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <span style={{ marginLeft: '23px' }}>After: </span>
                   <span>
                     <input
+                      data-cy="cyStyleAfterSpace"
                       className="molsp-spacinginput molsp-fontstyle"
                       key="after"
                       onChange={this.onStyleClick.bind(this, 'after')}
@@ -1270,6 +1275,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     }}
                   >
                     <select
+                      data-cy="cyStyleLevel"
                       className="molsp-leveltype molsp-fontstyle"
                       disabled={this.state.styles.isList === true}
                       id="levelValue"
@@ -1389,6 +1395,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     </span>
                     <span>
                       <select
+                        data-cy="cyStyleIndent"
                         className="molsp-leveltype molsp-specifiedindent molsp-fontstyle"
                         disabled={this.state.styles.isList === true}
                         onChange={this.onIndentChange.bind(this)}
@@ -1521,10 +1528,11 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
           </div>
         </div>
         <div className="molsp-btns">
-          <button className="molsp-buttonstyle" onClick={this._cancel}>
+          <button data-cy="cyStyleCancel" className="molsp-buttonstyle" onClick={this._cancel}>
             {this.state.mode === 3 ? 'Close' : 'Cancel'}
           </button>
           <button
+            data-cy="cyStyleSave"
             className="molsp-btnsave molsp-buttonstyle"
             onClick={this._save.bind(this)}
             onKeyDown={this.handleKeyDown}

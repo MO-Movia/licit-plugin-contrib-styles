@@ -540,7 +540,7 @@ export class CustomStyleCommand extends UICommand {
   }
 }
 
-const compareAttributes = (mark, style): boolean => {
+export const compareAttributes = (mark, style): boolean => {
   if (mark.attrs[ATTR_OVERRIDDEN] !== undefined && mark.attrs[ATTR_OVERRIDDEN]) return false;
 
   switch (mark.type.name) {
@@ -566,7 +566,7 @@ const compareAttributes = (mark, style): boolean => {
     default:
       return false;
   }
-}
+};
 
 
 export function compareMarkWithStyle(
@@ -1190,7 +1190,7 @@ export function insertParagraph(nodeAttrs, startPos, tr, index, state?) {
 
 // [FS] IRAD-1243 2021-05-05
 // To reset the previous numbering custom style attribute values.
-function resetNodeAttrs(nodeAttrs, customStyle) {
+export function resetNodeAttrs(nodeAttrs, customStyle) {
   nodeAttrs.styleName = customStyle ? customStyle.styleName : '';
   nodeAttrs.indent = null;
   nodeAttrs.lineSpacing = null;
@@ -1245,7 +1245,7 @@ function addElement(
   ).tr;
 }
 
-function addElementAfter(nodeAttrs, state, tr, startPos, nextLevel) {
+export function addElementAfter(nodeAttrs, state, tr, startPos, nextLevel) {
   const element = addElementEx(nodeAttrs, state, tr, startPos, true, nextLevel);
   if (element) {
     tr = element.tr;

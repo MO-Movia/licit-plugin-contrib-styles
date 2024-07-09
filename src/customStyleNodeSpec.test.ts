@@ -663,6 +663,8 @@ describe('toCustomStyleDOM', () => {
     ]);
   });
 
+
+
   it('should reset list style counters in window variables', () => {
     const styleLevel = 3;
     const isListStyle = true;

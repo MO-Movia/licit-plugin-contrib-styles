@@ -5752,8 +5752,8 @@ describe('applyStyleForPreviousEmptyParagraph', () => {
         setSelection: setSelection
       };
     };
-    const tr = {setSelection:setSelection, doc: mockdoc ,selection:{$from:{parentOffset:0,end:()=>{return 0;}},$anchor:{pos:1},$head:{before:()=>{return 2;}}}};
-    expect(applyStyleForPreviousEmptyParagraph({schema:mockschema,doc:{resolve:()=>{return {nodeBefore:{nodeSize :1,attrs:{styleName:'Normal'}}};}}},tr)).toBeDefined();
+    const tr = {setSelection:setSelection, doc: mockdoc ,selection:{$from:{parentOffset:0,end:()=>{return 0;}},$anchor:{pos:1},$head:{before:()=>{return 2;}}}} as unknown as Transaction;
+    expect(applyStyleForPreviousEmptyParagraph({schema:mockschema,doc:{resolve:()=>{return {nodeBefore:{nodeSize :1,attrs:{styleName:'Normal'}}} as unknown as ResolvedPos;}} as unknown as Node} as unknown as EditorState,tr)).toBeDefined();
   });
 });
 describe('applyStyles', () => {

@@ -135,8 +135,8 @@ export class CustomStyleItem extends React.PureComponent<
           </PointerSurface>
         </div>
         <div
-          data-cy="cyStyleEdit"
           className="molsp-arrow-right"
+          data-cy="cyStyleEdit"
           style={{ width: '50px', display: hasText ? 'block' : 'none' }}
         >
           {/* Need to change the below icon to downarroe */}

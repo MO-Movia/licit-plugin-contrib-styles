@@ -1227,3 +1227,4 @@ describe('customstyledropdowncommand 1', () => {
     spy.mockRestore();
   });
 });
+

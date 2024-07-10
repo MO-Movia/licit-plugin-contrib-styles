@@ -16,6 +16,8 @@ import {
   applyLineStyle,
   removeAllMarksExceptLink,
   handleRemoveMarks,
+  compareAttributes,
+  resetNodeAttrs,
 } from './CustomStyleCommand.js';
 import * as cusstylecommand from './CustomStyleCommand';
 import { EditorState, Selection, Transaction } from 'prosemirror-state';
@@ -2762,6 +2764,22 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       addElementEx(nodeattrs, statemock, trmock, 0, false, 2)
     ).toBeDefined();
   });
+  it('should handle addElementEx', () => {
+    const nodeattrs = {
+      align: 'left',
+      color: null,
+      id: null,
+      indent: null,
+      lineSpacing: '125%',
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'FM_chsubpara1',
+    };
+    expect(
+      addElementEx(nodeattrs, statemock, trmock, 0, false, 2,1)
+    ).toBeDefined();
+  });
   it('should handle getCustomStyles', () => {
     //const nodeattrs = { 'align': 'left', 'color': null, 'id': null, 'indent': null, 'lineSpacing': '125%', 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'FM_chsubpara1' };
     const mockschema = new Schema({
@@ -4931,6 +4949,7 @@ describe('applyLineStyle', () => {
       )
     ).toBeDefined();
   });
+
 });
 describe('isLevelUpdated', () => {
   it('should handle isLevelUpdated when isCustomStyleAlreadyApplied is false', () => {
@@ -5299,5 +5318,18 @@ describe('handleRemoveMarks', () => {
     };
     const customstylecommand = new CustomStyleCommand(styl, 'A_12');
     expect(customstylecommand.isActive()).toBeTruthy();
+  });
+});
+describe('compareAttributes',()=>{
+  it('should handle compareAttributes',()=>{
+    expect(compareAttributes({attrs:{'overridden':{}}},{})).toBeFalsy();
+  });
+  it('should handle compareAttributes when mark.type.name is super',()=>{
+    expect(compareAttributes({attrs:{'overridden':undefined},type:{name:'super'}},{})).toBeFalsy();
+  });
+});
+describe('resetNodeAttrs',()=>{
+  it('should handle resetNodeAttrs',()=>{
+    expect(resetNodeAttrs({},{})).toBeDefined();
   });
 });

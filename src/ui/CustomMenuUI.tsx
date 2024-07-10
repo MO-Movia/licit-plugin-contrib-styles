@@ -114,14 +114,12 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     });
     return (
       <div>
-        <span data-cy="cyStyleDropdown">
-          <div className="molsp-dropbtn" id={this._id}>
-            <div className="molsp-stylenames">{children}</div>
+        <div className="molsp-dropbtn" id={this._id}>
+          <div className="molsp-stylenames">{children}</div>
 
-            <hr></hr>
-            {children1}
-          </div>
-        </span>
+          <hr></hr>
+          {children1}
+        </div>
       </div>
     );
   }
@@ -303,6 +301,9 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   }
 
   //shows the alignment and line spacing option
+
+
+
   showStyleWindow(command, _event: SyntheticEvent<Element>, mode) {
     // close the popup toggling effect
     if (this._stylePopup) {
@@ -323,98 +324,102 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
         position: atViewportCenter,
         autoDismiss: false,
         IsChildDialog: false,
-        onClose: (val) => {
-          if (this._stylePopup) {
-            //handle save style object part here
-            if (undefined !== val) {
-              const { dispatch } = this.props.editorView;
-              // [FS] IRAD-1112 2020-12-14
-              // Issue fix: Duplicate style created while modified the style name.
-              delete val.runtime;
-              if (1 === mode) {
-                // update
-                delete val.editorView;
-                let tr;
-
-                // [FS] IRAD-1350 2021-05-19
-                // blocks edit if the style is already applied in editor
-                if (
-                  !isLevelUpdated(this.props.editorState, val.styleName, val)
-                ) {
-                  saveStyle(val).then((result) => {
-                    if (result) {
-                      //in bladelicitruntime, the response of the saveStyle() changed from list to a object
-                      //so need to add that style object to the current style list
-                      if (!Array.isArray(result)) {
-                        result = addStyleToList(result);
-                      }
-                      setStyles(result);
-                      result.forEach((obj) => {
-                        if (val.styleName === obj.styleName) {
-                          tr = updateDocument(
-                            this.props.editorState,
-                            this.props.editorState.tr,
-                            val.styleName,
-                            obj
-                          );
-                        }
-                      });
-                      if (tr) {
-                        dispatch(tr);
-                      }
-                    }
-                    this.props.editorView.focus();
-                    this._stylePopup.close();
-                    this._stylePopup = null;
-                  });
-                } else {
-                  this.showAlert();
-                }
-              } else {
-                // rename
-                renameStyle(this._styleName, val.styleName).then((result) => {
-                  // [FS] IRAD-1133 2021-01-06
-                  // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
-
-                  if (null != result) {
-                    let tr;
-                    delete val.editorView;
-                    saveStyle(val).then((result) => {
-                      if (result) {
-                        //in bladelicitruntime, the response of the saveStyle() changed from list to a object
-                        //so need to add that style object to the current style list
-                        if (!Array.isArray(result)) {
-                          result = addStyleToList(result);
-                        }
-                        setStyles(result);
-                        result.forEach((obj) => {
-                          if (val.styleName === obj.styleName) {
-                            tr = this.renameStyleInDocument(
-                              this.props.editorState,
-                              this.props.editorState.tr,
-                              this._styleName,
-                              val.styleName,
-                            );
-                          }
-                        });
-                        if (tr) {
-                          dispatch(tr);
-                        }
-                      }
-                      this.props.editorView.focus();
-                      this._stylePopup.close();
-                      this._stylePopup = null;
-                    });
-                  }
-                });
-              }
-            }
-          }
-          this.props.editorView.focus();
-        },
+        onClose: this.handlePopupClose.bind(this, mode),
       }
     );
   }
+
+  handlePopupClose(mode, val) {
+    if (this._stylePopup) {
+      if (val !== undefined) {
+        const { dispatch } = this.props.editorView;
+        delete val.runtime;
+        if (mode === 1) {
+          this.updateStyle(val, dispatch);
+        } else {
+          this.renameAndSaveStyle(val, dispatch);
+        }
+      }
+    }
+    this.props.editorView.focus();
+  }
+
+  updateStyle(val, dispatch) {
+    if (!isLevelUpdated(this.props.editorState, val.styleName, val)) {
+      saveStyle(val).then((result) => {
+        if (result) {
+          result = Array.isArray(result) ? result : addStyleToList(result);
+          setStyles(result);
+          const tr = this.getUpdatedTransaction(result, val.styleName);
+          if (tr) {
+            dispatch(tr);
+          }
+        }
+        this.closeStylePopup();
+      });
+    } else {
+      this.showAlert();
+    }
+  }
+
+  renameAndSaveStyle(val, dispatch) {
+    renameStyle(this._styleName, val.styleName).then((result) => {
+      if (result !== null) {
+        delete val.editorView;
+        saveStyle(val).then((result) => {
+          if (result) {
+            result = Array.isArray(result) ? result : addStyleToList(result);
+            setStyles(result);
+            const tr = this.getRenamedTransaction(result, val.styleName);
+            if (tr) {
+              dispatch(tr);
+            }
+          }
+          this.closeStylePopup();
+        });
+      }
+    });
+  }
+
+  getUpdatedTransaction(result, styleName) {
+    let tr;
+    result.forEach((obj) => {
+      if (styleName === obj.styleName) {
+        tr = updateDocument(
+          this.props.editorState,
+          this.props.editorState.tr,
+          styleName,
+          obj
+        );
+      }
+    });
+    return tr;
+  }
+
+  getRenamedTransaction(result, newStyleName) {
+    let tr;
+    result.forEach((obj) => {
+      if (newStyleName === obj.styleName) {
+        tr = this.renameStyleInDocument(
+          this.props.editorState,
+          this.props.editorState.tr,
+          this._styleName,
+          newStyleName
+        );
+      }
+    });
+    return tr;
+  }
+
+  closeStylePopup() {
+    this.props.editorView.focus();
+    this._stylePopup.close();
+    this._stylePopup = null;
+  }
+
+
+
+
 
   // [FS] IRAD-1237 2021-05-05
   // Issue fix: Rename style not working on the fly

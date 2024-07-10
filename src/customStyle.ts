@@ -166,76 +166,81 @@ export function isPreviousLevelExists(previousLevel: number) {
 
 // [FS] IRAD-1046 2020-09-24
 // To create a style object from the customstyles to show the styles in the example piece.
+
+
+
 export function getCustomStyle(customStyle) {
   const style: CSSStyle = {};
 
   for (const property in customStyle) {
-    switch (property) {
-      case 'strong':
-        // [FS] IRAD-1137 2021-1-22
-        // Deselected Bold, Italics and Underline are not removed from the example style near style name
-        if (!customStyle.boldPartial && customStyle[property]) {
-          style.fontWeight = 'bold';
-        }
-        break;
-
-      case 'em':
-        // [FS] IRAD-1137 2021-1-22
-        // Deselected Bold, Italics and Underline are not removed from the example style near style name
-        if (customStyle[property]) {
-          style.fontStyle = 'italic';
-        }
-        break;
-
-      case 'color':
-        style.color = customStyle[property];
-        break;
-
-      case 'textHighlight':
-        style.backgroundColor = customStyle[property];
-        break;
-
-      case 'fontSize':
-        style.fontSize = customStyle[property];
-        break;
-
-      case 'fontName':
-        style.fontName = customStyle[property];
-        break;
-      // [FS] IRAD-1042 2020-09-29
-      // Fix:icluded strike through in custom styles.
-      case 'strike':
-        if (customStyle[property]) {
-          style.textDecorationLine = 'line-through';
-        }
-        break;
-
-      case 'super':
-        style.verticalAlign = 'super';
-        break;
-
-      case 'underline':
-        // [FS] IRAD-1137 2021-1-22
-        // Deselected Bold, Italics and Underline are not removed from the example style near style name
-        if (customStyle[property]) {
-          style.textDecoration = 'underline';
-        }
-        break;
-
-      case 'textAlign':
-        style.textAlign = customStyle[property];
-        break;
-
-      case 'lineHeight':
-        style.lineHeight = customStyle[property];
-        break;
-
-      default:
-        break;
-    }
+    applyStyle(property, customStyle[property], style, customStyle);
   }
+
   return style;
 }
+
+function applyStyle(property, value, style, customStyle) {
+  switch (property) {
+    case 'strong':
+      if (!customStyle.boldPartial && value) {
+        style.fontWeight = 'bold';
+      }
+      break;
+
+    case 'em':
+      if (value) {
+        style.fontStyle = 'italic';
+      }
+      break;
+
+    case 'color':
+      style.color = value;
+      break;
+
+    case 'textHighlight':
+      style.backgroundColor = value;
+      break;
+
+    case 'fontSize':
+      style.fontSize = value;
+      break;
+
+    case 'fontName':
+      style.fontName = value;
+      break;
+
+    case 'strike':
+      if (value) {
+        style.textDecorationLine = 'line-through';
+      }
+      break;
+
+    case 'super':
+      style.verticalAlign = 'super';
+      break;
+
+    case 'underline':
+      if (value) {
+        style.textDecoration = 'underline';
+      }
+      break;
+
+    case 'textAlign':
+      style.textAlign = value;
+      break;
+
+    case 'lineHeight':
+      style.lineHeight = value;
+      break;
+
+    default:
+      break;
+  }
+}
+
+
+
+
 // [FS] IRAD-1539 2021-08-02
 // method to save,retrive,rename and remove style from the style server.
 export function saveStyle(styleProps: Style): Promise<Style[]> {

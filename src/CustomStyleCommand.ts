@@ -626,71 +626,98 @@ export function updateOverrideFlag(
   return tr;
 }
 
+
+
+function createMark(markType, attrs) {
+  return markType.create(attrs);
+}
+
+function getAttrs(property, styleProp) {
+  switch (property) {
+    case COLOR:
+      return { color: styleProp.styles[property] };
+    case FONTSIZE:
+      return { pt: styleProp.styles[property] };
+    case FONTNAME:
+      return { name: styleProp.styles[property] };
+    case TEXTHL:
+      return { highlightColor: styleProp.styles[property] };
+    default:
+      return null;
+  }
+}
+
+function getMarkType(property, schema) {
+  switch (property) {
+    case STRONG:
+    case BOLDPARTIAL:
+      return schema.marks[MARKSTRONG];
+    case EM:
+      return schema.marks[MARKEM];
+    case COLOR:
+      return schema.marks[MARKTEXTCOLOR];
+    case FONTSIZE:
+      return schema.marks[MARKFONTSIZE];
+    case FONTNAME:
+      return schema.marks[MARKFONTTYPE];
+    case TEXTHL:
+      return schema.marks[MARKTEXTHIGHLIGHT];
+    case UNDERLINE:
+      return schema.marks[MARKUNDERLINE];
+    default:
+      return null;
+  }
+}
+
 export function getMarkByStyleName(styleName: string, schema: Schema) {
   const styleProp = getCustomStyleByName(styleName);
   const marks = [];
-  let markType = null;
-  let attrs = null;
+
   if (styleProp?.styles) {
     for (const property in styleProp.styles) {
-      switch (property) {
-        case STRONG:
-        case BOLDPARTIAL:
-          if (styleProp.styles[property]) {
-            markType = schema.marks[MARKSTRONG];
-            marks.push(markType.create(attrs));
-          }
-          break;
-
-        case EM:
-          markType = schema.marks[MARKEM];
-          if (styleProp.styles[property]) marks.push(markType.create(attrs));
-          break;
-
-        case COLOR:
-          markType = schema.marks[MARKTEXTCOLOR];
-          attrs = styleProp.styles[property]
-            ? { color: styleProp.styles[property] }
-            : null;
-          marks.push(markType.create(attrs));
-          break;
-
-        case FONTSIZE:
-          markType = schema.marks[MARKFONTSIZE];
-          attrs = styleProp.styles[property]
-            ? { pt: styleProp.styles[property] }
-            : null;
-          marks.push(markType.create(attrs));
-          break;
-
-        case FONTNAME:
-          markType = schema.marks[MARKFONTTYPE];
-          attrs = styleProp.styles[property]
-            ? { name: styleProp.styles[property] }
-            : null;
-          marks.push(markType.create(attrs));
-          break;
-
-        case TEXTHL:
-          markType = schema.marks[MARKTEXTHIGHLIGHT];
-          attrs = styleProp.styles[property]
-            ? { highlightColor: styleProp.styles[property] }
-            : null;
-          marks.push(markType.create(attrs));
-          break;
-
-        case UNDERLINE:
-          markType = schema.marks[MARKUNDERLINE];
-          marks.push(markType.create(attrs));
-          break;
-
-        default:
-          break;
+      const markType = getMarkType(property, schema);
+      if (markType) {
+        const attrs = getAttrs(property, styleProp);
+        if (property !== STRONG && property !== BOLDPARTIAL && !styleProp.styles[property]) continue;
+        marks.push(createMark(markType, attrs));
       }
     }
   }
+
   return marks;
 }
+
+
+function setNodeAttribute(element, styleProp, newattrs) {
+  if (styleProp?.styles) {
+    if (element instanceof TextAlignCommand) {
+      newattrs.align = styleProp.styles.align;
+    } else if (element instanceof TextLineSpacingCommand) {
+      newattrs.lineSpacing = getLineSpacingValue(styleProp.styles.lineHeight || '');
+    } else if (element instanceof ParagraphSpacingCommand) {
+      newattrs.paragraphSpacingAfter = styleProp.styles.paragraphSpacingAfter || null;
+      newattrs.paragraphSpacingBefore = styleProp.styles.paragraphSpacingBefore || null;
+    } else if (element instanceof IndentCommand) {
+      newattrs.indent = styleProp.styles.isLevelbased
+        ? styleProp.styles.styleLevel
+        : styleProp.styles.indent;
+    }
+  }
+}
+
+function executeElementCommand(element, state, tr, startPos, endPos) {
+  if (element.executeCustom && typeof element.executeCustom === 'function') {
+    const returnVal = element.executeCustom(state, tr, startPos, endPos);
+    if (typeof returnVal !== 'boolean') {
+      tr = returnVal;
+    }
+  }
+  return tr;
+}
+
+
+
+
 function applyStyleEx(
   styleProp: Style,
   styleName: string,
@@ -705,14 +732,14 @@ function applyStyleEx(
   const loading = !styleProp;
 
 
-    // [FS] IRAD-1087 2020-11-02
-    // Issue fix: applied link is missing after applying a custom style.
-    tr = removeAllMarksExceptLink(
-      startPos,
-      endPos,
-      tr,
-      state.schema
-    );
+  // [FS] IRAD-1087 2020-11-02
+  // Issue fix: applied link is missing after applying a custom style.
+  tr = removeAllMarksExceptLink(
+    startPos,
+    endPos,
+    tr,
+    state.schema
+  );
 
 
   if (loading || !opt) {
@@ -736,43 +763,8 @@ function applyStyleEx(
     newattrs.styleName = styleName;
 
     _commands.forEach((element) => {
-      if (styleProp?.styles) {
-        // to set the node attribute for text-align
-        if (element instanceof TextAlignCommand) {
-          newattrs.align = styleProp.styles.align;
-          // to set the node attribute for line-height
-        } else if (element instanceof TextLineSpacingCommand) {
-          // [FS] IRAD-1104 2020-11-13
-          // Issue fix : Linespacing Double and Single not applied in the sample text paragraph
-          newattrs.lineSpacing = getLineSpacingValue(
-            styleProp.styles.lineHeight || ''
-          );
-        } else if (element instanceof ParagraphSpacingCommand) {
-          // [FS] IRAD-1100 2020-11-05
-          // Add in leading and trailing spacing (before and after a paragraph)
-          newattrs.paragraphSpacingAfter =
-            styleProp.styles.paragraphSpacingAfter || null;
-          newattrs.paragraphSpacingBefore =
-            styleProp.styles.paragraphSpacingBefore || null;
-        } else if (element instanceof IndentCommand) {
-          // [FS] IRAD-1162 2021-1-25
-          // Bug fix: indent not working along with level
-          newattrs.indent = styleProp.styles.isLevelbased
-            ? styleProp.styles.styleLevel
-            : styleProp.styles.indent;
-        }
-      }
-
-      // to set the marks for the node
-      if (
-        element.executeCustom &&
-        typeof element.executeCustom === 'function'
-      ) {
-        const returnVal = element.executeCustom(state, tr, startPos, endPos);
-        if (typeof returnVal != 'boolean') {
-          tr = returnVal;
-        }
-      }
+      setNodeAttribute(element, styleProp, newattrs);
+      tr = executeElementCommand(element, state, tr, startPos, endPos);
     });
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
@@ -806,34 +798,22 @@ function isValidHeirarchy(
 // [FS] IRAD-1213 2020-02-23
 // Loop the whole document
 // if any heirachy misses return true and keep the object in a global object
-function hasMismatchHeirarchy(
-  _state: EditorState,
-  tr: Transform,
-  node /* The current node */,
-  startPos: number,
-  endPos: number,
-  styleName? /* New style to be applied */
-) {
-  const styleLevel = Number(getStyleLevel(styleName || ''));
-  const currentLevel = getStyleLevel(node.attrs?.styleName);
-  nodesBeforeSelection.splice(0);
-  nodesAfterSelection.splice(0);
-  const attrs = { ...node.attrs };
-  attrs['styleName'] = styleName;
-  let previousLevel = null;
-  let levelDiff = 0;
-  let isAfter = false;
 
-  let hasHeirarchyBroken = false;
 
-  // Manage heirachy for nodes of previous  position
-  // if (startPos !== 0) {
-  // Fix: document Load Error- Instead of state doc here give transaction doc,because when we apply changes
-  // dynamically through transactions the node position  get affected,
-  // so depending on state doc nodes' positions is incorrect.
+
+
+
+function getNodeStyleLevel(node) {
+  return Number(getStyleLevel(node.attrs?.styleName));
+}
+
+function processDescendants(tr, startPos, endPos) {
+  const nodesBeforeSelection = [];
+  const nodesAfterSelection = [];
+
   tr.doc.descendants((node, pos) => {
     if (isAllowedNode(node)) {
-      const nodeStyleLevel = getStyleLevel(node.attrs.styleName);
+      const nodeStyleLevel = getNodeStyleLevel(node);
       if (nodeStyleLevel) {
         if (pos < startPos) {
           nodesBeforeSelection.push({ pos, node });
@@ -844,199 +824,226 @@ function hasMismatchHeirarchy(
     }
     return true;
   });
-  if (nodesBeforeSelection.length === 0 && nodesAfterSelection.length === 0) {
-    setNewElementObject(attrs, startPos, 0, false);
-    hasHeirarchyBroken = true;
-  }
+
+  return { nodesBeforeSelection, nodesAfterSelection };
+}
+
+function handleNodesBefore(nodesBeforeSelection, styleLevel, attrs, startPos) {
+  let previousLevel = null;
 
   nodesBeforeSelection.forEach((item) => {
-    previousLevel = Number(getStyleLevel(item.node.attrs.styleName));
+    previousLevel = getNodeStyleLevel(item.node);
   });
-  if (null === previousLevel && null == currentLevel) {
-    // No levels established before.
-    if (styleLevel !== 1) {
-      setNewElementObject(attrs, startPos, null, false);
-      hasHeirarchyBroken = true;
-    }
-  } else {
-    //	If this is the first level, identify the level difference with previous level.
-    levelDiff = previousLevel ? styleLevel - previousLevel : styleLevel;
 
-    if (0 > levelDiff) {
-      // If NOT applying (same level OR adjacent level)
-
-      if (nodesAfterSelection.length === 0) {
-        isAfter = true;
-        previousLevel = Number(
-          getStyleLevel(
-            nodesBeforeSelection[nodesBeforeSelection.length - 1].node.attrs
-              .styleName
-          )
-        );
-      }
-      setNewElementObject(attrs, startPos, previousLevel, isAfter);
-      hasHeirarchyBroken = true;
-    }
-    if (levelDiff > 0) {
-      if (selectedNodes.length !== 1) {
-        previousLevel = Number(
-          getStyleLevel(selectedNodes[0].node.attrs.styleName)
-        );
-      }
-      setNewElementObject(attrs, startPos, previousLevel, false);
-    }
+  if (previousLevel === null && styleLevel !== 1) {
+    setNewElementObject(attrs, startPos, null, false);
+    return { hasHeirarchyBroken: true, previousLevel };
   }
 
-  if (0 < nodesAfterSelection.length) {
-    const selectedLevel = styleLevel;
-    let currentLevel = 0;
-    let found = false;
-    nodesAfterSelection.every((item) => {
-      if (!found) {
-        currentLevel = Number(getStyleLevel(item.node.attrs.styleName));
-        levelDiff = selectedLevel - currentLevel;
+  return { hasHeirarchyBroken: false, previousLevel };
+}
 
-        if (styleLevel > 1 && levelDiff >= 0) {
-          if (
-            nodesBeforeSelection.length > 0 &&
-            nodesBeforeSelection[nodesBeforeSelection.length - 1].node.attrs
-              .styleName !== RESERVED_STYLE_NONE
-          ) {
-            // do nothing
-          } else {
-            setNewElementObject(attrs, item.pos, 0, false);
-            found = true;
-            hasHeirarchyBroken = false;
-          }
+function handleNodesAfter(
+  nodesAfterSelection,
+  nodesBeforeSelection,
+  styleLevel,
+  attrs,
+  endPos,
+  previousLevel
+) {
+  const selectedLevel = styleLevel;
+  let hasHeirarchyBroken = false;
 
-          // do nothing
-        } else if (0 === styleLevel) {
-          setNewElementObject(attrs, endPos, previousLevel, true);
-          hasHeirarchyBroken = false;
-        } else {
-          if (levelDiff < 0) {
-            setNewElementObject(attrs, endPos, selectedLevel, true);
-            found = true;
-          }
-          hasHeirarchyBroken = true;
-        }
+  nodesAfterSelection.every((item) => {
+    const currentLevel = getNodeStyleLevel(item.node);
+    const levelDiff = selectedLevel - currentLevel;
+
+    if (styleLevel > 1 && levelDiff >= 0) {
+      if (
+        nodesBeforeSelection.length > 0 &&
+        nodesBeforeSelection[nodesBeforeSelection.length - 1].node.attrs
+          .styleName !== RESERVED_STYLE_NONE
+      ) {
+        return true; // Continue the loop
+      } else {
+        setNewElementObject(attrs, item.pos, 0, false);
+        hasHeirarchyBroken = false;
+        return false; // Break the loop
       }
-    });
-  }
+    } else if (styleLevel === 0) {
+      setNewElementObject(attrs, endPos, previousLevel, true);
+      hasHeirarchyBroken = false;
+      return false; // Break the loop
+    } else {
+      if (levelDiff < 0) {
+        setNewElementObject(attrs, endPos, selectedLevel, true);
+        hasHeirarchyBroken = true;
+        return false; // Break the loop
+      }
+      hasHeirarchyBroken = true;
+    }
+
+    return true; // Continue the loop
+  });
+
   return hasHeirarchyBroken;
 }
 
+function hasMismatchHeirarchy(
+  _state: EditorState,
+  tr: Transform,
+  node,
+  startPos: number,
+  endPos: number,
+  styleName?
+) {
+  const styleLevel = Number(getStyleLevel(styleName || ''));
+  const attrs = { ...node.attrs, styleName };
+
+  const { nodesBeforeSelection, nodesAfterSelection } = processDescendants(
+    tr,
+    startPos,
+    endPos
+  );
+
+  if (nodesBeforeSelection.length === 0 && nodesAfterSelection.length === 0) {
+    setNewElementObject(attrs, startPos, 0, false);
+    return true;
+  }
+
+  const { hasHeirarchyBroken, previousLevel } = handleNodesBefore(
+    nodesBeforeSelection,
+    styleLevel,
+    attrs,
+    startPos
+  );
+
+  if (hasHeirarchyBroken) {
+    return true;
+  }
+
+  getNodeStyleLevel(node);
+  const levelDiff = previousLevel ? styleLevel - previousLevel : styleLevel;
+
+  if (levelDiff < 0) {
+    setNewElementObject(attrs, startPos, previousLevel, false);
+    return true;
+  }
+
+  if (levelDiff > 0 && selectedNodes.length !== 1) {
+    setNewElementObject(attrs, startPos, previousLevel, false);
+  }
+
+  return handleNodesAfter(
+    nodesAfterSelection,
+    nodesBeforeSelection,
+    styleLevel,
+    attrs,
+    endPos,
+    previousLevel
+  );
+}
+
+
+
+
+
+
+
+
 // add new blank element and apply curresponding styles
+
+
+
+function validateAndPrepareAttributes(MISSED_HEIRACHY_ELEMENT, nodesBeforeSelection, startPos) {
+  const appliedLevel = Number(getStyleLevel(MISSED_HEIRACHY_ELEMENT.attrs.styleName));
+  let hasNodeAfter = false;
+  let posArray = [];
+  const newattrs = { value: null };  // Use an object to store newattrs
+
+  nodesBeforeSelection.forEach((item, counter) => {
+    const subsequantLevel = Number(getStyleLevel(item.node.attrs.styleName));
+    if (startPos === 0 && counter === 0) {
+      if (subsequantLevel !== appliedLevel) {
+        newattrs.value = { ...item.node.attrs };
+        posArray.push({ pos: startPos, appliedLevel, currentLevel: subsequantLevel });
+      }
+    } else if (startPos >= item.pos) {
+      if (startPos !== 0 && RESERVED_STYLE_NONE !== item.node.attrs.styleName && subsequantLevel > 0) {
+        if (appliedLevel - subsequantLevel > 1) {
+          newattrs.value = { ...item.node.attrs };
+          posArray = [{ pos: startPos, appliedLevel, currentLevel: subsequantLevel }];
+        } else if (appliedLevel - subsequantLevel === 1) {
+          posArray = [];
+          hasNodeAfter = true;
+        }
+      } else if (startPos !== 0 && RESERVED_STYLE_NONE === item.node.attrs.styleName) {
+        newattrs.value = { ...item.node.attrs };
+        posArray.push({ pos: startPos, appliedLevel, currentLevel: subsequantLevel });
+      }
+    }
+  });
+
+  return { hasNodeAfter, newattrs, posArray };
+}
+
+function handleNodesAfterSelection(
+  nodesAfterSelection, startPos, appliedLevel, newattrs, posArray, MISSED_HEIRACHY_ELEMENT) {
+  if (nodesAfterSelection.length > 0) {
+    nodesAfterSelection.forEach((item) => {
+      if (startPos > item.pos) {
+        posArray.push({ pos: startPos, appliedLevel, currentLevel: 0 });
+      } else {
+        newattrs.value = MISSED_HEIRACHY_ELEMENT.attrs;
+        posArray.push({ pos: startPos, appliedLevel, currentLevel: 0 });
+      }
+    });
+  }
+}
+
+function addNewElement(tr, state, newattrs, posArray) {
+  if (posArray.length > 0) {
+    tr = addElement(
+      newattrs.value,
+      state,
+      tr,
+      posArray[0].pos,
+      false,
+      posArray[0].appliedLevel,
+      posArray[0].currentLevel
+    );
+  }
+  return tr;
+}
+
 function createEmptyElement(
   state: EditorState,
   tr: Transform,
-  _node: Node /* The current node */,
+  _node: Node,
   startPos: number
 ) {
-  /* Validate the missed heirachy object details are availale */
-  if (undefined !== MISSED_HEIRACHY_ELEMENT.attrs) {
+  if (MISSED_HEIRACHY_ELEMENT.attrs !== undefined) {
     if (!MISSED_HEIRACHY_ELEMENT.isAfter) {
-      const appliedLevel = Number(
-        getStyleLevel(MISSED_HEIRACHY_ELEMENT.attrs.styleName)
-      );
-      let hasNodeAfter = false;
-      let subsequantLevel = 0;
-      let posArray = [];
-      let counter = 0;
-      let newattrs = null;
+      const { hasNodeAfter, newattrs, posArray } = validateAndPrepareAttributes(
+        MISSED_HEIRACHY_ELEMENT, nodesBeforeSelection, startPos);
 
-      if (nodesBeforeSelection.length > 0) {
-        nodesBeforeSelection.forEach((item) => {
-          subsequantLevel = Number(getStyleLevel(item.node.attrs.styleName));
-          if (0 === startPos && 0 === counter) {
-            if (subsequantLevel !== appliedLevel) {
-              newattrs = { ...item.node.attrs };
-              posArray.push({
-                pos: startPos,
-                appliedLevel: appliedLevel,
-                currentLevel: subsequantLevel,
-              });
-            }
-          } else if (startPos >= item.pos) {
-            if (
-              startPos !== 0 &&
-              RESERVED_STYLE_NONE !== item.node.attrs.styleName &&
-              Number(getStyleLevel(item.node.attrs.styleName)) > 0
-            ) {
-              if (appliedLevel - subsequantLevel > 1) {
-                newattrs = { ...item.node.attrs };
-                posArray = [];
-                posArray.push({
-                  pos: startPos,
-                  appliedLevel: appliedLevel,
-                  currentLevel: subsequantLevel,
-                });
-              } else if (1 === appliedLevel - subsequantLevel) {
-                posArray = [];
-                hasNodeAfter = true;
-              }
-            } else if (
-              startPos !== 0 &&
-              RESERVED_STYLE_NONE === item.node.attrs.styleName
-            ) {
-              newattrs = { ...item.node.attrs };
-              posArray.push({
-                pos: startPos,
-                appliedLevel: appliedLevel,
-                currentLevel: subsequantLevel,
-              });
-            }
-          }
-          counter++;
-        });
-      }
       if (nodesAfterSelection.length > 0 && !hasNodeAfter) {
-        nodesAfterSelection.forEach((item) => {
-          if (startPos > item.pos) {
-            posArray.push({
-              pos: startPos,
-              appliedLevel: appliedLevel,
-              currentLevel: 0,
-            });
-          } else {
-            newattrs = MISSED_HEIRACHY_ELEMENT.attrs;
-            posArray.push({
-              pos: startPos,
-              appliedLevel: appliedLevel,
-              currentLevel: 0,
-            });
-          }
-        });
-      }
-      // }
-      if (
-        nodesBeforeSelection.length === 0 &&
-        nodesAfterSelection.length === 0
-      ) {
-        newattrs = MISSED_HEIRACHY_ELEMENT.attrs;
-        posArray.push({
-          pos: startPos,
-          appliedLevel: appliedLevel,
-          currentLevel: 0,
-        });
-      }
-
-      if (posArray.length > 0) {
-        tr = addElement(
-          newattrs,
-          state,
-          tr,
-          posArray[0].pos,
-          false,
-          posArray[0].appliedLevel,
-          posArray[0].currentLevel
+        handleNodesAfterSelection(
+          nodesAfterSelection, startPos,
+          Number(getStyleLevel(MISSED_HEIRACHY_ELEMENT.attrs.styleName)),
+          newattrs, posArray, MISSED_HEIRACHY_ELEMENT
         );
       }
+
+      if (nodesBeforeSelection.length === 0 && nodesAfterSelection.length === 0) {
+        newattrs.value = MISSED_HEIRACHY_ELEMENT.attrs;
+        posArray.push({ pos: startPos, appliedLevel: Number(getStyleLevel(MISSED_HEIRACHY_ELEMENT.attrs.styleName)), currentLevel: 0 });
+      }
+
+      tr = addNewElement(tr, state, newattrs, posArray);
     } else {
       tr = manageElementsAfterSelection(
-        nodesAfterSelection.length > 0
-          ? nodesAfterSelection
-          : nodesBeforeSelection,
+        nodesAfterSelection.length > 0 ? nodesAfterSelection : nodesBeforeSelection,
         state,
         tr
       );
@@ -1049,105 +1056,106 @@ function createEmptyElement(
   return tr;
 }
 
+
+
+
+
 // [FS] IRAD-1387 2021-05-25
 // Indent/deindent without heirachy break
-export function allowCustomLevelIndent(
-  tr: Transform,
-  startPos: number,
-  styleName: string,
-  delta: number
-) {
+
+
+
+export function allowCustomLevelIndent(tr: Transform, startPos: number, styleName: string, delta: number) {
   const styleLevel = Number(getStyleLevel(styleName));
-  let allowIndent = false;
   startPos = startPos < 2 ? 2 : startPos - 1;
+
   if (delta > 0) {
-    for (let index = startPos; index >= 0; index--) {
-      const element = tr.doc.resolve(index);
-      if (element?.parent) {
-        const node = element.parent;
-        if (isAllowedNode(node)) {
-          if (RESERVED_STYLE_NONE !== node.attrs.styleName) {
-            const nodeStyleLevel = Number(getStyleLevel(node.attrs.styleName));
-            if (
-              nodeStyleLevel >= styleLevel ||
-              styleLevel - nodeStyleLevel === 1
-            ) {
-              allowIndent = true;
-              break;
-            } else {
-              index = index - node.nodeSize || 0; //NOSONAR Need to assign the index for the logic
-            }
-          }
-        } else {
-          index = index - node.nodeSize || 0; //NOSONAR Need to assign the index for the logic
-        }
-      }
-    }
+    return checkIndent(tr, startPos, styleLevel, -1);
   } else {
-    startPos = startPos + 1;
-    for (let index = startPos; index < tr.doc.nodeSize - 2; index++) {
-      const element = tr.doc.resolve(index);
-      if (element?.parent) {
-        const node = element.parent;
-        if (isAllowedNode(node)) {
-          if (RESERVED_STYLE_NONE !== node.attrs.styleName) {
-            const nodeStyleLevel = Number(getStyleLevel(node.attrs.styleName));
-            if (nodeStyleLevel >= styleLevel) {
-              allowIndent = true;
-              index = index - node.nodeSize; //NOSONAR Need to assign the index for the logic
-              break;
-            } else {
-              index = index + node.nodeSize; //NOSONAR Need to assign the index for the logic
-            }
-          }
-        } else {
-          index = index + node.nodeSize; //NOSONAR Need to assign the index for the logic
+    startPos += 2;
+    return checkIndent(tr, startPos, styleLevel, 1);
+  }
+}
+
+
+
+function shouldCheckNode(node, styleLevel, direction) {
+  const nodeStyleLevel = getNodeStyleLevel(node);
+  if (direction > 0) {
+    return nodeStyleLevel >= styleLevel;
+  } else {
+    return nodeStyleLevel >= styleLevel || styleLevel - nodeStyleLevel === 1;
+  }
+}
+
+function checkIndent(tr: Transform, startPos: number, styleLevel: number, direction: number): boolean {
+  const endPos = direction > 0 ? tr.doc.nodeSize - 2 : 0;
+
+  for (let index = startPos; direction > 0 ? index < endPos : index >= endPos; index += direction) {
+    const element = tr.doc.resolve(index);
+
+    if (element?.parent) {
+      const node = element.parent;
+
+      if (isAllowedNode(node) && RESERVED_STYLE_NONE !== node.attrs.styleName) {
+        if (shouldCheckNode(node, styleLevel, direction)) {
+          return true;
         }
       }
+
+      index += node.nodeSize * direction;
     }
   }
 
-  return allowIndent;
+  return false;
 }
+
+
+
+
+
 
 // Mange heirarchy for the elements after selection
+
+
+
 export function manageElementsAfterSelection(nodeArray, state, tr) {
   let selectedLevel = Number(MISSED_HEIRACHY_ELEMENT.previousLevel);
-  let subsequantLevel = 0;
   let counter = 0;
 
-  for (let index = 0; index < nodeArray.length; index++) {
-    const item = nodeArray[index];
-    subsequantLevel = Number(getStyleLevel(item.node.attrs.styleName));
-    if (subsequantLevel !== 0 && selectedLevel !== subsequantLevel) {
-      if (subsequantLevel - selectedLevel > 1) {
-        subsequantLevel = subsequantLevel - 1;
-        const style = getCustomStyleByLevel(subsequantLevel);
-        if (style) {
-          const newattrs = { ...item.node.attrs };
-          newattrs.styleName = style.styleName;
-          tr = tr.setNodeMarkup(item.pos, undefined, newattrs);
-          selectedLevel = subsequantLevel;
-        }
+  for (const item of nodeArray) {
+    const subsequantLevel = Number(getStyleLevel(item.node.attrs.styleName));
+
+    if (subsequantLevel === 0 || selectedLevel === subsequantLevel) {
+      continue;
+    }
+
+    if (subsequantLevel - selectedLevel > 1) {
+      const newLevel = subsequantLevel - 1;
+      const style = getCustomStyleByLevel(newLevel);
+      if (style) {
+        const newAttrs = { ...item.node.attrs, styleName: style.styleName };
+        tr = tr.setNodeMarkup(item.pos, undefined, newAttrs);
+        selectedLevel = newLevel;
         counter++;
-      } else {
-        index = nodeArray.length + 1;
+        break; // exit loop after one update
       }
-    } else if (
-      subsequantLevel !== 0 &&
-      counter === 0 &&
-      nodeArray.length === 0
-    ) {
+    } else if (counter === 0 && nodeArray.length === 1) {
       const style = getCustomStyleByLevel(1);
       if (style) {
-        const newattrs = { ...item.node.attrs };
-        newattrs.styleName = style.styleName;
-        tr = addElement(newattrs, state, tr, item.pos, false, 2, 0);
+        const newAttrs = { ...item.node.attrs, styleName: style.styleName };
+        tr = addElement(newAttrs, state, tr, item.pos, false, 2, 0);
+        break; // exit loop after adding element
       }
     }
   }
+
   return tr;
 }
+
+
+
+
 // check the styles with specified levels are defined
 function checkLevlsAvailable() {
   let isAvailable = true;
@@ -1245,7 +1253,7 @@ function addElement(
   ).tr;
 }
 
-export function addElementAfter(nodeAttrs, state, tr, startPos, nextLevel) {
+function addElementAfter(nodeAttrs, state, tr, startPos, nextLevel) {
   const element = addElementEx(nodeAttrs, state, tr, startPos, true, nextLevel);
   if (element) {
     tr = element.tr;
@@ -1365,8 +1373,9 @@ export function removeAllMarksExceptLink(
             mark,
           });
         }
+        return true;
       });
-      return true;
+
     }
     return true;
   });

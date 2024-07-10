@@ -104,194 +104,214 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   // To set the selected style values
+
+
   onStyleClick(style: string, event) {
     let state = null;
+
     switch (style) {
-      // simple toggles where style matches the key to change.
       case 'strong':
       case 'em':
       case 'strike':
       case 'super':
       case 'underline':
-        // copy the current style values, and flip the matching value
-        state = { styles: { ...this.state.styles } };
-        if (state.styles[style] === true) {
-          state.styles[style] = undefined;
-        } else {
-          state.styles[style] = !state.styles[style];
-        }
-
+        state = this.toggleStyle(style);
         break;
-
       case 'name':
-        if (event) {
-          const oldName = this.state.styleName;
-          const newName = event.target.value;
-          state = { styleName: newName, styles: null };
-          state.styles = { ...this.state.styles };
-          if (this.state.styles.nextLineStyleName === oldName) {
-            // Update next line style as well.
-            state.styles.nextLineStyleName = newName;
-          }
-        }
+        state = this.updateStyleName(event);
         break;
-
       case 'description':
-        if (event) {
-          state = { description: event.target.value };
-        }
+        state = this.updateDescription(event);
         break;
-
-      // [FS] IRAD-1497 2021-06-30
-      // Not able to set paragraph spacing before and after.
       case 'before':
-        if (event) {
-          state = {
-            styles: {
-              ...this.state.styles,
-              paragraphSpacingBefore: event.target.value,
-            },
-          };
-        }
+        state = this.updateParagraphSpacing('paragraphSpacingBefore', event);
         break;
       case 'after':
-        if (event) {
-          state = {
-            styles: {
-              ...this.state.styles,
-              paragraphSpacingAfter: event.target.value,
-            },
-          };
-        }
+        state = this.updateParagraphSpacing('paragraphSpacingAfter', event);
         break;
       default:
         break;
     }
 
-    // save changes and update
     if (state) {
       this.setState(state, () => this.buildStyle());
     }
   }
 
-  // Build styles to display the example piece
-  buildStyle() {
-    const style: React.CSSProperties = {};
-    if (this.state.styles.fontName) {
-      style.fontFamily = this.state.styles.fontName;
-    }
-    if (this.state.styles.fontSize) {
-      style.fontSize = `${this.state.styles.fontSize}px`;
-    }
-    if (this.state.styles.strong) {
-      style.fontWeight = 'bold';
-    }
-    if (this.state.styles.color) {
-      style.color = this.state.styles.color;
-    }
-    if (this.state.styles.underline) {
-      style.textDecoration =
-        undefined !== style.textDecoration
-          ? `${style.textDecoration}${' underline'}`
-          : 'underline';
-    }
-    if (this.state.styles.strike) {
-      style.textDecoration =
-        undefined !== style.textDecoration
-          ? `${style.textDecoration}${' line-through'}`
-          : 'line-through';
-    }
-    if (this.state.styles.em) {
-      style.fontStyle = 'italic';
-    }
-    if (this.state.styles.textHighlight) {
-      style.backgroundColor = this.state.styles.textHighlight;
-    }
-    if (this.state.styles.align) {
-      style.textAlign = this.state.styles.align;
-    }
-    if (this.state.styles.lineHeight) {
-      // [FS] IRAD-1104 2020-11-13
-      // Issue fix : Linespacing Double and Single not applied in the sample text paragraph
-      style.lineHeight = getLineSpacingValue(this.state.styles.lineHeight);
-    }
-    // [FS] IRAD-1111 2020-12-10
-    // Issue fix : Paragraph space before is not applied in the sample text.
-    if (this.state.styles.paragraphSpacingBefore) {
-      style.marginTop = `${this.state.styles.paragraphSpacingBefore}px`;
-    }
-    // [FS] IRAD-1111 2020-12-10
-    // Issue fix : Paragraph space after is not applied in the sample text.
-    if (this.state.styles.paragraphSpacingAfter) {
-      style.marginBottom = `${this.state.styles.paragraphSpacingAfter}px`;
-    }
-    // [FS] IRAD-1111 2020-12-10
-    // Issue fix : Indent is not applied in the sample text.
-    if (!this.state.styles.isLevelbased) {
-      if (this.state.styles.indent) {
-        style.marginLeft = `${parseInt(this.state.styles.indent) * 2}px`;
-      }
-    } else {
-      const levelValue = document?.getElementById('levelValue');
-      if (
-        // this covers null & undefined
-        levelValue instanceof window.HTMLSelectElement &&
-        levelValue.value
-      ) {
-        style.marginLeft = `${parseInt(levelValue.value) * 2}px`;
-      }
-    }
-
-    const sampleDiv = document.getElementById('sampletextdiv');
-    if (sampleDiv) {
-      // [FS] IRAD-1394 2021-06-02
-      // Issue: numbering sample not working when select Bold first sentence
-      let textSample = SAMPLE_TEXT;
-      if (this.state.styles.boldPartial) {
-        if (this.state.styles.boldSentence) {
-          const content = SAMPLE_TEXT.split('.');
-          sampleDiv.innerHTML = `<strong>${content[0]}</strong> ${content[1]}`;
-        } else {
-          const content = SAMPLE_TEXT.split(' ');
-          sampleDiv.innerHTML = `<strong>${content[0]}</strong> ${SAMPLE_TEXT}`;
-        }
-        textSample = sampleDiv.innerHTML;
-        // [FS] IRAD-1473 2021-06-30
-        // Style Example not showing properly when select Bold and Bold First Sentence
-        style.fontWeight = 'normal';
-      }
-      if (
-        this.state.styles.styleLevel &&
-        (this.state.styles.hasNumbering || this.state.styles.isList)
-      ) {
-        // [FS] IRAD-1137 2021-01-11
-        // Issue fix : The Preview text is not showing the numbering in bold after Bold Numbering is enabled.
-        const sampleDiv = document.getElementById('sampletextdiv');
-        if (sampleDiv) {
-          if (this.state.styles.boldNumbering) {
-            sampleDiv.innerHTML = `<strong>${this.getNumberingLevel(
-              this.state.styles.styleLevel,
-              this.state.styles.prefixValue
-            )}</strong>${textSample}`;
-          } else {
-            sampleDiv.innerText = `${this.getNumberingLevel(
-              this.state.styles.styleLevel,
-              this.state.styles.prefixValue
-            )}${textSample}`;
-          }
-        }
-      } else {
-        sampleDiv.innerText = `${SAMPLE_TEXT}`;
-        sampleDiv.innerHTML = textSample;
-      }
-
-      if (this.state.styles.styleLevel && this.state.styles?.hasBullet) {
-        const bulletDetails = getDetailsBullet(this.state.styles.bulletLevel);
-        sampleDiv.innerHTML = `<strong style=color:${bulletDetails.color}>${bulletDetails.symbol}</strong>${textSample}`;
-      }
-    }
-    return style;
+  toggleStyle(style) {
+    const styles = { ...this.state.styles };
+    styles[style] = styles[style] === true ? undefined : !styles[style];
+    return { styles };
   }
+
+  updateStyleName(event) {
+    if (!event) return null;
+
+    const oldName = this.state.styleName;
+    const newName = event.target.value;
+    const styles = { ...this.state.styles };
+
+    if (styles.nextLineStyleName === oldName) {
+      styles.nextLineStyleName = newName;
+    }
+
+    return { styleName: newName, styles };
+  }
+
+  updateDescription(event) {
+    if (!event) return null;
+
+    return { description: event.target.value };
+  }
+
+  updateParagraphSpacing(spacingType, event) {
+    if (!event) return null;
+
+    const styles = { ...this.state.styles };
+    styles[spacingType] = event.target.value;
+
+    return { styles };
+  }
+
+
+
+
+  // Build styles to display the example piece
+
+
+buildStyle() {
+  const style: React.CSSProperties = {};
+
+  this.applyFontProperties(style);
+  this.applyTextDecorations(style);
+  this.applyTextStyles(style);
+  this.applyParagraphStyles(style);
+  this.applyIndentation(style);
+
+  this.updateSampleDiv(style);
+
+  return style;
+}
+
+applyFontProperties(style) {
+  if (this.state.styles.fontName) {
+    style.fontFamily = this.state.styles.fontName;
+  }
+  if (this.state.styles.fontSize) {
+    style.fontSize = `${this.state.styles.fontSize}px`;
+  }
+}
+
+applyTextDecorations(style) {
+  if (this.state.styles.underline) {
+    style.textDecoration = style.textDecoration ? `${style.textDecoration} underline` : 'underline';
+  }
+  if (this.state.styles.strike) {
+    style.textDecoration = style.textDecoration ? `${style.textDecoration} line-through` : 'line-through';
+  }
+}
+
+applyTextStyles(style) {
+  if (this.state.styles.strong) {
+    style.fontWeight = 'bold';
+  }
+  if (this.state.styles.color) {
+    style.color = this.state.styles.color;
+  }
+  if (this.state.styles.em) {
+    style.fontStyle = 'italic';
+  }
+  if (this.state.styles.textHighlight) {
+    style.backgroundColor = this.state.styles.textHighlight;
+  }
+  if (this.state.styles.align) {
+    style.textAlign = this.state.styles.align;
+  }
+  if (this.state.styles.lineHeight) {
+    style.lineHeight = getLineSpacingValue(this.state.styles.lineHeight);
+  }
+}
+
+applyParagraphStyles(style) {
+  if (this.state.styles.paragraphSpacingBefore) {
+    style.marginTop = `${this.state.styles.paragraphSpacingBefore}px`;
+  }
+  if (this.state.styles.paragraphSpacingAfter) {
+    style.marginBottom = `${this.state.styles.paragraphSpacingAfter}px`;
+  }
+}
+
+applyIndentation(style) {
+  if (!this.state.styles.isLevelbased) {
+    if (this.state.styles.indent) {
+      style.marginLeft = `${parseInt(this.state.styles.indent) * 2}px`;
+    }
+  } else {
+    const levelValue = document?.getElementById('levelValue');
+    if (levelValue instanceof window.HTMLSelectElement && levelValue.value) {
+      style.marginLeft = `${parseInt(levelValue.value) * 2}px`;
+    }
+  }
+}
+
+updateSampleDiv(style) {
+  const sampleDiv = document.getElementById('sampletextdiv');
+  if (!sampleDiv) return;
+
+  let textSample = SAMPLE_TEXT;
+  if (this.state.styles.boldPartial) {
+    textSample = this.applyBoldPartial(sampleDiv,style);
+  }
+
+  if (this.state.styles.styleLevel && (this.state.styles.hasNumbering || this.state.styles.isList)) {
+    this.applyNumberingOrList(sampleDiv, textSample);
+  } else {
+    sampleDiv.innerText = SAMPLE_TEXT;
+    sampleDiv.innerHTML = textSample;
+  }
+
+  if (this.state.styles.styleLevel && this.state.styles?.hasBullet) {
+    this.applyBullet(sampleDiv, textSample);
+  }
+}
+
+applyBoldPartial(sampleDiv,style) {
+  let textSample = '';
+  if (this.state.styles.boldSentence) {
+    const content = SAMPLE_TEXT.split('.');
+    sampleDiv.innerHTML = `<strong>${content[0]}</strong> ${content[1]}`;
+  } else {
+    const content = SAMPLE_TEXT.split(' ');
+    sampleDiv.innerHTML = `<strong>${content[0]}</strong> ${SAMPLE_TEXT}`;
+  }
+  textSample = sampleDiv.innerHTML;
+  style.fontWeight = 'normal';
+  return textSample;
+}
+
+applyNumberingOrList(sampleDiv, textSample) {
+  if (this.state.styles.boldNumbering) {
+    sampleDiv.innerHTML = `<strong>${this.getNumberingLevel(
+      this.state.styles.styleLevel,
+      this.state.styles.prefixValue
+    )}</strong>${textSample}`;
+  } else {
+    sampleDiv.innerText = `${this.getNumberingLevel(
+      this.state.styles.styleLevel,
+      this.state.styles.prefixValue
+    )}${textSample}`;
+  }
+}
+
+applyBullet(sampleDiv, textSample) {
+  const bulletDetails = getDetailsBullet(this.state.styles.bulletLevel);
+  sampleDiv.innerHTML = `<strong style=color:${bulletDetails.color}>${bulletDetails.symbol}</strong>${textSample}`;
+}
+
+
+
+
+
   // [FS] IRAD-1111 2020-12-10
   // get the numbering corresponding to the level
   getNumberingLevel(level: string | number, prefixValue: string | number) {
@@ -711,9 +731,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
               </span>
             </p>
             <span>
-              <input autoFocus
+              <input
+                autoFocus
                 className="molsp-stylenameinput molsp-fontstyle"
-                data-cy="cyStyleName"
                 disabled={
                   this.state.mode === 1 || this.state.mode === 3
                 }
@@ -818,7 +838,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                 <div className="molsp-sectiondiv">
                   <select
                     className="molsp-fonttype molsp-fontstyle"
-                    data-cy="cyStyleFont"
                     onChange={this.onFontNameChange.bind(this)}
                     value={this.state.styles.fontName || 'Arial'}
                   >
@@ -830,7 +849,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   </select>
                   <select
                     className="molsp-fontsize molsp-fontstyle"
-                    data-cy="cyStyleFontSize"
                     onChange={this.onFontSizeChange.bind(this)}
                     value={this.state.styles.fontSize || 11}
                   >
@@ -860,7 +878,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       }
                       onClick={this.onStyleClick.bind(this, 'strong')}
                     >
-                      <span className="molsp-iconspan czi-icon format_bold editor-markbuttons" data-cy="cyStyleBold">
+                      <span className="molsp-iconspan czi-icon format_bold editor-markbuttons">
                         format_bold
                       </span>
                     </button>
@@ -1021,7 +1039,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <label style={{ fontSize: '12px', color: '#464343' }}>
                       <input
                         checked={this.state.styles.toc}
-                        data-cy="cyStyleTOC"
                         onChange={this.handleTOC.bind(this)}
                         type="checkbox"
                       />TOC
@@ -1159,7 +1176,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <span>
                     <input
                       className="molsp-spacinginput molsp-fontstyle"
-                      data-cy="cyStyleBeforeSpace"
                       key="before"
                       onChange={this.onStyleClick.bind(this, 'before')}
                       type="text"
@@ -1172,7 +1188,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <span>
                     <input
                       className="molsp-spacinginput molsp-fontstyle"
-                      data-cy="cyStyleAfterSpace"
                       key="after"
                       onChange={this.onStyleClick.bind(this, 'after')}
                       type="text"
@@ -1276,7 +1291,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   >
                     <select
                       className="molsp-leveltype molsp-fontstyle"
-                      data-cy="cyStyleLevel"
                       disabled={this.state.styles.isList === true}
                       id="levelValue"
                       onChange={this.onLevelChange.bind(this)}
@@ -1396,7 +1410,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <span>
                       <select
                         className="molsp-leveltype molsp-specifiedindent molsp-fontstyle"
-                        data-cy="cyStyleIndent"
                         disabled={this.state.styles.isList === true}
                         onChange={this.onIndentChange.bind(this)}
                         style={{ width: '99px !important' }}
@@ -1528,12 +1541,11 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
           </div>
         </div>
         <div className="molsp-btns">
-          <button className="molsp-buttonstyle" data-cy="cyStyleCancel" onClick={this._cancel}>
+          <button className="molsp-buttonstyle" onClick={this._cancel}>
             {this.state.mode === 3 ? 'Close' : 'Cancel'}
           </button>
           <button
             className="molsp-btnsave molsp-buttonstyle"
-            data-cy="cyStyleSave"
             onClick={this._save.bind(this)}
             onKeyDown={this.handleKeyDown}
           >

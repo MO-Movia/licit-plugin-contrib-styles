@@ -4949,7 +4949,6 @@ describe('applyLineStyle', () => {
       )
     ).toBeDefined();
   });
-
 });
 describe('isLevelUpdated', () => {
   it('should handle isLevelUpdated when isCustomStyleAlreadyApplied is false', () => {

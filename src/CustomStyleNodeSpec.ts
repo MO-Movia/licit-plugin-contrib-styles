@@ -4,6 +4,7 @@ import { toCSSLineSpacing } from '@modusoperandi/licit-ui-commands';
 
 import { getCustomStyleByName, getHidenumberingFlag } from './customStyle.js';
 import './ui/czi-cust-style-numbered.css';
+import { HTMLStyles } from './StyleRuntime.js';
 
 // This assumes that every 36pt maps to one indent level.
 export const ATTRIBUTE_PREFIX = 'prefix';
@@ -54,7 +55,7 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
   const {
     style,
     styleLevel,
-    indentOverriden,
+    indentOverridden,
     bulletDetails,
     isListStyle,
     prefix,
@@ -73,8 +74,8 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
       output[1][HIDE_STYLE_LEVEL] = getHidenumberingFlag();
     }
   }
-  if ('' !== indentOverriden) {
-    output[1][ATTRIBUTE_INDENT] = String(indentOverriden);
+  if ('' !== indentOverridden) {
+    output[1][ATTRIBUTE_INDENT] = String(indentOverridden);
   }
 
   if (prefix) {
@@ -151,101 +152,114 @@ function getBulletDetails(code) {
   return bulletData;
 }
 
-function getStyleEx(align, lineSpacing, styleName) {
+function getStyleEx(align: string | null, lineSpacing, styleName: string | null) {
   let style = '';
   let styleLevel = 0;
-  let indentOverriden = '';
+  let indentOverridden = '';
   let isListStyle = false;
   let prefix = '';
-  let bulletDetails: {
-    symbol: string;
-    color: string;
-  };
+  let bulletDetails: { symbol: string; color: string } | undefined;
+
   if (align && align !== 'left') {
     style += `text-align: ${align};`;
   }
 
-  if (lineSpacing) {
+  if (lineSpacing !== null) {
     const cssLineSpacing = toCSSLineSpacing(lineSpacing);
-    style +=
-      `line-height: ${cssLineSpacing};` +
-      // This creates the local css variable `--czi-content-line-height`
-      // that its children may apply.
-      `--czi-content-line-height: ${cssLineSpacing};`;
+    style += `line-height: ${cssLineSpacing}; --czi-content-line-height: ${cssLineSpacing};`;
   }
 
-  if (null !== styleName && 'None' !== styleName) {
-    // to get the styles of the corresponding style name
-    const styleProps = getCustomStyleByName(styleName);
-    if (styleProps?.styles) {
-      if (styleProps.styles.hasBullet) {
-        bulletDetails = getBulletDetails(styleProps.styles.bulletLevel);
-        styleLevel = styleProps.styles.styleLevel;
-      }
+  if (!styleName || styleName === 'None') {
+    return { style, styleLevel, indentOverridden, bulletDetails, isListStyle, prefix };
+  }
 
-      if (null === align && styleProps.styles.align) {
-        style += `text-align: ${styleProps.styles.align};`;
-      }
+  const styleProps = getCustomStyleByName(styleName);
 
-      // [FS] IRAD-1100 2020-11-04
-      // Add in leading and trailing spacing (before and after a paragraph)
-      if (styleProps.styles.paragraphSpacingAfter) {
-        style += `margin-bottom: ${styleProps.styles.paragraphSpacingAfter}pt !important;`;
-      }
-      if (styleProps.styles.paragraphSpacingBefore) {
-        style += `margin-top: ${styleProps.styles.paragraphSpacingBefore}pt !important;`;
-      }
-      if (styleProps.styles.styleLevel) {
-        if (styleProps.styles.strong) {
-          style += 'font-weight: bold;';
-        }
-        if (styleProps.styles.boldNumbering) {
-          style += ' --czi-counter-bold: bold;';
-        }
-        if (styleProps.styles.em) {
-          style += 'font-style: italic;';
-        }
-        if (styleProps.styles.color) {
-          style += `color: ${styleProps.styles.color};`;
-        }
-        if (styleProps.styles.fontSize) {
-          style += `font-size: ${styleProps.styles.fontSize}pt;`;
-        }
-        if (styleProps.styles.fontName) {
-          style += `font-family: ${styleProps.styles.fontName};`;
-        }
-        if (styleProps.styles.indent) {
-          indentOverriden = styleProps.styles.indent;
-        }
-        // [FS] IRAD-1462 2021-06-17
-        // FIX:  Numbering applied for paragraph even though the custom style not selected numbering(but set level)
-        styleLevel =
-          styleProps.styles.hasNumbering || styleProps.styles.isList
-            ? styleProps.styles.styleLevel
-            : 0;
-        isListStyle = styleProps.styles.isList;
-        prefix = styleProps.styles.prefixValue;
-        style += refreshCounters(styleLevel, isListStyle);
-      }
-    } else if (styleName?.includes(RESERVED_STYLE_NONE_NUMBERING)) {
+  if (!styleProps?.styles) {
+    handleNoneNumberingStyle(styleName);
+    return { style, styleLevel, indentOverridden, bulletDetails, isListStyle, prefix };
+  }
+
+  applyCustomStyleProps(styleProps.styles);
+
+  return { style, styleLevel, indentOverridden, bulletDetails, isListStyle, prefix };
+
+  function handleNoneNumberingStyle(styleName: string) {
+    if (styleName.includes(RESERVED_STYLE_NONE_NUMBERING)) {
       const indices = styleName.split(RESERVED_STYLE_NONE_NUMBERING);
-      if (indices && 2 === indices.length) {
-        styleLevel = parseInt(indices[1]);
-      }
-      if (styleLevel) {
-        style += refreshCounters(styleLevel, isListStyle);
+      if (indices.length === 2) {
+        styleLevel = parseInt(indices[1], 10);
+        if (styleLevel) {
+          style += refreshCounters(styleLevel, isListStyle);
+        }
       }
     }
   }
-  return {
-    style,
-    styleLevel,
-    indentOverriden,
-    bulletDetails,
-    isListStyle,
-    prefix,
-  };
+
+  function applyCustomStyleProps(styles:HTMLStyles) {
+    const {
+      bulletLevel,
+      align: customAlign,
+      paragraphSpacingAfter,
+      paragraphSpacingBefore,
+      styleLevel: customStyleLevel,
+      strong,
+      boldNumbering,
+      em,
+      color,
+      fontSize,
+      fontName,
+      indent,
+      hasNumbering,
+      isList,
+      prefixValue,
+    } = styles;
+
+    if (hasNumbering && bulletLevel) {
+      bulletDetails = getBulletDetails(bulletLevel);
+      styleLevel = customStyleLevel || 0;
+    }
+
+    if (!align && customAlign) {
+      style += `text-align: ${customAlign};`;
+    }
+
+    if (paragraphSpacingAfter) {
+      style += `margin-bottom: ${paragraphSpacingAfter}pt !important;`;
+    }
+
+    if (paragraphSpacingBefore) {
+      style += `margin-top: ${paragraphSpacingBefore}pt !important;`;
+    }
+
+    applyTextStyles();
+
+    function applyTextStyles() {
+      if (!customStyleLevel) return;
+
+      const styleLines = [];
+
+      if (strong) styleLines.push('font-weight: bold;');
+      if (boldNumbering) styleLines.push(' --czi-counter-bold: bold;');
+      if (em) styleLines.push('font-style: italic;');
+      if (color) styleLines.push(`color: ${color};`);
+      if (fontSize) styleLines.push(`font-size: ${fontSize}pt;`);
+      if (fontName) styleLines.push(`font-family: ${fontName};`);
+      if (indent) indentOverridden = indent;
+
+      styleLevel = hasNumbering || isList ? customStyleLevel : 0;
+      isListStyle = isList;
+      prefix = prefixValue || '';
+
+      style += styleLines.join(' ');
+      style += refreshCounters(styleLevel, isListStyle);
+    }
+
+  }
+
+
 }
+
 
 export const toCustomStyleDOM = toDOM;
 export const getCustomStyleAttrs = getAttrs;

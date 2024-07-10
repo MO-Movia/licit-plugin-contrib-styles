@@ -1138,4 +1138,12 @@ describe('Custom Menu UI   ', () => {
       )
     ).toBeUndefined();
   });
+  it('should handle handlePopupClose',()=>{
+    custommenuui._stylePopup = {close:()=>{}} as unknown as null;
+    expect(custommenuui.handlePopupClose(1,{runtime:{}})).toBeUndefined();
+  });
+  it('should handle handlePopupClose when mode is not 1',()=>{
+    custommenuui._stylePopup = {close:()=>{}} as unknown as null;
+    expect(custommenuui.handlePopupClose(0,{runtime:{}})).toBeUndefined();
+  });
 });

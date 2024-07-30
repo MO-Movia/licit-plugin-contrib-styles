@@ -1620,7 +1620,10 @@ export function isLevelUpdated(
     // [FS] IRAD-1496 2021-06-25
     // Fix: warning message not showing if deselect numbering and save
     if (
-      (style?.styles && currentLevel > 0 && !style.styles.hasNumbering) ||
+      (style?.styles &&
+        currentLevel > 0 &&
+        undefined !== style.styles.hasNumbering &&
+        !style.styles.hasNumbering) ||
       (style?.styles && undefined === style?.styles?.styleLevel) ||
       style?.styles?.styleLevel !== currentLevel
     ) {

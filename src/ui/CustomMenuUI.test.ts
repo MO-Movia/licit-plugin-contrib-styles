@@ -730,9 +730,67 @@ describe('Custom Menu UI   ', () => {
   });
 
   it('should handle removeCustomStyleName3', () => {
+    const setSelection = () => {
+      return {
+        setSelection,
+        doc: {
+          nodesBetween(from, to, callback) {
+            for (let i = from; i < to; i++) {
+              const node = {
+                content: {
+                  content: [
+                    {
+                      marks: [{ attrs: { styleName: 'AFDP_Bullet' } }],
+                    },
+                  ],
+                },
+                type: { name: 'paragraph' },
+                attrs: { styleName: 'AFDP_Bullet' },
+              };
+              callback(node, i);
+            }
+          },
+          resolve: () => {
+            return el;
+          },
+          nodeSize: 10,
+        },
+        removeMark: () => {
+          return removeMarkChain;
+        },
+      };
+    };
+    const el = {
+      parent: { inlineContent: {} },
+      min: () => {},
+      max: () => {},
+    } as unknown as HTMLDivElement;
     const removeMarkChain = {
       setNodeMarkup: () => {
         return removeMarkChain;
+      },
+      setSelection,
+      doc: {
+        nodesBetween(from, to, callback) {
+          for (let i = from; i < to; i++) {
+            const node = {
+              content: {
+                content: [
+                  {
+                    marks: [{ attrs: { styleName: 'AFDP_Bullet' } }],
+                  },
+                ],
+              },
+              type: { name: 'paragraph' },
+              attrs: { styleName: 'AFDP_Bullet' },
+            };
+            callback(node, i);
+          }
+        },
+        resolve: () => {
+          return el;
+        },
+        nodeSize: 10,
       },
       removeMark: () => {
         return removeMarkChain;
@@ -758,12 +816,32 @@ describe('Custom Menu UI   ', () => {
         },
         nodeSize: 10,
       },
-      schema: {},
+      schema: { marks: {} },
       selection: { from: 0, to: 1 },
       plugins: [],
       empty: null,
-      tr:  {
+      tr: {
+        doc: {
+          nodesBetween(from, to, callback) {
+            for (let i = from; i < to; i++) {
+              const node = {
+                content: {
+                  content: [
+                    {
+                      marks: [{ attrs: { styleName: 'AFDP_Bullet' } }],
+                    },
+                  ],
+                },
+                type: { name: 'paragraph' },
+                attrs: { styleName: 'AFDP_Bullet' },
+              };
+              callback(node, i);
+            }
+          },
+          nodeSize: 10,
+        },
         removeMark: () => removeMarkChain,
+        setSelection: setSelection,
       },
     };
 

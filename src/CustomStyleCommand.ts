@@ -36,7 +36,7 @@ import {
   setStyles,
   saveStyle,
   getStylesAsync,
-  addStyleToList
+  addStyleToList,
 } from './customStyle.js';
 import type { Style } from './StyleRuntime.js';
 import {
@@ -541,7 +541,8 @@ export class CustomStyleCommand extends UICommand {
 }
 
 export const compareAttributes = (mark, style): boolean => {
-  if (mark.attrs[ATTR_OVERRIDDEN] !== undefined && mark.attrs[ATTR_OVERRIDDEN]) return false;
+  if (mark.attrs[ATTR_OVERRIDDEN] !== undefined && mark.attrs[ATTR_OVERRIDDEN])
+    return false;
 
   switch (mark.type.name) {
     case MARKSTRONG:
@@ -551,7 +552,7 @@ export const compareAttributes = (mark, style): boolean => {
     case MARKTEXTCOLOR:
       return mark.attrs['color'] === style[COLOR];
     case MARKFONTSIZE:
-      return mark.attrs['pt'] === Number(style[FONTSIZE]);
+      return mark.attrs['pt'] == style[FONTSIZE];
     case MARKFONTTYPE:
       return mark.attrs['name'] === style[FONTNAME];
     case MARKSTRIKE:
@@ -568,7 +569,6 @@ export const compareAttributes = (mark, style): boolean => {
   }
 };
 
-
 export function compareMarkWithStyle(
   mark,
   style,
@@ -577,7 +577,6 @@ export function compareMarkWithStyle(
   _endPos,
   retObj
 ) {
-
   if (!style) return tr;
   const overridden = !compareAttributes(mark, style);
 
@@ -660,7 +659,7 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
           attrs = styleProp.styles[property]
             ? { pt: styleProp.styles[property] }
             : null;
-          marks.push(markType.create(attrs));
+          marks.push(markType?.create(attrs));
           break;
 
         case FONTNAME:
@@ -668,7 +667,7 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
           attrs = styleProp.styles[property]
             ? { name: styleProp.styles[property] }
             : null;
-          marks.push(markType.create(attrs));
+          marks.push(markType?.create(attrs));
           break;
 
         case TEXTHL:
@@ -704,16 +703,9 @@ function applyStyleEx(
 ) {
   const loading = !styleProp;
 
-
-    // [FS] IRAD-1087 2020-11-02
-    // Issue fix: applied link is missing after applying a custom style.
-    tr = removeAllMarksExceptLink(
-      startPos,
-      endPos,
-      tr,
-      state.schema
-    );
-
+  // [FS] IRAD-1087 2020-11-02
+  // Issue fix: applied link is missing after applying a custom style.
+  tr = removeAllMarksExceptLink(startPos, endPos, tr, state.schema);
 
   if (loading || !opt) {
     styleProp = getCustomStyleByName(styleName);
@@ -1379,7 +1371,6 @@ export function handleRemoveMarks(
   from: number,
   to: number,
   schema: Schema
-
 ) {
   tasks.forEach((job) => {
     const { mark } = job;
@@ -1406,13 +1397,11 @@ export function applyStyle(
   if (state.doc.nodeAt(startPos).type.name == 'table') {
     startPos = selection.from - selection.$from.parentOffset - 1;
     endPos = selection.$to?.parent?.nodeSize + startPos - 1;
-  }
-  else {
+  } else {
     endPos = selection.$to.after(1) - 1;
   }
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
-
 
 // apply style to each selected node (when style applied to multiple paragraphs)
 export function applyStyleToEachNode(
@@ -1450,9 +1439,7 @@ export function applyLineStyle(
   if (node) {
     if (node.attrs?.styleName) {
       const styleProp = getCustomStyleByName(node.attrs.styleName);
-      if (
-        styleProp?.styles?.boldPartial
-      ) {
+      if (styleProp?.styles?.boldPartial) {
         if (!tr) {
           tr = state.tr;
         }
@@ -1480,9 +1467,7 @@ export function applyLineStyle(
           // && RESERVED_STYLE_NONE !== node.attrs.styleName
         ) {
           const styleProp = getCustomStyleByName(node.attrs.styleName);
-          if (
-            styleProp?.styles?.boldPartial
-          ) {
+          if (styleProp?.styles?.boldPartial) {
             if (!tr) {
               tr = state.tr;
             }
@@ -1635,9 +1620,12 @@ export function isLevelUpdated(
     // [FS] IRAD-1496 2021-06-25
     // Fix: warning message not showing if deselect numbering and save
     if (
-      (style?.styles && currentLevel > 0 && !style.styles.hasNumbering) ||
+      (style?.styles &&
+        currentLevel > 0 &&
+        undefined !== style.styles.hasNumbering &&
+        !style.styles.hasNumbering) ||
       (style?.styles && undefined === style?.styles?.styleLevel) ||
-      (style?.styles?.styleLevel !== currentLevel)
+      style?.styles?.styleLevel !== currentLevel
     ) {
       bOK = true;
     }

@@ -10,6 +10,7 @@ import { AlertInfo } from './AlertInfo.js';
 import { CustomStyleSubMenu } from './CustomStyleSubMenu.js';
 import { CustomStyleEditor } from './CustomStyleEditor.js';
 import {
+  applyLatestStyle,
   updateDocument,
   isCustomStyleAlreadyApplied,
   isLevelUpdated,
@@ -19,9 +20,14 @@ import {
   saveStyle,
   renameStyle,
   removeStyle,
-  addStyleToList
+  addStyleToList,
 } from '../customStyle.js';
-import { setTextAlign, setTextLineSpacing, atViewportCenter, createPopUp } from '@modusoperandi/licit-ui-commands';
+import {
+  setTextAlign,
+  setTextLineSpacing,
+  atViewportCenter,
+  createPopUp,
+} from '@modusoperandi/licit-ui-commands';
 import { setParagraphSpacing } from '../ParagraphSpacingCommand.js';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec.js';
 
@@ -256,6 +262,17 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
       tr = tr.removeMark(pos, pos + node.nodeSize, mark.type);
       // reset the custom style name to NONE after remove the styles
       node.attrs.styleName = customStyleName;
+      // FIX: Rest to Normal not working for font size.
+      tr = applyLatestStyle(
+        node.attrs.styleName,
+        editorState,
+        tr,
+        node,
+        pos,
+        pos + node.nodeSize,
+        null,
+        1
+      );
     });
 
     // to remove both text align format and line spacing
@@ -393,7 +410,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                               this.props.editorState,
                               this.props.editorState.tr,
                               this._styleName,
-                              val.styleName,
+                              val.styleName
                             );
                           }
                         });
@@ -422,13 +439,13 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     state: EditorState,
     tr: Transform,
     oldStyleName,
-    styleName,
+    styleName
   ) {
     const { doc } = state;
 
     doc.descendants(function (child, pos) {
       if (oldStyleName === child.attrs.styleName) {
-        ((child.attrs as { styleName: string }).styleName) = styleName;
+        (child.attrs as { styleName: string }).styleName = styleName;
         tr = tr.setNodeMarkup(pos, undefined, child.attrs);
       }
     });

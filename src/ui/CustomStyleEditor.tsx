@@ -27,8 +27,6 @@ import { AlertInfo } from './AlertInfo.js';
 let customStyles: Style[] = [];
 const otherStyleSelected = false;
 const editedStyles = [];
-let disableControl = false;
-
 const FONT_PT_SIZES = [8, 9, 10, 11, 12, 14, 18, 24, 30, 36, 48, 60, 72, 90];
 
 const FONT_TYPE_NAMES = [
@@ -82,6 +80,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       toc: false,
       isHidden: false,
       otherStyleSelected,
+      disableControl: false,
       customStyles,
     };
     // set default values for text alignment and boldNumbering checkbox.
@@ -102,11 +101,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       this.state.styles.fontSize = '11';
     }
     this.getCustomStyles();
-    // FIX: disable the numbering,bullet list,level,prefix and list-style controls on modify a style which have selected the numbering and also applied it in the document.
-    disableControl =
-      this.state.mode > 0 &&
-      this.state.styles.hasNumbering &&
-      this.isCustomStyleAlreadyApplied();
   }
 
   // To set the selected style values
@@ -1226,7 +1220,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       style={{ textAlign: 'right' }}
                     >
                       <input
-                        disabled={disableControl}
+                        disabled={this.state.disableControl}
                         onChange={this.handlePrefix.bind(this)}
                         style={{ width: '48px' }}
                         type="text"
@@ -1240,7 +1234,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       <label>
                         <input
                           checked={this.state.styles.isList}
-                          disabled={disableControl}
+                          disabled={this.state.disableControl}
                           onChange={this.handleList.bind(this)}
                           type="checkbox"
                         />
@@ -1265,7 +1259,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       <label>
                         <input
                           checked={this.state.styles.isList}
-                          disabled={disableControl}
+                            disabled={this.state.disableControl}
                           onChange={this.handleList.bind(this)}
                           type="checkbox"
                         />
@@ -1288,9 +1282,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <select
                       className="molsp-leveltype molsp-fontstyle"
                       data-cy="cyStyleLevel"
-                      disabled={
-                        disableControl || this.state.styles.isList === true
-                      }
+                      disabled={this.state.disableControl || this.state.styles.isList === true}
                       id="levelValue"
                       onChange={this.onLevelChange.bind(this)}
                       value={this.state.styles.styleLevel || ''}
@@ -1308,7 +1300,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         checked={this.state.styles.hasNumbering}
                         className="molsp-chknumbering"
                         disabled={
-                          disableControl ||
+                          this.state.disableControl ||
                           this.state.styles.styleLevel === 'None' ||
                           this.state.styles.styleLevel === undefined ||
                           (this.state.styles.styleLevel === 1 &&
@@ -1336,7 +1328,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         checked={this.state.styles?.hasBullet}
                         className="molsp-chknumbering"
                         disabled={
-                          disableControl ||
+                          this.state.disableControl ||
                           this.state.styles.styleLevel === 'None' ||
                           this.state.styles.styleLevel === undefined ||
                           (this.state.styles.styleLevel === 1 &&
@@ -1349,10 +1341,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       <span>
                         <select
                           className="molsp-fontstyle"
-                          disabled={
-                            disableControl ||
-                            this.checkCondition(this.state.styles?.hasBullet)
-                          }
+                          disabled={this.state.disableControl || this.checkCondition(
+                            this.state.styles?.hasBullet
+                          )}
                           id="bulletValue"
                           onChange={this.onBulletLevelChange.bind(this)}
                           style={{ textAlign: 'center' }}
@@ -1641,8 +1632,11 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       customStyles = result;
       // [FS] IRAD-1222 2021-03-01
       // Issue fix: In edit all, the style list not showing the first time.
+      // FIX: disableControl : disable the numbering,bullet list,level,prefix and list-style controls on modify a style which have selected the numbering and also applied it in the document.
+
       this.setState({
         customStyles: result,
+        disableControl: (this.state.mode > 0 && this.state.styles.hasNumbering && this.isCustomStyleAlreadyApplied()),
       });
     });
   }

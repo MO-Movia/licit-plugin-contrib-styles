@@ -552,7 +552,7 @@ export const compareAttributes = (mark, style): boolean => {
     case MARKTEXTCOLOR:
       return mark.attrs['color'] === style[COLOR];
     case MARKFONTSIZE:
-      return Number(mark.attrs['pt']) === Number(style[FONTSIZE]);
+      return mark.attrs['pt'] == style[FONTSIZE];
     case MARKFONTTYPE:
       return mark.attrs['name'] === style[FONTNAME];
     case MARKSTRIKE:

@@ -33,6 +33,14 @@
   width: max-content;
 }
 
+.czi-editor-frameset .div-height-large {   
+  height: 95px; 
+}
+
+.czi-editor-frameset .div-height-small {   
+  height: 35px; 
+}
+
 .czi-editor-frameset .molsp-dropdown-content a {
   display: block;
   padding-bottom: 10px;

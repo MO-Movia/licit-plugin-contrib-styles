@@ -820,7 +820,10 @@ function hasMismatchHeirarchy(
   let hasHeirarchyBroken = false;
 
   //need to check heirarchy only if user apply a style with numbering.No need to check heirarchy if the style has only the style level.
-  if (undefined == style.styles.hasNumbering || !style.styles.hasNumbering) {
+  if (
+    undefined == style?.styles?.hasNumbering ||
+    !style?.styles?.hasNumbering
+  ) {
     return hasHeirarchyBroken;
   }
   // Manage heirachy for nodes of previous  position
@@ -1595,8 +1598,9 @@ export function isCustomStyleAlreadyApplied(
   const { doc } = editorState;
   doc.nodesBetween(0, doc.nodeSize - 2, (node) => {
     if (node.content && node.content.size > 0) {
+      const style = getCustomStyleByName(styleName || '');
       const styleLevel = getStyleLevel(styleName);
-      if (!found && 0 < styleLevel && node.attrs.styleName === styleName) {
+      if (!found && 0 < styleLevel && style?.styles?.hasNumbering  && node.attrs.styleName === styleName) {
         found = true;
       }
     }
@@ -1630,7 +1634,9 @@ export function isLevelUpdated(
         undefined !== style.styles.hasNumbering &&
         !style.styles.hasNumbering) ||
       (style?.styles && undefined === style?.styles?.styleLevel) ||
-      (style?.styles?.styleLevel !== currentLevel && undefined !== style.styles.hasNumbering && !style.styles.hasNumbering)
+      (style?.styles?.styleLevel !== currentLevel &&
+        undefined !== style.styles.hasNumbering &&
+        !style.styles.hasNumbering)
     ) {
       bOK = true;
     }

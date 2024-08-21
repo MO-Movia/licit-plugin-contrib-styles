@@ -406,6 +406,79 @@ describe('applyNormalIfNoStyle', () => {
       mockdoc, true)).toBeDefined();
   });
 
+  it('should handle applyNormalIfNoStyle when styleName is undefined', () => {
+    const linkmark = new Mark();
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+        'fontName': { create: () => { return {}; } },
+        'mark-font-type': { create: () => { return {}; } },
+        'mark-font-size': { create: () => { return {}; } },
+      },
+    });
+
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { level: 1, styleName: undefined },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+    const setSelection = () => {
+      return {
+        doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } },
+        setSelection: setSelection
+      };
+    };
+
+    mockdoc.resolve = () => { return {} as unknown as ResolvedPos; };
+    expect(applyNormalIfNoStyle({ schema: mockschema }, {
+      doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } },
+      setSelection: setSelection, selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } }
+    },
+      mockdoc, true)).toBeDefined();
+  });
+
 });
 
 
@@ -2358,6 +2431,37 @@ describe('Cus Style Plugin-Pass', () => {
       styleName: 'A11-Rename',
     };
     expect(setNodeAttrs(null, newattrs)).toStrictEqual(newattrs);
+  });
+
+  it('should return newAttrs with indent as stylelevel branch coverage  ', () => {
+    jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styles: { indent: '10', align: 'left', lineHeight: '', isLevelbased: true, styleLevel: 3 },
+      styleName: ''
+    });
+    const newattrs = {
+      align: 'left',
+      color: null,
+      id: '',
+      indent: null,
+      lineSpacing: null,
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'A11-Rename',
+      innerLink: '#uuid'
+    };
+    expect(setNodeAttrs('test', newattrs)).toStrictEqual({
+      align: 'left',
+      capco: null,
+      color: null,
+      id: '',
+      indent: 3,
+      lineSpacing: '125%',
+      paddingBottom: null,
+      paddingTop: null,
+      styleName: 'test',
+      innerLink: null
+    });
   });
 
   it('should handle applyStyleForNextParagraph', () => {
@@ -5763,7 +5867,11 @@ describe('applyStyles', () => {
 });
 describe('applyStyleForEmptyParagraph', () => {
   it('should handle applyStyleForEmptyParagraph', () => {
-    expect(applyStyleForEmptyParagraph({tr:{}},null)).toStrictEqual({});
+    jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styles: { isList: false, indent: '10', align: 'left', lineHeight: '10' },
+      styleName: ''
+    });
+    expect(applyStyleForEmptyParagraph({ tr: {} }, null)).toStrictEqual({});
   });
 });
 describe('isDocChanged', () => {

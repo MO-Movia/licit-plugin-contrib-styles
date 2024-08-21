@@ -1207,7 +1207,7 @@ describe('CustomStyleEditor', () => {
     jest.spyOn(customstyleeditor, 'isCustomStyleAlreadyApplied').mockReturnValue(true);
     const spy = jest.spyOn(customstyleeditor, 'showAlert');
     customstyleeditor.handleList({ target: { value: '', checked: false } });
-    expect(spy).toHaveBeenCalled();
+    expect(spy).not.toHaveBeenCalled();
   });
   it('should handle handleList when mode is 0', () => {
     customstyleeditor.state = {

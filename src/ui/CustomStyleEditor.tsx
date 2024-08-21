@@ -117,7 +117,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         // copy the current style values, and flip the matching value
         state = { styles: { ...this.state.styles } };
         if (state.styles[style] === true) {
-          state.styles[style] = undefined;
+          state.styles[style] = false;
         } else {
           state.styles[style] = !state.styles[style];
         }

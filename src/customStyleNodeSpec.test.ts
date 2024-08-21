@@ -57,10 +57,12 @@ describe('toCustomStyleDOM', () => {
         id: null,
         indent: null,
         lineSpacing: '16pt',
+        isListStyle: true,
         paddingBottom: null,
         paddingTop: null,
         capco: null,
         styleName: 'FS_B01',
+        prefix:true
       },
       content: [
         {
@@ -95,6 +97,196 @@ describe('toCustomStyleDOM', () => {
       },
     ]);
   });
+
+
+  it('should handle toCustomStyleDOM with isLevelBased=true', () => {
+    jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: 1,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: true,
+        color: 'blue',
+        fontSize: '10',
+        fontName: 'Tahoma',
+        indent: '10',
+        hasNumbering: true,
+        isLevelbased:true
+      },
+      styleName: '',
+    });
+    //const base = undefined
+
+    const node = {
+      type: 'paragraph',
+      attrs: {
+        align: 'right',
+        color: null,
+        id: null,
+        indent: null,
+        lineSpacing: '16pt',
+        isListStyle: true,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: 'FS_B01',
+        prefix:true
+      },
+      content: [
+        {
+          type: 'text',
+          marks: [
+            { type: 'mark-font-size', attrs: { pt: 11, overridden: false } },
+            {
+              type: 'mark-font-type',
+              attrs: { name: 'Arial', overridden: false },
+            },
+            {
+              type: 'mark-text-color',
+              attrs: { color: '#3b0df2', overridden: false },
+            },
+          ],
+          text: 'g',
+        },
+      ],
+    };
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
+      'span',
+      {
+        'data-bullet-color': '#000000',
+        'data-bullet-symbol': '● ',
+        'data-indent': '1',
+        'data-show-bullet': true,
+        'data-style-level': '1',
+        'hide-style-level': false,
+        style:
+          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
+        styleName: 'FS_B01',
+      },
+    ]);
+  });
+
+  it('should handle toCustomStyleDOM when indent is null', () => {
+    jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: 3,
+        isList: true,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: true,
+        color: 'blue',
+        fontSize: '10',
+        fontName: 'Tahoma',
+        indent: null,
+        hasNumbering: true,
+      },
+      styleName: '',
+    });
+    //const base = undefined
+
+    const node = {
+      type: 'paragraph',
+      attrs: {
+        align: 'right',
+        color: null,
+        id: null,
+        indent: null,
+        lineSpacing: '16pt',
+        isListStyle: true,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: 'FS_B01',
+      },
+      content: [
+        {
+          type: 'text',
+          marks: [
+            { type: 'mark-font-size', attrs: { pt: 11, overridden: false } },
+            {
+              type: 'mark-font-type',
+              attrs: { name: 'Arial', overridden: false },
+            },
+            {
+              type: 'mark-text-color',
+              attrs: { color: '#3b0df2', overridden: false },
+            },
+          ],
+          text: 'g',
+        },
+      ],
+    };
+    const result = toCustomStyleDOM(base, node as unknown as Node);
+    expect(result[1]['list-style-level']).toEqual(3);
+  });
+
+  it('should handle toCustomStyleDOM when isListStyle true', () => {
+    jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: 1,
+        isList: true,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: true,
+        color: 'blue',
+        fontSize: '10',
+        fontName: 'Tahoma',
+        indent: '4',
+        hasNumbering: true,
+      },
+      styleName: '',
+    });
+    //const base = undefined
+
+    const node = {
+      type: 'paragraph',
+      attrs: {
+        align: 'right',
+        color: null,
+        id: null,
+        indent: 4,
+        lineSpacing: '16pt',
+        isListStyle: true,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: 'FS_B01',
+      },
+      content: [
+        {
+          type: 'text',
+          marks: [
+            { type: 'mark-font-size', attrs: { pt: 11, overridden: false } },
+            {
+              type: 'mark-font-type',
+              attrs: { name: 'Arial', overridden: false },
+            },
+            {
+              type: 'mark-text-color',
+              attrs: { color: '#3b0df2', overridden: false },
+            },
+          ],
+          text: 'g',
+        },
+      ],
+    };
+    const result = toCustomStyleDOM(base, node as unknown as Node);
+    expect(result[1]['list-style-level']).toEqual(5);
+  });
+
+
   it('should handle toCustomStyleDOM when hasnumbering false', () => {
     jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
       styles: {
@@ -671,7 +863,7 @@ describe('toCustomStyleDOM', () => {
     window['set-cust-list-style-counter-1'] = false;
     window['set-cust-list-style-counter-2'] = false;
     const result = countersRefresh(styleLevel, isListStyle);
-    expect(result).toBe('counter-increment: L1 L2 L3 ;');
+    expect(result).toBe('counter-increment: L1 L2 ;');
     expect(window['set-cust-list-style-counter-1']).toBe(true);
     expect(window['set-cust-list-style-counter-2']).toBe(true);
   });

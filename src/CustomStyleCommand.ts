@@ -705,7 +705,14 @@ function applyStyleEx(
 
   // [FS] IRAD-1087 2020-11-02
   // Issue fix: applied link is missing after applying a custom style.
-  tr = removeAllMarksExceptLink(startPos, endPos, tr, state.schema);
+  tr = removeAllMarksExceptLink(
+    startPos,
+    endPos,
+    tr,
+    state.schema,
+    node
+  );
+
 
   if (loading || !opt) {
     styleProp = getCustomStyleByName(styleName);
@@ -1349,7 +1356,8 @@ export function removeAllMarksExceptLink(
   from: number,
   to: number,
   tr: Transform,
-  schema: Schema
+  schema: Schema,
+  prevNode: Node
 ) {
   const { doc } = tr;
   const tasks = [];
@@ -1357,8 +1365,9 @@ export function removeAllMarksExceptLink(
   // const posTo = (tr as Transaction).selection.$to.end(1) - 1;
   doc.nodesBetween(from, to, (node, pos) => {
     if (node.marks?.length > 0) {
+
       node.marks.some((mark) => {
-        if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
+        if ((!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) || (mark.attrs[ATTR_OVERRIDDEN] && 'strong' === mark.type.name && isBoldFirstWordSelected(prevNode))) {
           tasks.push({
             node,
             pos,
@@ -1373,6 +1382,11 @@ export function removeAllMarksExceptLink(
   return handleRemoveMarks(tr, tasks, from, to, schema);
 }
 
+function isBoldFirstWordSelected(node: Node) {
+  const styleprops = getCustomStyleByName(node.attrs.styleName);
+  return styleprops?.styles?.boldPartial;
+}
+
 export function handleRemoveMarks(
   tr: Transform,
   tasks,
@@ -1382,10 +1396,8 @@ export function handleRemoveMarks(
 ) {
   tasks.forEach((job) => {
     const { mark } = job;
-    if (!mark.attrs[ATTR_OVERRIDDEN]) {
-      const to = job.pos + job.node?.nodeSize;
-      tr = tr.removeMark(job.pos, to, mark.type);
-    }
+    const to = job.pos + job.node?.nodeSize;
+    tr = tr.removeMark(job.pos, to, mark.type);
   });
   tr = setTextAlign(tr, schema, null);
   return tr;
@@ -1405,7 +1417,8 @@ export function applyStyle(
   if (state.doc.nodeAt(startPos).type.name == 'table') {
     startPos = selection.from - selection.$from.parentOffset - 1;
     endPos = selection.$to?.parent?.nodeSize + startPos - 1;
-  } else {
+  }
+  else {
     endPos = selection.$to.after(1) - 1;
   }
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
@@ -1574,15 +1587,19 @@ export function updateDocument(
   doc.descendants(function (child, pos) {
     const contentLen = child.content.size;
     if (haveEligibleChildren(child, styleName)) {
-      tr = applyLatestStyle(
-        child.attrs.styleName,
-        state,
-        tr,
-        child,
-        pos,
-        pos + contentLen + 1,
-        style
-      );
+      //FIX: On modify a style to include numbering, it misses the heirarchy levels
+      if (styleHasNumbering(style)) {
+        // to add previous heirarchy levels
+        hasMismatchHeirarchy(
+          state,
+          tr,
+          child,
+          pos,
+          pos + contentLen + 1,
+          styleName
+        );
+        tr = applyStyle(style, child.attrs.styleName, state, tr) as Transaction;
+      }
     }
   });
   return tr;
@@ -1600,7 +1617,7 @@ export function isCustomStyleAlreadyApplied(
     if (node.content && node.content.size > 0) {
       const style = getCustomStyleByName(styleName || '');
       const styleLevel = getStyleLevel(styleName);
-      if (!found && 0 < styleLevel && style?.styles?.hasNumbering  && node.attrs.styleName === styleName) {
+      if (!found && 0 < styleLevel && style?.styles?.hasNumbering && node.attrs.styleName === styleName) {
         found = true;
       }
     }
@@ -1629,14 +1646,9 @@ export function isLevelUpdated(
     // [FS] IRAD-1496 2021-06-25
     // Fix: warning message not showing if deselect numbering and save
     if (
-      (style?.styles &&
-        currentLevel > 0 &&
-        undefined !== style.styles.hasNumbering &&
-        !style.styles.hasNumbering) ||
+      (style?.styles && currentLevel > 0 && undefined !== style?.styles?.hasNumbering && !style?.styles?.hasNumbering) ||
       (style?.styles && undefined === style?.styles?.styleLevel) ||
-      (style?.styles?.styleLevel !== currentLevel &&
-        undefined !== style.styles.hasNumbering &&
-        !style.styles.hasNumbering)
+      (style?.styles?.styleLevel !== currentLevel && undefined !== style?.styles?.hasNumbering && !style?.styles?.hasNumbering)
     ) {
       bOK = true;
     }

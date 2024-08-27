@@ -72,7 +72,7 @@ export function getCustomStyleByName(name: string): Style {
   return style;
 }
 
-export function setView(csview : EditorView) {
+export function setView(csview: EditorView) {
   _view = csview;
 }
 
@@ -126,6 +126,14 @@ export function isStylesLoaded() {
 
 export function hasStyleRuntime() {
   return !!styleRuntime;
+}
+
+export function totalCountOfStyleByLevel(level: number) {
+  let count = 0;
+  if (customStyles.length > 0) {
+    count = customStyles.filter(item => item.styles?.styleLevel == level && item.styles?.hasNumbering).length;
+  }
+  return count;
 }
 // get a style by Level
 export function getCustomStyleByLevel(level: number) {

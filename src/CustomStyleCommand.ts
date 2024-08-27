@@ -1598,8 +1598,15 @@ export function updateDocument(
           pos + contentLen + 1,
           styleName
         );
-        tr = applyStyle(style, child.attrs.styleName, state, tr) as Transaction;
       }
+      tr = applyStyleToEachNode(
+        state,
+        pos,
+        pos + contentLen + 1,
+        tr,
+        style,
+        child.attrs.styleName,        
+      );
     }
   });
   return tr;

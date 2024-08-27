@@ -15,7 +15,8 @@ import {
   saveStyle,
   getStylesAsync,
   addStyleToList,
-  getCustomStyleByName
+  getCustomStyleByName,
+  totalCountOfStyleByLevel
 } from '../customStyle.js';
 import {
   RESERVED_STYLE_NONE,
@@ -345,22 +346,28 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   // handles Level drop down change
   onLevelChange(e) {
-    let isCheckboxDisabled;
-    const val = RESERVED_STYLE_NONE === e.target.value ? null : e.target.value;
-    if (val === 'None') {
-      isCheckboxDisabled = true;
+    // FIX: If the user edit the level which is not in use, but modify this level breaks the heirarchy, then show a alert message.
+    if (this.state.styles?.hasNumbering && 1 === totalCountOfStyleByLevel(Number(this.state.styles?.styleLevel))) {
+      this.showAlert(true);
     }
+    else {
+      let isCheckboxDisabled;
+      const val = 'None' === e.target.value ? null : e.target.value;
+      if (val === 'None') {
+        isCheckboxDisabled = true;
+      }
 
-    this.setState((prevState) => ({
-      styles: {
-        ...prevState.styles,
-        styleLevel: val,
-        hasNumbering: isCheckboxDisabled
-          ? false
-          : prevState.styles.hasNumbering,
-        hasBullet: isCheckboxDisabled ? false : prevState.style?.hasBullet,
-      },
-    }));
+      this.setState((prevState) => ({
+        styles: {
+          ...prevState.styles,
+          styleLevel: val,
+          hasNumbering: isCheckboxDisabled
+            ? false
+            : prevState.styles.hasNumbering,
+          hasBullet: isCheckboxDisabled ? false : prevState.style?.hasBullet,
+        },
+      }));
+    }
   }
 
   // handles Bullet Level drop down change
@@ -591,13 +598,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     return style?.styles?.isList;
   }
 
-  showAlert() {
+  showAlert(showHierarchyMissingMsg = false) {
     const anchor = null;
+    const messageContent = showHierarchyMissingMsg ? 'Unable to modify the level as this action breaks the heirarchy.' : 'This style already used in the document,uncheck list-style will breaks the heirarchy.';
     this._popUp = createPopUp(
       AlertInfo,
       {
-        content:
-          'This style already used in the document,uncheck list-style will breaks the heirarchy.',
+        content: messageContent,
         title: 'Modify Style Alert!!!',
       },
       {

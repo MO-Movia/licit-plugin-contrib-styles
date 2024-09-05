@@ -768,7 +768,21 @@ function applyStyleEx(
     });
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
-    tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
+    const nodetype = state.tr.doc.nodeAt(
+      state.selection.$from.pos -
+        state.selection.$from.parentOffset -
+        state.selection.$from.depth
+    );
+    tr =
+      nodetype.type.name === 'table'
+        ? _setNodeAttribute(
+            state,
+            tr,
+            state.selection.from,
+            state.selection.to,
+            newattrs
+          )
+        : _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     (tr as Transaction).storedMarks = storedmarks;
   }
   return tr;

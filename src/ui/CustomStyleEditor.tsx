@@ -82,6 +82,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       otherStyleSelected,
       disableControl: false,
       customStyles,
+      selectedStyle: 'userDefined',
     };
     // set default values for text alignment and boldNumbering checkbox.
     if (!this.state.styles.align) {
@@ -540,20 +541,19 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   handleList(val) {
-    //edit mode
-    if (
-      this.state.mode > 0 &&
-      this.isCustomStyleAlreadyApplied() &&
-      false === val.target.checked
-    ) {
+    const selectedStyle = val.target.value;
+    const isList = selectedStyle === 'listStyle';
+    // Edit mode
+    if (this.state.mode > 0 && this.isCustomStyleAlreadyApplied() && !isList) {
       this.showAlert();
     } else {
       this.setState((prevState) => ({
+        selectedStyle,
         styles: {
           ...prevState.styles,
-          styleLevel: 1,
-          isList: val.target.checked,
-          nextLineStyleName: val.target.checked
+          styleLevel: isList ? 1 : 0,
+          isList,
+          nextLineStyleName: isList
             ? prevState.styleName
             : RESERVED_STYLE_NONE,
         },
@@ -1212,33 +1212,29 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       marginLeft: '-1px',
                     }}
                   >
-                    <p className="molsp-formp" style={{ margin: '0' }}>
-                      Prefix:
-                    </p>
                     <div
                       className="molsp-hierarchydiv"
-                      style={{ textAlign: 'right' }}
-                    >
-                      <input
-                        disabled={this.state.disableControl}
-                        onChange={this.handlePrefix.bind(this)}
-                        style={{ width: '48px' }}
-                        type="text"
-                        value={this.state.styles.prefixValue}
-                      />
-                    </div>
-                    <div
-                      className="molsp-hierarchydiv"
-                      style={{ textAlign: 'right' }}
                     >
                       <label>
                         <input
-                          checked={this.state.styles.isList}
+                          type="radio"
+                          value="userDefined"
+                          checked={this.state.selectedStyle === 'userDefined'}
                           disabled={this.state.disableControl}
                           onChange={this.handleList.bind(this)}
-                          type="checkbox"
                         />
-                        List-style
+                        User-defined Numbering/Bullets
+                      </label>
+                      <br />
+                      <label>
+                        <input
+                          type="radio"
+                          value="listStyle"
+                          checked={this.state.selectedStyle === 'listStyle'}
+                          disabled={this.state.disableControl}
+                          onChange={this.handleList.bind(this)}
+                        />
+                        List-style (Auto Numbering)
                       </label>
                     </div>
                   </div>
@@ -1254,114 +1250,174 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   >
                     <div
                       className="molsp-hierarchydiv"
-                      style={{ textAlign: 'right' }}
                     >
                       <label>
                         <input
-                          checked={this.state.styles.isList}
-                            disabled={this.state.disableControl}
+                          type="radio"
+                          value="userDefined"
+                          checked={this.state.selectedStyle === 'userDefined'}
+                          disabled={this.state.disableControl}
                           onChange={this.handleList.bind(this)}
-                          type="checkbox"
                         />
-                        List-style
+                        User-defined Numbering/Bullets
+                      </label>
+                      <br />
+                      <label>
+                        <input
+                          type="radio"
+                          value="listStyle"
+                          checked={this.state.selectedStyle === 'listStyle'}
+                          disabled={this.state.disableControl}
+                          onChange={this.handleList.bind(this)}
+                        />
+                        List-style (Auto Numbering)
                       </label>
                     </div>
                   </div>
                 )}
-                <div className="molsp-hierarchydiv" style={{ display: 'flex' }}>
+                <div
+                  className="molsp-hierarchydiv"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    paddingLeft: '22px'
+                  }}
+                >
                   <p className="molsp-formp" style={{ margin: '0' }}>
                     Level:
                   </p>
-                  <div
-                    style={{
-                      float: 'left',
-                      marginTop: '19px',
-                      marginLeft: '-42px',
-                    }}
+                  <select
+                    className="molsp-leveltype molsp-fontstyle"
+                    data-cy="cyStyleLevel"
+                    disabled={this.state.disableControl || this.state.styles.isList === true}
+                    id="levelValue"
+                    onChange={this.onLevelChange.bind(this)}
+                    value={this.state.styles.styleLevel || ''}
                   >
-                    <select
-                      className="molsp-leveltype molsp-fontstyle"
-                      data-cy="cyStyleLevel"
-                      disabled={this.state.disableControl || this.state.styles.isList === true}
-                      id="levelValue"
-                      onChange={this.onLevelChange.bind(this)}
-                      value={this.state.styles.styleLevel || ''}
-                    >
-                      {LEVEL_VALUES.map((value) => (
-                        <option key={value} value={value}>
-                          {value}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label>
-                      <input
-                        checked={this.state.styles.hasNumbering}
-                        className="molsp-chknumbering"
-                        disabled={
-                          this.state.disableControl ||
-                          this.state.styles.styleLevel === 'None' ||
-                          this.state.styles.styleLevel === undefined ||
-                          (this.state.styles.styleLevel === 1 &&
-                            this.state.styles.isList === true)
-                        }
-                        onChange={this.handleNumbering.bind(this)}
-                        type="checkbox"
-                      />
-                      Numbering(1.1)
-                    </label>
-                    <label>
-                      <input
-                        checked={this.state.styles.boldNumbering}
-                        className="molsp-chkboldnumbering"
-                        disabled={this.checkCondition(
-                          this.state.styles.hasNumbering
+                    {LEVEL_VALUES.map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="molsp-hierarchydiv" style={{ display: 'flex' }}>
+                  <fieldset style={{ width: '100%' }}>
+                    <legend>Formatting</legend>
+                    <div>
+                      <label>
+                        <input
+                          type="radio"
+                          name="formatting"
+                          value="none"
+                          checked={
+                            !this.state.styles.hasNumbering &&
+                            !this.state.styles.hasBullet
+                          }
+                          className="molsp-chknumbering"
+                          disabled={this.state.disableControl || this.state.styles.isList === true}
+                          onChange={() => {
+                            this.setState({
+                              styles: {
+                                ...this.state.styles,
+                                hasNumbering: false,
+                                boldNumbering: false,
+                                hasBullet: false
+                              },
+                            });
+                          }}
+                        />
+                        None
+                      </label>
+                      <br />
+                      <label>
+                        <input
+                          type="radio"
+                          name="formatting"
+                          value="numbering"
+                          checked={this.state.styles.hasNumbering}
+                          className="molsp-chknumbering"
+                          disabled={
+                            this.state.disableControl ||
+                            this.state.styles.styleLevel === 'None' ||
+                            this.state.styles.styleLevel === undefined ||
+                            (this.state.styles.styleLevel === 1 && this.state.styles.isList === true)
+                          }
+                          onChange={() => {
+                            this.setState({
+                              styles: {
+                                ...this.state.styles,
+                                hasNumbering: true,
+                                boldNumbering: false,
+                                hasBullet: false
+                              },
+                            });
+                          }}
+                        />
+                        Numbering (1.1)
+                      </label>
+                      <br />
+                      <div className="prefix-div" style={{ display: 'flex', alignItems: 'baseline' }}>
+                        <label style={{ marginRight: '10px' }}>
+                          <input
+                            checked={this.state.styles.boldNumbering}
+                            className="molsp-chkboldnumbering"
+                            disabled={this.checkCondition(this.state.styles.hasNumbering)}
+                            onChange={this.handleBoldNumbering.bind(this)}
+                            type="checkbox"
+                          />
+                          Bold
+                        </label>
+
+                        {(this.state.styles.isList || this.state.styles.hasNumbering) && (
+                          <span style={{ display: 'flex', alignItems: 'center' }}>
+                            <p className="molsp-formp">Prefix:</p>
+                            <input
+                              disabled={this.state.disableControl}
+                              onChange={this.handlePrefix.bind(this)}
+                              style={{ width: '35px' }}
+                              type="text"
+                              value={this.state.styles.prefixValue}
+                            />
+                          </span>
                         )}
-                        onChange={this.handleBoldNumbering.bind(this)}
-                        type="checkbox"
-                      />
-                      Bold numbering
-                    </label>
-                    <label>
-                      <input
-                        checked={this.state.styles?.hasBullet}
-                        className="molsp-chknumbering"
-                        disabled={
-                          this.state.disableControl ||
-                          this.state.styles.styleLevel === 'None' ||
-                          this.state.styles.styleLevel === undefined ||
-                          (this.state.styles.styleLevel === 1 &&
-                            this.state.styles.isList === true)
-                        }
-                        onChange={this.handleBulletPoints.bind(this)}
-                        type="checkbox"
-                      />
-                      Bullet{' '}
-                      <span>
-                        <select
-                          className="molsp-fontstyle"
-                          disabled={this.state.disableControl || this.checkCondition(
-                            this.state.styles?.hasBullet
-                          )}
-                          id="bulletValue"
-                          onChange={this.onBulletLevelChange.bind(this)}
-                          style={{ textAlign: 'center' }}
-                          value={this.state.styles.bulletLevel || ''}
-                        >
-                          {BULLET_POINTS.map((value) => (
-                            <option
-                              key={value.key}
-                              style={{ color: value.color }}
-                              value={value.key}
-                            >
-                              <span>{value.symbol}</span>
-                            </option>
-                          ))}
-                        </select>
-                      </span>
-                    </label>
-                  </div>
+                      </div>
+                      <br />
+                      <label>
+                        <input
+                          type="radio"
+                          name="bullet"
+                          checked={this.state.styles?.hasBullet}
+                          className="molsp-chknumbering"
+                          disabled={
+                            this.state.disableControl ||
+                            this.state.styles.styleLevel === 'None' ||
+                            this.state.styles.styleLevel === undefined ||
+                            (this.state.styles.styleLevel === 1 &&
+                              this.state.styles.isList === true)
+                          }
+                          onChange={this.handleBulletPoints.bind(this)}
+                        />
+                        Bullet{' '}
+                        <span>
+                          <select
+                            className="molsp-fontstyle"
+                            disabled={this.state.disableControl || this.checkCondition(this.state.styles?.hasBullet)}
+                            id="bulletValue"
+                            onChange={this.onBulletLevelChange.bind(this)}
+                            style={{ textAlign: 'center' }}
+                            value={this.state.styles.bulletLevel || ''}
+                          >
+                            {BULLET_POINTS.map((value) => (
+                              <option key={value.key} value={value.key}>
+                                {value.symbol}
+                              </option>
+                            ))}
+                          </select>
+                        </span>
+                      </label>
+                    </div>
+                  </fieldset>
                 </div>
                 <p className="molsp-formp">Indenting:</p>
                 <div className="molsp-hierarchydiv">
@@ -1443,7 +1499,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <input
                       checked={
                         this.state.styles.nextLineStyleName ===
-                          this.state.styleName && !this.state.otherStyleSelected
+                        this.state.styleName && !this.state.otherStyleSelected
                       }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 1)}

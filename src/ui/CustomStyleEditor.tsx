@@ -1356,20 +1356,21 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         />
                         Numbering (1.1)
                       </label>
-                      <br />
-                      <div className="prefix-div" style={{ display: 'flex', alignItems: 'baseline' }}>
-                        <label style={{ marginRight: '10px' }}>
-                          <input
-                            checked={this.state.styles.boldNumbering}
-                            className="molsp-chkboldnumbering"
-                            disabled={this.checkCondition(this.state.styles.hasNumbering)}
-                            onChange={this.handleBoldNumbering.bind(this)}
-                            type="checkbox"
-                          />
-                          Bold
-                        </label>
+                      <br/>
+                      {(this.state.styles.isList || this.state.styles.hasNumbering) && (
+                        <div className="prefix-div" style={{ display: 'flex', alignItems: 'baseline' }}>
+                          <label style={{ marginRight: '10px' }}>
+                            <input
+                              checked={this.state.styles.boldNumbering}
+                              className="molsp-chkboldnumbering"
+                              disabled={this.checkCondition(this.state.styles.hasNumbering)}
+                              onChange={this.handleBoldNumbering.bind(this)}
+                              type="checkbox"
+                            />
+                            Bold
+                          </label>
 
-                        {(this.state.styles.isList || this.state.styles.hasNumbering) && (
+
                           <span style={{ display: 'flex', alignItems: 'center' }}>
                             <p className="molsp-formp">Prefix:</p>
                             <input
@@ -1380,9 +1381,10 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                               value={this.state.styles.prefixValue}
                             />
                           </span>
-                        )}
-                      </div>
-                      <br />
+
+                        </div>
+                      )}
+                    
                       <label>
                         <input
                           type="radio"

@@ -343,7 +343,7 @@
   box-sizing: border-box;
   margin-left: -1px;
   padding: 5px;
-  width: auto;
+  width:100%;
 }
 
 .czi-editor-frameset .molsp-hierarchydiv label {

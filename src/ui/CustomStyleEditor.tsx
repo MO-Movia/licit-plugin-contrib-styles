@@ -639,16 +639,22 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         }
       });
     }
+
+    if (this.state.styleName === RESERVED_STYLE_NONE) {
+      acc[2].classList.toggle('molsp-accactive');
+      const mp2 = document.getElementsByClassName('molsp-panel2')[0] as HTMLElement;
+      mp2.style.maxHeight = null;
+    } else {
+      const mp2 = document.getElementsByClassName('molsp-panel2')[0] as HTMLElement;
+      mp2.style.maxHeight = mp2.scrollHeight + 'px';
+    }
+
     const mp = document.getElementsByClassName('molsp-panel')[0] as HTMLElement;
     mp.style.maxHeight = mp.scrollHeight + 'px';
     const mp1 = document.getElementsByClassName(
       'molsp-panel1'
     )[0] as HTMLElement;
     mp1.style.maxHeight = mp1.scrollHeight + 'px';
-    const mp2 = document.getElementsByClassName(
-      'molsp-panel2'
-    )[0] as HTMLElement;
-    mp2.style.maxHeight = mp2.scrollHeight + 'px';
     const mp3 = document.getElementsByClassName(
       'molsp-panel3'
     )[0] as HTMLElement;
@@ -1220,7 +1226,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           type="radio"
                           value="userDefined"
                           checked={this.state.selectedStyle === 'userDefined'}
-                          disabled={this.state.disableControl}
+                          disabled={this.state.disableControl || this.state.styleName === RESERVED_STYLE_NONE}
                           onChange={this.handleList.bind(this)}
                         />
                         User-defined Numbering/Bullets
@@ -1231,7 +1237,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           type="radio"
                           value="listStyle"
                           checked={this.state.selectedStyle === 'listStyle'}
-                          disabled={this.state.disableControl}
+                          disabled={this.state.disableControl || this.state.styleName === RESERVED_STYLE_NONE}
                           onChange={this.handleList.bind(this)}
                         />
                         List-style (Auto Numbering)
@@ -1256,7 +1262,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           type="radio"
                           value="userDefined"
                           checked={this.state.selectedStyle === 'userDefined'}
-                          disabled={this.state.disableControl}
+                          disabled={this.state.disableControl || this.state.styleName === RESERVED_STYLE_NONE}
                           onChange={this.handleList.bind(this)}
                         />
                         User-defined Numbering/Bullets
@@ -1267,7 +1273,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           type="radio"
                           value="listStyle"
                           checked={this.state.selectedStyle === 'listStyle'}
-                          disabled={this.state.disableControl}
+                          disabled={this.state.disableControl || this.state.styleName === RESERVED_STYLE_NONE}
                           onChange={this.handleList.bind(this)}
                         />
                         List-style (Auto Numbering)
@@ -1289,7 +1295,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <select
                     className="molsp-leveltype molsp-fontstyle"
                     data-cy="cyStyleLevel"
-                    disabled={this.state.disableControl || this.state.styles.isList === true}
+                    disabled={this.state.disableControl || this.state.styles.isList === true || this.state.styleName === RESERVED_STYLE_NONE}
                     id="levelValue"
                     onChange={this.onLevelChange.bind(this)}
                     value={this.state.styles.styleLevel || ''}
@@ -1315,7 +1321,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             !this.state.styles.hasBullet
                           }
                           className="molsp-chknumbering"
-                          disabled={this.state.disableControl || this.state.styles.isList === true}
+                          disabled={this.state.disableControl || this.state.styles.isList === true || this.state.styleName === RESERVED_STYLE_NONE}
                           onChange={() => {
                             this.setState({
                               styles: {
@@ -1341,7 +1347,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             this.state.disableControl ||
                             this.state.styles.styleLevel === 'None' ||
                             this.state.styles.styleLevel === undefined ||
-                            (this.state.styles.styleLevel === 1 && this.state.styles.isList === true)
+                            (this.state.styles.styleLevel === 1 && this.state.styles.isList === true || this.state.styleName === RESERVED_STYLE_NONE)
                           }
                           onChange={() => {
                             this.setState({
@@ -1356,14 +1362,14 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         />
                         Numbering (1.1)
                       </label>
-                      <br/>
+                      <br />
                       {(this.state.styles.isList || this.state.styles.hasNumbering) && (
                         <div className="prefix-div" style={{ display: 'flex', alignItems: 'baseline' }}>
                           <label style={{ marginRight: '10px' }}>
                             <input
                               checked={this.state.styles.boldNumbering}
                               className="molsp-chkboldnumbering"
-                              disabled={this.checkCondition(this.state.styles.hasNumbering)}
+                              disabled={this.checkCondition(this.state.styles.hasNumbering) || this.state.styleName === RESERVED_STYLE_NONE}
                               onChange={this.handleBoldNumbering.bind(this)}
                               type="checkbox"
                             />
@@ -1374,7 +1380,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           <span style={{ display: 'flex', alignItems: 'center' }}>
                             <p className="molsp-formp">Prefix:</p>
                             <input
-                              disabled={this.state.disableControl}
+                              disabled={this.state.disableControl || this.state.styleName === RESERVED_STYLE_NONE}
                               onChange={this.handlePrefix.bind(this)}
                               style={{ width: '35px' }}
                               type="text"
@@ -1384,7 +1390,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
                         </div>
                       )}
-                    
                       <label>
                         <input
                           type="radio"
@@ -1396,7 +1401,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             this.state.styles.styleLevel === 'None' ||
                             this.state.styles.styleLevel === undefined ||
                             (this.state.styles.styleLevel === 1 &&
-                              this.state.styles.isList === true)
+                              this.state.styles.isList === true) || this.state.styleName === RESERVED_STYLE_NONE
                           }
                           onChange={this.handleBulletPoints.bind(this)}
                         />
@@ -1404,7 +1409,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         <span>
                           <select
                             className="molsp-fontstyle"
-                            disabled={this.state.disableControl || this.checkCondition(this.state.styles?.hasBullet)}
+                            disabled={this.state.disableControl || this.checkCondition(this.state.styles?.hasBullet) || this.state.styleName === RESERVED_STYLE_NONE}
                             id="bulletValue"
                             onChange={this.onBulletLevelChange.bind(this)}
                             style={{ textAlign: 'center' }}
@@ -1426,7 +1431,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <div className="molsp-indentdiv">
                     <input
                       checked={this.state.styles.isLevelbased}
-                      disabled={this.state.styles.isList === true}
+                      disabled={this.state.styles.isList === true || this.state.styleName === RESERVED_STYLE_NONE}
                       name="indenting"
                       onChange={this.onIndentRadioChanged.bind(this)}
                       type="radio"
@@ -1445,7 +1450,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <div className="molsp-indentdiv">
                     <input
                       checked={!this.state.styles.isLevelbased}
-                      disabled={this.state.styles.isList === true}
+                      disabled={this.state.styles.isList === true || this.state.styleName === RESERVED_STYLE_NONE}
                       name="indenting"
                       onChange={this.onIndentRadioChanged.bind(this)}
                       type="radio"
@@ -1464,7 +1469,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       <select
                         className="molsp-leveltype molsp-specifiedindent molsp-fontstyle"
                         data-cy="cyStyleIndent"
-                        disabled={this.state.styles.isList === true}
+                        disabled={this.state.styles.isList === true || this.state.styleName === RESERVED_STYLE_NONE}
                         onChange={this.onIndentChange.bind(this)}
                         style={{ width: '99px !important' }}
                         value={this.state.styles.indent || ''}
@@ -1501,7 +1506,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <input
                       checked={
                         this.state.styles.nextLineStyleName ===
-                        this.state.styleName && !this.state.otherStyleSelected
+                        this.state.styleName && !this.state.otherStyleSelected || this.state.styleName
                       }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 1)}
@@ -1523,11 +1528,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   </div>
                   <div className="molsp-settingsdiv">
                     <input
-                      checked={
-                        this.state.styles.nextLineStyleName ===
-                        RESERVED_STYLE_NONE
-                      }
-                      disabled={this.state.styles.isList === true}
+                      disabled={this.state.styles.isList === true || this.state.styleName === RESERVED_STYLE_NONE}
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 0)}
                       style={{
@@ -1549,7 +1550,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <div className="molsp-indentdiv">
                     <input
                       checked={this.state.otherStyleSelected}
-                      disabled={this.state.styles.isList === true}
+                      disabled={this.state.styles.isList === true || this.state.styleName === RESERVED_STYLE_NONE}
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 2)}
                       style={{

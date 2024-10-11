@@ -513,7 +513,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   handleNumbering(val) {
-    if (this.checkForPreviousLevelWithNumbering(this.state.styles.styleLevel)) {
+    if (this.props.mode === 0 || this.checkForPreviousLevelWithNumbering(this.state.styles.styleLevel)) {
       // if user select numbering, then always set nextLineStyle as continues this style.
       // [FS] IRAD-1221 2021-03-01
       // Issue fix: The next line style not switch back to RESERVED_STYLE_NONE when disable the numbering.

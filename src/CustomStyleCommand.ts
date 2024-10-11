@@ -503,6 +503,8 @@ export class CustomStyleCommand extends UICommand {
             val.styleName
           );
           tr = applyStyle(val, val.styleName, state, tr) as Transaction;
+          const newStyle = result.find(obj => obj.styleName === val.styleName);
+          tr = updateDocument(state, tr, val.styleName, newStyle) as Transaction;
           dispatch(tr);
         }
       });
@@ -1605,7 +1607,7 @@ export function updateDocument(
         pos + contentLen + 1,
         tr,
         style,
-        child.attrs.styleName,        
+        child.attrs.styleName,
       );
     }
   });

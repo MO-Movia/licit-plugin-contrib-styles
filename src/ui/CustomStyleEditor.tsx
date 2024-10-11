@@ -16,7 +16,8 @@ import {
   getStylesAsync,
   addStyleToList,
   getCustomStyleByName,
-  totalCountOfStyleByLevel
+  totalCountOfStyleByLevel,
+  getCustomStyleByLevel
 } from '../customStyle.js';
 import {
   RESERVED_STYLE_NONE,
@@ -347,7 +348,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   // handles Level drop down change
   onLevelChange(e) {
     // FIX: If the user edit the level which is not in use, but modify this level breaks the heirarchy, then show a alert message.
-    if (this.state.styles?.hasNumbering && 1 === totalCountOfStyleByLevel(Number(this.state.styles?.styleLevel))) {
+    if (this.state.styles?.hasNumbering && !this.checkForPreviousLevelWithNumbering(e.target.value) &&  1 === totalCountOfStyleByLevel(Number(this.state.styles?.styleLevel))) {
       this.showAlert(true);
     }
     else {
@@ -512,19 +513,24 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   handleNumbering(val) {
-    // if user select numbering, then always set nextLineStyle as continues this style.
-    // [FS] IRAD-1221 2021-03-01
-    // Issue fix: The next line style not switch back to RESERVED_STYLE_NONE when disable the numbering.
-    this.setState((prevState) => ({
-      styles: {
-        ...prevState.styles,
-        hasNumbering: val.target.checked,
-        hasBullet: val.target.checked ? false : prevState.styles?.hasBullet,
-        nextLineStyleName: val.target.checked
-          ? prevState.styleName
-          : RESERVED_STYLE_NONE,
-      },
-    }));
+    if (this.checkForPreviousLevelWithNumbering(this.state.styles.styleLevel)) {
+      // if user select numbering, then always set nextLineStyle as continues this style.
+      // [FS] IRAD-1221 2021-03-01
+      // Issue fix: The next line style not switch back to RESERVED_STYLE_NONE when disable the numbering.
+      this.setState((prevState) => ({
+        styles: {
+          ...prevState.styles,
+          hasNumbering: val.target.checked,
+          hasBullet: val.target.checked ? false : prevState.styles?.hasBullet,
+          nextLineStyleName: val.target.checked
+            ? prevState.styleName
+            : RESERVED_STYLE_NONE,
+        },
+      }));
+    }
+    else{
+      this.showAlert(true);
+    }
   }
 
   // handles the boldNumbering checkbox actions
@@ -596,6 +602,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   isListStyleAlreadySelected() {
     const style = getCustomStyleByName(this.state.styleName);
     return style?.styles?.isList;
+  }
+
+  checkForPreviousLevelWithNumbering(styleLevel) {
+    let found = false;
+    const style = getCustomStyleByLevel(styleLevel - 1);
+    found = style?.styles?.hasNumbering;
+    return found;
   }
 
   showAlert(showHierarchyMissingMsg = false) {
@@ -1257,31 +1270,31 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     </div>
                   </div>
                 ) : (
-                  <div
-                    className="molsp-hierarchydiv"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginLeft: '-1px',
-                    }}
-                  >
                     <div
                       className="molsp-hierarchydiv"
-                      style={{ textAlign: 'right' }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginLeft: '-1px',
+                      }}
                     >
-                      <label>
-                        <input
-                          checked={this.state.styles.isList}
+                      <div
+                        className="molsp-hierarchydiv"
+                        style={{ textAlign: 'right' }}
+                      >
+                        <label>
+                          <input
+                            checked={this.state.styles.isList}
                             disabled={this.state.disableControl}
-                          onChange={this.handleList.bind(this)}
-                          type="checkbox"
-                        />
+                            onChange={this.handleList.bind(this)}
+                            type="checkbox"
+                          />
                         List-style
                       </label>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
                 <div className="molsp-hierarchydiv" style={{ display: 'flex' }}>
                   <p className="molsp-formp" style={{ margin: '0' }}>
                     Level:
@@ -1457,7 +1470,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <input
                       checked={
                         this.state.styles.nextLineStyleName ===
-                          this.state.styleName && !this.state.otherStyleSelected
+                        this.state.styleName && !this.state.otherStyleSelected
                       }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 1)}

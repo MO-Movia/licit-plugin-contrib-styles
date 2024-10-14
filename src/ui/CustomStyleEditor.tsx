@@ -457,14 +457,19 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   // [FS] IRAD-1127 2020-12-31
   // to populate the selected custom styles.
   onSelectCustomStyle(e) {
-    if (null !== customStyles) {
+    if (customStyles !== null) {
       const value = customStyles.find((u) => u.styleName === e.target.value);
+
       // FIX: not able to modify and save the populated style
-      value?.mode !== undefined && (value.mode = 3); //FSFIX
+      if (value?.mode !== undefined) {
+        value.mode = 3; //FSFIX
+      }
+
       this.setState((prevState) => ({ ...prevState, ...value }));
       this.setNextLineStyle(this.state.styles.nextLineStyleName);
     }
   }
+
 
   // shows color dialog based on input text-color/text-heighlight
   showColorDialog(isTextColor: boolean, event: React.SyntheticEvent) {
@@ -543,7 +548,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   handleList(val) {
     const selectedStyle = val.target.value;
     const isList = selectedStyle === 'listStyle';
-    // Edit mode
+    const styleLevel = selectedStyle === 'none' ? 0 : (isList ? 1 : 1);
     if (this.state.mode > 0 && this.isCustomStyleAlreadyApplied() && !isList) {
       this.showAlert();
     } else {
@@ -551,12 +556,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         selectedStyle,
         styles: {
           ...prevState.styles,
-          styleLevel: isList ? 1 : 0,
+          styleLevel,
           isList,
           nextLineStyleName: isList
             ? prevState.styleName
             : RESERVED_STYLE_NONE,
         },
+        isRadioDisabled: styleLevel === 0
       }));
     }
   }
@@ -646,7 +652,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       mp2.style.maxHeight = null;
     } else {
       const mp2 = document.getElementsByClassName('molsp-panel2')[0] as HTMLElement;
-      mp2.style.maxHeight = mp2.scrollHeight + 'px';
+      setTimeout(() => {
+        mp2.style.maxHeight = '312px';
+      }, 0);
     }
 
     const mp = document.getElementsByClassName('molsp-panel')[0] as HTMLElement;
@@ -1223,22 +1231,22 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     >
                       <label>
                         <input
-                          type="radio"
-                          value="userDefined"
                           checked={this.state.selectedStyle === 'userDefined'}
                           disabled={this.state.disableControl || this.state.styleName === RESERVED_STYLE_NONE}
                           onChange={this.handleList.bind(this)}
+                          type="radio"
+                          value="userDefined"
                         />
                         User-defined Numbering/Bullets
                       </label>
                       <br />
                       <label>
                         <input
-                          type="radio"
-                          value="listStyle"
                           checked={this.state.selectedStyle === 'listStyle'}
                           disabled={this.state.disableControl || this.state.styleName === RESERVED_STYLE_NONE}
                           onChange={this.handleList.bind(this)}
+                          type="radio"
+                          value="listStyle"
                         />
                         List-style (Auto Numbering)
                       </label>
@@ -1259,22 +1267,22 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     >
                       <label>
                         <input
-                          type="radio"
-                          value="userDefined"
                           checked={this.state.selectedStyle === 'userDefined'}
                           disabled={this.state.disableControl || this.state.styleName === RESERVED_STYLE_NONE}
                           onChange={this.handleList.bind(this)}
+                          type="radio"
+                          value="userDefined"
                         />
                         User-defined Numbering/Bullets
                       </label>
                       <br />
                       <label>
                         <input
-                          type="radio"
-                          value="listStyle"
                           checked={this.state.selectedStyle === 'listStyle'}
                           disabled={this.state.disableControl || this.state.styleName === RESERVED_STYLE_NONE}
                           onChange={this.handleList.bind(this)}
+                          type="radio"
+                          value="listStyle"
                         />
                         List-style (Auto Numbering)
                       </label>
@@ -1313,15 +1321,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <div>
                       <label>
                         <input
-                          type="radio"
-                          name="formatting"
-                          value="none"
                           checked={
                             !this.state.styles.hasNumbering &&
                             !this.state.styles.hasBullet
                           }
                           className="molsp-chknumbering"
                           disabled={this.state.disableControl || this.state.styles.isList === true || this.state.styleName === RESERVED_STYLE_NONE}
+                          name="formatting"
                           onChange={() => {
                             this.setState({
                               styles: {
@@ -1332,23 +1338,24 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                               },
                             });
                           }}
+                          type="radio"
+                          value="none"
                         />
                         None
                       </label>
                       <br />
                       <label>
                         <input
-                          type="radio"
-                          name="formatting"
-                          value="numbering"
                           checked={this.state.styles.hasNumbering}
                           className="molsp-chknumbering"
                           disabled={
                             this.state.disableControl ||
-                            this.state.styles.styleLevel === 'None' ||
                             this.state.styles.styleLevel === undefined ||
-                            (this.state.styles.styleLevel === 1 && this.state.styles.isList === true || this.state.styleName === RESERVED_STYLE_NONE)
+                            this.state.isRadioDisabled ||
+                            this.state.styles.styleLevel === 'None' ||
+                            (this.state.styles.styleLevel === 1 && this.state.styles.isList === true) || this.state.styleName === RESERVED_STYLE_NONE
                           }
+                          name="formatting"
                           onChange={() => {
                             this.setState({
                               styles: {
@@ -1359,6 +1366,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                               },
                             });
                           }}
+                          type="radio"
+                          value="numbering"
                         />
                         Numbering (1.1)
                       </label>
@@ -1376,7 +1385,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             Bold
                           </label>
 
-
                           <span style={{ display: 'flex', alignItems: 'center' }}>
                             <p className="molsp-formp">Prefix:</p>
                             <input
@@ -1392,18 +1400,19 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       )}
                       <label>
                         <input
-                          type="radio"
-                          name="bullet"
                           checked={this.state.styles?.hasBullet}
                           className="molsp-chknumbering"
                           disabled={
                             this.state.disableControl ||
+                            this.state.isRadioDisabled ||
                             this.state.styles.styleLevel === 'None' ||
                             this.state.styles.styleLevel === undefined ||
                             (this.state.styles.styleLevel === 1 &&
                               this.state.styles.isList === true) || this.state.styleName === RESERVED_STYLE_NONE
                           }
+                          name="bullet"
                           onChange={this.handleBulletPoints.bind(this)}
+                          type="radio"
                         />
                         Bullet{' '}
                         <span>

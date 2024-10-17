@@ -1,4 +1,4 @@
-import {convertToCSSPTValue} from './convertToCSSPTValue';
+import {convertToCSSPTValue, PX_TO_PT_RATIO} from './convertToCSSPTValue';
 
 describe('convertToCSSPTValue', () => {
   it('should convert pixel value to points', () => {
@@ -20,5 +20,9 @@ describe('convertToCSSPTValue', () => {
   it('should return point value as is', () => {
     expect(convertToCSSPTValue('12pt')).toBe(12);
     expect(convertToCSSPTValue('24pt')).toBe(24);
+  });
+  xit('should return point value as is', () => {
+    const result = convertToCSSPTValue('12.5px');
+    expect(result).toBe(12.5 * PX_TO_PT_RATIO);
   });
 });

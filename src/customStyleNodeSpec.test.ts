@@ -2,6 +2,7 @@ import {
   toCustomStyleDOM,
   getCustomStyleAttrs,
   countersRefresh,
+  RESERVED_STYLE_NONE_NUMBERING
 } from './CustomStyleNodeSpec.js';
 import * as customstyle from './customStyle';
 import { Node, DOMOutputSpec } from 'prosemirror-model';
@@ -44,6 +45,7 @@ describe('toCustomStyleDOM', () => {
         fontName: 'Tahoma',
         indent: '10',
         hasNumbering: true,
+        prefixValue: '001',
       },
       styleName: '',
     });
@@ -62,7 +64,7 @@ describe('toCustomStyleDOM', () => {
         paddingTop: null,
         capco: null,
         styleName: 'FS_B01',
-        prefix:true
+        prefix: true
       },
       content: [
         {
@@ -91,9 +93,75 @@ describe('toCustomStyleDOM', () => {
         'data-show-bullet': true,
         'data-style-level': '1',
         'hide-style-level': false,
+        "prefix": "001",
         style:
           'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;counter-increment: C1 ;',
         styleName: 'FS_B01',
+      },
+    ]);
+  });
+
+
+  it('should handle toCustomStyleDOM ', () => {
+    jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+      // styles: {
+      //   // hasBullet: true,
+      //   // bulletLevel: '25CF',
+      //   // styleLevel: 1,
+      //   // paragraphSpacingBefore: '10',
+      //   // paragraphSpacingAfter: '10',
+      //   // strong: true,
+      //   // boldNumbering: true,
+      //   // em: true,
+      //   // color: 'blue',
+      //   // fontSize: '10',
+      //   // fontName: 'Tahoma',
+      //   // indent: '10',
+      //   // hasNumbering: true,
+      //   // prefixValue: '001',
+      // },
+      styleName: '',
+    });
+    //const base = undefined
+
+    const node = {
+      type: 'paragraph',
+      attrs: {
+        align: 'right',
+        color: null,
+        id: null,
+        indent: null,
+        lineSpacing: '16pt',
+        isListStyle: true,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: '2' + RESERVED_STYLE_NONE_NUMBERING,
+        prefix: true
+      },
+      content: [
+        {
+          type: 'text',
+          marks: [
+            { type: 'mark-font-size', attrs: { pt: 11, overridden: false } },
+            {
+              type: 'mark-font-type',
+              attrs: { name: 'Arial', overridden: false },
+            },
+            {
+              type: 'mark-text-color',
+              attrs: { color: '#3b0df2', overridden: false },
+            },
+          ],
+          text: 'g',
+        },
+      ],
+    };
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
+      'span',
+      {         
+        "style": "text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;",
+        "styleName":  "2Normal-@#$-",
       },
     ]);
   });
@@ -115,7 +183,7 @@ describe('toCustomStyleDOM', () => {
         fontName: 'Tahoma',
         indent: '10',
         hasNumbering: true,
-        isLevelbased:true
+        isLevelbased: true
       },
       styleName: '',
     });
@@ -134,7 +202,7 @@ describe('toCustomStyleDOM', () => {
         paddingTop: null,
         capco: null,
         styleName: 'FS_B01',
-        prefix:true
+        prefix: true
       },
       content: [
         {

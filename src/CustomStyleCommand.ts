@@ -786,7 +786,7 @@ function applyStyleEx(
 // [FS] IRAD-1238 2021-03-08
 // Fix: Shows alert message 'This Numberings breaks hierarchy, Previous levels are missing' on create styles
 // if a numbering applied in editor.
-function styleHasNumbering(style) {
+export function styleHasNumbering(style) {
   let hasNumbering = false;
   hasNumbering = style.styles.hasNumbering ? style.styles.hasNumbering : false;
   return hasNumbering;
@@ -794,7 +794,7 @@ function styleHasNumbering(style) {
 
 // [FS] IRAD-1238 2021-03-08
 // Check for the style with previous numbering level exists
-function isValidHeirarchy(
+export function isValidHeirarchy(
   styleName /* New style to be applied */,
   level: number
 ) {
@@ -1384,8 +1384,8 @@ export function removeAllMarksExceptLink(
   return handleRemoveMarks(tr, tasks, from, to, schema);
 }
 
-function isBoldFirstWordSelected(node: Node) {
-  const styleprops = getCustomStyleByName(node.attrs.styleName);
+export function isBoldFirstWordSelected(node: Node) {
+  const styleprops = getCustomStyleByName(node.attrs?.styleName);
   return styleprops?.styles?.boldPartial;
 }
 
@@ -1586,7 +1586,7 @@ export function updateDocument(
   style: Style
 ) {
   const { doc } = state;
-  doc.descendants(function (child, pos) {
+  doc?.descendants(function (child, pos) {
     const contentLen = child.content.size;
     if (haveEligibleChildren(child, styleName)) {
       //FIX: On modify a style to include numbering, it misses the heirarchy levels

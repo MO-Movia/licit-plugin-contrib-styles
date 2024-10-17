@@ -19,6 +19,10 @@ import {
   handleRemoveMarks,
   compareAttributes,
   resetNodeAttrs,
+  isValidHeirarchy,
+  styleHasNumbering,
+  addElementAfter,
+  isBoldFirstWordSelected
 } from './CustomStyleCommand.js';
 import * as cusstylecommand from './CustomStyleCommand';
 import { EditorState, Selection, Transaction } from 'prosemirror-state';
@@ -28,9 +32,20 @@ import { EditorView } from 'prosemirror-view';
 import { Schema, Node } from 'prosemirror-model';
 import { schema } from 'prosemirror-schema-basic';
 import * as customstyles from './customStyle';
+import {
+  setStyles,
+  getCustomStyleByName,
+  isCustomStyleExists,
+  isStylesLoaded,
+  getCustomStyleByLevel,
+  getHidenumberingFlag,
+  setHidenumberingFlag
+} from './customStyle';
+
 import { Transform } from 'prosemirror-transform';
 import type { Style } from './StyleRuntime.js';
 import { doc, p } from 'jest-prosemirror';
+import { captureRejectionSymbol } from 'events';
 
 describe('CustomStyleCommand', () => {
   const styl = {
@@ -120,6 +135,36 @@ describe('CustomStyleCommand', () => {
   });
   it('should not throw an error', () => {
     expect(() => customstylecommand.cancel()).not.toThrow();
+  });
+
+  it('should call isValidHeirarchy', () => {
+    const result = isValidHeirarchy('Normal', 0);
+    expect(getStyleLevel('Normal')).toBe(0);
+  });
+
+  it('should call styleHasNumbering', () => {
+    const mockval = {
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: '2',
+        paragraphSpacingBefore: 10,
+        paragraphSpacingAfter: 10,
+        strong: 10,
+        boldNumbering: 10,
+        em: 10,
+        color: 'blue',
+        fontSize: 10,
+        fontName: 'Tahoma',
+        indent: 10,
+        hasNumbering: false,
+      },
+      styleName: 'test',
+      editorView: {},
+    };
+
+    const result = styleHasNumbering(mockval);
+    expect(result).toBe(false);
   });
   it('should return the same transform', () => {
     const initialState = {} as EditorState;
@@ -904,63 +949,291 @@ describe('CustomStyleCommand', () => {
         return { doc: mockdoc };
       },
     } as unknown as Transaction;
-    const mockstate = {
-      doc: {
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        nodeAt: () => {
-          return { type: { name: 'table' } };
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: null,
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'Normal',
-            },
-          },
-        ],
-      },
-      selection: {
-        type: 'text',
-        anchor: 1,
-        head: 1,
-        $from: {
-          before: () => {
-            return 0;
-          },
-        },
-        $to: {
-          after: () => {
-            return 1;
-          },
-          pos: 1,
-        },
-        from: 0,
-      },
-    } as unknown as EditorState;
-    // Create a dummy document with nodes that have styleName attributes
 
     const schema = new Schema({
       nodes: {
-        doc: { content: 'paragraph+' },
-        paragraph: { content: 'text*' },
-        text: {},
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: '' },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: '' },
+          },
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: {
+          marks: '_',
+        },
+      },
+
+      marks: {
+        link: {
+          attrs: {
+            test_href: {
+              default: 'test_href',
+            },
+          },
+        },
+        em: {
+          parseDOM: [
+            {
+              tag: 'i',
+            },
+            {
+              tag: 'em',
+            },
+            {
+              style: 'font-style=italic',
+            },
+          ],
+          toDOM() {
+            return ['em', 0];
+          },
+          attrs: {
+            overridden: {
+              default: false,
+            },
+          },
+        },
+        strong: {
+          parseDOM: [
+            {
+              tag: 'strong',
+            },
+            {
+              tag: 'b',
+            },
+            {
+              style: 'font-weight',
+            },
+          ],
+          toDOM() {
+            return ['strong', 0];
+          },
+          attrs: {
+            overridden: {
+              default: false,
+            },
+          },
+        },
+        underline: {
+          parseDOM: [
+            {
+              tag: 'u',
+            },
+            {
+              style: 'text-decoration-line',
+            },
+            {
+              style: 'text-decoration',
+            },
+          ],
+          toDOM() {
+            return ['u', 0];
+          },
+          attrs: {
+            overridden: {
+              default: false,
+            },
+          },
+        },
+        'mark-text-color': {
+          attrs: {
+            color: {
+              default: '',
+            },
+            overridden: {
+              default: false,
+            },
+          },
+          inline: true,
+          group: 'inline',
+          parseDOM: [
+            {
+              style: 'color',
+            },
+          ],
+          toDOM() {
+            return ['span', { color: '' }, 0];
+          },
+        },
+        'mark-text-highlight': {
+          attrs: {
+            highlightColor: {
+              default: '',
+            },
+            overridden: {
+              default: false,
+            },
+          },
+          inline: true,
+          group: 'inline',
+          parseDOM: [
+            {
+              tag: 'span[style*=background-color]',
+            },
+          ],
+          toDOM() {
+            return [''];
+          },
+        },
+        'mark-font-size': {
+          attrs: {
+            pt: {
+              default: null,
+            },
+            overridden: {
+              default: false,
+            },
+          },
+          inline: true,
+          group: 'inline',
+          parseDOM: [
+            {
+              style: 'font-size',
+            },
+          ],
+          toDOM() {
+            return ['Test Mark'];
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: {
+              default: '',
+            },
+            overridden: {
+              default: false,
+            },
+          },
+          inline: true,
+          group: 'inline',
+          parseDOM: [
+            {
+              style: 'font-family',
+            },
+          ],
+          toDOM() {
+            return ['span', 0];
+          },
+        },
       },
     });
+
+    // Define the document and selection directly
+    const doc = schema.nodeFromJSON({
+      type: 'doc',
+      attrs: {
+        layout: null,
+        padding: null,
+        width: null,
+        counterFlags: null,
+        capcoMode: 0,
+      },
+      content: [
+        {
+          type: 'paragraph',
+          attrs: {
+            align: 'left',
+            color: null,
+            id: '',
+            indent: null,
+            lineSpacing: null,
+            paddingBottom: null,
+            paddingTop: null,
+            capco: null,
+            styleName: 'A11-Rename',
+          },
+          content: [
+            {
+              type: 'text',
+              marks: [
+                {
+                  type: 'mark-font-size',
+                  attrs: { pt: 14, overridden: false },
+                },
+                {
+                  type: 'mark-font-type',
+                  attrs: { name: 'Arial Black', overridden: false },
+                },
+              ],
+              text: 'fggfdfgfghfghfgh',
+            },
+          ],
+        },
+      ],
+    });
+    // Create the EditorState
+    const mockstate = { schema: schema, doc: doc, selection: { from: 0, to: 1 } } as unknown as EditorState;;
+    // const mockstate = {
+    //   doc: {
+    //     type: 'doc',
+    //     attrs: {
+    //       layout: null,
+    //       padding: null,
+    //       width: null,
+    //       counterFlags: null,
+    //       capcoMode: 0,
+    //     },
+    //     nodeAt: () => {
+    //       return { type: { name: 'table' } };
+    //     },
+    //     content: [
+    //       {
+    //         type: 'paragraph',
+    //         attrs: {
+    //           align: null,
+    //           color: null,
+    //           id: null,
+    //           indent: null,
+    //           lineSpacing: null,
+    //           paddingBottom: null,
+    //           paddingTop: null,
+    //           capco: null,
+    //           styleName: 'Normal',
+    //         },
+    //       },
+    //     ],
+    //   },
+    //   selection: {
+    //     type: 'text',
+    //     anchor: 1,
+    //     head: 1,
+    //     $from: {
+    //       before: () => {
+    //         return 0;
+    //       },
+    //     },
+    //     $to: {
+    //       after: () => {
+    //         return 1;
+    //       },
+    //       pos: 1,
+    //     },
+    //     from: 0,
+    //   },
+    // } as unknown as EditorState;
+    // Create a dummy document with nodes that have styleName attributes
+
+    // const schema = new Schema({
+    //   nodes: {
+    //     doc: { content: 'paragraph+' },
+    //     paragraph: { content: 'text*' },
+    //     text: {},
+    //   },
+    // });
 
     // Create a document with nodes containing inline content
     const mockdoc = schema.node('doc', null, [
@@ -986,7 +1259,7 @@ describe('CustomStyleCommand', () => {
         fontSize: 10,
         fontName: 'Tahoma',
         indent: 10,
-        hasNumbering: false,
+        hasNumbering: true,
       },
       styleName: 'test',
       editorView: {},
@@ -998,7 +1271,7 @@ describe('CustomStyleCommand', () => {
       mockdispatch,
       mockdoc
     );
-    expect(spy2).not.toHaveBeenCalled();
+    expect(spy2).toHaveBeenCalled();
   });
   it('should handle createNewStyle', () => {
     const spy2 = jest.spyOn(customstylecommand, 'showAlert');
@@ -1138,7 +1411,7 @@ describe('CustomStyleCommand', () => {
       styles: {
         hasBullet: true,
         bulletLevel: '25CF',
-        styleLevel: '0',
+        styleLevel: '2',
         paragraphSpacingBefore: 10,
         paragraphSpacingAfter: 10,
         strong: 10,
@@ -2940,7 +3213,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       styleName: 'FM_chsubpara1',
     };
     expect(
-      addElementEx(nodeattrs, statemock, trmock, 0, false, 2,1)
+      addElementEx(nodeattrs, statemock, trmock, 0, false, 2, 1)
     ).toBeDefined();
   });
 
@@ -3012,9 +3285,64 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       ],
     });
     const myEditor = {} as unknown as EditorState;
-    const tr = {doc:mockdoc} as unknown as Transaction;
+    const tr = { doc: mockdoc } as unknown as Transaction;
+    const customstyle: Style[] = [];
+    const style = {
+      description: 'BIU',
+      mode: 0,
+      styleName: 'BIU',
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        boldSentence: true,
+        fontName: 'Arial',
+        fontSize: '14',
+        isHidden: false,
+        nextLineStyleName: 'Default',
+        paragraphSpacingAfter: '3',
+        toc: false,
+      },
+    };
+    customstyle.push(
+      style,
+      {
+        description: '1-Bold-FS',
+        mode: 0,
+        styleName: '1-Bold-FS',
+        styles: {
+          align: 'left',
+          boldNumbering: true,
+          boldSentence: true,
+          fontName: 'Arial',
+          fontSize: '11',
+          nextLineStyleName: 'None',
+          strong: true,
+          toc: false,
+        },
+      },
+      {
+        description: '1-Bold-Level',
+        mode: 0,
+        styleName: '1-Bold-Level',
+        styles: {
+          align: 'left',
+          boldNumbering: true,
+          boldSentence: true,
+          em: true,
+          fontName: 'Arial',
+          fontSize: '11',
+          nextLineStyleName: 'BIU',
+          strong: true,
+          toc: false,
+          underline: true,
+          styleLevel: 1,
+        },
+      }
+    );
+    setStyles(customstyle);
+
     expect(
-      executeCommands(myEditor, tr,'Normal', 0,1)
+      executeCommands(myEditor, tr, '1-Bold-FS', 0, 1)
     ).toBeDefined();
   });
 
@@ -4460,12 +4788,12 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
 
   it('should handle isCustomStyleAlreadyApplied - without stylename', () => {
     jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
-      styles: {  hasNumbering: true },
+      styles: { hasNumbering: true },
       styleName: '',
     });
     expect(
       isCustomStyleAlreadyApplied(
-       '',
+        '',
         statemock as unknown as EditorState
       )
     ).toBeFalsy();
@@ -4665,7 +4993,7 @@ describe('applyLatestStyle', () => {
       ],
     });
     const doc = new Node();
-    const tr = {doc:mockdoc} as unknown as Transaction;
+    const tr = { doc: mockdoc } as unknown as Transaction;
     const myEditor = {} as unknown as EditorState;
     const style: Style = {
       styleName: '',
@@ -4747,7 +5075,7 @@ describe('applyLatestStyle', () => {
         return document.createElement('div');
       },
     } as unknown as Node;
-    const tr = {doc:mockdoc} as unknown as Transaction;
+    const tr = { doc: mockdoc } as unknown as Transaction;
     const myEditor = {} as unknown as EditorState;
     const style: Style = {
       styleName: '',
@@ -4827,8 +5155,8 @@ describe('applyLatestStyle', () => {
     expect(
       applyLatestStyle(
         '',
-        {schema:mockschema} as unknown as EditorState,
-        { doc: mockdoc,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}} } as unknown as Transform,
+        { schema: mockschema } as unknown as EditorState,
+        { doc: mockdoc, selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } } } as unknown as Transform,
         {
           attrs: {
             lineSpacing: '',
@@ -5057,7 +5385,7 @@ describe('insertParagraph', () => {
 describe('applyLineStyle', () => {
   it('should handle applyLineStyle ', () => {
     jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
-      styles: { boldPartial: true ,hasNumbering:true,styleLevel: 2},
+      styles: { boldPartial: true, hasNumbering: true, styleLevel: 2 },
       styleName: '',
     });
     expect(
@@ -5315,7 +5643,7 @@ describe('removeAllMarksExceptLink', () => {
         },
       ],
     });
-    const tr = { doc: mockDoc,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}  } as unknown as Transform;
+    const tr = { doc: mockDoc, selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } } } as unknown as Transform;
     const schema1 = new Schema({
       nodes: {
         doc: {
@@ -5488,44 +5816,44 @@ describe('removeAllMarksExceptLink', () => {
       },
     });
     // Define the JSON object
-  const json = {
-    type: 'paragraph',
-    attrs: {
-      align: 'left',
-      color: null,
-      id: null,
-      indent: 0,
-      lineSpacing: null,
-      paddingBottom: null,
-      paddingTop: null,
-      capco: null,
-      styleName: '10Normal-@#$-10',
-    },
-    content: [
-      {
-        type: 'text',
-        marks: [
-          {
-            type: 'mark-font-size',
-            attrs: { pt: 18, overridden: false },
-          },
-          {
-            type: 'mark-font-type',
-            attrs: { name: 'Times New Roman', overridden: false },
-          },
-          {
-            type: 'mark-text-color',
-            attrs: { color: '#0d69f2', overridden: false },
-          },
-        ],
-        text: '.fggf.dfgfgh.fghfgh',
+    const json = {
+      type: 'paragraph',
+      attrs: {
+        align: 'left',
+        color: null,
+        id: null,
+        indent: 0,
+        lineSpacing: null,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: '10Normal-@#$-10',
       },
-    ],
-  };
+      content: [
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'mark-font-size',
+              attrs: { pt: 18, overridden: false },
+            },
+            {
+              type: 'mark-font-type',
+              attrs: { name: 'Times New Roman', overridden: false },
+            },
+            {
+              type: 'mark-text-color',
+              attrs: { color: '#0d69f2', overridden: false },
+            },
+          ],
+          text: '.fggf.dfgfgh.fghfgh',
+        },
+      ],
+    };
 
-  const nodemock = schema1.nodeFromJSON(json);
+    const nodemock = schema1.nodeFromJSON(json);
     expect(
-      removeAllMarksExceptLink(0, 1, tr, mySchema,nodemock)
+      removeAllMarksExceptLink(0, 1, tr, mySchema, nodemock)
     ).toBeDefined();
   });
   it('should handle removeAllMarksExceptLink when mark.attrs[ATTR_OVERRIDDEN] && link === mark.type.name', () => {
@@ -5559,7 +5887,7 @@ describe('removeAllMarksExceptLink', () => {
         },
       ],
     });
-    const tr = { doc: mockDoc ,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}} } as unknown as Transform;
+    const tr = { doc: mockDoc, selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } } } as unknown as Transform;
     const schema1 = new Schema({
       nodes: {
         doc: {
@@ -5739,44 +6067,44 @@ describe('removeAllMarksExceptLink', () => {
       },
     });
     // Define the JSON object
-  const json = {
-    type: 'paragraph',
-    attrs: {
-      align: 'left',
-      color: null,
-      id: null,
-      indent: 0,
-      lineSpacing: null,
-      paddingBottom: null,
-      paddingTop: null,
-      capco: null,
-      styleName: '10Normal-@#$-10',
-    },
-    content: [
-      {
-        type: 'text',
-        marks: [
-          {
-            type: 'mark-font-size',
-            attrs: { pt: 18, overridden: false },
-          },
-          {
-            type: 'mark-font-type',
-            attrs: { name: 'Times New Roman', overridden: false },
-          },
-          {
-            type: 'mark-text-color',
-            attrs: { color: '#0d69f2', overridden: false },
-          },
-        ],
-        text: '.fggf.dfgfgh.fghfgh',
+    const json = {
+      type: 'paragraph',
+      attrs: {
+        align: 'left',
+        color: null,
+        id: null,
+        indent: 0,
+        lineSpacing: null,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: '10Normal-@#$-10',
       },
-    ],
-  };
+      content: [
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'mark-font-size',
+              attrs: { pt: 18, overridden: false },
+            },
+            {
+              type: 'mark-font-type',
+              attrs: { name: 'Times New Roman', overridden: false },
+            },
+            {
+              type: 'mark-text-color',
+              attrs: { color: '#0d69f2', overridden: false },
+            },
+          ],
+          text: '.fggf.dfgfgh.fghfgh',
+        },
+      ],
+    };
 
-  const nodemock = schema1.nodeFromJSON(json);
+    const nodemock = schema1.nodeFromJSON(json);
     expect(
-      removeAllMarksExceptLink(0, 1, tr, mySchema,nodemock)
+      removeAllMarksExceptLink(0, 1, tr, mySchema, nodemock)
     ).toBeDefined();
   });
   it('should handle removeAllMarksExceptLink when mark.attrs[ATTR_OVERRIDDEN] && link === mark.type.name', () => {
@@ -5826,7 +6154,7 @@ describe('removeAllMarksExceptLink', () => {
       removeMark: () => {
         return { doc: mockDoc };
       },
-      selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}
+      selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } }
     } as unknown as Transform;
     const schema1 = new Schema({
       nodes: {
@@ -6007,44 +6335,44 @@ describe('removeAllMarksExceptLink', () => {
       },
     });
     // Define the JSON object
-  const json = {
-    type: 'paragraph',
-    attrs: {
-      align: 'left',
-      color: null,
-      id: null,
-      indent: 0,
-      lineSpacing: null,
-      paddingBottom: null,
-      paddingTop: null,
-      capco: null,
-      styleName: '10Normal-@#$-10',
-    },
-    content: [
-      {
-        type: 'text',
-        marks: [
-          {
-            type: 'mark-font-size',
-            attrs: { pt: 18, overridden: false },
-          },
-          {
-            type: 'mark-font-type',
-            attrs: { name: 'Times New Roman', overridden: false },
-          },
-          {
-            type: 'mark-text-color',
-            attrs: { color: '#0d69f2', overridden: false },
-          },
-        ],
-        text: '.fggf.dfgfgh.fghfgh',
+    const json = {
+      type: 'paragraph',
+      attrs: {
+        align: 'left',
+        color: null,
+        id: null,
+        indent: 0,
+        lineSpacing: null,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: '10Normal-@#$-10',
       },
-    ],
-  };
+      content: [
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'mark-font-size',
+              attrs: { pt: 18, overridden: false },
+            },
+            {
+              type: 'mark-font-type',
+              attrs: { name: 'Times New Roman', overridden: false },
+            },
+            {
+              type: 'mark-text-color',
+              attrs: { color: '#0d69f2', overridden: false },
+            },
+          ],
+          text: '.fggf.dfgfgh.fghfgh',
+        },
+      ],
+    };
 
-  const nodemock = schema1.nodeFromJSON(json);
+    const nodemock = schema1.nodeFromJSON(json);
     expect(
-      removeAllMarksExceptLink(1, 2, tr, mySchema,nodemock)
+      removeAllMarksExceptLink(1, 2, tr, mySchema, nodemock)
     ).toBeDefined();
   });
   it('should handle removeAllMarksExceptLink when mark.attrs[ATTR_OVERRIDDEN] && link === mark.type.name', () => {
@@ -6094,7 +6422,7 @@ describe('removeAllMarksExceptLink', () => {
       removeMark: () => {
         return { doc: mockDoc };
       },
-      selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}
+      selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } }
     } as unknown as Transform;
     const schema1 = new Schema({
       nodes: {
@@ -6275,44 +6603,44 @@ describe('removeAllMarksExceptLink', () => {
       },
     });
     // Define the JSON object
-  const json = {
-    type: 'paragraph',
-    attrs: {
-      align: 'left',
-      color: null,
-      id: null,
-      indent: 0,
-      lineSpacing: null,
-      paddingBottom: null,
-      paddingTop: null,
-      capco: null,
-      styleName: '10Normal-@#$-10',
-    },
-    content: [
-      {
-        type: 'text',
-        marks: [
-          {
-            type: 'mark-font-size',
-            attrs: { pt: 18, overridden: false },
-          },
-          {
-            type: 'mark-font-type',
-            attrs: { name: 'Times New Roman', overridden: false },
-          },
-          {
-            type: 'mark-text-color',
-            attrs: { color: '#0d69f2', overridden: false },
-          },
-        ],
-        text: '.fggf.dfgfgh.fghfgh',
+    const json = {
+      type: 'paragraph',
+      attrs: {
+        align: 'left',
+        color: null,
+        id: null,
+        indent: 0,
+        lineSpacing: null,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: '10Normal-@#$-10',
       },
-    ],
-  };
+      content: [
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'mark-font-size',
+              attrs: { pt: 18, overridden: false },
+            },
+            {
+              type: 'mark-font-type',
+              attrs: { name: 'Times New Roman', overridden: false },
+            },
+            {
+              type: 'mark-text-color',
+              attrs: { color: '#0d69f2', overridden: false },
+            },
+          ],
+          text: '.fggf.dfgfgh.fghfgh',
+        },
+      ],
+    };
 
-  const nodemock = schema1.nodeFromJSON(json);
+    const nodemock = schema1.nodeFromJSON(json);
     expect(
-      removeAllMarksExceptLink(1, 2, tr, mySchema,nodemock)
+      removeAllMarksExceptLink(1, 2, tr, mySchema, nodemock)
     ).toBeDefined();
   });
 });
@@ -6348,7 +6676,7 @@ describe('handleRemoveMarks', () => {
         },
       ],
     });
-    mockdoc.nodeAt = ()=>{return {} as unknown as Node;};
+    mockdoc.nodeAt = () => { return {} as unknown as Node; };
     const tr = {
       doc: mockdoc,
       removeMark: () => {
@@ -6419,6 +6747,33 @@ describe('handleRemoveMarks', () => {
     ).toBeDefined();
   });
 
+  it('should handle resetNodeAttrs', () => {
+    const nodeattrs = {
+      align: 'left',
+      color: null,
+      id: null,
+      indent: null,
+      lineSpacing: '125%',
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'FM_chsubpara1',
+    };
+    const customstyle = {
+      align: 'left',
+      color: null,
+      id: null,
+      indent: null,
+      lineSpacing: '125%',
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'customstyle-name',
+    };
+    const nodeAttrsValue = resetNodeAttrs(nodeattrs, customstyle);
+    expect(nodeAttrsValue.styleName).toBe(customstyle.styleName);
+  });
+
   it('should handle isActive', () => {
     const styl = {
       styleName: 'A_12',
@@ -6444,17 +6799,142 @@ describe('handleRemoveMarks', () => {
     const customstylecommand = new CustomStyleCommand(styl, 'A_12');
     expect(customstylecommand.isActive()).toBeTruthy();
   });
-});
-describe('compareAttributes',()=>{
-  it('should handle compareAttributes',()=>{
-    expect(compareAttributes({attrs:{'overridden':{}}},{})).toBeFalsy();
+  it('should handle isBoldFirstWordSelected', () => {
+    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
+      styles: { boldPartial: true, hasNumbering: true, styleLevel: 2 },
+      styleName: '',
+    });
+
+    const doc = {
+      resolve: () => {
+        return {
+          parent: {
+            type: { name: 'paragraph' },
+            attrs: { styleName: 'dont know' },
+          },
+        };
+      },
+    } as unknown as Node;
+    const result=  isBoldFirstWordSelected(doc);
+   
+    expect(result).toBe(true);
   });
-  it('should handle compareAttributes when mark.type.name is super',()=>{
-    expect(compareAttributes({attrs:{'overridden':undefined},type:{name:'super'}},{})).toBeFalsy();
+
+});
+describe('compareAttributes', () => {
+  it('should handle compareAttributes', () => {
+    expect(compareAttributes({ attrs: { 'overridden': {} } }, {})).toBeFalsy();
+  });
+  it('should handle compareAttributes when mark.type.name is super', () => {
+    expect(compareAttributes({ attrs: { 'overridden': undefined }, type: { name: 'super' } }, {})).toBeFalsy();
   });
 });
-describe('resetNodeAttrs',()=>{
-  it('should handle resetNodeAttrs',()=>{
-    expect(resetNodeAttrs({},{})).toBeDefined();
+describe('resetNodeAttrs', () => {
+  it('should handle resetNodeAttrs', () => {
+    const nodeattrs = {
+      align: 'left',
+      color: null,
+      id: null,
+      indent: null,
+      lineSpacing: '125%',
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'FM_chsubpara1',
+    };
+    const customstyle = {
+      align: 'left',
+      color: null,
+      id: null,
+      indent: null,
+      lineSpacing: '125%',
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'customstyle-name',
+    };
+    const nodeAttrsValue = resetNodeAttrs(nodeattrs, customstyle);
+    expect(nodeAttrsValue.styleName).toBe(customstyle.styleName);
+  });
+  it('should handle addElementAfter', () => {
+    const nodeattrs = {
+      align: 'left',
+      color: null,
+      id: null,
+      indent: null,
+      lineSpacing: '125%',
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'FM_chsubpara1',
+    };
+    const customstyle = {
+      align: 'left',
+      color: null,
+      id: null,
+      indent: null,
+      lineSpacing: '125%',
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'customstyle-name',
+    };
+    const mockSchema = new Schema({
+      nodes: {
+        doc: { content: 'image' },
+        text: {},
+        image: {
+          inline: true,
+          attrs: {
+            align: { default: 'left' },
+            fitToParent: { default: true },
+          },
+          group: 'inline',
+          draggable: true,
+          parseDOM: [
+            {
+              tag: 'img[src]',
+              getAttrs(dom) {
+                return {
+                  align: dom.toString(),
+                  fitToParent: dom.toString(),
+                };
+              },
+            },
+          ],
+          toDOM(node) {
+            return [
+              'img',
+              { src: node.attrs.src, align: node.attrs.align || '' },
+            ];
+          },
+        },
+      },
+    });
+    const editorState = EditorState.create({
+      schema: mockSchema,
+      plugins: [],
+    });
+    const el = document.createElement('div');
+    const mockEditorView = {
+      state: editorState,
+      dispatch: jest.fn(),
+      posAtCoords: () => {
+        return {
+          pos: 1,
+          inside: 1,
+        };
+      },
+      destroy: jest.fn(),
+      dom: el,
+    };
+    const tr = {
+      removeMark: () => {
+        return {};
+      },
+    } as unknown as Transform;
+    const nodeAttrsValue = addElementEx(nodeattrs, editorState, tr, 0, false,2,3);
+    // expect(nodeAttrsValue.styleName).toBe(customstyle.styleName);
   });
 });
+

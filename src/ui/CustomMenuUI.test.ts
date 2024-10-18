@@ -703,7 +703,7 @@ describe('Custom Menu UI   ', () => {
     ).toBeUndefined();
   });
   it('should handle removeCustomStyleName1', () => {
-    expect(custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', null)).toBe(
+    expect(custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', null,'Normal')).toBe(
       false
     );
   });
@@ -725,7 +725,7 @@ describe('Custom Menu UI   ', () => {
     expect(
       custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', (x) => {
         return x;
-      })
+      },'Normal')
     ).toBe(true);
   });
 
@@ -850,7 +850,7 @@ describe('Custom Menu UI   ', () => {
     const result = custommenuui.removeCustomStyleName(
       state,
       'AFDP_Bullet',
-      dispatchMock
+      dispatchMock,'Normal'
     );
     expect(result).toBeTruthy();
   });

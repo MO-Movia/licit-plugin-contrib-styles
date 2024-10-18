@@ -9,6 +9,7 @@ import { CustomStyleItem } from './CustomStyleItem.js';
 import { AlertInfo } from './AlertInfo.js';
 import { CustomStyleSubMenu } from './CustomStyleSubMenu.js';
 import { CustomStyleEditor } from './CustomStyleEditor.js';
+import { DeleteStyleUI } from './DeleteStyleUI.js';
 import {
   applyLatestStyle,
   updateDocument,
@@ -186,26 +187,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
             if (undefined !== val && val.command._customStyle) {
               // do edit,remove,rename code here
               if ('remove' === val.type) {
-                // [FS] IRAD-1223 2021-03-01
-                // Not allow user to remove already in used custom style with numbering, which shall break the heirarchy.
-                if (
-                  !isCustomStyleAlreadyApplied(
-                    val.command._customStyleName,
-                    this.props.editorState
-                  )
-                ) {
-                  removeStyle(val.command._customStyleName).then(() => {
-                    // [FS] IRAD-1099 2020-11-17
-                    // Issue fix: Even the applied style is removed the style name is showing in the editor
-                    this.removeCustomStyleName(
-                      this.props.editorState,
-                      val.command._customStyleName,
-                      this.props.editorView.dispatch
-                    );
-                  });
-                } else {
-                  this.showAlert();
-                }
+                this.showDeleteStyleUI(command, event, 2);
               } else if ('rename' === val.type) {
                 this.showStyleWindow(command, event, 2);
               } else {
@@ -220,7 +202,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
   // [FS] IRAD-1099 2020-11-17
   // Issue fix: Even the applied style is removed the style name is showing in the editor
-  removeCustomStyleName(editorState, removedStyleName, dispatch) {
+  removeCustomStyleName(editorState, removedStyleName, dispatch, selectedStyleName) {
     const { selection, doc } = editorState;
     let { from, to } = selection;
     const { empty } = selection;
@@ -230,7 +212,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     }
 
     let tr = editorState.tr;
-    const customStyleName = RESERVED_STYLE_NONE;
+    const customStyleName = selectedStyleName;
     const tasks = [];
     const textAlignNode = [];
 
@@ -314,6 +296,67 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
           if (this._popUp) {
             this._popUp = null;
           }
+        },
+      }
+    );
+  }
+
+  showDeleteStyleUI(command, _event: SyntheticEvent<Element>, mode) {
+    // close the popup toggling effect
+    if (this._stylePopup) {
+      this._stylePopup.close();
+      this._stylePopup = null;
+    }
+    this._styleName = command._customStyleName;
+    this._stylePopup = createPopUp(
+      DeleteStyleUI,
+      {
+        styleName: command._customStyleName,
+        mode: mode, //edit
+        description: command._customStyle.description,
+        styles: command._customStyle.styles,
+        editorView: this.props.editorView,
+      },
+      {
+        position: atViewportCenter,
+        autoDismiss: false,
+        IsChildDialog: false,
+        onClose: (val) => {
+          if (this._stylePopup) {
+            //handle save style object part here
+            if (undefined !== val) {
+              const { dispatch } = this.props.editorView;
+              // [FS] IRAD-1112 2020-12-14
+              // Issue fix: Duplicate style created while modified the style name.
+              delete val.runtime;
+
+              // update
+              delete val.editorView;
+              let tr;
+
+              // Not allow user to remove already in used custom style with numbering, which shall break the heirarchy.
+              if (
+                !isCustomStyleAlreadyApplied(
+                  val.styleName,
+                  this.props.editorState
+                )
+              ) {
+                removeStyle(val.styleName).then(() => {
+                  // Issue fix: Even the applied style is removed the style name is showing in the editor
+                  this.removeCustomStyleName(
+                    this.props.editorState,
+                    val.styleName,
+                    this.props.editorView.dispatch,
+                    val.selectedStylename
+                  );
+                });
+              } else {
+                this.showAlert();
+              }
+
+            }
+          }
+          this.props.editorView.focus();
         },
       }
     );

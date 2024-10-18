@@ -1,0 +1,63 @@
+.czi-editor-frameset .molsp-customdelete-div {
+  background: #e6e6e6;
+  border-color: #4a4949;
+  border-style: solid;
+  border-width: 1px;
+  box-sizing: border-box !important;
+  color: white;
+  font-family: 'Arial', sans-serif;
+  height: 210px;
+  overflow: hidden;
+  position: relative;
+  width: 387px;
+}
+
+.czi-editor-frameset .molsp-deleteoptions label {
+  box-sizing: content-box !important;
+  color: #464343;
+  font-size: 13px;
+  margin-bottom: 4px;
+  margin-left: -4px;
+  margin-right: 0;
+  margin-top: 4px;
+}
+
+.czi-editor-frameset .molsp-deletefontstyle {
+  font-size: 13px;
+}
+
+.czi-editor-frameset .molsp-delete-stylenameinput {
+  box-sizing: unset !important;
+  color: black;
+  font-family: inherit !important;
+  height: 18px;
+  line-height: unset;
+  margin-bottom: 3px;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+  width: 97%;
+}
+
+.czi-editor-frameset .molsp-delete-btns {
+  margin-bottom: 2px;
+  margin-left: 28px;
+  margin-right: 0;
+  margin-top: 2px;
+  padding-left: 4px;
+  padding-right: 0;
+  /* text-align: right; */
+}
+
+.czi-editor-frameset .molsp-delete-btnsave {
+  margin-left: 8px;
+  margin-right: 7px;
+  margin-top: 2px;
+  padding-left: 6px;
+}
+
+.czi-editor-frameset .molsp-delete-buttonstyle {
+  border-radius: initial;
+  font-size: 13px;
+}

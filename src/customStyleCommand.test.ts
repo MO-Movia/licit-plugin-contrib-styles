@@ -21,7 +21,6 @@ import {
   resetNodeAttrs,
   isValidHeirarchy,
   styleHasNumbering,
-  addElementAfter,
   isBoldFirstWordSelected
 } from './CustomStyleCommand.js';
 import * as cusstylecommand from './CustomStyleCommand';
@@ -34,18 +33,11 @@ import { schema } from 'prosemirror-schema-basic';
 import * as customstyles from './customStyle';
 import {
   setStyles,
-  getCustomStyleByName,
-  isCustomStyleExists,
-  isStylesLoaded,
-  getCustomStyleByLevel,
-  getHidenumberingFlag,
-  setHidenumberingFlag
 } from './customStyle';
 
 import { Transform } from 'prosemirror-transform';
 import type { Style } from './StyleRuntime.js';
 import { doc, p } from 'jest-prosemirror';
-import { captureRejectionSymbol } from 'events';
 
 describe('CustomStyleCommand', () => {
   const styl = {
@@ -138,7 +130,7 @@ describe('CustomStyleCommand', () => {
   });
 
   it('should call isValidHeirarchy', () => {
-    const result = isValidHeirarchy('Normal', 0);
+    isValidHeirarchy('Normal', 0);
     expect(getStyleLevel('Normal')).toBe(0);
   });
 
@@ -1176,7 +1168,7 @@ describe('CustomStyleCommand', () => {
       ],
     });
     // Create the EditorState
-    const mockstate = { schema: schema, doc: doc, selection: { from: 0, to: 1 } } as unknown as EditorState;;
+    const mockstate = { schema: schema, doc: doc, selection: { from: 0, to: 1 } } as unknown as EditorState;
     // const mockstate = {
     //   doc: {
     //     type: 'doc',
@@ -6815,8 +6807,8 @@ describe('handleRemoveMarks', () => {
         };
       },
     } as unknown as Node;
-    const result=  isBoldFirstWordSelected(doc);
-   
+    const result = isBoldFirstWordSelected(doc);
+
     expect(result).toBe(true);
   });
 
@@ -6868,17 +6860,6 @@ describe('resetNodeAttrs', () => {
       capco: null,
       styleName: 'FM_chsubpara1',
     };
-    const customstyle = {
-      align: 'left',
-      color: null,
-      id: null,
-      indent: null,
-      lineSpacing: '125%',
-      paddingBottom: null,
-      paddingTop: null,
-      capco: null,
-      styleName: 'customstyle-name',
-    };
     const mockSchema = new Schema({
       nodes: {
         doc: { content: 'image' },
@@ -6915,26 +6896,12 @@ describe('resetNodeAttrs', () => {
       schema: mockSchema,
       plugins: [],
     });
-    const el = document.createElement('div');
-    const mockEditorView = {
-      state: editorState,
-      dispatch: jest.fn(),
-      posAtCoords: () => {
-        return {
-          pos: 1,
-          inside: 1,
-        };
-      },
-      destroy: jest.fn(),
-      dom: el,
-    };
     const tr = {
       removeMark: () => {
         return {};
       },
     } as unknown as Transform;
-    const nodeAttrsValue = addElementEx(nodeattrs, editorState, tr, 0, false,2,3);
-    // expect(nodeAttrsValue.styleName).toBe(customstyle.styleName);
+    addElementEx(nodeattrs, editorState, tr, 0, false, 2, 3);
   });
 });
 

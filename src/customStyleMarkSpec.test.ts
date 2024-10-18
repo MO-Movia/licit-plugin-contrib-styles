@@ -20,7 +20,7 @@ describe('getAttrs', () => {
         dom2.setAttribute('overridden', '123');
         const base = undefined;
         expect(getMarkAttrs(base, dom2)).toBeUndefined();
-    }); 
+    });
 });
 
 describe('toMarkDOM', () => {

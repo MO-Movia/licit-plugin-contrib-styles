@@ -93,7 +93,7 @@ describe('toCustomStyleDOM', () => {
         'data-show-bullet': true,
         'data-style-level': '1',
         'hide-style-level': false,
-        "prefix": "001",
+        'prefix': '001',
         style:
           'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;counter-increment: C1 ;',
         styleName: 'FS_B01',
@@ -159,9 +159,9 @@ describe('toCustomStyleDOM', () => {
     };
     expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
-      {         
-        "style": "text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;",
-        "styleName":  "2Normal-@#$-",
+      {
+        'style': 'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;',
+        'styleName':  '2Normal-@#$-',
       },
     ]);
   });

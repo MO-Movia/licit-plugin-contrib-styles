@@ -128,7 +128,9 @@
   color: gray;
   cursor: text;
   flex-direction: column;
-  font: 400 11px arial, sans-serif;
+  font:
+    400 11px arial,
+    sans-serif;
   margin: 0;
   margin-left: 0;
   margin-right: 20px;
@@ -177,8 +179,6 @@
   width: 83px;
 }
 
-
-
 .czi-editor-frameset .molsp-btns {
   margin-bottom: 2px;
   margin-left: 28px;
@@ -195,7 +195,6 @@
   margin-top: 2px;
   padding-left: 6px;
 }
-
 
 .czi-editor-frameset .molsp-visible-sampletext {
   color: black;
@@ -326,7 +325,6 @@
   border-color: transparent;
 }
 
-
 .czi-editor-frameset .molsp-fontstyle {
   font-size: 13px;
 }
@@ -343,7 +341,7 @@
   box-sizing: border-box;
   margin-left: -1px;
   padding: 5px;
-  width:100%;
+  width: 100%;
 }
 
 .czi-editor-frameset .molsp-hierarchydiv label {
@@ -351,7 +349,7 @@
   color: #464343;
   font-size: 12px;
   margin-bottom: 4px;
-  margin-left: -4px;
+  margin-left: 0;
   margin-right: 0;
   margin-top: 4px;
 }
@@ -380,4 +378,16 @@ div[disabled='disabled'] {
   color: white;
   padding: 20px;
   width: 340px;
+}
+
+.czi-editor-frameset .molsp-hierarchydiv .formatting-fieldset {
+  width: 100%;
+  min-width: 0;
+  padding-left: 10px;
+  margin: 0;
+  border: inherit;
+}
+
+.czi-editor-frameset .molsp-hierarchydiv .formatting-legend {
+  all: unset;
 }

@@ -275,7 +275,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
               this.state.styles.prefixValue
             )}</strong>${textSample}`;
           } else {
-            sampleDiv.innerText = `${this.getNumberingLevel(
+            sampleDiv.innerHTML = `${this.getNumberingLevel(
               this.state.styles.styleLevel,
               this.state.styles.prefixValue
             )}${textSample}`;
@@ -1329,8 +1329,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   </select>
                 </div>
                 <div className="molsp-hierarchydiv" style={{ display: 'flex' }}>
-                  <fieldset style={{ width: '100%' }}>
-                    <legend>Formatting</legend>
+                  <fieldset className="formatting-fieldset">
+                    <legend className="formatting-legend">Formatting</legend>
                     <div>
                       <label>
                         <input
@@ -1546,7 +1546,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                 <div className="molsp-indentdiv">
                   <span
                     style={{
-                      marginLeft: '-7px',
+                      marginLeft: '0',
                       marginTop: '2px',
                       color: '#444',
                     }}

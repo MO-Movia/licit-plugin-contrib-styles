@@ -15,6 +15,7 @@ import {
   saveStyle,
   getStylesAsync,
   addStyleToList,
+  getCustomStyleByName
 } from '../customStyle.js';
 import {
   RESERVED_STYLE_NONE,
@@ -544,6 +545,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     if (
       this.state.mode > 0 &&
       this.isCustomStyleAlreadyApplied() &&
+      this.isListStyleAlreadySelected() &&
       false === val.target.checked
     ) {
       this.showAlert();
@@ -582,6 +584,11 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       }
     });
     return found;
+  }
+
+  isListStyleAlreadySelected() {
+    const style = getCustomStyleByName(this.state.styleName);
+    return style?.styles?.isList;
   }
 
   showAlert() {

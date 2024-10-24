@@ -116,7 +116,7 @@ export class CustomstylePlugin extends Plugin {
     });
   }
 
-  initButtonCommands() {
+  initButtonCommands(theme: string): unknown {
     return {
       '[H1] Header 1': CustomstyleDropDownCommand,
     };
@@ -515,7 +515,7 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
 
   const node = nextState.tr?.doc?.nodeAt(startPos);
   const style = getCustomStyleByName(node?.attrs?.styleName);
-  if (!style?.styles?.isList) {
+  if (undefined !== style?.styles?.isList && !style?.styles?.isList) {
     if (validateStyleName(node)) {
       if (
         node.content?.content &&
@@ -628,7 +628,7 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
     const nextLineStyle = getCustomStyleByName(nextLineStyleName);
     if (nextLineStyle?.styles) {
       newattrs.styleName = nextLineStyleName;
-      newattrs.indent = nextLineStyle.styles.indent;
+      newattrs.indent = nextLineStyle.styles.isLevelbased ? nextLineStyle.styles.styleLevel : nextLineStyle.styles.indent;
       newattrs.align = nextLineStyle.styles.align;
       // KNITE-864 08-03-2024 InnerLink functionality change
       if (newattrs.innerLink) {

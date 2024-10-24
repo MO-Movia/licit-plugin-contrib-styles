@@ -7,7 +7,7 @@ import { EditorState } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
 import React from 'react';
-import { CustomButton, createPopUp } from '@modusoperandi/licit-ui-commands';
+import { CustomButton, createPopUp,ThemeContext } from '@modusoperandi/licit-ui-commands';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { uuid } from './Uuid.js';
 import { CustomMenuUI } from './CustomMenuUI.js';
@@ -33,12 +33,14 @@ export class CustomMenuButton extends React.PureComponent<
   state = {
     expanded: false,
   };
-  _menu = null;
+  static contextType = ThemeContext;
+  _menu  = null;
   _id = uuid();
 
   render(): React.ReactElement {
     const { className, label, icon, title } = this.props;
     const { expanded } = this.state;
+    const theme_1 = this.context;
     const buttonClassName = cx(className, {
       'czi-custom-menu-button': true,
       expanded,
@@ -52,6 +54,7 @@ export class CustomMenuButton extends React.PureComponent<
         id={this._id}
         label={label}
         onClick={this._onClick}
+        theme={theme_1.toString()}
         title={title}
       />
     );
@@ -82,6 +85,7 @@ export class CustomMenuButton extends React.PureComponent<
     const menuProps = {
       ...this.props,
       onCommand: this._onCommand,
+      theme:this.context
       // popupId: this._popupId
     };
     if (menu) {

@@ -66,6 +66,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     const children1 = [];
     let counter = 0;
     let selecteClassName = '';
+    const theme = this.props.theme;
     const selectedName = this.getTheSelectedCustomStyle(this.props.editorState);
     commandGroups.forEach((group) => {
       Object.keys(group).forEach((label) => {
@@ -118,15 +119,16 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
         );
       });
     });
+    const className = 'molsp-dropbtn ' + theme;
     return (
       <div>
         <span data-cy="cyStyleDropdown">
-          <div className="molsp-dropbtn" id={this._id}>
-            <div className="molsp-stylenames">{children}</div>
+        <div className={className} id={this._id}>
+          <div className="molsp-stylenames">{children}</div>
 
-            <hr></hr>
-            {children1}
-          </div>
+          <hr></hr>
+          {children1}
+        </div>
         </span>
       </div>
     );

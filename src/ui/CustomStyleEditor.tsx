@@ -1419,7 +1419,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             <p className="molsp-formp">Prefix:</p>
                             <input
                               disabled={
-                                this.state.disableControl ||
                                 this.state.styleName === RESERVED_STYLE_NONE
                               }
                               onChange={this.handlePrefix.bind(this)}
@@ -1561,11 +1560,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                 <div className="molsp-hierarchydiv">
                   <div className="molsp-settingsdiv">
                     <input
-                      checked={
-                        (this.state.styles.nextLineStyleName ===
-                          this.state.styleName &&
-                          !this.state.otherStyleSelected) ||
-                        this.state.styleName
+                       checked={
+                        this.state.styles.nextLineStyleName ===
+                          this.state.styleName && !this.state.otherStyleSelected
                       }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 1)}
@@ -1588,10 +1585,12 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <div className="molsp-settingsdiv">
                     <input
                       disabled={
-                        this.state.styles.isList === true ||
-                        this.state.styleName === RESERVED_STYLE_NONE
+                        this.state.styles.isList === true
                       }
-                      checked={this.state.mode === 0}
+                      checked={
+                        this.state.styles.nextLineStyleName ===
+                        RESERVED_STYLE_NONE
+                      }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 0)}
                       style={{
@@ -1613,10 +1612,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <div className="molsp-indentdiv">
                     <input
                       checked={this.state.otherStyleSelected}
-                      disabled={
-                        this.state.styles.isList === true ||
-                        this.state.styleName === RESERVED_STYLE_NONE
-                      }
+                      disabled={this.state.styles.isList === true}
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 2)}
                       style={{

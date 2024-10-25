@@ -1375,16 +1375,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             this.state.styleName === RESERVED_STYLE_NONE
                           }
                           name="formatting"
-                          onChange={() => {
-                            this.setState({
-                              styles: {
-                                ...this.state.styles,
-                                hasNumbering: true,
-                                boldNumbering: false,
-                                hasBullet: false,
-                              },
-                            });
-                          }}
+                          onChange={this.handleNumbering.bind(this)}
                           type="radio"
                           value="numbering"
                         />

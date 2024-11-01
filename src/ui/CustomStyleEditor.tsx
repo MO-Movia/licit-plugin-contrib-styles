@@ -1230,7 +1230,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <div className="molsp-hierarchydiv">
                       <label>
                         <input
-                          checked={this.state.selectedStyle === 'userDefined'}
+                          checked={!this.state.styles.isList}
                           disabled={
                             this.state.disableControl ||
                             this.state.styleName === RESERVED_STYLE_NONE
@@ -1244,7 +1244,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       <br />
                       <label>
                         <input
-                          checked={this.state.selectedStyle === 'listStyle'}
+                          checked={this.state.styles.isList}
                           disabled={
                             this.state.disableControl ||
                             this.state.styleName === RESERVED_STYLE_NONE

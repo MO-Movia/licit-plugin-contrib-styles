@@ -272,11 +272,17 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       } else {
         sampleDiv.innerText = SAMPLE_TEXT;
       }
-    
-      if (this.state.styles.styleLevel && (this.state.styles.hasNumbering || this.state.styles.isList)) {
-        const numberingLevel = this.getNumberingLevel(this.state.styles.styleLevel, this.state.styles.prefixValue);
+
+      if (
+        this.state.styles.styleLevel &&
+        (this.state.styles.hasNumbering || this.state.styles.isList)
+      ) {
+        const numberingLevel = this.getNumberingLevel(
+          this.state.styles.styleLevel,
+          this.state.styles.prefixValue
+        );
         const numberingNode = document.createTextNode(numberingLevel);
-    
+
         sampleDiv.innerHTML = ''; // Clear previous content
         if (this.state.styles.boldNumbering) {
           const boldElement = document.createElement('strong');
@@ -287,19 +293,19 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         }
         sampleDiv.appendChild(document.createTextNode(textSample));
       }
-    
+
       if (this.state.styles.styleLevel && this.state.styles.hasBullet) {
         const bulletDetails = getDetailsBullet(this.state.styles.bulletLevel);
         const bulletSymbol = document.createElement('strong');
         bulletSymbol.style.color = bulletDetails.color;
         bulletSymbol.innerText = bulletDetails.symbol;
-    
+
         sampleDiv.innerHTML = ''; // Clear previous content
         sampleDiv.appendChild(bulletSymbol);
         sampleDiv.appendChild(document.createTextNode(textSample));
       }
     }
-    
+
     return style;
   }
   // [FS] IRAD-1111 2020-12-10
@@ -470,8 +476,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       const value = customStyles.find((u) => u.styleName === e.target.value);
 
       // FIX: not able to modify and save the populated style
-      if (value) value.mode ??= 3;
-
+      if (value) value.mode = 3;
 
       this.setState((prevState) => ({ ...prevState, ...value }));
       this.setNextLineStyle(this.state.styles.nextLineStyleName);
@@ -560,7 +565,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       this.showAlert();
     } else {
       this.setState((prevState) => ({
-        ...prevState, 
+        ...prevState,
         selectedStyle,
         styles: {
           ...prevState.styles,
@@ -572,7 +577,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       }));
     }
   }
-  
 
   handlePrefix(val) {
     //edit mode
@@ -655,14 +659,18 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
     if (this.state.styleName === RESERVED_STYLE_NONE) {
       acc[2].classList.toggle('molsp-accactive');
-      const mp2 = document.getElementsByClassName('molsp-panel2')[0] as HTMLElement;
+      const mp2 = document.getElementsByClassName(
+        'molsp-panel2'
+      )[0] as HTMLElement;
       mp2.classList.remove('expanded'); // Collapse it
     } else {
-      const mp2 = document.getElementsByClassName('molsp-panel2')[0] as HTMLElement;
+      const mp2 = document.getElementsByClassName(
+        'molsp-panel2'
+      )[0] as HTMLElement;
       setTimeout(() => {
         mp2.classList.add('expanded'); // Expand it
       }, 0);
-    }    
+    }
 
     const mp = document.getElementsByClassName('molsp-panel')[0] as HTMLElement;
     mp.style.maxHeight = mp.scrollHeight + 'px';
@@ -1324,7 +1332,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       this.state.styleName === RESERVED_STYLE_NONE
                     }
                     id="levelValue"
-                      onChange={this.onLevelChange.bind(this)}
+                    onChange={this.onLevelChange.bind(this)}
                     value={this.state.styles.styleLevel || ''}
                   >
                     {LEVEL_VALUES.map((value) => (
@@ -1381,7 +1389,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             this.state.styleName === RESERVED_STYLE_NONE
                           }
                           name="formatting"
-                        onChange={this.handleNumbering.bind(this)}
+                          onChange={this.handleNumbering.bind(this)}
                           type="radio"
                           value="numbering"
                         />
@@ -1404,7 +1412,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                                 ) ||
                                 this.state.styleName === RESERVED_STYLE_NONE
                               }
-                        onChange={this.handleBoldNumbering.bind(this)}
+                              onChange={this.handleBoldNumbering.bind(this)}
                               type="checkbox"
                             />
                             Bold
@@ -1440,7 +1448,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             this.state.styleName === RESERVED_STYLE_NONE
                           }
                           name="bullet"
-                        onChange={this.handleBulletPoints.bind(this)}
+                          onChange={this.handleBulletPoints.bind(this)}
                           type="radio"
                         />
                         Bullet{' '}
@@ -1455,7 +1463,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                               this.state.styleName === RESERVED_STYLE_NONE
                             }
                             id="bulletValue"
-                          onChange={this.onBulletLevelChange.bind(this)}
+                            onChange={this.onBulletLevelChange.bind(this)}
                             style={{ textAlign: 'center' }}
                             value={this.state.styles.bulletLevel || ''}
                           >
@@ -1557,7 +1565,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                 <div className="molsp-hierarchydiv">
                   <div className="molsp-settingsdiv">
                     <input
-                       checked={
+                      checked={
                         this.state.styles.nextLineStyleName ===
                           this.state.styleName && !this.state.otherStyleSelected
                       }

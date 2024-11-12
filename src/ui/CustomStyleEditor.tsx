@@ -249,48 +249,57 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       // Issue: numbering sample not working when select Bold first sentence
       let textSample = SAMPLE_TEXT;
       if (this.state.styles.boldPartial) {
+        const fragment = document.createDocumentFragment();
         if (this.state.styles.boldSentence) {
-          const content = SAMPLE_TEXT.split('.');
-          sampleDiv.innerHTML = `<strong>${content[0]}</strong> ${content[1]}`;
+          const [firstSentence, ...rest] = SAMPLE_TEXT.split('.');
+          const boldElement = document.createElement('strong');
+          boldElement.innerText = `${firstSentence}.`;
+          fragment.appendChild(boldElement);
+          fragment.appendChild(document.createTextNode(rest.join('.')));
         } else {
-          const content = SAMPLE_TEXT.split(' ');
-          sampleDiv.innerHTML = `<strong>${content[0]}</strong> ${SAMPLE_TEXT}`;
+          const [firstWord, ...rest] = SAMPLE_TEXT.split(' ');
+          const boldElement = document.createElement('strong');
+          boldElement.innerText = firstWord;
+          fragment.appendChild(boldElement);
+          fragment.appendChild(document.createTextNode(` ${rest.join(' ')}`));
         }
-        textSample = sampleDiv.innerHTML;
+        sampleDiv.innerHTML = ''; // Clear previous content
+        sampleDiv.appendChild(fragment);
+        textSample = sampleDiv.innerText;
         // [FS] IRAD-1473 2021-06-30
         // Style Example not showing properly when select Bold and Bold First Sentence
         style.fontWeight = 'normal';
-      }
-      if (
-        this.state.styles.styleLevel &&
-        (this.state.styles.hasNumbering || this.state.styles.isList)
-      ) {
-        // [FS] IRAD-1137 2021-01-11
-        // Issue fix : The Preview text is not showing the numbering in bold after Bold Numbering is enabled.
-        const sampleDiv = document.getElementById('sampletextdiv');
-        if (sampleDiv) {
-          if (this.state.styles.boldNumbering) {
-            sampleDiv.innerHTML = `<strong>${this.getNumberingLevel(
-              this.state.styles.styleLevel,
-              this.state.styles.prefixValue
-            )}</strong>${textSample}`;
-          } else {
-            sampleDiv.innerHTML = `${this.getNumberingLevel(
-              this.state.styles.styleLevel,
-              this.state.styles.prefixValue
-            )}${textSample}`;
-          }
-        }
       } else {
-        sampleDiv.innerText = `${SAMPLE_TEXT}`;
-        sampleDiv.innerHTML = textSample;
+        sampleDiv.innerText = SAMPLE_TEXT;
       }
-
-      if (this.state.styles.styleLevel && this.state.styles?.hasBullet) {
+    
+      if (this.state.styles.styleLevel && (this.state.styles.hasNumbering || this.state.styles.isList)) {
+        const numberingLevel = this.getNumberingLevel(this.state.styles.styleLevel, this.state.styles.prefixValue);
+        const numberingNode = document.createTextNode(numberingLevel);
+    
+        sampleDiv.innerHTML = ''; // Clear previous content
+        if (this.state.styles.boldNumbering) {
+          const boldElement = document.createElement('strong');
+          boldElement.appendChild(numberingNode);
+          sampleDiv.appendChild(boldElement);
+        } else {
+          sampleDiv.appendChild(numberingNode);
+        }
+        sampleDiv.appendChild(document.createTextNode(textSample));
+      }
+    
+      if (this.state.styles.styleLevel && this.state.styles.hasBullet) {
         const bulletDetails = getDetailsBullet(this.state.styles.bulletLevel);
-        sampleDiv.innerHTML = `<strong style=color:${bulletDetails.color}>${bulletDetails.symbol}</strong>${textSample}`;
+        const bulletSymbol = document.createElement('strong');
+        bulletSymbol.style.color = bulletDetails.color;
+        bulletSymbol.innerText = bulletDetails.symbol;
+    
+        sampleDiv.innerHTML = ''; // Clear previous content
+        sampleDiv.appendChild(bulletSymbol);
+        sampleDiv.appendChild(document.createTextNode(textSample));
       }
     }
+    
     return style;
   }
   // [FS] IRAD-1111 2020-12-10
@@ -696,7 +705,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
               <select
                 className="molsp-stylenameinput molsp-fontstyle"
                 defaultValue={'DEFAULT'}
-                onChange={(e) => this.onSelectCustomStyle(e)}
+                onChange={this.onSelectCustomStyle.bind(this)}
                 style={{ height: '24px' }}
               >
                 <option disabled value="DEFAULT">
@@ -726,7 +735,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                 disabled={this.state.mode === 1 || this.state.mode === 3}
                 id="txtName"
                 key="name"
-                onChange={(e) => this.onStyleClick('name', e)}
+                onChange={this.onStyleClick.bind(this, 'name')}
                 type="text"
                 value={this.state.styleName || ''}
               />
@@ -736,7 +745,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
               <input
                 className="molsp-stylenameinput molsp-fontstyle"
                 key="description"
-                onChange={(e) => this.onStyleClick('description', e)}
+                onChange={this.onStyleClick.bind(this, 'description')}
                 type="text"
                 value={this.state.description || ''}
               />
@@ -826,7 +835,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <select
                     className="molsp-fonttype molsp-fontstyle"
                     data-cy="cyStyleFont"
-                    onChange={(e) => this.onFontNameChange(e)}
+                    onChange={this.onFontNameChange.bind(this)}
                     value={this.state.styles.fontName || 'Tahoma'}
                   >
                     {FONT_TYPE_NAMES.map((value) => (
@@ -838,7 +847,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <select
                     className="molsp-fontsize molsp-fontstyle"
                     data-cy="cyStyleFontSize"
-                    onChange={(e) => this.onFontSizeChange(e)}
+                    onChange={this.onFontSizeChange.bind(this)}
                     value={this.state.styles.fontSize || 12}
                   >
                     {FONT_PT_SIZES.map((value) => (
@@ -865,7 +874,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           ? 'czi-custom-button use-icon active molsp-markbuttons'
                           : 'czi-custom-button use-icon molsp-markbuttons molsp-formatbuttons'
                       }
-                      onClick={(e) => this.onStyleClick('strong', e)}
+                      onClick={this.onStyleClick.bind(this, 'strong')}
                     >
                       <span
                         className="molsp-iconspan czi-icon format_bold editor-markbuttons"
@@ -890,7 +899,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           ? 'czi-custom-button use-icon active molsp-markbuttons'
                           : 'czi-custom-button use-icon molsp-markbuttons molsp-formatbuttons'
                       }
-                      onClick={(e) => this.onStyleClick('em', e)}
+                      onClick={this.onStyleClick.bind(this, 'em')}
                     >
                       <span className="molsp-iconspan czi-icon format_italic editor-markbuttons">
                         format_italic
@@ -913,7 +922,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           ? 'czi-custom-button use-icon active molsp-markbuttons'
                           : 'czi-custom-button use-icon molsp-markbuttons molsp-formatbuttons'
                       }
-                      onClick={(e) => this.onStyleClick('underline', e)}
+                      onClick={this.onStyleClick.bind(this, 'underline')}
                     >
                       <span className="molsp-iconspan czi-icon  format_underline editor-markbuttons">
                         format_underline
@@ -932,7 +941,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-disabled="false"
                       aria-pressed="false"
                       className="czi-custom-button use-icon molsp-markbuttons"
-                      onClick={(e) => this.showColorDialog(true, e)}
+                      onClick={this.showColorDialog.bind(this, true)}
                     >
                       <span
                         className="molsp-iconspan czi-icon format_color_text editor-markbuttons"
@@ -959,7 +968,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-disabled="false"
                       aria-pressed="false"
                       className="czi-custom-button use-icon molsp-markbuttons"
-                      onClick={(e) => this.showColorDialog(false, e)}
+                      onClick={this.showColorDialog.bind(this, false)}
                     >
                       <span
                         className="molsp-iconspan czi-icon border_color editor-markbuttons"
@@ -982,7 +991,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <label>
                       <input
                         checked={this.state.styles.boldPartial}
-                        onChange={(e) => this.handleBoldPartial(e)}
+                        onChange={this.handleBoldPartial.bind(this)}
                         type="checkbox"
                       />
                       Bold the
@@ -993,7 +1002,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       checked={this.state.styles.boldSentence}
                       disabled={!this.state.styles.boldPartial}
                       name="boldscentence"
-                      onChange={(e) => this.onScentenceRadioChanged(e)}
+                      onChange={this.onScentenceRadioChanged.bind(this)}
                       style={{ marginLeft: '21px' }}
                       type="radio"
                       value="0"
@@ -1011,7 +1020,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       checked={!this.state.styles.boldSentence}
                       disabled={!this.state.styles.boldPartial}
                       name="boldscentence"
-                      onChange={(e) => this.onScentenceRadioChanged(e)}
+                      onChange={this.onScentenceRadioChanged.bind(this)}
                       style={{ marginLeft: '21px' }}
                       type="radio"
                       value="1"
@@ -1033,7 +1042,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       <input
                         checked={this.state.styles.toc}
                         data-cy="cyStyleTOC"
-                        onChange={(e) => this.handleTOC(e)}
+                        onChange={this.handleTOC.bind(this)}
                         type="checkbox"
                       />
                       TOC
@@ -1078,7 +1087,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           ? 'czi-custom-button use-icon molsp-activealignbuttons'
                           : 'czi-custom-button molsp-alignbuttons'
                       }
-                      onClick={() => this.onAlignButtonClick('left')}
+                      onClick={this.onAlignButtonClick.bind(this, 'left')}
                     >
                       <span className="molsp-iconspan czi-icon format_align_left">
                         format_align_left
@@ -1100,7 +1109,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           ? 'czi-custom-button use-icon molsp-activealignbuttons'
                           : 'czi-custom-button  molsp-alignbuttons'
                       }
-                      onClick={() => this.onAlignButtonClick('center')}
+                      onClick={this.onAlignButtonClick.bind(this, 'center')}
                     >
                       <span className="molsp-iconspan czi-icon format_align_center">
                         format_align_center
@@ -1122,7 +1131,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           ? 'czi-custom-button use-icon molsp-activealignbuttons'
                           : 'czi-custom-button  molsp-alignbuttons'
                       }
-                      onClick={() => this.onAlignButtonClick('right')}
+                      onClick={this.onAlignButtonClick.bind(this, 'right')}
                     >
                       <span className="molsp-iconspan czi-icon format_align_right">
                         format_align_right
@@ -1144,7 +1153,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           ? 'czi-custom-button use-icon molsp-activealignbuttons'
                           : 'czi-custom-button  molsp-alignbuttons'
                       }
-                     onClick={() => this.onAlignButtonClick('justify')}
+                      onClick={this.onAlignButtonClick.bind(this, 'justify')}
                     >
                       <span className="molsp-iconspan czi-icon format_align_justify">
                         format_align_justify
@@ -1155,7 +1164,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                 <p className="molsp-formp">Line Spacing:</p>
                 <select
                   className="molsp-linespacing molsp-fontstyle"
-                  onChange={(e) => this.onLineSpaceChange(e)}
+                  onChange={this.onLineSpaceChange.bind(this)}
                   value={this.state.styles.lineHeight || ''}
                 >
                   {LINE_SPACE.map((value) => (
@@ -1173,7 +1182,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       className="molsp-spacinginput molsp-fontstyle"
                       data-cy="cyStyleBeforeSpace"
                       key="before"
-                      onChange={(e) => this.onStyleClick('before', e)} 
+                      onChange={this.onStyleClick.bind(this, 'before')}
                       type="text"
                       value={this.state.styles.paragraphSpacingBefore || ''}
                     />
@@ -1186,7 +1195,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       className="molsp-spacinginput molsp-fontstyle"
                       data-cy="cyStyleAfterSpace"
                       key="after"
-                      onChange={(e) => this.onStyleClick('after', e)}
+                      onChange={this.onStyleClick.bind(this, 'after')}
                       type="text"
                       value={this.state.styles.paragraphSpacingAfter || ''}
                     />
@@ -1246,7 +1255,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             this.state.disableControl ||
                             this.state.styleName === RESERVED_STYLE_NONE
                           }
-                          onChange={(e) => this.handleList(e)}
+                          onChange={this.handleList.bind(this)}
                           type="radio"
                           value="listStyle"
                         />
@@ -1286,7 +1295,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             this.state.disableControl ||
                             this.state.styleName === RESERVED_STYLE_NONE
                           }
-                          onChange={(e) => this.handleList(e)}
+                          onChange={this.handleList.bind(this)}
                           type="radio"
                           value="listStyle"
                         />
@@ -1315,7 +1324,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       this.state.styleName === RESERVED_STYLE_NONE
                     }
                     id="levelValue"
-                    onChange={(e) =>this.onLevelChange(e)}
+                      onChange={this.onLevelChange.bind(this)}
                     value={this.state.styles.styleLevel || ''}
                   >
                     {LEVEL_VALUES.map((value) => (
@@ -1372,7 +1381,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             this.state.styleName === RESERVED_STYLE_NONE
                           }
                           name="formatting"
-                          onChange={(e) => this.handleNumbering(e)}
+                        onChange={this.handleNumbering.bind(this)}
                           type="radio"
                           value="numbering"
                         />
@@ -1395,7 +1404,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                                 ) ||
                                 this.state.styleName === RESERVED_STYLE_NONE
                               }
-                              onChange={(e) => this.handleBoldNumbering(e)}
+                        onChange={this.handleBoldNumbering.bind(this)}
                               type="checkbox"
                             />
                             Bold
@@ -1431,7 +1440,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             this.state.styleName === RESERVED_STYLE_NONE
                           }
                           name="bullet"
-                          onChange={(e) => this.handleBulletPoints(e)}
+                        onChange={this.handleBulletPoints.bind(this)}
                           type="radio"
                         />
                         Bullet{' '}
@@ -1446,7 +1455,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                               this.state.styleName === RESERVED_STYLE_NONE
                             }
                             id="bulletValue"
-                            onChange={(e) => this.onBulletLevelChange(e)}
+                          onChange={this.onBulletLevelChange.bind(this)}
                             style={{ textAlign: 'center' }}
                             value={this.state.styles.bulletLevel || ''}
                           >
@@ -1471,7 +1480,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         this.state.styleName === RESERVED_STYLE_NONE
                       }
                       name="indenting"
-                      onChange={(e) => this.onIndentRadioChanged(e)}
+                      onChange={this.onIndentRadioChanged.bind(this)}
                       type="radio"
                       value="0"
                     />
@@ -1493,7 +1502,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         this.state.styleName === RESERVED_STYLE_NONE
                       }
                       name="indenting"
-                      onChange={(e) =>this.onIndentRadioChanged(e)}
+                      onChange={this.onIndentRadioChanged.bind(this)}
                       type="radio"
                       value="1"
                     />
@@ -1514,7 +1523,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           this.state.styles.isList === true ||
                           this.state.styleName === RESERVED_STYLE_NONE
                         }
-                        onChange={(e) => this.onIndentChange(e)}
+                        onChange={this.onIndentChange.bind(this)}
                         style={{ width: '99px !important' }}
                         value={this.state.styles.indent || ''}
                       >
@@ -1553,7 +1562,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           this.state.styleName && !this.state.otherStyleSelected
                       }
                       name="nextlinestyle"
-                      onChange={() => this.onNextLineStyleSelected(1)}
+                      onChange={this.onNextLineStyleSelected.bind(this, 1)}
                       style={{
                         marginLeft: '10px',
                       }}
@@ -1578,7 +1587,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         RESERVED_STYLE_NONE
                       }
                       name="nextlinestyle"
-                      onChange={() => this.onNextLineStyleSelected(0)}
+                      onChange={this.onNextLineStyleSelected.bind(this, 0)}
                       style={{
                         marginLeft: '10px',
                       }}
@@ -1600,7 +1609,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       checked={this.state.otherStyleSelected}
                       disabled={this.state.styles.isList === true}
                       name="nextlinestyle"
-                      onChange={() => this.onNextLineStyleSelected(2)}
+                      onChange={this.onNextLineStyleSelected.bind(this, 2)}
                       style={{
                         marginLeft: '9px',
                       }}
@@ -1622,7 +1631,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         className="molsp-fontstyle molsp-stylenameinput"
                         disabled={this.state.styles.isList === true}
                         id="nextStyleValue"
-                        onChange={(e) => this.onOtherStyleSelectionChanged(e)}
+                        onChange={this.onOtherStyleSelectionChanged.bind(this)}
                         style={{
                           height: '20px',
                           marginLeft: '7px',
@@ -1654,7 +1663,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
           <button
             className="molsp-btnsave molsp-buttonstyle"
             data-cy="cyStyleSave"
-            onClick={() => this._save()}
+            onClick={this._save.bind(this)}
             onKeyDown={this.handleKeyDown}
           >
             Save

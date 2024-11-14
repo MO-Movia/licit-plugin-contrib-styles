@@ -478,8 +478,41 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       // FIX: not able to modify and save the populated style
       if (value) value.mode = 3;
 
-      this.setState((prevState) => ({ ...prevState, ...value }));
-      this.setNextLineStyle(this.state.styles.nextLineStyleName);
+      this.setState(
+        (prevState) => ({ ...prevState, ...value }),
+        () => {
+          const isReservedStyleNone =
+            this.state.styleName === RESERVED_STYLE_NONE;
+
+          const mp2 = document.getElementsByClassName(
+            'molsp-panel2'
+          )[0] as HTMLElement;
+          const acc2 = document.getElementsByClassName(
+            'molsp-licit-accordion'
+          )[2] as HTMLElement;
+
+          if (isReservedStyleNone) {
+            acc2.classList.remove('molsp-accactive');
+            mp2.style.maxHeight = null;
+          } else {
+            acc2.classList.add('molsp-accactive');
+            mp2.style.maxHeight = '320px';
+          }
+
+          (
+            document.getElementsByClassName('molsp-panel')[0] as HTMLElement
+          ).style.maxHeight = '100%';
+          (
+            document.getElementsByClassName('molsp-panel1')[0] as HTMLElement
+          ).style.maxHeight = '100%';
+          (
+            document.getElementsByClassName('molsp-panel3')[0] as HTMLElement
+          ).style.maxHeight = '100%';
+
+          // Ensure the next line style is set
+          this.setNextLineStyle(this.state.styles.nextLineStyleName);
+        }
+      );
     }
   }
 
@@ -662,13 +695,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       const mp2 = document.getElementsByClassName(
         'molsp-panel2'
       )[0] as HTMLElement;
-      mp2.classList.remove('expanded'); // Collapse it
+      mp2.style.maxHeight = null;
     } else {
       const mp2 = document.getElementsByClassName(
         'molsp-panel2'
       )[0] as HTMLElement;
       setTimeout(() => {
-        mp2.classList.add('expanded'); // Expand it
+        mp2.style.maxHeight = '320px';
       }, 0);
     }
 

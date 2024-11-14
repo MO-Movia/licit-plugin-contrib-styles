@@ -391,13 +391,3 @@ div[disabled='disabled'] {
 .czi-editor-frameset .molsp-hierarchydiv .formatting-legend {
   all: unset;
 }
-
-.molsp-panel2 {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease-out;
-}
-
-.molsp-panel2.expanded {
-  max-height: 320px;
-}

@@ -11,7 +11,7 @@ function convertToBoolean(value) {
     return value;
   }
   else {
-    return value === 'true' ? true : false;
+    return value === 'true'
   }
 }
 function getAttrs(base: getAttrsFn | undefined, dom: HTMLElement) {

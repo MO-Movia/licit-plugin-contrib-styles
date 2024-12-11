@@ -21,8 +21,8 @@ describe('convertToCSSPTValue', () => {
     expect(convertToCSSPTValue('12pt')).toBe(12);
     expect(convertToCSSPTValue('24pt')).toBe(24);
   });
-  xit('should return point value as is', () => {
-    const result = convertToCSSPTValue('12.5px');
-    expect(result).toBe(12.5 * PX_TO_PT_RATIO);
+  it('should return point value as is', () => {
+    const result = convertToCSSPTValue('12px');
+    expect(result).toBe(12 * PX_TO_PT_RATIO);
   });
 });

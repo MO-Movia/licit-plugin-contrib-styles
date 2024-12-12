@@ -1208,7 +1208,7 @@ export function addElementEx(
     addElementAfter(nodeAttrs, state, tr, startPos, nextLevel);
   } else {
     level = previousLevel ? previousLevel - 1 : 0;
-    counter = currentLevel ? currentLevel : 0;
+    counter = currentLevel ?? 0;
   }
 
   for (let index = level; index > counter; index--) {

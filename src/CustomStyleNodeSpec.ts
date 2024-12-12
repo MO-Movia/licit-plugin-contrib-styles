@@ -59,7 +59,9 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
     isListStyle,
     prefix,
   } = getStyle(node.attrs);
-  style && (output[1].style = style);
+  if (style) {
+    output[1].style = style;
+  }
   if (styleLevel) {
     if (isListStyle) {
       if (node.attrs.indent !== null) {

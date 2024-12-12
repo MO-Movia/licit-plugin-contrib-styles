@@ -16,7 +16,7 @@ import {
   applyStyleForPreviousEmptyParagraph,
   applyStyles,
   applyStyleForEmptyParagraph,
-  isDocChanged
+  isDocChanged,
 } from './index';
 import { builders } from 'prosemirror-test-builder';
 import {
@@ -33,14 +33,13 @@ import {
   isStylesLoaded,
   getCustomStyleByLevel,
   getHidenumberingFlag,
-  setHidenumberingFlag
+  setHidenumberingFlag,
 } from './customStyle';
 import { Schema, Mark, Node, Slice, ResolvedPos } from 'prosemirror-model';
 import { isTransparent, toCSSColor } from './toCSSColor';
 import { EditorView } from 'prosemirror-view';
 import * as DOMfunc from './CustomStyleNodeSpec';
 
-import { sanitizeURL } from './sanitizeURL';
 import { CustomStyleCommand } from './CustomStyleCommand';
 import * as ccommand from './CustomStyleCommand.js';
 import { Style } from './StyleRuntime.js';
@@ -134,8 +133,7 @@ const mockSchema = new Schema({
 
   marks: {
     link: {
-      attrs: {
-      },
+      attrs: {},
     },
     em: {
       parseDOM: [
@@ -325,9 +323,7 @@ describe('applyNormalIfNoStyle', () => {
               text: 'Hello, ProseMirror!',
             },
           ],
-          marks: [
-            { type: 'link', attrs: { ['overridden']: true } },
-          ],
+          marks: [{ type: 'link', attrs: { ['overridden']: true } }],
         },
       ],
     });
@@ -367,9 +363,21 @@ describe('applyNormalIfNoStyle', () => {
       },
       marks: {
         link: linkmark,
-        'fontName': { create: () => { return {}; } },
-        'mark-font-type': { create: () => { return {}; } },
-        'mark-font-size': { create: () => { return {}; } },
+        fontName: {
+          create: () => {
+            return {};
+          },
+        },
+        'mark-font-type': {
+          create: () => {
+            return {};
+          },
+        },
+        'mark-font-size': {
+          create: () => {
+            return {};
+          },
+        },
       },
     });
 
@@ -385,32 +393,77 @@ describe('applyNormalIfNoStyle', () => {
               text: 'Hello, ProseMirror!',
             },
           ],
-          marks: [
-            { type: 'link', attrs: { ['overridden']: true } },
-          ],
+          marks: [{ type: 'link', attrs: { ['overridden']: true } }],
         },
       ],
     });
     const setSelection = () => {
       return {
-        doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } },
-        setSelection: setSelection
+        doc: {
+          content: { size: 0 },
+          resolve: () => {
+            return {
+              min: () => {
+                return 0;
+              },
+              max: () => {
+                return 1;
+              },
+            } as unknown as ResolvedPos;
+          },
+          nodesBetween: () => {
+            return {};
+          },
+        },
+        setSelection: setSelection,
       };
     };
 
-    mockdoc.resolve = () => { return {} as unknown as ResolvedPos; };
-    expect(applyNormalIfNoStyle({ schema: mockschema }, {
-      doc: { content: { size: 0 }, resolve: () => { return { min: () => { return 0; }, max: () => { return 1; } } as unknown as ResolvedPos; }, nodesBetween: () => { return {}; } },
-      setSelection: setSelection,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}
-    },
-      mockdoc, true)).toBeDefined();
+    mockdoc.resolve = () => {
+      return {} as unknown as ResolvedPos;
+    };
+    expect(
+      applyNormalIfNoStyle(
+        { schema: mockschema },
+        {
+          doc: {
+            content: { size: 0 },
+            resolve: () => {
+              return {
+                min: () => {
+                  return 0;
+                },
+                max: () => {
+                  return 1;
+                },
+              } as unknown as ResolvedPos;
+            },
+            nodesBetween: () => {
+              return {};
+            },
+          },
+          setSelection: setSelection,
+          selection: {
+            $from: {
+              start: () => {
+                return 1;
+              },
+            },
+            $to: {
+              end: () => {
+                return 2;
+              },
+            },
+          },
+        },
+        mockdoc,
+        true
+      )
+    ).toBeDefined();
   });
-
 });
 
-
 describe('onUpdateAppendTransaction', () => {
-
   it('should handle onUpdateAppendTransaction when ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$from.start() == tr.selection.$from.end() this condition should pass', () => {
     const linkmark = new Mark();
 
@@ -426,7 +479,6 @@ describe('onUpdateAppendTransaction', () => {
         return this.meta[key];
       }
     }
-
 
     const mockTransactions = [
       new Transaction(100, { type: 'deposit', paste: true }),
@@ -465,9 +517,21 @@ describe('onUpdateAppendTransaction', () => {
       },
       marks: {
         link: linkmark,
-        'fontName': { create: () => { return {}; } },
-        'mark-font-type': { create: () => { return {}; } },
-        'mark-font-size': { create: () => { return {}; } },
+        fontName: {
+          create: () => {
+            return {};
+          },
+        },
+        'mark-font-type': {
+          create: () => {
+            return {};
+          },
+        },
+        'mark-font-size': {
+          create: () => {
+            return {};
+          },
+        },
       },
     });
     const mockdoc = mockschema.nodeFromJSON({
@@ -482,37 +546,77 @@ describe('onUpdateAppendTransaction', () => {
               text: 'Hello, ProseMirror!',
             },
           ],
-          marks: [
-            { type: 'link', attrs: { ['overridden']: true } },
-          ],
+          marks: [{ type: 'link', attrs: { ['overridden']: true } }],
         },
       ],
     });
-    mockdoc.resolve = () => { return { type: 'paragraph', isTextblock: true, parent: { content: { content: [{ attrs: null }] } }, min: () => { return 0; }, max: () => { return 1; }, depth: 1, node: () => { return { type: 'paragraph' }; }, before: () => { return 1; }, start: () => { return 1; } } as unknown as ResolvedPos; };
-    mockdoc.nodeAt = () => { return { nodeSize: 20, type: 'paragraph', isTextblock: true } as unknown as Node; };
+    mockdoc.resolve = () => {
+      return {
+        type: 'paragraph',
+        isTextblock: true,
+        parent: { content: { content: [{ attrs: null }] } },
+        min: () => {
+          return 0;
+        },
+        max: () => {
+          return 1;
+        },
+        depth: 1,
+        node: () => {
+          return { type: 'paragraph' };
+        },
+        before: () => {
+          return 1;
+        },
+        start: () => {
+          return 1;
+        },
+      } as unknown as ResolvedPos;
+    };
+    mockdoc.nodeAt = () => {
+      return {
+        nodeSize: 20,
+        type: 'paragraph',
+        isTextblock: true,
+      } as unknown as Node;
+    };
     const mockSlice1 = {
       content: {
         childCount: 3,
         content: [
-          { type: { name: 'paragraph' }, attrs: { styleName: 'paragraph-style' }, content: { size: 10 } },
-          { type: { name: 'heading' }, attrs: { styleName: 'heading-style' }, content: { size: 8 } },
-          { type: { name: 'image' }, attrs: { styleName: 'image-style' }, content: { size: 4 } }
-
-        ]
-      }
+          {
+            type: { name: 'paragraph' },
+            attrs: { styleName: 'paragraph-style' },
+            content: { size: 10 },
+          },
+          {
+            type: { name: 'heading' },
+            attrs: { styleName: 'heading-style' },
+            content: { size: 8 },
+          },
+          {
+            type: { name: 'image' },
+            attrs: { styleName: 'image-style' },
+            content: { size: 4 },
+          },
+        ],
+      },
     };
     const setSelection = () => {
       return {
         doc: {
           content: { size: 0 },
-          resolve: () => ({
-            min: () => 0,
-            max: () => 1
-          }) as unknown as ResolvedPos,
-          nodesBetween: () => ({})
+          resolve: () =>
+            ({
+              min: () => 0,
+              max: () => 1,
+            }) as unknown as ResolvedPos,
+          nodesBetween: () => ({}),
         },
         setSelection: setSelection,
-        scrollIntoView: () => { return {}; }
+        scrollIntoView: () => {
+          return {};
+        },
       };
     };
 
@@ -531,16 +635,31 @@ describe('onUpdateAppendTransaction', () => {
               },
             },
           },
-          scrollIntoView: () => { return {}; },
-          setSelection: setSelection
+          scrollIntoView: () => {
+            return {};
+          },
+          setSelection: setSelection,
         },
         {
           schema: {
-            nodes: { paragraph: 'paragraph' }, marks: {
+            nodes: { paragraph: 'paragraph' },
+            marks: {
               link: linkmark,
-              'fontName': { create: () => { return {}; } },
-              'mark-font-type': { create: () => { return {}; } },
-              'mark-font-size': { create: () => { return {}; } },
+              fontName: {
+                create: () => {
+                  return {};
+                },
+              },
+              'mark-font-type': {
+                create: () => {
+                  return {};
+                },
+              },
+              'mark-font-size': {
+                create: () => {
+                  return {};
+                },
+              },
             },
           },
           selection: {
@@ -560,7 +679,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
-              pos: 0
+              pos: 0,
             },
           },
           tr: {
@@ -578,8 +697,7 @@ describe('onUpdateAppendTransaction', () => {
                 },
               },
             },
-            setSelection: setSelection
-
+            setSelection: setSelection,
           },
           doc: mockdoc,
         },
@@ -605,7 +723,25 @@ describe('onUpdateAppendTransaction', () => {
           },
           doc: mockdoc,
         },
-        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } } }, tr: { doc: { nodeAt() { return { type: { name: 'table' } }; } } } } },
+        {
+          input: { lastKeyCode: 13 },
+          state: {
+            selection: {
+              $from: {
+                before() {
+                  return 5;
+                },
+              },
+            },
+            tr: {
+              doc: {
+                nodeAt() {
+                  return { type: { name: 'table' } };
+                },
+              },
+            },
+          },
+        },
         mockTransactions,
         mockSlice1
       )
@@ -627,7 +763,6 @@ describe('onUpdateAppendTransaction', () => {
         return this.meta[key];
       }
     }
-
 
     const mockTransactions = [
       new Transaction(100, { type: 'deposit', paste: true }),
@@ -689,18 +824,56 @@ describe('onUpdateAppendTransaction', () => {
         },
       ],
     });
-    mockdoc.resolve = () => { return { type: 'paragraph', isTextblock: true, parent: { attrs: { styleName: 'bold' }, content: { content: [{ attrs: { styleName: 'bold' } }] } }, min: () => { return 0; }, max: () => { return 1; }, depth: 1, node: () => { return { type: 'paragraph' }; }, before: () => { return 1; }, start: () => { return 1; } } as unknown as ResolvedPos; };
-    mockdoc.nodeAt = () => { return { nodeSize: 10 } as unknown as Node; };
+    mockdoc.resolve = () => {
+      return {
+        type: 'paragraph',
+        isTextblock: true,
+        parent: {
+          attrs: { styleName: 'bold' },
+          content: { content: [{ attrs: { styleName: 'bold' } }] },
+        },
+        min: () => {
+          return 0;
+        },
+        max: () => {
+          return 1;
+        },
+        depth: 1,
+        node: () => {
+          return { type: 'paragraph' };
+        },
+        before: () => {
+          return 1;
+        },
+        start: () => {
+          return 1;
+        },
+      } as unknown as ResolvedPos;
+    };
+    mockdoc.nodeAt = () => {
+      return { nodeSize: 10 } as unknown as Node;
+    };
     const mockSlice1 = {
       content: {
         childCount: 3,
         content: [
-          { type: { name: 'paragraph' }, attrs: { styleName: 'paragraph-style' }, content: { size: 10 } },
-          { type: { name: 'heading' }, attrs: { styleName: 'heading-style' }, content: { size: 8 } },
-          { type: { name: 'image' }, attrs: { styleName: 'image-style' }, content: { size: 4 } }
-
-        ]
-      }
+          {
+            type: { name: 'paragraph' },
+            attrs: { styleName: 'paragraph-style' },
+            content: { size: 10 },
+          },
+          {
+            type: { name: 'heading' },
+            attrs: { styleName: 'heading-style' },
+            content: { size: 8 },
+          },
+          {
+            type: { name: 'image' },
+            attrs: { styleName: 'image-style' },
+            content: { size: 4 },
+          },
+        ],
+      },
     };
     expect(
       onUpdateAppendTransaction(
@@ -720,11 +893,24 @@ describe('onUpdateAppendTransaction', () => {
         },
         {
           schema: {
-            nodes: { paragraph: 'paragraph' }, marks: {
+            nodes: { paragraph: 'paragraph' },
+            marks: {
               link: linkmark,
-              'fontName': { create: () => { return {}; } },
-              'mark-font-type': { create: () => { return {}; } },
-              'mark-font-size': { create: () => { return {}; } },
+              fontName: {
+                create: () => {
+                  return {};
+                },
+              },
+              'mark-font-type': {
+                create: () => {
+                  return {};
+                },
+              },
+              'mark-font-size': {
+                create: () => {
+                  return {};
+                },
+              },
             },
           },
           selection: {
@@ -786,7 +972,25 @@ describe('onUpdateAppendTransaction', () => {
           },
           doc: mockdoc,
         },
-        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } } }, tr: { doc: { nodeAt() { return { type: { name: 'table' } }; } } } } },
+        {
+          input: { lastKeyCode: 13 },
+          state: {
+            selection: {
+              $from: {
+                before() {
+                  return 5;
+                },
+              },
+            },
+            tr: {
+              doc: {
+                nodeAt() {
+                  return { type: { name: 'table' } };
+                },
+              },
+            },
+          },
+        },
         mockTransactions,
         mockSlice1
       )
@@ -808,7 +1012,6 @@ describe('onUpdateAppendTransaction', () => {
         return this.meta[key];
       }
     }
-
 
     const mockTransactions = [
       new Transaction(100, { type: 'deposit', paste: true }),
@@ -870,19 +1073,57 @@ describe('onUpdateAppendTransaction', () => {
         },
       ],
     });
-    mockdoc.resolve = () => { return { type: 'paragraph', isTextblock: true, parent: { attrs: { styleName: 'bold' }, content: { content: [{ attrs: { styleName: 'bold' } }] } }, min: () => { return 0; }, max: () => { return 1; }, depth: 1, node: () => { return { type: 'paragraph' }; }, before: () => { return 1; }, start: () => { return 1; } } as unknown as ResolvedPos; };
+    mockdoc.resolve = () => {
+      return {
+        type: 'paragraph',
+        isTextblock: true,
+        parent: {
+          attrs: { styleName: 'bold' },
+          content: { content: [{ attrs: { styleName: 'bold' } }] },
+        },
+        min: () => {
+          return 0;
+        },
+        max: () => {
+          return 1;
+        },
+        depth: 1,
+        node: () => {
+          return { type: 'paragraph' };
+        },
+        before: () => {
+          return 1;
+        },
+        start: () => {
+          return 1;
+        },
+      } as unknown as ResolvedPos;
+    };
 
-    mockdoc.nodeAt = () => { return { nodeSize: 10 } as unknown as Node; };
+    mockdoc.nodeAt = () => {
+      return { nodeSize: 10 } as unknown as Node;
+    };
     const mockSlice1 = {
       content: {
         childCount: 3,
         content: [
-          { type: { name: 'paragraph' }, attrs: { styleName: 'paragraph-style' }, content: { size: 10 } },
-          { type: { name: 'heading' }, attrs: { styleName: 'heading-style' }, content: { size: 8 } },
-          { type: { name: 'image' }, attrs: { styleName: 'image-style' }, content: { size: 4 } }
-
-        ]
-      }
+          {
+            type: { name: 'paragraph' },
+            attrs: { styleName: 'paragraph-style' },
+            content: { size: 10 },
+          },
+          {
+            type: { name: 'heading' },
+            attrs: { styleName: 'heading-style' },
+            content: { size: 8 },
+          },
+          {
+            type: { name: 'image' },
+            attrs: { styleName: 'image-style' },
+            content: { size: 4 },
+          },
+        ],
+      },
     };
     expect(
       onUpdateAppendTransaction(
@@ -902,11 +1143,24 @@ describe('onUpdateAppendTransaction', () => {
         },
         {
           schema: {
-            nodes: { paragraph: 'paragraph' }, marks: {
+            nodes: { paragraph: 'paragraph' },
+            marks: {
               link: linkmark,
-              'fontName': { create: () => { return {}; } },
-              'mark-font-type': { create: () => { return {}; } },
-              'mark-font-size': { create: () => { return {}; } },
+              fontName: {
+                create: () => {
+                  return {};
+                },
+              },
+              'mark-font-type': {
+                create: () => {
+                  return {};
+                },
+              },
+              'mark-font-size': {
+                create: () => {
+                  return {};
+                },
+              },
             },
           },
           selection: {
@@ -968,15 +1222,36 @@ describe('onUpdateAppendTransaction', () => {
           },
           doc: mockdoc,
         },
-        { input: { lastKeyCode: 13 }, state: { selection: { $from: { before() { return 5; } }, $to: { after() { return 10; } } }, tr: { doc: { nodeAt() { return { type: { name: 'eatho onu' } }; } } } } },
+        {
+          input: { lastKeyCode: 13 },
+          state: {
+            selection: {
+              $from: {
+                before() {
+                  return 5;
+                },
+              },
+              $to: {
+                after() {
+                  return 10;
+                },
+              },
+            },
+            tr: {
+              doc: {
+                nodeAt() {
+                  return { type: { name: 'eatho onu' } };
+                },
+              },
+            },
+          },
+        },
         mockTransactions,
         mockSlice1
       )
     ).toStrictEqual({});
   });
 });
-
-
 
 jest.fn((tr) => {
   return tr;
@@ -1062,7 +1337,13 @@ describe('Style Plugin', () => {
   });
   it('SHOULD HANDLE paste', () => {
     const boundHandlePaste = plugin?.props?.handlePaste?.bind(plugin);
-    expect(boundHandlePaste(view, {} as unknown as Event, { content: { content: [{ attrs: true }] } } as unknown as Slice)).toBeFalsy();
+    expect(
+      boundHandlePaste(
+        view,
+        {} as unknown as Event,
+        { content: { content: [{ attrs: true }] } } as unknown as Slice
+      )
+    ).toBeFalsy();
   });
   it('customStyle getCustomStyleByName', () => {
     const result = getCustomStyleByName('BIU');
@@ -1127,22 +1408,6 @@ describe('Style Plugin', () => {
   it('toCSSColor input  given as transparent', () => {
     const bOK = toCSSColor('transparent');
     expect(bOK).toBe('rgba(0,0,0,0)');
-  });
-  it('sanitizeURL with out http url as input', () => {
-    const testurl = 'www.google.com';
-    const url = sanitizeURL(testurl);
-    expect(url).toBe('http://' + testurl);
-  });
-
-  it('sanitizeURL with http url as input', () => {
-    const testurl = 'http://www.google.com';
-    const url = sanitizeURL(testurl);
-    expect(url).toBe(testurl);
-  });
-
-  it('sanitizeURL with http url as input', () => {
-    const url = sanitizeURL();
-    expect(url).toBe('http://');
   });
   it('isTransparent', () => {
     const bOK = isTransparent('rgba(0,0,0,0)');
@@ -1244,7 +1509,6 @@ describe('Style Plugin', () => {
   });
 
   it('isCustomStyleExists in customstyle', () => {
-
     const customstyle: Style[] = [];
     const style = {
       description: 'BIU',
@@ -1438,8 +1702,6 @@ describe('Style Plugin', () => {
     expect(bok).toEqual(true);
   });
 
-
-
   it('getCustomStyleCommands in CustomStyleCommand', () => {
     const selection = TextSelection.create(view.state.doc, 1, 2);
     const tr = view.state.tr.setSelection(selection);
@@ -1579,7 +1841,11 @@ describe('Style Plugin Execute', () => {
 
     if (val != 'none') {
       const customcommand = new CustomStyleCommand(val, val);
-      const res = customcommand.execute(state, view.dispatch, view as unknown as EditorView);
+      const res = customcommand.execute(
+        state,
+        view.dispatch,
+        view as unknown as EditorView
+      );
       if (val != 'clearstyle') {
         expect(res).toStrictEqual(false);
       } else {
@@ -1587,7 +1853,11 @@ describe('Style Plugin Execute', () => {
       }
     } else {
       const customcommand = new CustomStyleCommand(val, val);
-      customcommand.execute(state, view.dispatch, view as unknown as EditorView);
+      customcommand.execute(
+        state,
+        view.dispatch,
+        view as unknown as EditorView
+      );
     }
   });
 });
@@ -1645,7 +1915,7 @@ describe('Custom Style Plugin pass', () => {
 
   it('Test 1 ', () => {
     const props = {
-      dispatch: () => { },
+      dispatch: () => {},
       editorState: state,
       editorView: editor.view,
     };
@@ -2286,7 +2556,7 @@ describe('Cus Style Plugin-Pass', () => {
   it('should return newAttrs when RESERVED_STYLE_NONE  is not nextLineStyle  ', () => {
     jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
       styles: { indent: '10', align: 'left', lineHeight: '10' },
-      styleName: ''
+      styleName: '',
     });
     const newattrs = {
       align: 'left',
@@ -2314,7 +2584,7 @@ describe('Cus Style Plugin-Pass', () => {
   it('should return newAttrs when RESERVED_STYLE_NONE  is not nextLineStyle branch coverage  ', () => {
     jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
       styles: { indent: '10', align: 'left', lineHeight: '' },
-      styleName: ''
+      styleName: '',
     });
     const newattrs = {
       align: 'left',
@@ -2326,7 +2596,7 @@ describe('Cus Style Plugin-Pass', () => {
       paddingTop: null,
       capco: null,
       styleName: 'A11-Rename',
-      innerLink: '#uuid'
+      innerLink: '#uuid',
     };
     expect(setNodeAttrs('test', newattrs)).toStrictEqual({
       align: 'left',
@@ -2338,13 +2608,13 @@ describe('Cus Style Plugin-Pass', () => {
       paddingBottom: null,
       paddingTop: null,
       styleName: 'test',
-      innerLink: null
+      innerLink: null,
     });
   });
   it('should handle setNodeAttrs when nextLineStyleName is null ', () => {
     jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
       styles: { indent: '10', align: 'left', lineHeight: '' },
-      styleName: ''
+      styleName: '',
     });
     const newattrs = {
       align: 'left',
@@ -2368,7 +2638,7 @@ describe('Cus Style Plugin-Pass', () => {
         lineHeight: '',
         nextLineStyleName: 'Normal',
       },
-      styleName: ''
+      styleName: '',
     });
     jest
       .spyOn(ccommand, 'getMarkByStyleName')
@@ -2515,7 +2785,6 @@ describe('Cus Style Plugin-Pass', () => {
         },
       },
     });
-
 
     const nextstate = {
       schema: schema2,
@@ -2960,7 +3229,7 @@ describe('Cus Style Plugin-Pass', () => {
         lineHeight: '',
         nextLineStyleName: '',
       },
-      styleName: ''
+      styleName: '',
     });
     expect(
       applyStyleForNextParagraph(prevstate1, nextstate1, transaction1, mockview)
@@ -3023,7 +3292,9 @@ describe('Cus Style Plugin-Pass', () => {
                   src: (dom as unknown as HTMLElement).getAttribute('src'),
                   alt: (dom as unknown as HTMLElement).getAttribute('alt'),
                   title: (dom as unknown as HTMLElement).getAttribute('title'),
-                  styleName: (dom as unknown as HTMLElement).getAttribute('styleName'),
+                  styleName: (dom as unknown as HTMLElement).getAttribute(
+                    'styleName'
+                  ),
                 };
               },
             },
@@ -3261,7 +3532,7 @@ describe('Cus Style Plugin-Pass', () => {
         lineHeight: '',
         nextLineStyleName: 'Normal',
       },
-      styleName: ''
+      styleName: '',
     });
     jest
       .spyOn(ccommand, 'getMarkByStyleName')
@@ -3407,7 +3678,6 @@ describe('Cus Style Plugin-Pass', () => {
         },
       },
     });
-
 
     const nextstate = {
       schema: schema2,
@@ -3852,7 +4122,7 @@ describe('Cus Style Plugin-Pass', () => {
         lineHeight: '',
         nextLineStyleName: '',
       },
-      styleName: ''
+      styleName: '',
     });
     expect(
       applyStyleForNextParagraph(prevstate1, nextstate1, transaction1, mockview)
@@ -3915,7 +4185,9 @@ describe('Cus Style Plugin-Pass', () => {
                   src: (dom as unknown as HTMLElement).getAttribute('src'),
                   alt: (dom as unknown as HTMLElement).getAttribute('alt'),
                   title: (dom as unknown as HTMLElement).getAttribute('title'),
-                  styleName: (dom as unknown as HTMLElement).getAttribute('styleName'),
+                  styleName: (dom as unknown as HTMLElement).getAttribute(
+                    'styleName'
+                  ),
                 };
               },
             },
@@ -4138,7 +4410,6 @@ describe('Cus Style Plugin-Pass', () => {
         mockview2
       )
     ).toBeDefined();
-
   });
   it('should handle applyStyleForNextParagraph', () => {
     jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
@@ -4148,7 +4419,7 @@ describe('Cus Style Plugin-Pass', () => {
         lineHeight: '',
         nextLineStyleName: 'Normal',
       },
-      styleName: ''
+      styleName: '',
     });
     jest
       .spyOn(ccommand, 'getMarkByStyleName')
@@ -4294,7 +4565,6 @@ describe('Cus Style Plugin-Pass', () => {
         },
       },
     });
-
 
     const nextstate = {
       schema: schema2,
@@ -4739,7 +5009,7 @@ describe('Cus Style Plugin-Pass', () => {
         lineHeight: '',
         nextLineStyleName: '',
       },
-      styleName: ''
+      styleName: '',
     });
     expect(
       applyStyleForNextParagraph(prevstate1, nextstate1, transaction1, mockview)
@@ -4802,7 +5072,9 @@ describe('Cus Style Plugin-Pass', () => {
                   src: (dom as unknown as HTMLElement).getAttribute('src'),
                   alt: (dom as unknown as HTMLElement).getAttribute('alt'),
                   title: (dom as unknown as HTMLElement).getAttribute('title'),
-                  styleName: (dom as unknown as HTMLElement).getAttribute('styleName'),
+                  styleName: (dom as unknown as HTMLElement).getAttribute(
+                    'styleName'
+                  ),
                 };
               },
             },
@@ -5025,7 +5297,6 @@ describe('Cus Style Plugin-Pass', () => {
         mockview2
       )
     ).toBeDefined();
-
   });
   it('should handle manageHierarchyOnDelete when prevState.doc === nextState.doc', () => {
     expect(
@@ -5102,30 +5373,73 @@ describe('onInitAppendTransaction', () => {
               type: 'text',
               text: 't',
             },
-
           ],
-          marks: [
-            { type: 'link', attrs: { ['overridden']: true } },
-          ],
-
+          marks: [{ type: 'link', attrs: { ['overridden']: true } }],
         },
-
       ],
     });
-    mockdoc.resolve = () => { return { min: () => { return null; }, max: () => { return {}; } } as unknown as ResolvedPos; };
+    mockdoc.resolve = () => {
+      return {
+        min: () => {
+          return null;
+        },
+        max: () => {
+          return {};
+        },
+      } as unknown as ResolvedPos;
+    };
     jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(true);
     const setSelection = () => {
       return {
-        curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc, setNodeMarkup: () => { return {}; },
-        setSelection: setSelection
+        curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } },
+        doc: mockdoc,
+        setNodeMarkup: () => {
+          return {};
+        },
+        setSelection: setSelection,
       };
     };
-    expect(onInitAppendTransaction({ loaded: true, firstTime: false }, {setSelection: setSelection, curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}  },
-      {
-        tr: {
-          setSelection: setSelection, doc: mockdoc, selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}
-        }, schema: mockSchema
-      })).toBeDefined();
+    expect(
+      onInitAppendTransaction(
+        { loaded: true, firstTime: false },
+        {
+          setSelection: setSelection,
+          curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } },
+          doc: mockdoc,
+          selection: {
+            $from: {
+              start: () => {
+                return 1;
+              },
+            },
+            $to: {
+              end: () => {
+                return 2;
+              },
+            },
+          },
+        },
+        {
+          tr: {
+            setSelection: setSelection,
+            doc: mockdoc,
+            selection: {
+              $from: {
+                start: () => {
+                  return 1;
+                },
+              },
+              $to: {
+                end: () => {
+                  return 2;
+                },
+              },
+            },
+          },
+          schema: mockSchema,
+        }
+      )
+    ).toBeDefined();
   });
 });
 
@@ -5179,9 +5493,7 @@ describe('onUpdateAppendTransaction', () => {
               text: 'Hello, ProseMirror!',
             },
           ],
-          marks: [
-            { type: 'link', attrs: { ['overridden']: true } },
-          ],
+          marks: [{ type: 'link', attrs: { ['overridden']: true } }],
         },
       ],
     });
@@ -5201,7 +5513,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
-              nodeSize:1
+              nodeSize: 1,
             },
           },
           tr: {
@@ -5294,10 +5606,7 @@ describe('onUpdateAppendTransaction', () => {
               text: 'Hello, ProseMirror!',
             },
           ],
-          marks: [
-
-            { type: 'link', attrs: { ['overridden']: true } },
-          ],
+          marks: [{ type: 'link', attrs: { ['overridden']: true } }],
         },
       ],
     });
@@ -5335,7 +5644,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
-              nodeSize:1
+              nodeSize: 1,
             },
           },
           tr: {
@@ -5371,7 +5680,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
-              nodeSize:1
+              nodeSize: 1,
             },
           },
           tr: {
@@ -5439,10 +5748,7 @@ describe('onUpdateAppendTransaction', () => {
               text: 'Hello, ProseMirror!',
             },
           ],
-          marks: [
-
-            { type: 'link', attrs: { ['overridden']: true } },
-          ],
+          marks: [{ type: 'link', attrs: { ['overridden']: true } }],
         },
       ],
     });
@@ -5480,7 +5786,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
-              nodeSize:1
+              nodeSize: 1,
             },
           },
           tr: {
@@ -5516,7 +5822,7 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
-              nodeSize:1
+              nodeSize: 1,
             },
           },
           tr: {
@@ -5584,10 +5890,7 @@ describe('onUpdateAppendTransaction', () => {
               text: 'Hello, ProseMirror!',
             },
           ],
-          marks: [
-
-            { type: 'link', attrs: { ['overridden']: true } },
-          ],
+          marks: [{ type: 'link', attrs: { ['overridden']: true } }],
         },
       ],
     });
@@ -5606,7 +5909,7 @@ describe('onUpdateAppendTransaction', () => {
               },
             },
           },
-          curSelection:{$head:1}
+          curSelection: { $head: 1 },
         },
         {
           selection: {
@@ -5626,9 +5929,9 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
-              nodeSize:1
+              nodeSize: 1,
             },
-            from:0
+            from: 0,
           },
           tr: {
             doc: {
@@ -5663,9 +5966,9 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
-              nodeSize:1
+              nodeSize: 1,
             },
-            from:0
+            from: 0,
           },
           tr: {
             doc: {
@@ -5675,7 +5978,6 @@ describe('onUpdateAppendTransaction', () => {
             },
           },
           doc: mockdoc,
-
         },
         { input: { lastKeyCode: 8 } },
         {},
@@ -5740,37 +6042,67 @@ describe('applyStyleForPreviousEmptyParagraph', () => {
               text: 'Hello, ProseMirror!',
             },
           ],
-          marks: [
-            { type: 'link', attrs: { ['overridden']: true } },
-          ],
+          marks: [{ type: 'link', attrs: { ['overridden']: true } }],
         },
       ],
     });
     const setSelection = () => {
       return {
-        curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } }, doc: mockdoc, setNodeMarkup: () => { return {}; },
-        setSelection: setSelection
+        curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } },
+        doc: mockdoc,
+        setNodeMarkup: () => {
+          return {};
+        },
+        setSelection: setSelection,
       };
     };
-    const tr = {setSelection:setSelection, doc: mockdoc ,selection:{$from:{parentOffset:0,end:()=>{return 0;}},$anchor:{pos:1},$head:{before:()=>{return 2;}}}} as unknown as Transaction;
-    expect(applyStyleForPreviousEmptyParagraph({schema:mockschema,doc:{resolve:()=>{return {nodeBefore:{nodeSize :1,attrs:{styleName:'Normal'}}} as unknown as ResolvedPos;}} as unknown as Node} as unknown as EditorState,tr)).toBeDefined();
+    const tr = {
+      setSelection: setSelection,
+      doc: mockdoc,
+      selection: {
+        $from: {
+          parentOffset: 0,
+          end: () => {
+            return 0;
+          },
+        },
+        $anchor: { pos: 1 },
+        $head: {
+          before: () => {
+            return 2;
+          },
+        },
+      },
+    } as unknown as Transaction;
+    expect(
+      applyStyleForPreviousEmptyParagraph(
+        {
+          schema: mockschema,
+          doc: {
+            resolve: () => {
+              return {
+                nodeBefore: { nodeSize: 1, attrs: { styleName: 'Normal' } },
+              } as unknown as ResolvedPos;
+            },
+          } as unknown as Node,
+        } as unknown as EditorState,
+        tr
+      )
+    ).toBeDefined();
   });
 });
 describe('applyStyles', () => {
   it('should handle applyStyles', () => {
-    expect(applyStyles({tr:{}},null)).toStrictEqual({});
+    expect(applyStyles({ tr: {} }, null)).toStrictEqual({});
   });
 });
 describe('applyStyleForEmptyParagraph', () => {
   it('should handle applyStyleForEmptyParagraph', () => {
-    expect(applyStyleForEmptyParagraph({tr:{}},null)).toStrictEqual({});
+    expect(applyStyleForEmptyParagraph({ tr: {} }, null)).toStrictEqual({});
   });
 });
 describe('isDocChanged', () => {
   it('should handle isDocChanged', () => {
-    expect(isDocChanged([{docChanged:{}}])).toBeTruthy();
+    expect(isDocChanged([{ docChanged: {} }])).toBeTruthy();
   });
 });
-
-
-

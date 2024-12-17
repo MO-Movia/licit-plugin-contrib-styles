@@ -348,7 +348,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   // handles Level drop down change
   onLevelChange(e) {
     // FIX: If the user edit the level which is not in use, but modify this level breaks the heirarchy, then show a alert message.
-    if (this.state.styles?.hasNumbering && !this.checkForPreviousLevelWithNumbering(e.target.value) &&  1 === totalCountOfStyleByLevel(Number(this.state.styles?.styleLevel))) {
+    if (this.state.styles?.hasNumbering && !this.checkForPreviousLevelWithNumbering(e.target.value) && 1 === totalCountOfStyleByLevel(Number(this.state.styles?.styleLevel))) {
       this.showAlert(true);
     }
     else {
@@ -513,7 +513,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   handleNumbering(val) {
-    if (this.props.mode === 0 || this.checkForPreviousLevelWithNumbering(this.state.styles.styleLevel)) {
+    // if mode is create/ style level is 1 or previous level is found then allow to select numbering else show alert message.
+    if (this.props.mode === 0 || '1' === this.state.styles.styleLevel || this.checkForPreviousLevelWithNumbering(this.state.styles.styleLevel)) {
       // if user select numbering, then always set nextLineStyle as continues this style.
       // [FS] IRAD-1221 2021-03-01
       // Issue fix: The next line style not switch back to RESERVED_STYLE_NONE when disable the numbering.
@@ -528,7 +529,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         },
       }));
     }
-    else{
+    else {
       this.showAlert(true);
     }
   }

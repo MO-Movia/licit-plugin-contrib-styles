@@ -1,6 +1,6 @@
 {
   "name": "@modusoperandi/licit-custom-styles",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "subversion": "1",
   "description": "CustomStyle plugin built with ProseMirror",
@@ -9,7 +9,7 @@
   "types": "index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MO-Movia/licit.git"
+    "url": "git+https://github.com/MO-Movia/licit-plugin-contrib-styles.git"
   },
   "scripts": {
     "verify": "npm run lint && npm run ci:build && npm run test:coverage",

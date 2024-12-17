@@ -2,7 +2,6 @@
 // UI for Custom Style edit
 //Need to change the button binding implementation
 import React from 'react';
-import './custom-style-edit.css';
 import {
   atViewportCenter,
   ColorEditor,
@@ -615,7 +614,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         styles: {
           ...prevState.styles,
           styleLevel,
-          isList
+          isList,
         },
         isRadioDisabled: styleLevel === 0,
       }));

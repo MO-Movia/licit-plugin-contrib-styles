@@ -555,8 +555,9 @@ export const compareAttributes = (mark, style): boolean => {
       return mark.attrs['pt'] == style[FONTSIZE];
     case MARKFONTTYPE:
       return mark.attrs['name'] === style[FONTNAME];
+    // KNITE-1465 2024-12-24
+    // FIX: strike through formatting not being respected on re-entry into doc editor mode.
     case MARKSTRIKE:
-      return mark.attrs['strike'] === style['strike'];
     case MARKSUPER:
     case MARKSUB:
       return false;

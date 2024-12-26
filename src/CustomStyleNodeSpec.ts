@@ -3,7 +3,6 @@ import type { KeyValuePair } from './Constants.js';
 import { toCSSLineSpacing } from '@modusoperandi/licit-ui-commands';
 
 import { getCustomStyleByName, getHidenumberingFlag } from './customStyle.js';
-import './ui/czi-cust-style-numbered.css';
 
 // This assumes that every 36pt maps to one indent level.
 export const ATTRIBUTE_PREFIX = 'prefix';
@@ -253,4 +252,3 @@ export const toCustomStyleDOM = toDOM;
 export const getCustomStyleAttrs = getAttrs;
 export const getDetailsBullet = getBulletDetails;
 export const countersRefresh = refreshCounters;
-

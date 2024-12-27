@@ -200,7 +200,12 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
   // [FS] IRAD-1099 2020-11-17
   // Issue fix: Even the applied style is removed the style name is showing in the editor
-  removeCustomStyleName(editorState, removedStyleName, dispatch, selectedStyleName) {
+  removeCustomStyleName(
+    editorState,
+    removedStyleName,
+    dispatch,
+    selectedStyleName
+  ) {
     const { selection, doc } = editorState;
     let { from, to } = selection;
     const { empty } = selection;
@@ -330,7 +335,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
               // update
               delete val.editorView;
-              let tr;
 
               // Not allow user to remove already in used custom style with numbering, which shall break the heirarchy.
               if (
@@ -344,14 +348,13 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                   this.removeCustomStyleName(
                     this.props.editorState,
                     val.styleName,
-                    this.props.editorView.dispatch,
+                    dispatch,
                     val.selectedStylename
                   );
                 });
               } else {
                 this.showAlert();
               }
-
             }
           }
           this.props.editorView.focus();

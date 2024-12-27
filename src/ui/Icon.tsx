@@ -2,13 +2,6 @@ import React from 'react';
 
 import { canUseCSSFont } from './canUseCSSFont.js';
 
-import './czi-icon.css';
-
-// [FS] IRAD-1061 2020-09-19
-// Now loaded locally, so that it work in closed network as well.
-//import injectStyleSheet from './injectStyleSheet';
-import './icon-font.css';
-
 const cached = {};
 
 const CSS_CDN_URL = '//fonts.googleapis.com/icon?family=Material+Icons';

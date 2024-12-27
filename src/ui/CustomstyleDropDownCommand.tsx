@@ -17,7 +17,6 @@ import {
   hasStyleRuntime,
   isCustomStyleExists,
 } from '../customStyle.js';
-import './custom-dropdown.css';
 
 // [FS] IRAD-1042 2020-09-09
 // To include custom styles in the toolbar
@@ -52,7 +51,9 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
           setStyles(result);
           HEADING_NAMES = result;
           if (null != HEADING_NAMES) {
-            const foundNormal = result.find(obj => obj.styleName === RESERVED_STYLE_NONE);
+            const foundNormal = result.find(
+              (obj) => obj.styleName === RESERVED_STYLE_NONE
+            );
             if (foundNormal) {
               HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
                 foundNormal,
@@ -127,11 +128,13 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
         // [FS] IRAD-1231 2021-03-02
         // Show the custom style as None for paste paragraph from outside.
         else {
-          const updatedAttrs = { ...node.attrs, styleName: RESERVED_STYLE_NONE };
+          const updatedAttrs = {
+            ...node.attrs,
+            styleName: RESERVED_STYLE_NONE,
+          };
           node = { ...node, attrs: updatedAttrs } as unknown as Node;
           customStyleName = RESERVED_STYLE_NONE;
         }
-
       }
     });
     let backgroundColorClass = 'width-100';

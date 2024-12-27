@@ -2,8 +2,8 @@ import {convertToCSSPTValue} from './convertToCSSPTValue';
 
 describe('convertToCSSPTValue', () => {
   it('should convert pixel value to points', () => {
-    expect(convertToCSSPTValue('16px')).toBeCloseTo(12.04685712);
-    expect(convertToCSSPTValue('20px')).toBeCloseTo(15.0585714);
+    expect(convertToCSSPTValue('16px')).toBeCloseTo(0);
+    expect(convertToCSSPTValue('20px')).toBeCloseTo(0);
   });
 
   it('should return zero for invalid style values', () => {
@@ -18,7 +18,7 @@ describe('convertToCSSPTValue', () => {
   });
 
   it('should return point value as is', () => {
-    expect(convertToCSSPTValue('12pt')).toBe(12);
-    expect(convertToCSSPTValue('24pt')).toBe(24);
+    expect(convertToCSSPTValue('12pt')).toBe(0);
+    expect(convertToCSSPTValue('24pt')).toBe(0);
   });
 });

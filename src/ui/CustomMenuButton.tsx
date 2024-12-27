@@ -11,7 +11,6 @@ import { CustomButton, createPopUp } from '@modusoperandi/licit-ui-commands';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { uuid } from './Uuid.js';
 import { CustomMenuUI } from './CustomMenuUI.js';
-import './custom-dropdown.css';
 
 export class CustomMenuButton extends React.PureComponent<
   {
@@ -64,7 +63,11 @@ export class CustomMenuButton extends React.PureComponent<
   _onClick = (): void => {
     this.setState((lastState) => {
       const expanded = !lastState.expanded;
-      expanded ? this._showMenu() : this._hideMenu();
+      if (expanded) {
+        this._showMenu();
+      } else {
+        this._hideMenu();
+      }
       return {
         expanded,
       };

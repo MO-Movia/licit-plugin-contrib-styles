@@ -5,7 +5,6 @@
 @import '@modusoperandi/licit-ui-commands/ui/czi-color-editor.css';
 @import './ui/czi-custom-menu-item.css';
 @import './ui/czi-icon.css';
-
 @import '@modusoperandi/licit-ui-commands/ui/czi-pop-up.css';
 @import '@modusoperandi/licit-ui-commands/ui/czi-tooltip-surface.css';
 
@@ -14,6 +13,7 @@
 /* Now loaded locally, so that it work in closed network as well. */
 @import './ui/custom-style-edit.css';
 @import './ui/custom-dropdown.css';
+@import './ui/custom-style-delete.css';
 @import './ui/icon-font.css';
 @import '~node-mathquill/build/mathquill.css';
 @import '~katex/dist/katex.min.css';

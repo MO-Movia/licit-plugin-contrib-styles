@@ -732,14 +732,30 @@ function applyStyleEx(
       if (styleProp?.styles) {
         // to set the node attribute for text-align
         if (element instanceof TextAlignCommand) {
-          newattrs.align = styleProp.styles.align;
+          // [KNITE-1465] 26-12-2024
+          // if user override the align style then retian that align style 
+          // using the overridenAlign property we can find align style overrided or not
+          if (node?.attrs?.overriddenAlign) {
+            newattrs.align = node.attrs.align;
+          }
+          else {
+            newattrs.align = styleProp.styles.align;
+          }
           // to set the node attribute for line-height
         } else if (element instanceof TextLineSpacingCommand) {
           // [FS] IRAD-1104 2020-11-13
           // Issue fix : Linespacing Double and Single not applied in the sample text paragraph
-          newattrs.lineSpacing = getLineSpacingValue(
-            styleProp.styles.lineHeight || ''
-          );
+          // [KNITE-1465] 26-12-2024
+          // if user override the lineSpacing style then retian that lineSpacing style 
+          // using the overriddenLineSpacing property we can find lineSpacing style overrided or not
+          if (node?.attrs?.overriddenLineSpacing) {
+            newattrs.lineSpacing = node.attrs.lineSpacing;
+          }
+          else {
+            newattrs.lineSpacing = getLineSpacingValue(
+              styleProp.styles.lineHeight || ''
+            );
+          }         
         } else if (element instanceof ParagraphSpacingCommand) {
           // [FS] IRAD-1100 2020-11-05
           // Add in leading and trailing spacing (before and after a paragraph)
@@ -750,9 +766,17 @@ function applyStyleEx(
         } else if (element instanceof IndentCommand) {
           // [FS] IRAD-1162 2021-1-25
           // Bug fix: indent not working along with level
-          newattrs.indent = styleProp.styles.isLevelbased
-            ? styleProp.styles.styleLevel
-            : styleProp.styles.indent;
+          // [KNITE-1465] 26-12-2024
+          // if user override the indent style then retian that indent style 
+          // using the overriddenIndent property we can find indent style overrided or not
+          if (node?.attrs?.overriddenIndent) {
+            newattrs.indent = node.attrs.indent;
+          }
+          else {
+            newattrs.indent = styleProp.styles.isLevelbased
+              ? styleProp.styles.styleLevel
+              : styleProp.styles.indent;
+          }          
         }
       }
 

@@ -1,5 +1,5 @@
 // Plugin to handle Styles.
-import { Plugin, PluginKey, EditorState, TextSelection,Transaction } from 'prosemirror-state';
+import { Plugin, PluginKey, EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import {
   updateOverrideFlag,
@@ -708,6 +708,7 @@ function updateStyleOverrideFlag(state, tr) {
     if (tr && haveEligibleChildren(child, contentLen)) {
       const startPos = tr.curSelection.$anchor.pos; //pos
       const endPos = tr.curSelection.$head.pos; //pos + contentLen
+      child = updateOverrideFlagForAlign(child);
       if (!child.attrs.styleName) {
         child.attrs.styleName = 'Normal';
       }
@@ -723,6 +724,22 @@ function updateStyleOverrideFlag(state, tr) {
   });
 
   return retObj.modified ? tr : null;
+}
+
+// [KNITE-1465] 27-12-2024
+// using this function we can find if the user overrided the align,line spacing,indent.
+function updateOverrideFlagForAlign(node) {
+  const styleProp = getCustomStyleByName(node.attrs.styleName);
+  if (null !== node?.attrs.overriddenAlign && styleProp?.styles?.align === node?.attrs?.align) {
+    node.attrs['overriddenAlign'] = false;
+  }
+  if (null !== node?.attrs.overriddenLineSpacing && getLineSpacingValue(styleProp?.styles?.lineHeight) === node?.attrs?.lineSpacing) {
+    node.attrs['overriddenLineSpacing'] = false;
+  }
+  if (null !== node?.attrs.overriddenIndent && styleProp?.styles?.indent === node?.attrs?.indent) {
+    node.attrs['overriddenIndent'] = false;
+  }
+  return node;
 }
 
 function haveEligibleChildren(node, contentLen) {

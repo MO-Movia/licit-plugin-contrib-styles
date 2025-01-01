@@ -1538,14 +1538,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
     pos,
     pos + textContent.length + 1 + counter,
     markType.create(null)
-  );
-  if (content.length > 1) {
-    tr = tr.removeMark(
-      pos + textContent.length + 1 + counter,
-      pos + endPos + 1,
-      markType
-    );
-  }
+  );  
   return tr;
 }
 // get text content from selected node

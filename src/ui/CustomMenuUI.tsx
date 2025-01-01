@@ -4,7 +4,6 @@ import { Schema, Node } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { uuid } from './Uuid.js';
-import './listType.css';
 import { CustomStyleItem } from './CustomStyleItem.js';
 import { AlertInfo } from './AlertInfo.js';
 import { CustomStyleSubMenu } from './CustomStyleSubMenu.js';
@@ -35,7 +34,6 @@ import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec.js';
 // UI to show the list buttons
 // eslint-disable-next-line
 export class CustomMenuUI extends React.PureComponent<any, any> {
-  _activeCommand?: UICommand = null;
   _popUp = null;
   _stylePopup = null;
   _styleName = null;

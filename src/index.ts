@@ -1,5 +1,5 @@
 // Plugin to handle Styles.
-import { Plugin, PluginKey, EditorState, TextSelection, Transaction } from 'prosemirror-state';
+import { Plugin, PluginKey, EditorState, TextSelection,Transaction } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import {
   updateOverrideFlag,

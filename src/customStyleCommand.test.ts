@@ -2600,10 +2600,10 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
   const nodemock = schema1.nodeFromJSON(json);
 
   it('should handle addMarksToLine', () => {
-    const transaction = addMarksToLine(trmock, statemock, nodemock, 0, true);
+    const result = addMarksToLine(trmock, statemock, nodemock, 0, true);
     expect(
-      addMarksToLine(trmock, statemock, nodemock, 0, true)
-    ).toBeDefined;
+      result
+    ).toBeDefined();
   });
 
   it('should handle addMarksToLine when boldSentence is false', () => {
@@ -2642,10 +2642,9 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       ],
     };
     const nodemock = schema1.nodeFromJSON(json);
-    const transaction =  addMarksToLine(trmock, statemock, nodemock, 0, false);
     expect(
       addMarksToLine(trmock, statemock, nodemock, 0, true)
-    ).toBeDefined;
+    ).toBeDefined();
   });
   it('should handle manageElementsAfterSelection', () => {
     expect(

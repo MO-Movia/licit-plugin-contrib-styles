@@ -325,15 +325,15 @@ describe('toCustomStyleDOM', () => {
     };
     expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
-      { 
-          "data-bullet-color": "#000000",
-          "data-bullet-symbol": "● ",
-          "data-indent": "1",
-           "data-show-bullet": true,
-          "list-style-level": 10,
-          "prefix": "BL",
-           "style": "line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;counter-increment: L1 L2 L3 L4 L5 L6 L7 L8 L9 L10 ;",
-           "styleName": "ABC",        
+      {
+          'data-bullet-color': '#000000',
+          'data-bullet-symbol': '● ',
+          'data-indent': '1',
+           'data-show-bullet': true,
+          'list-style-level': 10,
+          'prefix': 'BL',
+           'style': 'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;counter-increment: L1 L2 L3 L4 L5 L6 L7 L8 L9 L10 ;',
+           'styleName': 'ABC',
       },
     ]);
   });

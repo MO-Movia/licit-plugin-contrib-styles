@@ -2547,7 +2547,7 @@ describe('Cus Style Plugin-Pass', () => {
       color: null,
       id: '',
       indent: undefined,
-      lineSpacing: "125%",
+      lineSpacing: '125%',
       paddingBottom: null,
       paddingTop: null,
       styleName: 'Normal',

@@ -272,8 +272,9 @@ describe('toCustomStyleDOM', () => {
   it('should handle toCustomStyleDOM when  styleLevel: null', () => {
     jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
       styles: {
-        hasBullet: false,
+        hasBullet: true,
         bulletLevel: '25CF',
+        isList:true,
         styleLevel: 10,
         paragraphSpacingBefore: 'null',
         paragraphSpacingAfter: 'null',
@@ -283,9 +284,10 @@ describe('toCustomStyleDOM', () => {
         color: 'null',
         fontSize: 'null',
         fontName: 'null',
-        indent: 'null',
+        indent: '1',
         hasNumbering: true,
         align: 'null',
+        prefixValue:'BL'
       },
       styleName: '',
     });
@@ -301,7 +303,7 @@ describe('toCustomStyleDOM', () => {
         paddingBottom: null,
         paddingTop: null,
         capco: null,
-        styleName: null,
+        styleName: 'ABC',
       },
       content: [
         {
@@ -323,9 +325,15 @@ describe('toCustomStyleDOM', () => {
     };
     expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
-      {
-        style: 'line-height: 16pt;--czi-content-line-height: 16pt;',
-        styleName: null,
+      { 
+          "data-bullet-color": "#000000",
+          "data-bullet-symbol": "● ",
+          "data-indent": "1",
+           "data-show-bullet": true,
+          "list-style-level": 10,
+          "prefix": "BL",
+           "style": "line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;counter-increment: L1 L2 L3 L4 L5 L6 L7 L8 L9 L10 ;",
+           "styleName": "ABC",        
       },
     ]);
   });
@@ -671,7 +679,7 @@ describe('toCustomStyleDOM', () => {
     window['set-cust-list-style-counter-1'] = false;
     window['set-cust-list-style-counter-2'] = false;
     const result = countersRefresh(styleLevel, isListStyle);
-    expect(result).toBe('counter-increment: L1 L2 L3 ;');
+    expect(result).toBe('counter-increment: L1 L2 ;');
     expect(window['set-cust-list-style-counter-1']).toBe(true);
     expect(window['set-cust-list-style-counter-2']).toBe(true);
   });

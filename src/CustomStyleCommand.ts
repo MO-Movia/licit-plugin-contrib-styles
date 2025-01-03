@@ -1489,7 +1489,6 @@ export function applyLineStyle(
 export function addMarksToLine(tr, state, node, pos, boldSentence) {
   const markType = state.schema.marks[MARKSTRONG];
   let textContent = getNodeText(node);
-  const endPos = textContent.length;
   let content: string[] = [];
   let counter: number = 0;
   if (boldSentence) {
@@ -1514,13 +1513,6 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
     pos + textContent.length + 1 + counter,
     markType.create(null)
   );
-  if (content.length > 1) {
-    tr = tr.removeMark(
-      pos + textContent.length + 1 + counter,
-      pos + endPos + 1,
-      markType
-    );
-  }
   return tr;
 }
 // get text content from selected node

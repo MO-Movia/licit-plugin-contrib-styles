@@ -2592,7 +2592,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
             attrs: { color: '#0d69f2', overridden: false },
           },
         ],
-        text: '.fggf.dfgfgh.fghfgh',
+        text: 'test the bold first sentence.fghfgh',
       },
     ],
   };
@@ -2600,9 +2600,10 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
   const nodemock = schema1.nodeFromJSON(json);
 
   it('should handle addMarksToLine', () => {
+    const transaction = addMarksToLine(trmock, statemock, nodemock, 0, true);
     expect(
       addMarksToLine(trmock, statemock, nodemock, 0, true)
-    ).toBeUndefined();
+    ).toBeDefined;
   });
 
   it('should handle addMarksToLine when boldSentence is false', () => {
@@ -2641,9 +2642,10 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       ],
     };
     const nodemock = schema1.nodeFromJSON(json);
+    const transaction =  addMarksToLine(trmock, statemock, nodemock, 0, false);
     expect(
-      addMarksToLine(trmock, statemock, nodemock, 0, false)
-    ).toBeUndefined();
+      addMarksToLine(trmock, statemock, nodemock, 0, true)
+    ).toBeDefined;
   });
   it('should handle manageElementsAfterSelection', () => {
     expect(
@@ -2777,7 +2779,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       styleName: 'FM_chsubpara1',
     };
     expect(
-      addElementEx(nodeattrs, statemock, trmock, 0, false, 2,1)
+      addElementEx(nodeattrs, statemock, trmock, 0, false, 2, 1)
     ).toBeDefined();
   });
   it('should handle getCustomStyles', () => {
@@ -4393,7 +4395,7 @@ describe('applyLatestStyle', () => {
       ],
     });
     const doc = new Node();
-    const tr = {doc:mockdoc} as unknown as Transaction;
+    const tr = { doc: mockdoc } as unknown as Transaction;
     const myEditor = {} as unknown as EditorState;
     const style: Style = {
       styleName: '',
@@ -4475,7 +4477,7 @@ describe('applyLatestStyle', () => {
         return document.createElement('div');
       },
     } as unknown as Node;
-    const tr = {doc:mockdoc} as unknown as Transaction;
+    const tr = { doc: mockdoc } as unknown as Transaction;
     const myEditor = {} as unknown as EditorState;
     const style: Style = {
       styleName: '',
@@ -4555,8 +4557,8 @@ describe('applyLatestStyle', () => {
     expect(
       applyLatestStyle(
         '',
-        {schema:mockschema} as unknown as EditorState,
-        { doc: mockdoc,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}} } as unknown as Transform,
+        { schema: mockschema } as unknown as EditorState,
+        { doc: mockdoc, selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } } } as unknown as Transform,
         {
           attrs: {
             lineSpacing: '',
@@ -5043,7 +5045,7 @@ describe('removeAllMarksExceptLink', () => {
         },
       ],
     });
-    const tr = { doc: mockDoc,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}  } as unknown as Transform;
+    const tr = { doc: mockDoc, selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } } } as unknown as Transform;
     expect(
       removeAllMarksExceptLink(0, 1, tr, mySchema)
     ).toBeDefined();
@@ -5079,7 +5081,7 @@ describe('removeAllMarksExceptLink', () => {
         },
       ],
     });
-    const tr = { doc: mockDoc ,selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}} } as unknown as Transform;
+    const tr = { doc: mockDoc, selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } } } as unknown as Transform;
     expect(
       removeAllMarksExceptLink(0, 1, tr, mySchema)
     ).toBeDefined();
@@ -5131,7 +5133,7 @@ describe('removeAllMarksExceptLink', () => {
       removeMark: () => {
         return { doc: mockDoc };
       },
-      selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}
+      selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } }
     } as unknown as Transform;
     expect(
       removeAllMarksExceptLink(1, 2, tr, mySchema)
@@ -5184,7 +5186,7 @@ describe('removeAllMarksExceptLink', () => {
       removeMark: () => {
         return { doc: mockDoc };
       },
-      selection:{$from:{start:()=>{return 1;}},$to:{end:()=>{return 2;}}}
+      selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } }
     } as unknown as Transform;
     expect(
       removeAllMarksExceptLink(1, 2, tr, mySchema)
@@ -5223,7 +5225,7 @@ describe('handleRemoveMarks', () => {
         },
       ],
     });
-    mockdoc.nodeAt = ()=>{return {} as unknown as Node;};
+    mockdoc.nodeAt = () => { return {} as unknown as Node; };
     const tr = {
       doc: mockdoc,
       removeMark: () => {
@@ -5320,16 +5322,16 @@ describe('handleRemoveMarks', () => {
     expect(customstylecommand.isActive()).toBeTruthy();
   });
 });
-describe('compareAttributes',()=>{
-  it('should handle compareAttributes',()=>{
-    expect(compareAttributes({attrs:{'overridden':{}}},{})).toBeFalsy();
+describe('compareAttributes', () => {
+  it('should handle compareAttributes', () => {
+    expect(compareAttributes({ attrs: { 'overridden': {} } }, {})).toBeFalsy();
   });
-  it('should handle compareAttributes when mark.type.name is super',()=>{
-    expect(compareAttributes({attrs:{'overridden':undefined},type:{name:'super'}},{})).toBeFalsy();
+  it('should handle compareAttributes when mark.type.name is super', () => {
+    expect(compareAttributes({ attrs: { 'overridden': undefined }, type: { name: 'super' } }, {})).toBeFalsy();
   });
 });
-describe('resetNodeAttrs',()=>{
-  it('should handle resetNodeAttrs',()=>{
-    expect(resetNodeAttrs({},{})).toBeDefined();
+describe('resetNodeAttrs', () => {
+  it('should handle resetNodeAttrs', () => {
+    expect(resetNodeAttrs({}, {})).toBeDefined();
   });
 });

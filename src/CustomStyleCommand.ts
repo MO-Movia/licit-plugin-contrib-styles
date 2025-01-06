@@ -733,7 +733,7 @@ function applyStyleEx(
         // to set the node attribute for text-align
         if (element instanceof TextAlignCommand) {
           // [KNITE-1465] 26-12-2024
-          // if user override the align style then retian that align style 
+          // if user override the align style then retian that align style
           // using the overridenAlign property we can find align style overrided or not
           if (node?.attrs?.overriddenAlign) {
             newattrs.align = node.attrs.align;
@@ -746,7 +746,7 @@ function applyStyleEx(
           // [FS] IRAD-1104 2020-11-13
           // Issue fix : Linespacing Double and Single not applied in the sample text paragraph
           // [KNITE-1465] 26-12-2024
-          // if user override the lineSpacing style then retian that lineSpacing style 
+          // if user override the lineSpacing style then retian that lineSpacing style
           // using the overriddenLineSpacing property we can find lineSpacing style overrided or not
           if (node?.attrs?.overriddenLineSpacing) {
             newattrs.lineSpacing = node.attrs.lineSpacing;
@@ -755,7 +755,7 @@ function applyStyleEx(
             newattrs.lineSpacing = getLineSpacingValue(
               styleProp.styles.lineHeight || ''
             );
-          }         
+          }
         } else if (element instanceof ParagraphSpacingCommand) {
           // [FS] IRAD-1100 2020-11-05
           // Add in leading and trailing spacing (before and after a paragraph)
@@ -767,7 +767,7 @@ function applyStyleEx(
           // [FS] IRAD-1162 2021-1-25
           // Bug fix: indent not working along with level
           // [KNITE-1465] 26-12-2024
-          // if user override the indent style then retian that indent style 
+          // if user override the indent style then retian that indent style
           // using the overriddenIndent property we can find indent style overrided or not
           if (node?.attrs?.overriddenIndent) {
             newattrs.indent = node.attrs.indent;
@@ -776,7 +776,7 @@ function applyStyleEx(
             newattrs.indent = styleProp.styles.isLevelbased
               ? styleProp.styles.styleLevel
               : styleProp.styles.indent;
-          }          
+          }
         }
       }
 
@@ -1514,7 +1514,6 @@ export function applyLineStyle(
 export function addMarksToLine(tr, state, node, pos, boldSentence) {
   const markType = state.schema.marks[MARKSTRONG];
   let textContent = getNodeText(node);
-  const endPos = textContent.length;
   let content: string[] = [];
   let counter: number = 0;
   if (boldSentence) {
@@ -1538,7 +1537,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
     pos,
     pos + textContent.length + 1 + counter,
     markType.create(null)
-  );  
+  );
   return tr;
 }
 // get text content from selected node

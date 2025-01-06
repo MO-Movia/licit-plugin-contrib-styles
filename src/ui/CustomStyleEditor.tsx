@@ -1500,6 +1500,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           <p className="molsp-formp">Prefix:</p>
                           <input
                             disabled={
+                              this.checkCondition(
+                                this.state.styles.hasNumbering
+                              ) ||
                               this.state.styleName === RESERVED_STYLE_NONE
                             }
                             onChange={(e) => this.handlePrefix(e)}

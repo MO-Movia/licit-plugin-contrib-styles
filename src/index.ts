@@ -730,16 +730,18 @@ function updateStyleOverrideFlag(state, tr) {
 // using this function we can find if the user overrided the align,line spacing,indent.
 function updateOverrideFlagForAlign(node) {
   const styleProp = getCustomStyleByName(node.attrs.styleName);
+  const newAttrs = { ...node.attrs };
   if (null !== node?.attrs.overriddenAlign && styleProp?.styles?.align === node?.attrs?.align) {
-    node.attrs['overriddenAlign'] = false;
+    newAttrs['overriddenAlign'] = false;
   }
   if (null !== node?.attrs.overriddenLineSpacing && getLineSpacingValue(styleProp?.styles?.lineHeight) === node?.attrs?.lineSpacing) {
-    node.attrs['overriddenLineSpacing'] = false;
+    newAttrs['overriddenLineSpacing'] = false;
   }
   if (null !== node?.attrs.overriddenIndent && styleProp?.styles?.indent === node?.attrs?.indent) {
-    node.attrs['overriddenIndent'] = false;
+    newAttrs['overriddenIndent'] = false;
   }
-  return node;
+   // Return a new node with updated attributes
+   return node.type.create(newAttrs, node.content, node.marks);
 }
 
 function haveEligibleChildren(node, contentLen) {

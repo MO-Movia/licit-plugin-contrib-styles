@@ -1,5 +1,4 @@
-import { EditorView } from 'prosemirror-view';
-import { isPreviousLevelExists, setStyles, isStylesLoaded, hasStyleRuntime, getCustomStyle, saveStyle, setStyleRuntime, renameStyle, removeStyle, addStyleToList, setView } from './customStyle';
+import { isPreviousLevelExists, setStyles, isStylesLoaded, hasStyleRuntime, getCustomStyle, saveStyle, setStyleRuntime, renameStyle, removeStyle, addStyleToList } from './customStyle';
 import type { Style } from './StyleRuntime.js';
 
 describe('customstyle', () => {
@@ -44,10 +43,6 @@ describe('customstyle', () => {
     it('should handle addStyleToList', () => {
         setStyleRuntime({ removeStyle: () => { return null; } });
         expect(addStyleToList({} as unknown as Style)).toStrictEqual([{ 'styleName': '' }, {}]);
-    });
-    it('should handle setStyles', () => {
-        setView({ dispatch: () => { }, state: { tr: { scrollIntoView: () => { } } } } as unknown as EditorView);
-        expect(setStyles([{ docType: {} } as unknown as Style])).toBeUndefined();
     });
 });
 

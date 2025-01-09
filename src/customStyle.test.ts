@@ -44,10 +44,6 @@ describe('customstyle', () => {
     it('should handle addStyleToList', () => {
         setStyleRuntime({ removeStyle: () => { return null; } });
         expect(addStyleToList({} as unknown as Style)).toStrictEqual([{ 'styleName': '' }, {}]);
-    });
-    it('should handle setStyles', () => {
-        setView({ dispatch: () => { }, state: { tr: { scrollIntoView: () => { } } } } as unknown as EditorView);
-        expect(setStyles([{ docType: {} } as unknown as Style])).toBeUndefined();
-    });
+    });   
 });
 

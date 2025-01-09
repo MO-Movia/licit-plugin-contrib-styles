@@ -44,7 +44,7 @@ export function isCustomStyleExists(styleName: string) {
     for (const style of customStyles) {
       // [FS] IRAD-1432 2021-07-08
       // FIX: Able to add same style name
-      if (styleName.toUpperCase() === style.styleName.toUpperCase()) {
+      if (styleName.toUpperCase() === style?.styleName?.toUpperCase()) {
         bOK = true;
         return bOK;
       }

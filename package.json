@@ -24,8 +24,8 @@
     "ci:bom": "cyclonedx-npm --ignore-npm-errors --short-PURLs --output-format XML --output-file dist/bom.xml"
   },
   "peerDependencies": {
-    "@modusoperandi/licit-doc-attrs-step": "^1.0.2",
-    "@modusoperandi/licit-ui-commands": "^1.0.3",
+    "@modusoperandi/licit-doc-attrs-step": "^1.0.3",
+    "@modusoperandi/licit-ui-commands": "^1.0.8",
     "uuid": "^9.0.0"
   },
   "dependencies": {

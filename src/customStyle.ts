@@ -96,7 +96,8 @@ export function setStyles(style: Style[]) {
   if (style[0] === undefined || !Object.hasOwn(style[0], 'docType')) {
     hasdocTypechanged = true;
   }
-  if (style && 0 === style.length) {
+  // if the styles doesn't have default style Normal then add that style.
+  if (style && !isCustomStyleExists(RESERVED_STYLE_NONE)) {
     saveDefaultStyle();
   }
 }
@@ -113,11 +114,9 @@ export function setStyleRuntime(runtime) {
 }
 
 function saveDefaultStyle() {
-  if (!isCustomStyleExists(RESERVED_STYLE_NONE)) {
-    saveStyle(DEFAULT_NORMAL_STYLE)?.then(() => {
-      /* This is intentional */
-    });
-  }
+  saveStyle(DEFAULT_NORMAL_STYLE)?.then(() => {
+    /* This is intentional */
+  });
 }
 
 export function isStylesLoaded() {

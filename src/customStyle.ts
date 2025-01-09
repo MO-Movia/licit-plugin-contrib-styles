@@ -65,6 +65,10 @@ export function getCustomStyleByName(name: string): Style {
         style = customStyles[i];
         has = true;
       }
+      // FIX: Marks are not getting applied to an undefined style.
+      else {
+        style = DEFAULT_NORMAL_STYLE;
+      }
     }
   } else {
     style = DEFAULT_NORMAL_STYLE;
@@ -72,7 +76,7 @@ export function getCustomStyleByName(name: string): Style {
   return style;
 }
 
-export function setView(csview : EditorView) {
+export function setView(csview: EditorView) {
   _view = csview;
 }
 

@@ -271,14 +271,15 @@ export class CustomStyleCommand extends UICommand {
     hasMismatchHeirarchy(state, tr, node, startPos, endPos);
     // [FS] IRAD-1480 2021-06-25
     // Indenting not remove when clear style is applied
-    newattrs = node.attrs;
-    if (newattrs) {
-      newattrs['styleName'] = RESERVED_STYLE_NONE;
-      newattrs['id'] = '';
+    // FIX: cannot assign to readonly property styleName of object.
+    const newAttrs = { ...node.attrs };
+    if (newAttrs) {
+      newAttrs['styleName'] = RESERVED_STYLE_NONE;
+      newAttrs['id'] = '';
       // [FS] IRAD-1414 2021-07-12
       // FIX: Applied number/bullet list removes when 'Clear Style'
-      newattrs['indent'] = 0;
-      tr = tr.setNodeMarkup(startPos, undefined, newattrs);
+      newAttrs['indent'] = 0;
+      tr = tr.setNodeMarkup(startPos, undefined, newAttrs);
     }
 
     tr = removeTextAlignAndLineSpacing(tr, state.schema);
@@ -1489,7 +1490,6 @@ export function applyLineStyle(
 export function addMarksToLine(tr, state, node, pos, boldSentence) {
   const markType = state.schema.marks[MARKSTRONG];
   let textContent = getNodeText(node);
-  const endPos = textContent.length;
   let content: string[] = [];
   let counter: number = 0;
   if (boldSentence) {
@@ -1514,13 +1514,6 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
     pos + textContent.length + 1 + counter,
     markType.create(null)
   );
-  if (content.length > 1) {
-    tr = tr.removeMark(
-      pos + textContent.length + 1 + counter,
-      pos + endPos + 1,
-      markType
-    );
-  }
   return tr;
 }
 // get text content from selected node

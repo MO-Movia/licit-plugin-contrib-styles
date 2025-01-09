@@ -709,7 +709,10 @@ function updateStyleOverrideFlag(state, tr) {
       const startPos = tr.curSelection.$anchor.pos; //pos
       const endPos = tr.curSelection.$head.pos; //pos + contentLen
       if (!child.attrs.styleName) {
-        child.attrs.styleName = 'Normal';
+        // FIX: cannot assign to readonly property styleName of object.
+        const newAttrs = { ...child.attrs };
+        newAttrs['styleName'] = 'Normal';
+        child.type.create(newAttrs, child.content, child.marks);
       }
       tr = updateOverrideFlag(
         child.attrs.styleName,

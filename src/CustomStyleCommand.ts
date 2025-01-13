@@ -18,7 +18,6 @@ import {
   FontSizeCommand,
   TextLineSpacingCommand,
   TextAlignCommand,
-  setTextAlign,
   IndentCommand,
   getLineSpacingValue,
 } from '@modusoperandi/licit-ui-commands';
@@ -706,7 +705,7 @@ function applyStyleEx(
 
   // [FS] IRAD-1087 2020-11-02
   // Issue fix: applied link is missing after applying a custom style.
-  tr = removeAllMarksExceptLink(startPos, endPos, tr, state.schema);
+  tr = removeAllMarksExceptLink(startPos, endPos, tr);
 
   if (loading || !opt) {
     styleProp = getCustomStyleByName(styleName);
@@ -725,7 +724,10 @@ function applyStyleEx(
 
     // [FS] IRAD-1131 2021-01-12
     // Indent overriding not working on a paragraph where custom style is applied
-    //newattrs.indent = null;
+    if (!node?.attrs?.overriddenIndent) {
+      newattrs.indent = null;
+    }
+
     newattrs.styleName = styleName;
 
     _commands.forEach((element) => {
@@ -736,7 +738,8 @@ function applyStyleEx(
           // if user override the align style then retian that align style
           // using the overridenAlign property we can find align style overrided or not
           if (node?.attrs?.overriddenAlign) {
-            newattrs.align = node.attrs.align;
+            // newattrs.align = node.attrs.align;
+            newattrs.align = node.attrs.overriddenAlignValue;
           }
           else {
             newattrs.align = styleProp.styles.align;
@@ -749,7 +752,8 @@ function applyStyleEx(
           // if user override the lineSpacing style then retian that lineSpacing style
           // using the overriddenLineSpacing property we can find lineSpacing style overrided or not
           if (node?.attrs?.overriddenLineSpacing) {
-            newattrs.lineSpacing = node.attrs.lineSpacing;
+            // newattrs.lineSpacing = node.attrs.lineSpacing;
+            newattrs.lineSpacing = node?.attrs?.overriddenLineSpacingValue;
           }
           else {
             newattrs.lineSpacing = getLineSpacingValue(
@@ -770,7 +774,8 @@ function applyStyleEx(
           // if user override the indent style then retian that indent style
           // using the overriddenIndent property we can find indent style overrided or not
           if (node?.attrs?.overriddenIndent) {
-            newattrs.indent = node.attrs.indent;
+            // newattrs.indent = node.attrs.indent;
+            newattrs.indent = node.attrs.overriddenIndentValue;
           }
           else {
             newattrs.indent = styleProp.styles.isLevelbased
@@ -1365,8 +1370,7 @@ function _setNodeAttribute(
 export function removeAllMarksExceptLink(
   from: number,
   to: number,
-  tr: Transform,
-  schema: Schema
+  tr: Transform
 ) {
   const { doc } = tr;
   const tasks = [];
@@ -1387,15 +1391,12 @@ export function removeAllMarksExceptLink(
     }
     return true;
   });
-  return handleRemoveMarks(tr, tasks, from, to, schema);
+  return handleRemoveMarks(tr, tasks);
 }
 
 export function handleRemoveMarks(
   tr: Transform,
-  tasks,
-  from: number,
-  to: number,
-  schema: Schema
+  tasks
 ) {
   tasks.forEach((job) => {
     const { mark } = job;
@@ -1404,7 +1405,6 @@ export function handleRemoveMarks(
       tr = tr.removeMark(job.pos, to, mark.type);
     }
   });
-  tr = setTextAlign(tr, schema, null);
   return tr;
 }
 

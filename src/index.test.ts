@@ -2547,10 +2547,16 @@ describe('Cus Style Plugin-Pass', () => {
       color: null,
       id: '',
       indent: undefined,
-      lineSpacing:'125%',
+      lineSpacing: '125%',
       paddingBottom: null,
       paddingTop: null,
       styleName: 'Normal',
+      overriddenAlign: null,
+      overriddenAlignValue: null,
+      overriddenIndent: null,
+      overriddenIndentValue: null,
+      overriddenLineSpacing: null,
+      overriddenLineSpacingValue: null,
     });
   });
   it('should return newAttrs when RESERVED_STYLE_NONE  is not nextLineStyle  ', () => {
@@ -2579,6 +2585,12 @@ describe('Cus Style Plugin-Pass', () => {
       paddingBottom: null,
       paddingTop: null,
       styleName: 'test',
+      overriddenAlign: null,
+      overriddenAlignValue: null,
+      overriddenIndent: null,
+      overriddenIndentValue: null,
+      overriddenLineSpacing: null,
+      overriddenLineSpacingValue: null,
     });
   });
   it('should return newAttrs when RESERVED_STYLE_NONE  is not nextLineStyle branch coverage  ', () => {
@@ -2609,6 +2621,12 @@ describe('Cus Style Plugin-Pass', () => {
       paddingTop: null,
       styleName: 'test',
       innerLink: null,
+      overriddenAlign: null,
+      overriddenAlignValue: null,
+      overriddenIndent: null,
+      overriddenIndentValue: null,
+      overriddenLineSpacing: null,
+      overriddenLineSpacingValue: null,
     });
   });
   it('should handle setNodeAttrs when nextLineStyleName is null ', () => {

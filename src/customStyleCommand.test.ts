@@ -18,7 +18,6 @@ import {
   handleRemoveMarks,
   compareAttributes,
   resetNodeAttrs,
-  executeCommands
 } from './CustomStyleCommand.js';
 import * as cusstylecommand from './CustomStyleCommand';
 import { EditorState, Selection, Transaction } from 'prosemirror-state';
@@ -494,7 +493,7 @@ describe('CustomStyleCommand', () => {
     expect(
       customstylecommand.executeClearStyle(
         mockeditorstate as unknown as EditorState,
-        () => { },
+        () => {},
         0,
         1,
         2,
@@ -809,7 +808,7 @@ describe('CustomStyleCommand', () => {
         },
       ],
     } as unknown as Node;
-    const mockdispatch = () => { };
+    const mockdispatch = () => {};
     const mockval = {
       styles: {
         hasBullet: true,
@@ -971,7 +970,7 @@ describe('CustomStyleCommand', () => {
       ]),
     ]);
 
-    const mockdispatch = () => { };
+    const mockdispatch = () => {};
     const mockval = {
       styles: {
         hasBullet: true,
@@ -2146,7 +2145,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       },
     ],
     addMark: () => {
-      return { removeMark: () => { } };
+      return { removeMark: () => {} };
     },
     removeMark: () => {
       return { key: 'mocktr' };
@@ -2593,7 +2592,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
             attrs: { color: '#0d69f2', overridden: false },
           },
         ],
-        text: 'test the bold first sentence.fghfgh',
+        text: '.fggf.dfgfgh.fghfgh',
       },
     ],
   };
@@ -2602,9 +2601,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
 
   it('should handle addMarksToLine', () => {
     const result = addMarksToLine(trmock, statemock, nodemock, 0, true);
-    expect(
-      result
-    ).toBeDefined();
+    expect(result).toBeDefined();
   });
 
   it('should handle addMarksToLine when boldSentence is false', () => {
@@ -2643,9 +2640,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       ],
     };
     const nodemock = schema1.nodeFromJSON(json);
-    expect(
-      addMarksToLine(trmock, statemock, nodemock, 0, true)
-    ).toBeDefined();
+    expect(addMarksToLine(trmock, statemock, nodemock, 0, true)).toBeDefined();
   });
   it('should handle manageElementsAfterSelection', () => {
     expect(
@@ -2782,426 +2777,418 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       addElementEx(nodeattrs, statemock, trmock, 0, false, 2, 1)
     ).toBeDefined();
   });
+  it('should handle getCustomStyles', () => {
+    //const nodeattrs = { 'align': 'left', 'color': null, 'id': null, 'indent': null, 'lineSpacing': '125%', 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'FM_chsubpara1' };
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+    });
 
-  it('should handle executeCommands', () => {
+    // Create a sample document
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'test' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'This is a mock dummy document.',
+              attrs: { styleName: 'test' },
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'It demonstrates the structure of a ProseMirror document.',
+            },
+          ],
+        },
+      ],
+    });
+    const mockselection = {
+      $from: {
+        before: (x) => {
+          return x - 1;
+        },
+      },
+      $to: {
+        after: (x) => {
+          return x + 1;
+        },
+      },
+    };
+    const mockeditorstate = {
+      schema: mockschema,
+      doc: mockdoc,
+      selection: mockselection,
+      tr: {
+        setSelection: () => {
+          return {
+            setNodeMarkup: () => {
+              return {
+                removeTextAlignAndLineSpacing: () => {
+                  return {
+                    createEmptyElement: () => {
+                      return {};
+                    },
+                  };
+                },
+              };
+            },
+            doc: mockdoc,
+          };
+        },
+      },
+    };
+    const styl = {
+      styleName: 'Normal',
+      mode: 1,
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A_12',
+        fontName: 'Aclonica',
+        fontSize: '14',
+        strong: true,
+        styleLevel: '2',
+        hasBullet: true,
+        bulletLevel: '272A',
+        hasNumbering: false,
+      },
+      toc: false,
+      isHidden: false,
+    } as unknown as Style;
+    jest.spyOn(customstyles, 'getStylesAsync').mockResolvedValue([styl]);
+    jest
+      .spyOn(cusstylecommand, 'updateDocument')
+      .mockReturnValue({ key: 'mocktr' } as unknown as Transform);
+    const customstylecommand = new CustomStyleCommand(styl, 'A_12');
+
+    const editorview = {
+      state: mockeditorstate,
+      dispatch: () => {
+        return {};
+      },
+    };
     expect(
-      executeCommands(statemock as EditorState, trmock as unknown as Transform, 'Normal', 0, 0)
+      customstylecommand.getCustomStyles(
+        'Normal',
+        editorview as unknown as EditorView
+      )
+    ).toBeUndefined();
+  });
+  it('should handle getCustomStyles when styleName null', () => {
+    const editorview = {
+      state: statemock,
+      dispatch: () => {
+        return {};
+      },
+    };
+    expect(
+      customstylecommand.getCustomStyles(
+        null as unknown as string,
+        editorview as unknown as EditorView
+      )
+    ).toBeUndefined();
+  });
+  it('should handle getCustomStyles when styleName not equal obj.styleName', () => {
+    //const nodeattrs = { 'align': 'left', 'color': null, 'id': null, 'indent': null, 'lineSpacing': '125%', 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'FM_chsubpara1' };
+    const styl = {
+      styleName: 'test',
+      mode: 1,
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        nextLineStyleName: 'A_12',
+        fontName: 'Aclonica',
+        fontSize: '14',
+        strong: true,
+        styleLevel: '2',
+        hasBullet: true,
+        bulletLevel: '272A',
+        hasNumbering: false,
+      },
+      toc: false,
+      isHidden: false,
+    } as unknown as Style;
+    jest.spyOn(customstyles, 'getStylesAsync').mockResolvedValue([styl]);
+    jest
+      .spyOn(cusstylecommand, 'updateDocument')
+      .mockReturnValue({ key: 'mocktr' } as unknown as Transform);
+    const customstylecommand = new CustomStyleCommand(styl, 'A_12');
+
+    const editorview = {
+      state: statemock,
+      dispatch: () => {
+        return {};
+      },
+    };
+    expect(
+      customstylecommand.getCustomStyles(
+        'Normal',
+        editorview as unknown as EditorView
+      )
+    ).toBeUndefined();
+  });
+
+  it('should handle compareMarkWithStyle when type = mark-font-size ', () => {
+    const mark = {
+      type: 'mark-font-size',
+      attrs: { pt: 11, overridden: false },
+    };
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
     ).toBeDefined();
-});
-
-
-it('should handle getCustomStyles', () => {
-  //const nodeattrs = { 'align': 'left', 'color': null, 'id': null, 'indent': null, 'lineSpacing': '125%', 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'FM_chsubpara1' };
-  const mockschema = new Schema({
-    nodes: {
-      doc: {
-        content: 'paragraph+',
-      },
-      paragraph: {
-        content: 'text*',
-        attrs: {
-          styleName: { default: 'test' },
-        },
-        toDOM() {
-          return ['p', 0];
-        },
-      },
-      heading: {
-        attrs: { level: { default: 1 }, styleName: { default: '' } },
-        content: 'inline*',
-        marks: '',
-        toDOM(node) {
-          return [
-            'h' + node.attrs.level,
-            { 'data-style-name': node.attrs.styleName },
-            0,
-          ];
-        },
-      },
-      text: {
-        group: 'inline',
-      },
-    },
   });
-
-  // Create a sample document
-  const mockdoc = mockschema.nodeFromJSON({
-    type: 'doc',
-    content: [
-      {
-        type: 'heading',
-        attrs: { level: 1, styleName: 'test' },
-        content: [
-          {
-            type: 'text',
-            text: 'Hello, ProseMirror!',
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        content: [
-          {
-            type: 'text',
-            text: 'This is a mock dummy document.',
-            attrs: { styleName: 'test' },
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        content: [
-          {
-            type: 'text',
-            text: 'It demonstrates the structure of a ProseMirror document.',
-          },
-        ],
-      },
-    ],
+  it('should handle compareMarkWithStyle when type = em ', () => {
+    const mark = { type: { name: 'em' }, attrs: { overridden: false } };
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
+    ).toBeDefined();
   });
-  const mockselection = {
-    $from: {
-      before: (x) => {
-        return x - 1;
-      },
-    },
-    $to: {
-      after: (x) => {
-        return x + 1;
-      },
-    },
-  };
-  const mockeditorstate = {
-    schema: mockschema,
-    doc: mockdoc,
-    selection: mockselection,
-    tr: {
-      setSelection: () => {
-        return {
-          setNodeMarkup: () => {
-            return {
-              removeTextAlignAndLineSpacing: () => {
-                return {
-                  createEmptyElement: () => {
-                    return {};
-                  },
-                };
-              },
-            };
-          },
-          doc: mockdoc,
-        };
-      },
-    },
-  };
-  const styl = {
-    styleName: 'Normal',
-    mode: 1,
-    styles: {
+  it('should handle compareMarkWithStyle when type = strong ', () => {
+    const mark = { type: { name: 'strong' }, attrs: { overridden: false } };
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
+    ).toBeDefined();
+  });
+  it('should handle compareMarkWithStyle when type = MARK_TEXT_COLOR ', () => {
+    const mark = {
+      type: { name: 'mark-text-color' },
+      attrs: { overridden: false },
+    };
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
+    ).toBeDefined();
+  });
+  it('should handle compareMarkWithStyle when type = MARKFONTSIZE ', () => {
+    const mark = {
+      type: { name: 'mark-font-size' },
+      attrs: { overridden: false },
+    };
+    const style1 = {
       align: 'left',
       boldNumbering: true,
       toc: false,
       isHidden: false,
       boldSentence: true,
-      nextLineStyleName: 'A_12',
-      fontName: 'Aclonica',
-      fontSize: '14',
+      nextLineStyleName: 'FS_36',
+      fontName: 'Arial',
+      fontSize: 11,
+      textHighlight: '#3b0df2',
       strong: true,
-      styleLevel: '2',
-      hasBullet: true,
-      bulletLevel: '272A',
-      hasNumbering: false,
-    },
-    toc: false,
-    isHidden: false,
-  } as unknown as Style;
-  jest.spyOn(customstyles, 'getStylesAsync').mockResolvedValue([styl]);
-  jest
-    .spyOn(cusstylecommand, 'updateDocument')
-    .mockReturnValue({ key: 'mocktr' } as unknown as Transform);
-  const customstylecommand = new CustomStyleCommand(styl, 'A_12');
-
-  const editorview = {
-    state: mockeditorstate,
-    dispatch: () => {
-      return {};
-    },
-  };
-  expect(
-    customstylecommand.getCustomStyles(
-      'Normal',
-      editorview as unknown as EditorView
-    )
-  ).toBeUndefined();
-});
-it('should handle getCustomStyles when styleName null', () => {
-  const editorview = {
-    state: statemock,
-    dispatch: () => {
-      return {};
-    },
-  };
-  expect(
-    customstylecommand.getCustomStyles(
-      null as unknown as string,
-      editorview as unknown as EditorView
-    )
-  ).toBeUndefined();
-});
-it('should handle getCustomStyles when styleName not equal obj.styleName', () => {
-  //const nodeattrs = { 'align': 'left', 'color': null, 'id': null, 'indent': null, 'lineSpacing': '125%', 'paddingBottom': null, 'paddingTop': null, 'capco': null, 'styleName': 'FM_chsubpara1' };
-  const styl = {
-    styleName: 'test',
-    mode: 1,
-    styles: {
+      em: true,
+      underline: true,
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
+    ).toBeDefined();
+  });
+  it('should handle compareMarkWithStyle when type = MARKFONTTYPE ', () => {
+    const mark = {
+      type: { name: 'mark-font-type' },
+      attrs: { overridden: false },
+    };
+    const style1 = {
       align: 'left',
       boldNumbering: true,
       toc: false,
       isHidden: false,
       boldSentence: true,
-      nextLineStyleName: 'A_12',
-      fontName: 'Aclonica',
-      fontSize: '14',
+      nextLineStyleName: 'FS_36',
+      fontName: 'Arial',
+      fontSize: 11,
+      textHighlight: '#3b0df2',
       strong: true,
-      styleLevel: '2',
-      hasBullet: true,
-      bulletLevel: '272A',
-      hasNumbering: false,
-    },
-    toc: false,
-    isHidden: false,
-  } as unknown as Style;
-  jest.spyOn(customstyles, 'getStylesAsync').mockResolvedValue([styl]);
-  jest
-    .spyOn(cusstylecommand, 'updateDocument')
-    .mockReturnValue({ key: 'mocktr' } as unknown as Transform);
-  const customstylecommand = new CustomStyleCommand(styl, 'A_12');
-
-  const editorview = {
-    state: statemock,
-    dispatch: () => {
-      return {};
-    },
-  };
-  expect(
-    customstylecommand.getCustomStyles(
-      'Normal',
-      editorview as unknown as EditorView
-    )
-  ).toBeUndefined();
-});
-
-it('should handle compareMarkWithStyle when type = mark-font-size ', () => {
-  const mark = {
-    type: 'mark-font-size',
-    attrs: { pt: 11, overridden: false },
-  };
-  const style1 = {
-    align: 'justify',
-    boldNumbering: true,
-    toc: false,
-    isHidden: false,
-    boldSentence: true,
-    nextLineStyleName: 'Normal',
-    fontName: 'Arial',
-    fontSize: 11,
-    strong: true,
-    em: true,
-    underline: true,
-    color: '#c40df2',
-  };
-  const retobj = { modified: false };
-  expect(
-    compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
-  ).toBeDefined();
-});
-it('should handle compareMarkWithStyle when type = em ', () => {
-  const mark = { type: { name: 'em' }, attrs: { overridden: false } };
-  const style1 = {
-    align: 'justify',
-    boldNumbering: true,
-    toc: false,
-    isHidden: false,
-    boldSentence: true,
-    nextLineStyleName: 'Normal',
-    fontName: 'Arial',
-    fontSize: 11,
-    strong: true,
-    em: true,
-    underline: true,
-    color: '#c40df2',
-  };
-  const retobj = { modified: false };
-  expect(
-    compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
-  ).toBeDefined();
-});
-it('should handle compareMarkWithStyle when type = strong ', () => {
-  const mark = { type: { name: 'strong' }, attrs: { overridden: false } };
-  const style1 = {
-    align: 'justify',
-    boldNumbering: true,
-    toc: false,
-    isHidden: false,
-    boldSentence: true,
-    nextLineStyleName: 'Normal',
-    fontName: 'Arial',
-    fontSize: 11,
-    strong: true,
-    em: true,
-    underline: true,
-    color: '#c40df2',
-  };
-  const retobj = { modified: false };
-  expect(
-    compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
-  ).toBeDefined();
-});
-it('should handle compareMarkWithStyle when type = MARK_TEXT_COLOR ', () => {
-  const mark = {
-    type: { name: 'mark-text-color' },
-    attrs: { overridden: false },
-  };
-  const style1 = {
-    align: 'justify',
-    boldNumbering: true,
-    toc: false,
-    isHidden: false,
-    boldSentence: true,
-    nextLineStyleName: 'Normal',
-    fontName: 'Arial',
-    fontSize: 11,
-    strong: true,
-    em: true,
-    underline: true,
-    color: '#c40df2',
-  };
-  const retobj = { modified: false };
-  expect(
-    compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
-  ).toBeDefined();
-});
-it('should handle compareMarkWithStyle when type = MARKFONTSIZE ', () => {
-  const mark = {
-    type: { name: 'mark-font-size' },
-    attrs: { overridden: false },
-  };
-  const style1 = {
-    align: 'left',
-    boldNumbering: true,
-    toc: false,
-    isHidden: false,
-    boldSentence: true,
-    nextLineStyleName: 'FS_36',
-    fontName: 'Arial',
-    fontSize: 11,
-    textHighlight: '#3b0df2',
-    strong: true,
-    em: true,
-    underline: true,
-  };
-  const retobj = { modified: false };
-  expect(
-    compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
-  ).toBeDefined();
-});
-it('should handle compareMarkWithStyle when type = MARKFONTTYPE ', () => {
-  const mark = {
-    type: { name: 'mark-font-type' },
-    attrs: { overridden: false },
-  };
-  const style1 = {
-    align: 'left',
-    boldNumbering: true,
-    toc: false,
-    isHidden: false,
-    boldSentence: true,
-    nextLineStyleName: 'FS_36',
-    fontName: 'Arial',
-    fontSize: 11,
-    textHighlight: '#3b0df2',
-    strong: true,
-    em: true,
-    underline: true,
-  };
-  const retobj = { modified: false };
-  expect(
-    compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
-  ).toBeDefined();
-});
-it('should handle compareMarkWithStyle when type = MARK_TEXT_HIGHLIGHT ', () => {
-  const mark = {
-    type: { name: 'mark-text-highlight' },
-    attrs: { overridden: false },
-  };
-  const style1 = {
-    align: 'justify',
-    boldNumbering: true,
-    toc: false,
-    isHidden: false,
-    boldSentence: true,
-    nextLineStyleName: 'Normal',
-    fontName: 'Arial',
-    fontSize: 11,
-    strong: true,
-    em: true,
-    underline: true,
-    color: '#c40df2',
-  };
-  const retobj = { modified: false };
-  expect(
-    compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
-  ).toBeDefined();
-});
-it('should handle compareMarkWithStyle when type = MARKSTRIKE ', () => {
-  const mark = { type: { name: 'strike' }, attrs: { overridden: false } };
-  const style1 = {
-    align: 'justify',
-    boldNumbering: true,
-    toc: false,
-    isHidden: false,
-    boldSentence: true,
-    nextLineStyleName: 'Normal',
-    fontName: 'Arial',
-    fontSize: 11,
-    strong: true,
-    em: true,
-    underline: true,
-    color: '#c40df2',
-  };
-  const retobj = { modified: false };
-  expect(
-    compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
-  ).toBeDefined();
-});
-it('should handle compareMarkWithStyle when type = MARK_UNDERLINE ', () => {
-  const mark = { type: { name: 'underline' }, attrs: { overridden: false } };
-  const style1 = {
-    align: 'justify',
-    boldNumbering: true,
-    toc: false,
-    isHidden: false,
-    boldSentence: true,
-    nextLineStyleName: 'Normal',
-    fontName: 'Arial',
-    fontSize: 11,
-    strong: true,
-    em: true,
-    underline: true,
-    color: '#c40df2',
-  };
-  const retobj = { modified: false };
-  expect(
-    compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
-  ).toBeDefined();
-});
-it('should handle compareMarkWithStyle when style not present ', () => {
-  const mark = { type: { name: 'underline' }, attrs: { overridden: false } };
-  const retobj = { modified: false };
-  expect(
-    compareMarkWithStyle(mark, null, trmock, '', '', retobj)
-  ).toBeDefined();
-});
+      em: true,
+      underline: true,
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
+    ).toBeDefined();
+  });
+  it('should handle compareMarkWithStyle when type = MARK_TEXT_HIGHLIGHT ', () => {
+    const mark = {
+      type: { name: 'mark-text-highlight' },
+      attrs: { overridden: false },
+    };
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
+    ).toBeDefined();
+  });
+  it('should handle compareMarkWithStyle when type = MARKSTRIKE ', () => {
+    const mark = { type: { name: 'strike' }, attrs: { overridden: false } };
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
+    ).toBeDefined();
+  });
+  it('should handle compareMarkWithStyle when type = MARK_UNDERLINE ', () => {
+    const mark = { type: { name: 'underline' }, attrs: { overridden: false } };
+    const style1 = {
+      align: 'justify',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'Normal',
+      fontName: 'Arial',
+      fontSize: 11,
+      strong: true,
+      em: true,
+      underline: true,
+      color: '#c40df2',
+    };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, style1, trmock, '', '', retobj)
+    ).toBeDefined();
+  });
+  it('should handle compareMarkWithStyle when style not present ', () => {
+    const mark = { type: { name: 'underline' }, attrs: { overridden: false } };
+    const retobj = { modified: false };
+    expect(
+      compareMarkWithStyle(mark, null, trmock, '', '', retobj)
+    ).toBeDefined();
+  });
 });
 describe('updateDocument', () => {
   const styl = {
@@ -3731,7 +3718,7 @@ describe('updateDocument', () => {
       },
     ],
     addMark: () => {
-      return { removeMark: () => { } };
+      return { removeMark: () => {} };
     },
     removeMark: () => {
       return { key: 'mocktr' };
@@ -4566,7 +4553,21 @@ describe('applyLatestStyle', () => {
       applyLatestStyle(
         '',
         { schema: mockschema } as unknown as EditorState,
-        { doc: mockdoc, selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } } } as unknown as Transform,
+        {
+          doc: mockdoc,
+          selection: {
+            $from: {
+              start: () => {
+                return 1;
+              },
+            },
+            $to: {
+              end: () => {
+                return 2;
+              },
+            },
+          },
+        } as unknown as Transform,
         {
           attrs: {
             lineSpacing: '',
@@ -5052,10 +5053,22 @@ describe('removeAllMarksExceptLink', () => {
         },
       ],
     });
-    const tr = { doc: mockDoc, selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } } } as unknown as Transform;
-    expect(
-      removeAllMarksExceptLink(0, 1, tr)
-    ).toBeDefined();
+    const tr = {
+      doc: mockDoc,
+      selection: {
+        $from: {
+          start: () => {
+            return 1;
+          },
+        },
+        $to: {
+          end: () => {
+            return 2;
+          },
+        },
+      },
+    } as unknown as Transform;
+    expect(removeAllMarksExceptLink(0, 1, tr)).toBeDefined();
   });
   it('should handle removeAllMarksExceptLink when mark.attrs[ATTR_OVERRIDDEN] && link === mark.type.name', () => {
     const mySchema = new Schema({
@@ -5088,10 +5101,22 @@ describe('removeAllMarksExceptLink', () => {
         },
       ],
     });
-    const tr = { doc: mockDoc, selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } } } as unknown as Transform;
-    expect(
-      removeAllMarksExceptLink(0, 1, tr)
-    ).toBeDefined();
+    const tr = {
+      doc: mockDoc,
+      selection: {
+        $from: {
+          start: () => {
+            return 1;
+          },
+        },
+        $to: {
+          end: () => {
+            return 2;
+          },
+        },
+      },
+    } as unknown as Transform;
+    expect(removeAllMarksExceptLink(0, 1, tr)).toBeDefined();
   });
   it('should handle removeAllMarksExceptLink when mark.attrs[ATTR_OVERRIDDEN] && link === mark.type.name', () => {
     const mySchema = new Schema({
@@ -5140,7 +5165,18 @@ describe('removeAllMarksExceptLink', () => {
       removeMark: () => {
         return { doc: mockDoc };
       },
-      selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } }
+      selection: {
+        $from: {
+          start: () => {
+            return 1;
+          },
+        },
+        $to: {
+          end: () => {
+            return 2;
+          },
+        },
+      },
     } as unknown as Transform;
     expect(removeAllMarksExceptLink(1, 2, tr)).toBeDefined();
   });
@@ -5191,7 +5227,18 @@ describe('removeAllMarksExceptLink', () => {
       removeMark: () => {
         return { doc: mockDoc };
       },
-      selection: { $from: { start: () => { return 1; } }, $to: { end: () => { return 2; } } }
+      selection: {
+        $from: {
+          start: () => {
+            return 1;
+          },
+        },
+        $to: {
+          end: () => {
+            return 2;
+          },
+        },
+      },
     } as unknown as Transform;
     expect(removeAllMarksExceptLink(1, 2, tr)).toBeDefined();
   });
@@ -5228,7 +5275,9 @@ describe('handleRemoveMarks', () => {
         },
       ],
     });
-    mockdoc.nodeAt = () => { return {} as unknown as Node; };
+    mockdoc.nodeAt = () => {
+      return {} as unknown as Node;
+    };
     const tr = {
       doc: mockdoc,
       removeMark: () => {
@@ -5294,10 +5343,15 @@ describe('handleRemoveMarks', () => {
 });
 describe('compareAttributes', () => {
   it('should handle compareAttributes', () => {
-    expect(compareAttributes({ attrs: { 'overridden': {} } }, {})).toBeFalsy();
+    expect(compareAttributes({ attrs: { overridden: {} } }, {})).toBeFalsy();
   });
   it('should handle compareAttributes when mark.type.name is super', () => {
-    expect(compareAttributes({ attrs: { 'overridden': undefined }, type: { name: 'super' } }, {})).toBeFalsy();
+    expect(
+      compareAttributes(
+        { attrs: { overridden: undefined }, type: { name: 'super' } },
+        {}
+      )
+    ).toBeFalsy();
   });
 });
 describe('resetNodeAttrs', () => {

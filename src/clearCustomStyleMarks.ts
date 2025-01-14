@@ -25,12 +25,13 @@ export function removeTextAlignAndLineSpacing(
 
 export function clearCustomStyleAttribute(node: Node) {
   if (node.attrs) {
+    // FIX: cannot assign to readonly property styleName of object.
+    const newAttrs = { ...node.attrs };
     if (node.attrs.styleName) {
-      ((node.attrs as { styleName: string }).styleName) = RESERVED_STYLE_NONE;
+      newAttrs['styleName'] = RESERVED_STYLE_NONE;
     }
     //SL-3
-
-    ((node.attrs as { indent: string }).indent) = null;
-
+    newAttrs['indent'] = null;
+    node?.type?.create(newAttrs, node.content, node.marks);
   }
 }

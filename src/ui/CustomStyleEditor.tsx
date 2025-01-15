@@ -701,7 +701,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     }
 
     if (this.state.styleName === RESERVED_STYLE_NONE) {
-      acc[2].classList.toggle('molsp-accactive');
+      acc[2]?.classList.toggle('molsp-accactive');
       const mp2 = document.getElementsByClassName(
         'molsp-panel2'
       )[0] as HTMLElement;

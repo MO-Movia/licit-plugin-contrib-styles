@@ -35,7 +35,7 @@ describe('CustomStyleEditor', () => {
   };
   it('should be defined', () => {
     expect(customstyleeditor).toBeDefined();
-  }); 
+  });
   it('should handle onStyleClick when style = strong', () => {
     expect(
       customstyleeditor.onStyleClick('strong', new Event('click'))
@@ -1249,7 +1249,7 @@ it('should handle componentDidMount ', () => {
     mode: 1,
     close: () => { },
   };
-  const CustomStyleEditors = new CustomStyleEditor(props);  
+  const CustomStyleEditors = new CustomStyleEditor(props);
     CustomStyleEditors.state = {
       styles: {
         align: 'left',

@@ -631,7 +631,6 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       newattrs.styleName = nextLineStyleName;
       newattrs.indent = nextLineStyle.styles.indent;
       newattrs.align = nextLineStyle.styles.align;
-      // KNITE-864 08-03-2024 InnerLink functionality change
       if (newattrs.innerLink) {
         newattrs.innerLink = null;
       }
@@ -750,7 +749,6 @@ function updateFormatOverrideFlag(state, tr) {
   return tr;
 }
 
-// [KNITE-1465] 27-12-2024
 // using this function we can find if the user overrided the align,line spacing,indent.
 function updateOverrideFlagForAlign(node) {
   const styleProp = getCustomStyleByName(node.attrs.styleName);

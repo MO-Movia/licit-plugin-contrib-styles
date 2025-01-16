@@ -555,7 +555,6 @@ export const compareAttributes = (mark, style): boolean => {
       return mark.attrs['pt'] == style[FONTSIZE];
     case MARKFONTTYPE:
       return mark.attrs['name'] === style[FONTNAME];
-    // KNITE-1465 2024-12-24
     // FIX: strike through formatting not being respected on re-entry into doc editor mode.
     case MARKSTRIKE:
     case MARKSUPER:
@@ -704,7 +703,6 @@ function applyStyleEx(
 ) {
   const loading = !styleProp;
 
-  // [FS] IRAD-1087 2020-11-02
   // Issue fix: applied link is missing after applying a custom style.
   tr = removeAllMarksExceptLink(startPos, endPos, tr);
 
@@ -714,16 +712,12 @@ function applyStyleEx(
 
   if (styleProp?.styles) {
     const _commands = getCustomStyleCommands(styleProp.styles);
-    // eslint-disable-next-line
-    const newattrs = { ...(node.attrs as any) };
-    //   const newattrs = node.attrs as { [key: string]: any };
-    // [FS] IRAD-1074 2020-10-22
+    const newattrs = { ...node.attrs };
     // Issue fix on not removing center alignment when switch style with center
     // alignment to style with left alignment
     newattrs.align = null;
     newattrs.lineSpacing = null;
 
-    // [FS] IRAD-1131 2021-01-12
     // Indent overriding not working on a paragraph where custom style is applied
     if (!node?.attrs?.overriddenIndent) {
       newattrs.indent = null;
@@ -735,11 +729,9 @@ function applyStyleEx(
       if (styleProp?.styles) {
         // to set the node attribute for text-align
         if (element instanceof TextAlignCommand) {
-          // [KNITE-1465] 26-12-2024
           // if user override the align style then retian that align style
           // using the overridenAlign property we can find align style overrided or not
           if (node?.attrs?.overriddenAlign) {
-            // newattrs.align = node.attrs.align;
             newattrs.align = node.attrs.overriddenAlignValue;
           }
           else {
@@ -747,13 +739,10 @@ function applyStyleEx(
           }
           // to set the node attribute for line-height
         } else if (element instanceof TextLineSpacingCommand) {
-          // [FS] IRAD-1104 2020-11-13
           // Issue fix : Linespacing Double and Single not applied in the sample text paragraph
-          // [KNITE-1465] 26-12-2024
           // if user override the lineSpacing style then retian that lineSpacing style
           // using the overriddenLineSpacing property we can find lineSpacing style overrided or not
           if (node?.attrs?.overriddenLineSpacing) {
-            // newattrs.lineSpacing = node.attrs.lineSpacing;
             newattrs.lineSpacing = node?.attrs?.overriddenLineSpacingValue;
           }
           else {
@@ -762,7 +751,6 @@ function applyStyleEx(
             );
           }
         } else if (element instanceof ParagraphSpacingCommand) {
-          // [FS] IRAD-1100 2020-11-05
           // Add in leading and trailing spacing (before and after a paragraph)
           newattrs.paragraphSpacingAfter =
             styleProp.styles.paragraphSpacingAfter || null;
@@ -771,11 +759,9 @@ function applyStyleEx(
         } else if (element instanceof IndentCommand) {
           // [FS] IRAD-1162 2021-1-25
           // Bug fix: indent not working along with level
-          // [KNITE-1465] 26-12-2024
           // if user override the indent style then retian that indent style
           // using the overriddenIndent property we can find indent style overrided or not
           if (node?.attrs?.overriddenIndent) {
-            // newattrs.indent = node.attrs.indent;
             newattrs.indent = node.attrs.overriddenIndentValue;
           }
           else {
@@ -1442,19 +1428,15 @@ export function applyStyleToEachNode(
   let _node = null;
   tr.doc.nodesBetween(from, to, (node, startPos) => {
     if (node.type.name === 'paragraph') {
-      // [FS] IRAD-1182 2021-02-11
       // Issue fix: When style applied to multiple paragraphs, some of the paragraph's objectId found in deletedObjectId's
       tr = applyStyleEx(style, styleName, state, tr, node, startPos, to, way);
       _node = node;
     }
   });
-  const newattrs = { ...(_node ? _node.attrs : {}) };
-  newattrs['styleName'] = styleName;
   tr = createEmptyElement(state, tr, _node, from);
   tr = applyLineStyle(state, tr, null, 0);
   return tr;
 }
-// [FS] IRAD-1468 2021-06-18
 // Fix: bold first sentence custom style not showing after reload editor.
 export function applyLineStyle(
   state: EditorState,

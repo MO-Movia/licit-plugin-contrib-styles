@@ -5335,7 +5335,7 @@ describe('onInitAppendTransaction', () => {
       {}
     );
   });
-  xit('it should handle onInitAppendTransaction when isStylesLoaded = true', () => {
+  it('it should handle onInitAppendTransaction when isStylesLoaded = true', () => {
     const linkmark = new Mark();
     const mockschema = new Schema({
       nodes: {
@@ -5421,6 +5421,7 @@ describe('onInitAppendTransaction', () => {
       onInitAppendTransaction(
         { loaded: true, firstTime: false },
         {
+          setNodeMarkup: () => new Transaction(mockdoc),
           setSelection: setSelection,
           curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } },
           doc: mockdoc,

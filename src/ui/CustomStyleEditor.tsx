@@ -614,7 +614,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         styles: {
           ...prevState.styles,
           styleLevel,
-          isList
+          isList,
         },
         isRadioDisabled: styleLevel === 0,
       }));
@@ -701,7 +701,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     }
 
     if (this.state.styleName === RESERVED_STYLE_NONE) {
-      acc[2].classList.toggle('molsp-accactive');
+      acc[2]?.classList.toggle('molsp-accactive');
       const mp2 = document.getElementsByClassName(
         'molsp-panel2'
       )[0] as HTMLElement;
@@ -738,8 +738,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     }
   }
 
-  // eslint-disable-next-line
-  render(): JSX.Element {
+  render() {
     return (
       <div className="molsp-customedit-div">
         <div className="molsp-customedit-head">
@@ -1760,16 +1759,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   _cancel = (): void => {
-    // [FS] IRAD-1231 2021-03-02
     // FIX: edited custom styles not applied to the document
     if (3 === this.state.mode) {
-      this.setState({
-        customstyles: [],
-      });
-      // eslint-disable-next-line
-      const { customStyles, ...newState } = this.state;
       // Update the state with the new state object
-      this.setState(newState);
+      this.setState(prev => ({
+        ...prev,
+        customStyles: customStyles ?? []
+      }));
       this.props.close(editedStyles);
     } else {
       this.props.close();
@@ -1781,7 +1777,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     const { otherStyleSelected, ...newState } = this.state;
     // Update the state with the new state object
     this.setState(newState);
-    // [FS] IRAD-1137 2021-01-15
     // FIX: able to save a custom style name with already exist style name
     if (0 === this.state.mode && isCustomStyleExists(this.state.styleName)) {
       const errMsg = document.getElementById('errormsg');
@@ -1789,7 +1784,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         errMsg.style.display = '';
       }
 
-      // [FS] IRAD-1176 2021-02-08
       // save the custom styles from Edit all option.
     } else if (3 === this.state.mode) {
       this.modifyCustomStyle(this.state);

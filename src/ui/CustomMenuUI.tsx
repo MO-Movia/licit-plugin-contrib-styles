@@ -443,8 +443,8 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
     doc.descendants(function (child, pos) {
       if (oldStyleName === child.attrs.styleName) {
-        (child.attrs as { styleName: string }).styleName = styleName;
-        tr = tr.setNodeMarkup(pos, undefined, child.attrs);
+        const newAttrs = { ...child.attrs, styleName };
+        tr = tr.setNodeMarkup(pos, undefined, newAttrs);
       }
     });
     return tr;

@@ -36,10 +36,6 @@ describe('CustomStyleEditor', () => {
   it('should be defined', () => {
     expect(customstyleeditor).toBeDefined();
   });
-  // it('should handle componentWillUnmount', () => {
-  //   customstyleeditor.componentWillUnmount();
-  //   expect(customstyleeditor).toBe(true);
-  // });
   it('should handle onStyleClick when style = strong', () => {
     expect(
       customstyleeditor.onStyleClick('strong', new Event('click'))
@@ -1234,6 +1230,75 @@ describe('CustomStyleEditor', () => {
 it('should handle onSelectCustomStyle',()=>{
   customstyleeditor.getCustomStyles();
   expect(customstyleeditor.onSelectCustomStyle(()=>{})).toBeUndefined();
+});
+it('should handle handleList',()=>{
+  expect(customstyleeditor.handleList({target:{value:'none'}})).toBeUndefined();
+});
+it('should handle componentDidMount ', () => {
+  const props = {
+    styles: {
+      align: 'left',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      nextLineStyleName: 'none',
+      fontName: 'Arial',
+      fontSize: 11,
+    },
+    mode: 1,
+    close: () => { },
+  };
+  const CustomStyleEditors = new CustomStyleEditor(props);
+    CustomStyleEditors.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: true,
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: false,
+        styleLevel: true,
+        hasNumbering: true,
+      },
+      mode: 3,
+      styleName: 'Normal',
+      otherStyleSelected: '',
+      customStyles: '',
+      editorView:{state:{doc:{nodesBetween:()=>{}}}}
+    };
+  expect(CustomStyleEditors.componentDidMount()).toBeUndefined();
+});
+it('should handle render', () => {
+  customstyleeditor.state = {
+    styles: {
+      align: 'center',
+      boldNumbering: true,
+      toc: false,
+      isHidden: false,
+      boldSentence: true,
+      fontName: null,
+      fontSize: null,
+      strong: true,
+      em: true,
+      underline: true,
+      color: 'rgba(0,0,0,0)',
+      textHighlight: 'rgba(0,0,0,0)',
+      boldPartial: true,
+      styleLevel: 1,
+      hasNumbering: true,
+      super: true,
+      isList:true
+    },
+    mode: 3,
+    styleName: 'Normal',
+    otherStyleSelected: '',
+    customStyles: [{ styles: { styleLevel: 2 }, styleName: 'test' }],
+  };
+  jest.spyOn(customstyle, 'isCustomStyleExists').mockReturnValue(true);
+  expect(customstyleeditor.render()).toBeDefined();
 });
 
 });

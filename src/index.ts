@@ -1,5 +1,5 @@
 // Plugin to handle Styles.
-import { Plugin, PluginKey, EditorState, TextSelection,Transaction } from 'prosemirror-state';
+import { Plugin, PluginKey, EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import {
   updateOverrideFlag,
@@ -138,6 +138,7 @@ export function onInitAppendTransaction(ref, tr, nextState) {
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
     tr = updateStyleOverrideFlag(nextState, tr);
+    tr = updateFormatOverrideFlag(nextState, tr);
     // do this only once when the document is loaded.
     tr = applyStyles(nextState, tr);
   }
@@ -630,10 +631,16 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       newattrs.styleName = nextLineStyleName;
       newattrs.indent = nextLineStyle.styles.indent;
       newattrs.align = nextLineStyle.styles.align;
-      // KNITE-864 08-03-2024 InnerLink functionality change
       if (newattrs.innerLink) {
         newattrs.innerLink = null;
       }
+      newattrs.overriddenAlign = null;
+      newattrs.overriddenAlignValue = null;
+      newattrs.overriddenIndent = null;
+      newattrs.overriddenIndentValue = null;
+      newattrs.overriddenLineSpacing = null;
+      newattrs.overriddenLineSpacingValue = null;
+
       // [FS] IRAD-1223 2021-03-04
       // Line spacing not working for next line style
       newattrs.lineSpacing = getLineSpacingValue(
@@ -708,6 +715,7 @@ function updateStyleOverrideFlag(state, tr) {
     if (tr && haveEligibleChildren(child, contentLen)) {
       const startPos = tr.curSelection.$anchor.pos; //pos
       const endPos = tr.curSelection.$head.pos; //pos + contentLen
+
       if (!child.attrs.styleName) {
         // FIX: cannot assign to readonly property styleName of object.
         const newAttrs = { ...child.attrs };
@@ -726,6 +734,40 @@ function updateStyleOverrideFlag(state, tr) {
   });
 
   return retObj.modified ? tr : null;
+}
+
+function updateFormatOverrideFlag(state, tr) {
+  if (!tr) {
+    tr = state.tr;
+  }
+  tr.doc.descendants(function (child, pos) {
+    if (child.type.name === 'paragraph') {
+      child = updateOverrideFlagForAlign(child);
+      tr = tr?.setNodeMarkup(pos, undefined, child.attrs);
+    }
+  });
+  return tr;
+}
+
+// using this function we can find if the user overrided the align,line spacing,indent.
+function updateOverrideFlagForAlign(node) {
+  const styleProp = getCustomStyleByName(node.attrs.styleName);
+  const newAttrs = { ...node.attrs };
+  if (null !== node?.attrs.overriddenAlign && styleProp?.styles?.align === node?.attrs?.align) {
+    newAttrs['overriddenAlign'] = false;
+    newAttrs['overriddenAlignValue'] = null;
+  }
+  if (null !== node?.attrs.overriddenLineSpacing && getLineSpacingValue(styleProp?.styles?.lineHeight) === node?.attrs?.lineSpacing) {
+    newAttrs['overriddenLineSpacing'] = false;
+    newAttrs['overriddenLineSpacingValue'] = null;
+  }
+  // first condition is to check if indent is not set in both custom style and toolbar .
+  if ((undefined === styleProp?.styles?.indent && null == node?.attrs?.indent) || (null !== node?.attrs.overriddenIndent && styleProp?.styles?.indent === node?.attrs?.indent)) {
+    newAttrs['overriddenIndent'] = false;
+    newAttrs['overriddenIndentValue'] = null;
+  }
+  // Return a new node with updated attributes
+  return node.type.create(newAttrs, node.content, node.marks);
 }
 
 function haveEligibleChildren(node, contentLen) {

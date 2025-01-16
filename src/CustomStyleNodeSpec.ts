@@ -251,4 +251,3 @@ export const toCustomStyleDOM = toDOM;
 export const getCustomStyleAttrs = getAttrs;
 export const getDetailsBullet = getBulletDetails;
 export const countersRefresh = refreshCounters;
-

@@ -552,7 +552,7 @@ export const compareAttributes = (mark, style): boolean => {
     case MARKTEXTCOLOR:
       return mark.attrs['color'] === style[COLOR];
     case MARKFONTSIZE:
-      return mark.attrs['pt'] == style[FONTSIZE];
+      return mark.attrs['pt'] == Number(style[FONTSIZE]);
     case MARKFONTTYPE:
       return mark.attrs['name'] === style[FONTNAME];
     // FIX: strike through formatting not being respected on re-entry into doc editor mode.
@@ -573,7 +573,7 @@ export function compareMarkWithStyle(
   mark,
   style,
   tr,
-  _startPos,
+  startPos,
   _endPos,
   retObj
 ) {
@@ -585,7 +585,15 @@ export function compareMarkWithStyle(
     mark.attrs[ATTR_OVERRIDDEN] !== overridden &&
     tr.curSelection
   ) {
-    mark.attrs[ATTR_OVERRIDDEN] = overridden;
+    // FIX: cannot assign to readonly property overridden of object.
+    const newAttrs = { ...mark.attrs };
+    newAttrs[ATTR_OVERRIDDEN] = overridden;
+    tr = tr.removeMark(startPos, _endPos, mark.type);
+    tr = tr.addMark(
+      startPos,
+      _endPos,
+      mark.type.create(newAttrs)
+    );
     retObj.modified = true;
   }
   /*

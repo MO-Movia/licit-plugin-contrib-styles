@@ -787,6 +787,9 @@ describe('Custom Menu UI   ', () => {
             callback(node, i);
           }
         },
+        nodeAt: () => {
+          return { type: { name: 'paragraph' } };
+        },
         resolve: () => {
           return el;
         },

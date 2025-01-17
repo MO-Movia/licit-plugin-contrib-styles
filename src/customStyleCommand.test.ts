@@ -493,7 +493,7 @@ describe('CustomStyleCommand', () => {
     expect(
       customstylecommand.executeClearStyle(
         mockeditorstate as unknown as EditorState,
-        () => {},
+        () => { },
         0,
         1,
         2,
@@ -808,7 +808,7 @@ describe('CustomStyleCommand', () => {
         },
       ],
     } as unknown as Node;
-    const mockdispatch = () => {};
+    const mockdispatch = () => { };
     const mockval = {
       styles: {
         hasBullet: true,
@@ -970,7 +970,7 @@ describe('CustomStyleCommand', () => {
       ]),
     ]);
 
-    const mockdispatch = () => {};
+    const mockdispatch = () => { };
     const mockval = {
       styles: {
         hasBullet: true,
@@ -2112,6 +2112,13 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       from: 0,
       to: 7,
     },
+    addMark: () => {
+      return {
+        removeMark: () => {
+          return {};
+        },
+      };
+    },
     curSelectionFor: 5,
     updated: 1,
     meta: {},
@@ -2144,11 +2151,11 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         },
       },
     ],
-    addMark: () => {
-      return { removeMark: () => {} };
-    },
+    // addMark: () => {
+    //   return { removeMark: () => { } };
+    // },
     removeMark: () => {
-      return { key: 'mocktr' };
+      return { key: 'mocktr',addMark:()=>{return {};} };
     },
     insert: () => {
       return { key: 'mocktr' };
@@ -2980,7 +2987,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
 
   it('should handle compareMarkWithStyle when type = mark-font-size ', () => {
     const mark = {
-      type: 'mark-font-size',
+      type: {name:'mark-font-size', create: () => { }},
       attrs: { pt: 11, overridden: false },
     };
     const style1 = {
@@ -3046,7 +3053,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
   });
   it('should handle compareMarkWithStyle when type = MARK_TEXT_COLOR ', () => {
     const mark = {
-      type: { name: 'mark-text-color' },
+      type: { name: 'mark-text-color', create: () => { }, },
       attrs: { overridden: false },
     };
     const style1 = {
@@ -3070,7 +3077,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
   });
   it('should handle compareMarkWithStyle when type = MARKFONTSIZE ', () => {
     const mark = {
-      type: { name: 'mark-font-size' },
+      type: { name: 'mark-font-size', create: () => { }, },
       attrs: { overridden: false },
     };
     const style1 = {
@@ -3094,7 +3101,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
   });
   it('should handle compareMarkWithStyle when type = MARKFONTTYPE ', () => {
     const mark = {
-      type: { name: 'mark-font-type' },
+      type: { name: 'mark-font-type', create: () => { }, },
       attrs: { overridden: false },
     };
     const style1 = {
@@ -3141,7 +3148,13 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
     ).toBeDefined();
   });
   it('should handle compareMarkWithStyle when type = MARKSTRIKE ', () => {
-    const mark = { type: { name: 'strike' }, attrs: { overridden: false } };
+    const mark = {
+      type: {
+        name: 'strike', create: () => {
+
+        },
+      }, attrs: { overridden: false }
+    };
     const style1 = {
       align: 'justify',
       boldNumbering: true,
@@ -3718,7 +3731,7 @@ describe('updateDocument', () => {
       },
     ],
     addMark: () => {
-      return { removeMark: () => {} };
+      return { removeMark: () => { } };
     },
     removeMark: () => {
       return { key: 'mocktr' };

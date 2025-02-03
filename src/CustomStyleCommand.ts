@@ -586,21 +586,17 @@ export function compareMarkWithStyle(
     tr.curSelection
   ) {
     // FIX: cannot assign to readonly property overridden of object.
-    const newAttrs = { ...mark.attrs };
-    newAttrs[ATTR_OVERRIDDEN] = overridden;
-    tr = tr.removeMark(startPos, _endPos, mark.type);
-    tr = tr.addMark(
-      startPos,
-      _endPos,
-      mark.type.create(newAttrs)
-    );
+    // const newAttrs = { ...mark.attrs };
+    // newAttrs[ATTR_OVERRIDDEN] = overridden;
+    // tr = tr.removeMark(startPos, _endPos, mark.type);
+    // tr = tr.addMark(
+    //   startPos,
+    //   _endPos,
+    //   mark.type.create(newAttrs)
+    // );
+    mark.attrs[ATTR_OVERRIDDEN] = overridden;
     retObj.modified = true;
   }
-  /*
-    case SUPER:
-    case TEXTHL:
-    case ALIGN:
-    case LHEIGHT:*/
 
   return tr;
 }
@@ -615,17 +611,32 @@ export function updateOverrideFlag(
 ) {
   const styleProp = getCustomStyleByName(styleName);
   if (styleProp?.styles) {
-    node.descendants(function (child: Node) {
+    node.descendants(function (child: Node, pos) {
+      // const mystartPos = (undefined === endPos) ? startPos : startPos + pos;
+      // let _startPos = 0;
+      // let _endPos = 0;
       if (child instanceof Node) {
         child.marks.forEach(function (mark) {
-          tr = compareMarkWithStyle(
-            mark,
-            styleProp.styles,
-            tr,
-            startPos,
-            endPos,
-            retObj
-          );
+
+          // tr = compareMarkWithStyle(
+          //   mark,
+          //   styleProp.styles,
+          //   tr,
+          //   pos,
+          //   pos + child.nodeSize,
+          //   retObj
+          // );
+
+          // if ((pos + parentPos) === mystartPos - 1 || (pos + parentPos) === mystartPos || isOnload) {
+          //   if (parentPos === 0) {
+          //     _startPos = mystartPos;
+          //     _endPos = (mystartPos - 1) + child.nodeSize;
+          //   } else {
+          //     _startPos = mystartPos + 1;
+          //     _endPos = (mystartPos + 1) + child.nodeSize;
+          //   }
+          tr = compareMarkWithStyle(mark, styleProp.styles, tr, startPos, endPos, retObj);
+          // }
         });
       }
     });

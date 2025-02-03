@@ -33,7 +33,7 @@ const ATTR_STYLE_NAME = 'styleName';
 let slice1;
 
 const isNodeHasAttribute = (node, attrName) => {
-  return node.attrs?.[attrName];
+  return (attrName in (node?.attrs || {}));
 };
 const requiredAddAttr = (node) => {
   return (
@@ -110,7 +110,9 @@ export class CustomstylePlugin extends Plugin {
         }
         firstTime = ref.firstTime;
         loaded = ref.loaded;
-
+        if (1 === tr?.updated) {
+          slice1 = null;
+        }
         return tr;
       },
     });
@@ -138,7 +140,7 @@ export function onInitAppendTransaction(ref, tr, nextState) {
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
     tr = updateStyleOverrideFlag(nextState, tr);
-    tr = updateFormatOverrideFlag(nextState, tr);
+    // tr = updateFormatOverrideFlag(nextState, tr);
     // do this only once when the document is loaded.
     tr = applyStyles(nextState, tr);
   }
@@ -158,7 +160,7 @@ export function onUpdateAppendTransaction(
 
   // when user updates
   if (!slice1 && csview && BACKSPACEKEYCODE !== csview.input.lastKeyCode) {
-    tr = updateStyleOverrideFlag(nextState, tr);
+    // tr = updateStyleOverrideFlag(nextState, tr);
   }
   tr = manageHierarchyOnDelete(prevState, nextState, tr, csview);
 
@@ -218,9 +220,9 @@ export function onUpdateAppendTransaction(
               const opt = 1;
               if (node2.type.name === 'table') {
                 const startPos = demoPos;
-                const styleName = slice1.content.content[index].attrs.styleName;
+                const styleName = slice1.content.content[index].attrs.styleName ?? 'Normal';
                 const node = nextState.tr.doc.nodeAt(startPos);
-                const len = node.nodeSize;
+                const len = node.nodeSize - 2;
                 const endPos = startPos + len;
                 tr = applyLatestStyle(
                   styleName,
@@ -236,8 +238,9 @@ export function onUpdateAppendTransaction(
                 const startPos = csview.state.selection.from - 1;
                 const node = nextState.tr.doc.nodeAt(startPos);
                 //FIX: Copied text show Normal style name instead of showing the applied style in the current paragraph.
-                const styleName = (null === slice1.content.content[index].attrs.styleName ? node.attrs.styleName : slice1.content.content[index].attrs.styleName);
-                const len = node.nodeSize;
+                let styleName = (null === slice1.content.content[index].attrs.styleName ? node.attrs.styleName : slice1.content.content[index].attrs.styleName);
+                styleName = styleName ?? 'Normal';
+                const len = node.nodeSize - 2;
                 const endPos = startPos + len;
                 tr = applyLatestStyle(
                   styleName,
@@ -256,7 +259,7 @@ export function onUpdateAppendTransaction(
             } else {
               if (node2.type.name === 'table') {
                 const startPos = demoPos;
-                const styleName = node1.attrs.styleName;
+                const styleName = node1.attrs.styleName ?? 'Normal';
                 const node = nextState.tr.doc.nodeAt(startPos);
                 const len = node.nodeSize;
                 const endPos = startPos + len;
@@ -271,7 +274,7 @@ export function onUpdateAppendTransaction(
                 );
               } else {
                 const startPos = csview.state.selection.$to.after(1) - 1;
-                const styleName = node1.attrs.styleName;
+                const styleName = node1.attrs.styleName ?? 'Normal';
                 const node = nextState.tr.doc.nodeAt(startPos);
                 const len = node.nodeSize;
                 const endPos = startPos + len;
@@ -337,7 +340,7 @@ export function applyStyles(state, tr) {
       }
 
       // check if the loaded document's para have valid styleName
-      const styleName = child.attrs.styleName;
+      const styleName = child.attrs.styleName ?? 'Normal';
       tr = applyLatestStyle(styleName, state, tr, child, pos, end);
     }
   });
@@ -346,9 +349,7 @@ export function applyStyles(state, tr) {
 }
 
 function validateStyleName(node) {
-  let bOK = false;
-  bOK = node?.attrs?.styleName;
-  return bOK;
+  return ('styleName' in (node?.attrs || {}));
 }
 
 // [FS] IRAD-1130 2021-01-07
@@ -525,7 +526,7 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
         0 === node.content.content[0].marks.length
       ) {
         tr = applyLatestStyle(
-          node.attrs.styleName,
+          node.attrs.styleName ?? 'Normal',
           nextState,
           tr,
           node,
@@ -713,22 +714,33 @@ function updateStyleOverrideFlag(state, tr) {
   tr.doc.descendants(function (child) {
     const contentLen = child.content.size;
     if (tr && haveEligibleChildren(child, contentLen)) {
+      const parentPos = tr.curSelection.$anchor.pos - tr.curSelection.$anchor.parentOffset - 1; //pos
       const startPos = tr.curSelection.$anchor.pos; //pos
       const endPos = tr.curSelection.$head.pos; //pos + contentLen
 
-      if (!child.attrs.styleName) {
-        // FIX: cannot assign to readonly property styleName of object.
-        const newAttrs = { ...child.attrs, styleName: 'Normal' };
-        child.type.create(newAttrs, child.content, child.marks);
-      }
-      tr = updateOverrideFlag(
-        child.attrs.styleName,
-        tr,
-        child,
-        startPos,
-        endPos,
-        retObj,
-      );
+      // if (!child.attrs.styleName) {
+      //   // FIX: cannot assign to readonly property styleName of object.
+      //   const newAttrs = { ...child.attrs, styleName: 'Normal' };
+      //   tr = tr?.setNodeMarkup(parentPos, undefined, newAttrs);
+      // }
+      // tr = updateOverrideFlag(
+      //   child.attrs.styleName ?? 'Normal',
+      //   tr,
+      //   child,
+      //   startPos,
+      //   endPos,
+      //   retObj,
+      // );
+
+      // if (tr.curSelection && endPos >= startPos && startPos !== endPos) {
+      //   tr = updateOverrideFlag(child.attrs.styleName ?? 'Normal', tr, child, startPos, undefined, retObj, false, parentPos);
+      // }
+      // if (tr.curSelection && startPos === endPos) {
+      //   tr = updateOverrideFlag(child.attrs.styleName ?? 'Normal', tr, child, parentPos, endPos, retObj, true, -1);
+      // }
+
+      tr = updateOverrideFlag(child.attrs.styleName, tr, child, startPos, endPos, retObj);
+
     }
   });
 

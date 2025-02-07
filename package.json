@@ -1,6 +1,6 @@
 {
   "name": "@modusoperandi/licit-custom-styles",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "type": "module",
   "subversion": "1",
   "description": "CustomStyle plugin built with ProseMirror",
@@ -12,7 +12,6 @@
     "url": "git+https://github.com/MO-Movia/licit-plugin-contrib-styles.git"
   },
   "scripts": {
-    "verify": "npm run lint && npm run ci:build && npm run test:coverage",
     "test": "jest",
     "test:unit": "jest",
     "test:coverage": "jest --coverage",
@@ -21,7 +20,8 @@
     "lint:css": "stylelint \"**/*.css\"",
     "lint": "npm run lint:css & npm run lint:ts",
     "ci:build": "tsc --build && copyfiles --up 1 \"src/**/*.css\" dist  && copyfiles package.json dist && copyfiles --up 1 \"src/fonts/**\" dist ",
-    "ci:bom": "cyclonedx-npm --ignore-npm-errors --short-PURLs --output-format XML --output-file dist/bom.xml"
+    "ci:bom": "cyclonedx-npm --ignore-npm-errors --short-PURLs --output-format XML --output-file dist/bom.xml",
+    "verify": "npm run lint -- --fix && npm run ci:build && npm run test:coverage && echo 'All Tests Passed!'"
   },
   "peerDependencies": {
     "@modusoperandi/licit-doc-attrs-step": "^1.0.2",
@@ -59,7 +59,7 @@
     "lint-staged": "^15.2.2",
     "prettier": "^3.2.4",
     "stylelint": "^16.2.0",
-    "stylelint-config-standard": "^36.0.0",
+    "stylelint-config-standard": "^37.0.0",
     "stylelint-prettier": "^5.0.0",
     "ts-jest": "^29.0.7",
     "ts-loader": "^9.5.0",

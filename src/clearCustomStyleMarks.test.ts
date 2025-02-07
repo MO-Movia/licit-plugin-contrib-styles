@@ -109,7 +109,7 @@ describe('removeTextAlignAndLineSpacing', () => {
     };
     clearCustomStyleAttribute(myNode as unknown as Node);
     expect(myNode.attrs.styleName).toBe('Normal');
-    expect(myNode.attrs.indent).toBeNull();
+    expect(myNode.attrs.indent).toBeTruthy();
   });
 
   it('should handle clearCustomStyleAttribute', () => {

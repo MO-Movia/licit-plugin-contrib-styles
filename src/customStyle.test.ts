@@ -47,7 +47,8 @@ describe('customstyle', () => {
     });
     it('should handle setStyles', () => {
         setView({ dispatch: () => { }, state: { tr: { scrollIntoView: () => { } } } } as unknown as EditorView);
-        expect(setStyles([{ docType: {} } as unknown as Style])).toBeUndefined();
+        expect(setStyles([{ styleName: 'Normal', styles: { strong: true, styleLevel: 2 } }])).toBeUndefined();
+
     });
 });
 

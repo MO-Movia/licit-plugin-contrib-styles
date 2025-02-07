@@ -64,7 +64,6 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
   if (styleLevel) {
     if (isListStyle) {
       if (node.attrs.indent !== null) {
-        console.log('Indent value is', node.attrs.indent);
         output[1][ATTRIBUTE_LIST_STYLE_LEVEL] = node.attrs.indent + 1;
       } else {
         output[1][ATTRIBUTE_LIST_STYLE_LEVEL] = styleLevel;

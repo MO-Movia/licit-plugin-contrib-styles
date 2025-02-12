@@ -429,3 +429,7 @@ html {
 .ProseMirror p[data-bullet-symbol='✪✪ ']::before {
   margin-left: -20pt;
 }
+
+.ProseMirror p[hideNumbering='true']::before {
+  visibility: hidden;
+}

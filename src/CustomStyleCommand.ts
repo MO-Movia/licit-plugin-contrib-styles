@@ -1500,7 +1500,15 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   let content: string[] = [];
   let counter: number = 0;
   if (boldSentence) {
-    content = textContent.split('.');
+    let firstSplitIndex = Math.min(
+      ...[textContent.indexOf('.'), textContent.indexOf('—')].filter(
+        (i) => i !== -1
+      )
+    );
+    content =
+      firstSplitIndex !== Infinity
+        ? [textContent.slice(0, firstSplitIndex)]
+        : [textContent];
   } else {
     content = textContent.split(' ');
   }

@@ -1305,22 +1305,22 @@ export function getStyleLevel(styleName: string) {
   return styleLevel;
 }
 
-export function executeCommands(
-  state: EditorState,
-  tr: Transform,
-  styleName: string,
-  startPos: number,
-  endPos: number
-) {
-  const style = getCustomStyleByName(styleName);
-  const _commands = getCustomStyleCommands(style);
-  _commands.forEach((element) => {
-    if (typeof element.executeCustom == 'function') {
-      tr = element.executeCustom(state, tr, startPos, endPos);
-    }
-  });
-  return tr;
-}
+// export function executeCommands(
+//   state: EditorState,
+//   tr: Transform,
+//   styleName: string,
+//   startPos: number,
+//   endPos: number
+// ) {
+//   const style = getCustomStyleByName(styleName);
+//   const _commands = getCustomStyleCommands(style);
+//   _commands.forEach((element) => {
+//     if (typeof element.executeCustom == 'function') {
+//       tr = element.executeCustom(state, tr, startPos, endPos, _commands);
+//     }
+//   });
+//   return tr;
+// }
 
 // Need to change this function code duplicates with applyStyle()
 export function applyLatestStyle(
@@ -1385,7 +1385,11 @@ export function removeAllMarksExceptLink(
   doc.nodesBetween(from, to, (node, pos) => {
     if (node.marks?.length > 0) {
       node.marks.some((mark) => {
-        if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
+        if (
+          !mark.attrs[ATTR_OVERRIDDEN] &&
+          'link' !== mark.type.name &&
+          'override' !== mark.type.name
+        ) {
           tasks.push({
             node,
             pos,

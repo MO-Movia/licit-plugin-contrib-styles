@@ -203,6 +203,12 @@ export function onUpdateAppendTransaction(
   }
   tr = applyLineStyleForBoldPartial(nextState, tr);
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
+
+    let _startPos = 0;
+    let _endPos = 0;
+    let node2 = null;
+    let demoPos = null;
+    let node1 = null
     for (let index = 0; index < slice1.content.childCount; index++) {
       if (
         !(
@@ -210,87 +216,74 @@ export function onUpdateAppendTransaction(
           slice1.content.content[index].type.name === 'doc'
         )
       ) {
-        if (index === 0) {
-          if (slice1.content.content[index].content.size !== 0) {
-            const tabPos = csview.state.selection.$from.before(1);
-            const node2 = csview.state.tr.doc.nodeAt(tabPos);
-            const demoPos = prevState.selection.from;
-            const node1 = prevState.doc.resolve(demoPos).parent;
-            if (!node1.content?.content[0]?.attrs) {
-              const opt = 1;
-              if (node2.type.name === 'table') {
-                const startPos = demoPos;
-                const styleName = slice1.content.content[index].attrs.styleName ?? 'Normal';
-                const node = nextState.tr.doc.nodeAt(startPos);
-                const len = node.nodeSize - 2;
-                const endPos = startPos + len;
-                tr = applyLatestStyle(
-                  styleName,
-                  nextState,
-                  tr,
-                  node,
-                  startPos,
-                  endPos,
-                  null,
-                  opt
-                );
-              } else {
-                const startPos = csview.state.selection.from - 1;
-                const node = nextState.tr.doc.nodeAt(startPos);
-                //FIX: Copied text show Normal style name instead of showing the applied style in the current paragraph.
-                let styleName = (null === slice1.content.content[index].attrs.styleName ? node.attrs.styleName : slice1.content.content[index].attrs.styleName);
-                styleName = styleName ?? 'Normal';
-                const len = node.nodeSize - 2;
-                const endPos = startPos + len;
-                tr = applyLatestStyle(
-                  styleName,
-                  nextState,
-                  tr,
-                  node,
-                  startPos,
-                  endPos,
-                  null,
-                  opt
-                );
-                const newattrs = { ...node.attrs };
-                newattrs.styleName = styleName;
-                tr = tr.setNodeMarkup(startPos, undefined, newattrs);
+        if (index !== 0) {
+          _startPos = _endPos;;
+        }
+        if (slice1.content.content[index].content.size !== 0) {
+          // const tabPos = csview.state.selection.$from.before(1);
+          if (index === 0) {
+            _startPos = csview.state.selection.$from.before(1);
+            node2 = csview.state.tr.doc.nodeAt(_startPos);
+            demoPos = prevState.selection.from;
+            node1 = prevState.doc.resolve(demoPos).parent;
+          }
+
+          if (!node1.content?.content[0]?.attrs) {
+            const opt = 1;
+            if (node2.type.name === 'table') {
+              const startPos = demoPos;
+              const styleName = slice1.content.content[index].attrs.styleName ?? 'Normal';
+              // const node = nextState.tr.doc.nodeAt(startPos);
+              const node = nextState.tr.doc.nodeAt(_startPos);
+              const len = node.nodeSize;
+              // const endPos = startPos + len;
+              _endPos = _startPos + len;
+              // tr = applyLatestStyle(styleName, nextState, tr, node, startPos, endPos, null, opt);
+              tr = applyLatestStyle(styleName, nextState, tr, node, _startPos, _endPos, null, opt);
+            }
+            else {
+              // const startPos = csview.state.selection.from - 1;
+              if (index === 0) {
+                _startPos = csview.state.selection.from - 1;
               }
-            } else {
-              if (node2.type.name === 'table') {
-                const startPos = demoPos;
-                const styleName = node1.attrs.styleName ?? 'Normal';
-                const node = nextState.tr.doc.nodeAt(startPos);
-                const len = node.nodeSize;
-                const endPos = startPos + len;
-                const styleProp = getCustomStyleByName(styleName);
-                tr = applyStyleToEachNode(
-                  nextState,
-                  startPos,
-                  endPos,
-                  tr,
-                  styleProp,
-                  styleName
-                );
-              } else {
-                const startPos = csview.state.selection.$to.after(1) - 1;
-                const styleName = node1.attrs.styleName ?? 'Normal';
-                const node = nextState.tr.doc.nodeAt(startPos);
-                const len = node.nodeSize;
-                const endPos = startPos + len;
-                const styleProp = getCustomStyleByName(styleName);
-                tr = applyStyleToEachNode(
-                  nextState,
-                  startPos,
-                  endPos,
-                  tr,
-                  styleProp,
-                  styleName
-                );
-              }
+
+              // const node = nextState.tr.doc.nodeAt(startPos);
+              const node = nextState.tr.doc.nodeAt(_startPos);
+              //FIX: Copied text show Normal style name instead of showing the applied style in the current paragraph.
+              let styleName = (null === slice1.content.content[index].attrs.styleName ? node.attrs.styleName : slice1.content.content[index].attrs.styleName);
+              styleName = styleName ?? 'Normal';
+              const len = node.nodeSize;
+              // const endPos = startPos + len;
+              _endPos = _startPos + len;
+              // tr = applyLatestStyle(styleName ?? '', nextState, tr, node, startPos, endPos, null, opt);
+              tr = applyLatestStyle(styleName ?? '', nextState, tr, node, _startPos, _endPos, null, opt);
+              const newattrs = { ...node.attrs };
+              newattrs.styleName = styleName;
+              tr = tr.setNodeMarkup(_startPos, undefined, newattrs);
+            }
+          }
+          else {
+            if (node2.type.name === 'table') {
+              const startPos = demoPos;
+              const styleName = node1.attrs.styleName ?? 'Normal';
+              const node = nextState.tr.doc.nodeAt(startPos);
+              const len = node.nodeSize;
+              const endPos = startPos + len;
+              const styleProp = getCustomStyleByName(styleName);
+              tr = applyStyleToEachNode(nextState, startPos, endPos, tr, styleProp, styleName);
+            }
+            else {
+              const startPos = csview.state.selection.$to.after(1) - 1;
+              const styleName = node1.attrs.styleName ?? 'Normal';
+              const node = nextState.tr.doc.nodeAt(startPos);
+              const len = node.nodeSize;
+              const endPos = startPos + len;
+              const styleProp = getCustomStyleByName(styleName);
+              tr = applyStyleToEachNode(nextState, startPos, endPos, tr, styleProp, styleName);
             }
           }
         }
+        // }
       }
     }
     tr = tr?.scrollIntoView();

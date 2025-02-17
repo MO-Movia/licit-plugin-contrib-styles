@@ -19,9 +19,9 @@ function getAttrs(base: getAttrsFn | undefined, dom: HTMLElement) {
     const attrs = base((dom as unknown as Node));
     // [FS] IRAD-1623 2021-11-11
     // Validate attrs
-    if (attrs && typeof attrs === 'object') {
-      attrs[ATTR_OVERRIDDEN] = convertToBoolean(dom.getAttribute(ATTR_OVERRIDDEN));
-    }
+    // if (attrs && typeof attrs === 'object') {
+    //   attrs[ATTR_OVERRIDDEN] = convertToBoolean(dom.getAttribute(ATTR_OVERRIDDEN));
+    // }
     return attrs;
   } else {
     return base?.(dom as unknown as Node);

@@ -733,8 +733,7 @@ function applyStyleEx(
           // using the overridenAlign property we can find align style overrided or not
           if (node?.attrs?.overriddenAlign) {
             newattrs.align = node.attrs.overriddenAlignValue;
-          }
-          else {
+          } else {
             newattrs.align = styleProp.styles.align;
           }
           // to set the node attribute for line-height
@@ -744,8 +743,7 @@ function applyStyleEx(
           // using the overriddenLineSpacing property we can find lineSpacing style overrided or not
           if (node?.attrs?.overriddenLineSpacing) {
             newattrs.lineSpacing = node?.attrs?.overriddenLineSpacingValue;
-          }
-          else {
+          } else {
             newattrs.lineSpacing = getLineSpacingValue(
               styleProp.styles.lineHeight || ''
             );
@@ -763,8 +761,7 @@ function applyStyleEx(
           // using the overriddenIndent property we can find indent style overrided or not
           if (node?.attrs?.overriddenIndent) {
             newattrs.indent = node.attrs.overriddenIndentValue;
-          }
-          else {
+          } else {
             newattrs.indent = styleProp.styles.isLevelbased
               ? styleProp.styles.styleLevel
               : styleProp.styles.indent;
@@ -1381,10 +1378,7 @@ export function removeAllMarksExceptLink(
   return handleRemoveMarks(tr, tasks);
 }
 
-export function handleRemoveMarks(
-  tr: Transform,
-  tasks
-) {
+export function handleRemoveMarks(tr: Transform, tasks) {
   tasks.forEach((job) => {
     const { mark } = job;
     if (!mark.attrs[ATTR_OVERRIDDEN]) {
@@ -1501,7 +1495,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   let counter: number = 0;
   if (boldSentence) {
     let firstSplitIndex = Math.min(
-      ...[textContent.indexOf('.'), textContent.indexOf('—')].filter(
+      ...[textContent.indexOf('.'), textContent.indexOf('â€”')].filter(
         (i) => i !== -1
       )
     );

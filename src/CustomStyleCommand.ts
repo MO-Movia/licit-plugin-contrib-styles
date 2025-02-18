@@ -1495,9 +1495,10 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   let counter: number = 0;
   if (boldSentence) {
     let firstSplitIndex = Math.min(
-      ...[textContent.indexOf('.'), textContent.indexOf('—')].filter(
-        (i) => i !== -1
-      )
+      ...[
+        textContent.indexOf('.'),
+        textContent.indexOf(String.fromCharCode(8212)),
+      ].filter((i) => i !== -1)
     );
     content =
       firstSplitIndex !== Infinity

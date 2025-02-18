@@ -2640,6 +2640,45 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       ],
     };
     const nodemock = schema1.nodeFromJSON(json);
+    expect(addMarksToLine(trmock, statemock, nodemock, 0, false)).toBeDefined();
+  });
+
+  it('should handle addMarksToLine when boldSentence is true', () => {
+    const json = {
+      type: 'paragraph',
+      attrs: {
+        align: 'left',
+        color: null,
+        id: null,
+        indent: 0,
+        lineSpacing: null,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: 'FM_chpara',
+      },
+      content: [
+        {
+          type: 'text',
+          marks: [
+            {
+              type: 'mark-font-size',
+              attrs: { pt: 18, overridden: false },
+            },
+            {
+              type: 'mark-font-type',
+              attrs: { name: 'Times New Roman', overridden: false },
+            },
+            {
+              type: 'mark-text-color',
+              attrs: { color: '#0d69f2', overridden: false },
+            },
+          ],
+          text: 'fggf dfgfgh fghfgh',
+        },
+      ],
+    };
+    const nodemock = schema1.nodeFromJSON(json);
     expect(addMarksToLine(trmock, statemock, nodemock, 0, true)).toBeDefined();
   });
   it('should handle manageElementsAfterSelection', () => {

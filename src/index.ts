@@ -139,7 +139,7 @@ export class CustomstylePlugin extends Plugin {
 export function onInitAppendTransaction(ref, tr, nextState) {
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
-    tr = updateStyleOverrideFlag(nextState, tr);
+    // tr = updateStyleOverrideFlag(nextState, tr);
     // tr = updateFormatOverrideFlag(nextState, tr);
     // do this only once when the document is loaded.
     tr = applyStyles(nextState, tr);

@@ -721,6 +721,11 @@ function applyStyleEx(
   opt?: number
 ) {
   const loading = !styleProp;
+  // Custom style is applied from menu the endpos is correct ie nodesize is calculating correct
+  // when loading the document with a node having custom style the nodesize is one point less
+  // to fix that added +1 to endpos
+  let lastChild = tr.doc.nodeAt(endPos);
+  endPos = null === lastChild ? endPos : endPos + 1;
 
   // Issue fix: applied link is missing after applying a custom style.
   tr = removeAllMarksExceptLink(startPos, endPos, tr);

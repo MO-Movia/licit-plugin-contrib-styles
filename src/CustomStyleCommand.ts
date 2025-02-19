@@ -183,6 +183,21 @@ export function getCustomStyleCommands(customStyle) {
   for (const property in customStyle) {
     commands = getCustomStyleCommandsEx(customStyle, property, commands);
   }
+  commands.sort((a, b) => {
+    if (
+      a.constructor.name === 'MarkToggleCommand' &&
+      b.constructor.name !== 'MarkToggleCommand'
+    ) {
+      return 1; // Move `a` to the end.
+    }
+    if (
+      a.constructor.name !== 'MarkToggleCommand' &&
+      b.constructor.name === 'MarkToggleCommand'
+    ) {
+      return -1; // Keep `b` at the end.
+    }
+    return 0; // Keep relative order if both are the same type.
+  });
   return commands;
 }
 
@@ -617,7 +632,6 @@ export function updateOverrideFlag(
       // let _endPos = 0;
       if (child instanceof Node) {
         child.marks.forEach(function (mark) {
-
           // tr = compareMarkWithStyle(
           //   mark,
           //   styleProp.styles,
@@ -635,7 +649,14 @@ export function updateOverrideFlag(
           //     _startPos = mystartPos + 1;
           //     _endPos = (mystartPos + 1) + child.nodeSize;
           //   }
-          tr = compareMarkWithStyle(mark, styleProp.styles, tr, startPos, endPos, retObj);
+          tr = compareMarkWithStyle(
+            mark,
+            styleProp.styles,
+            tr,
+            startPos,
+            endPos,
+            retObj
+          );
           // }
         });
       }
@@ -757,8 +778,7 @@ function applyStyleEx(
           // using the overridenAlign property we can find align style overrided or not
           if (node?.attrs?.overriddenAlign) {
             newattrs.align = node.attrs.overriddenAlignValue;
-          }
-          else {
+          } else {
             newattrs.align = styleProp.styles.align;
           }
           // to set the node attribute for line-height
@@ -768,8 +788,7 @@ function applyStyleEx(
           // using the overriddenLineSpacing property we can find lineSpacing style overrided or not
           if (node?.attrs?.overriddenLineSpacing) {
             newattrs.lineSpacing = node?.attrs?.overriddenLineSpacingValue;
-          }
-          else {
+          } else {
             newattrs.lineSpacing = getLineSpacingValue(
               styleProp.styles.lineHeight || ''
             );
@@ -787,8 +806,7 @@ function applyStyleEx(
           // using the overriddenIndent property we can find indent style overrided or not
           if (node?.attrs?.overriddenIndent) {
             newattrs.indent = node.attrs.overriddenIndentValue;
-          }
-          else {
+          } else {
             newattrs.indent = styleProp.styles.isLevelbased
               ? styleProp.styles.styleLevel
               : styleProp.styles.indent;
@@ -1409,10 +1427,7 @@ export function removeAllMarksExceptLink(
   return handleRemoveMarks(tr, tasks);
 }
 
-export function handleRemoveMarks(
-  tr: Transform,
-  tasks
-) {
+export function handleRemoveMarks(tr: Transform, tasks) {
   tasks.forEach((job) => {
     const { mark } = job;
     if (!mark.attrs[ATTR_OVERRIDDEN]) {

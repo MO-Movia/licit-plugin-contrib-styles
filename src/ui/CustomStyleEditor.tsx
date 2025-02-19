@@ -14,6 +14,7 @@ import {
   saveStyle,
   getStylesAsync,
   addStyleToList,
+  isHyphenIncluded,
 } from '../customStyle.js';
 import {
   RESERVED_STYLE_NONE,
@@ -772,9 +773,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
             <p className="molsp-formp">
               Style Name:{' '}
               <span id="errormsg" style={{ display: 'none', color: 'red' }}>
-                {isCustomStyleExists(this.state.styleName)
-                  ? 'Style name already exists'
-                  : ''}
+              {isCustomStyleExists(this.state.styleName) ? 'Style name already exists. ' : ''}
+              {this.state.styleName.includes('-') ? 'Style name should not contain a hyphen.' : ''}
               </span>
             </p>
             <span>
@@ -1778,7 +1778,10 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     // Update the state with the new state object
     this.setState(newState);
     // FIX: able to save a custom style name with already exist style name
-    if (0 === this.state.mode && isCustomStyleExists(this.state.styleName)) {
+    if (
+      (0 === this.state.mode && isCustomStyleExists(this.state.styleName)) ||
+      isHyphenIncluded(this.state.styleName)
+    ) {
       const errMsg = document.getElementById('errormsg');
       if (errMsg?.style) {
         errMsg.style.display = '';

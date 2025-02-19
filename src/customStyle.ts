@@ -53,6 +53,10 @@ export function isCustomStyleExists(styleName: string) {
   return bOK;
 }
 
+export function isHyphenIncluded(styleName) {
+  return styleName?.includes('-') ?? false;
+}
+
 // [FS] IRAD-1128 2020-12-30
 // get a style by styleName
 export function getCustomStyleByName(name: string): Style {

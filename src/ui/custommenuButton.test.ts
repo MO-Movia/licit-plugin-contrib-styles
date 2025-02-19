@@ -3,7 +3,6 @@ import { CustomMenuButton } from './CustomMenuButton';
 import { EditorState } from 'prosemirror-state';
 import { Schema } from 'prosemirror-model';
 
-
 describe('CustomMenuButton', () => {
   const mockState = {
     doc: {
@@ -63,7 +62,7 @@ describe('CustomMenuButton', () => {
           _popUp: null,
         },
       },
-    ] as unknown as  Array<{ [string: string]: UICommand }>,
+    ] as unknown as Array<{ [string: string]: UICommand }>,
     disabled: true,
     dispatch: () => undefined,
     editorState: mockState,
@@ -82,7 +81,7 @@ describe('CustomMenuButton', () => {
     expect(spy).toHaveBeenCalled();
   });
   it('should handle _onClick ', () => {
-    custommenubutton.state = {expanded:true};
+    custommenubutton.state = { expanded: true };
     custommenubutton._showMenu = () => undefined;
     const spy = jest.spyOn(custommenubutton, '_showMenu');
     custommenubutton._onClick();
@@ -90,7 +89,7 @@ describe('CustomMenuButton', () => {
     spy.mockReset();
   });
   it('should handle _onClick when this.state.expanded = true', () => {
-    custommenubutton.state = {expanded:true};
+    custommenubutton.state = { expanded: true };
     custommenubutton._menu = { close: () => undefined } as unknown as null;
     const spy = jest.spyOn(custommenubutton, '_hideMenu');
     custommenubutton._onClick();
@@ -116,6 +115,50 @@ describe('CustomMenuButton', () => {
     custommenubutton._menu = null;
     custommenubutton._onClose();
     expect(custommenubutton._menu).toBeNull();
+  });
+  describe('_onClick', () => {
+    let component;
+
+    beforeEach(() => {
+      // Initialize your component here
+      component = custommenubutton;
+      component._showMenu = jest.fn(); // Mock _showMenu
+      component._hideMenu = jest.fn(); // Mock _hideMenu
+      component.setState = jest.fn((callback) => {
+        const newState = callback(component.state);
+        component.state = { ...component.state, ...newState };
+      });
+    });
+
+    it('should call _showMenu when expanded is false', () => {
+      // Initial state: expanded is false
+      component.state = { expanded: false };
+
+      // Trigger the onClick method
+      component._onClick();
+
+      // Expect _showMenu to have been called
+      expect(component._showMenu).toHaveBeenCalled();
+
+      // Expect state to be updated to expanded: true
+      expect(component.setState).toHaveBeenCalledWith(expect.any(Function)); // Verify setState was called
+      expect(component.state.expanded).toBe(true); // Verify state update
+    });
+
+    it('should call _hideMenu when expanded is true', () => {
+      // Initial state: expanded is true
+      component.state = { expanded: true };
+
+      // Trigger the onClick method
+      component._onClick();
+
+      // Expect _hideMenu to have been called
+      expect(component._hideMenu).toHaveBeenCalled();
+
+      // Expect state to be updated to expanded: false
+      expect(component.setState).toHaveBeenCalledWith(expect.any(Function)); // Verify setState was called
+      expect(component.state.expanded).toBe(false); // Verify state update
+    });
   });
 });
 describe('custommenubutton', () => {
@@ -178,7 +221,7 @@ describe('custommenubutton', () => {
             _popUp: null,
           },
         },
-      ] as unknown as  Array<{ [string: string]: UICommand }>,
+      ] as unknown as Array<{ [string: string]: UICommand }>,
       disabled: true,
       dispatch: () => undefined,
       editorState: mockState,
@@ -186,42 +229,6 @@ describe('custommenubutton', () => {
       label: 'Normal',
     };
     const custommenubutton = new CustomMenuButton(props);
-    // custommenubutton.props = {
-    //   className: 'width-100 stylemenu-backgroundcolor',
-    //   commandGroups: [
-    //     {
-    //       Normal: {
-    //         _customStyleName: 'Normal',
-    //         _customStyle: 'Normal',
-    //         _popUp: null,
-    //       },
-    //     },
-    //   ],
-    //   staticCommand: [
-    //     {
-    //       newstyle: {
-    //         _customStyleName: 'New Style..',
-    //         _customStyle: 'newstyle',
-    //         _popUp: null,
-    //       },
-    //       editall: {
-    //         _customStyleName: 'Edit All',
-    //         _customStyle: 'editall',
-    //         _popUp: null,
-    //       },
-    //       clearstyle: {
-    //         _customStyleName: 'Clear Style',
-    //         _customStyle: 'clearstyle',
-    //         _popUp: null,
-    //       },
-    //     },
-    //   ],
-    //   disabled: true,
-    //   dispatch: () => undefined,
-    //   editorState: mockState,
-    //   editorView: null,
-    //   label: 'Normal',
-    // };
     custommenubutton.state.expanded = true;
     custommenubutton._menu = {
       close: () => undefined,
@@ -300,7 +307,7 @@ describe('custommenubutton', () => {
       ],
     });
     const mockState = {
-      doc:mockdoc ,
+      doc: mockdoc,
       selection: { type: 'text', anchor: 1, head: 1 },
     } as unknown as EditorState;
     const props = {
@@ -332,7 +339,7 @@ describe('custommenubutton', () => {
             _popUp: null,
           },
         },
-      ] as unknown as  Array<{ [string: string]: UICommand }>,
+      ] as unknown as Array<{ [string: string]: UICommand }>,
       disabled: true,
       dispatch: () => undefined,
       editorState: mockState,
@@ -342,6 +349,6 @@ describe('custommenubutton', () => {
     const custommenubutton = new CustomMenuButton(props);
     custommenubutton.state.expanded = true;
     custommenubutton._menu = null;
-    expect(  custommenubutton._showMenu()).toBeUndefined();
+    expect(custommenubutton._showMenu()).toBeUndefined();
   });
 });

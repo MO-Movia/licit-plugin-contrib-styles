@@ -1,7 +1,7 @@
 import { CustomstyleDropDownCommand } from './CustomstyleDropDownCommand';
 import { TestEditorView, createEditor, doc, p } from 'jest-prosemirror';
 import { EditorState } from 'prosemirror-state';
-import { Schema,Node } from 'prosemirror-model';
+import { Schema, Node } from 'prosemirror-model';
 import * as cusstyles from '../customStyle';
 
 describe('customstyledropdowncommand', () => {
@@ -418,13 +418,11 @@ describe('customstyledropdowncommand', () => {
     },
   });
   const mockdoc = doc(p('Hello World!!!'));
-  //mockdoc.styleName = '';
   const state = EditorState.create({
     doc: mockdoc,
     schema: schema,
     selection: editor.selection,
     plugins: [],
-  //  styleName: 'test',
   });
 
   const props = {
@@ -448,12 +446,16 @@ describe('customstyledropdowncommand', () => {
     expect(customstyledropdowncommand.staticCommands()).toBeInstanceOf(Array);
   });
   it('should handle isAllowedNode', () => {
-    const node = { type: { name: 'paragraph' } } ;
-    expect(customstyledropdowncommand.isAllowedNode(node as unknown as Node)).toBe(true);
+    const node = { type: { name: 'paragraph' } };
+    expect(
+      customstyledropdowncommand.isAllowedNode(node as unknown as Node)
+    ).toBe(true);
   });
   it('should handle isAllowedNode', () => {
     const node = { type: { name: 'ordered_list' } };
-    expect(customstyledropdowncommand.isAllowedNode(node as unknown as Node)).toBe(true);
+    expect(
+      customstyledropdowncommand.isAllowedNode(node as unknown as Node)
+    ).toBe(true);
   });
   it('should handle render when styleName null', () => {
     const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([
@@ -474,8 +476,6 @@ describe('customstyledropdowncommand', () => {
           underline: true,
           color: '#c40df2',
         },
-       // toc: false,
-        //isHidden: false,
       },
       {
         styleName: 'A11-Rename',
@@ -497,11 +497,8 @@ describe('customstyledropdowncommand', () => {
           paragraphSpacingBefore: '5',
           paragraphSpacingAfter: '5',
         },
-       // toc: false,
-       // isHidden: false,
       },
     ]);
-
 
     expect(customstyledropdowncommand.render()).toBeDefined();
     spy.mockRestore();
@@ -525,8 +522,6 @@ describe('customstyledropdowncommand', () => {
           underline: true,
           color: '#c40df2',
         },
-     //   toc: false,
-      //  isHidden: false,
       },
       {
         styleName: 'A11-Rename',
@@ -548,8 +543,6 @@ describe('customstyledropdowncommand', () => {
           paragraphSpacingBefore: '5',
           paragraphSpacingAfter: '5',
         },
-       // toc: false,
-       // isHidden: false,
       },
     ]);
     const mockschema = new Schema({
@@ -570,7 +563,7 @@ describe('customstyledropdowncommand', () => {
           },
           toDOM(node) {
             const { align, color } = node.attrs;
-            const style :string[] =[];
+            const style: string[] = [];
             if (align) style.push(`text-align: ${align}`);
             if (color) style.push(`color: ${color}`);
             return ['p', { style: style.join('; ') }, 0];
@@ -579,8 +572,9 @@ describe('customstyledropdowncommand', () => {
             {
               tag: 'p',
               getAttrs(dom) {
-                const style = (dom as unknown as HTMLElement).getAttribute('style') || '';
-                const attrs: { align?: string,  color?: string } = {};
+                const style =
+                  (dom as unknown as HTMLElement).getAttribute('style') || '';
+                const attrs: { align?: string; color?: string } = {};
                 if (style.includes('text-align: left')) attrs.align = 'left';
                 if (style.includes('text-align: center'))
                   attrs.align = 'center';
@@ -613,8 +607,9 @@ describe('customstyledropdowncommand', () => {
             {
               tag: 'h1', // Adjust the heading tag based on the desired level
               getAttrs(dom) {
-                const style = (dom as unknown as HTMLElement).getAttribute('style') || '';
-                const attrs: { align?: string,  color?: string } = {};
+                const style =
+                  (dom as unknown as HTMLElement).getAttribute('style') || '';
+                const attrs: { align?: string; color?: string } = {};
                 if (style.includes('text-align: left')) attrs.align = 'left';
                 if (style.includes('text-align: center'))
                   attrs.align = 'center';
@@ -852,13 +847,11 @@ describe('customstyledropdowncommand 1', () => {
     },
   });
   const mockdoc = doc(p('Hello World!!!'));
- // mockdoc.styleName = '';
   const state = EditorState.create({
     doc: mockdoc,
     schema: schema,
     selection: editor.selection,
     plugins: [],
-   // styleName: 'test',
   });
   const props = {
     dispatch: () => undefined,
@@ -892,8 +885,6 @@ describe('customstyledropdowncommand 1', () => {
           underline: true,
           color: '#c40df2',
         },
-        //toc: false,
-        //isHidden: false,
       },
       {
         styleName: 'A11-Rename',
@@ -915,8 +906,6 @@ describe('customstyledropdowncommand 1', () => {
           paragraphSpacingBefore: '5',
           paragraphSpacingAfter: '5',
         },
-       // toc: false,
-       // isHidden: false,
       },
     ]);
     const mockschema = new Schema({
@@ -946,8 +935,9 @@ describe('customstyledropdowncommand 1', () => {
             {
               tag: 'p',
               getAttrs(dom) {
-                const style = (dom as unknown as HTMLElement).getAttribute('style') || '';
-                const attrs: { align?: string,  color?: string } = {};
+                const style =
+                  (dom as unknown as HTMLElement).getAttribute('style') || '';
+                const attrs: { align?: string; color?: string } = {};
                 if (style.includes('text-align: left')) attrs.align = 'left';
                 if (style.includes('text-align: center'))
                   attrs.align = 'center';
@@ -980,8 +970,9 @@ describe('customstyledropdowncommand 1', () => {
             {
               tag: 'h1', // Adjust the heading tag based on the desired level
               getAttrs(dom) {
-                const style = (dom as unknown as HTMLElement).getAttribute('style') || '';
-                const attrs: { align?: string,  color?: string } = {};
+                const style =
+                  (dom as unknown as HTMLElement).getAttribute('style') || '';
+                const attrs: { align?: string; color?: string } = {};
                 if (style.includes('text-align: left')) attrs.align = 'left';
                 if (style.includes('text-align: center'))
                   attrs.align = 'center';
@@ -1033,7 +1024,7 @@ describe('customstyledropdowncommand 1', () => {
       editorState: mockeditorState as EditorState,
       editorView: {
         disabled: true,
-      } as  unknown as TestEditorView ,
+      } as unknown as TestEditorView,
     };
     const customstyledropdowncommand = new CustomstyleDropDownCommand(props);
     expect(customstyledropdowncommand.render()).toBeDefined();
@@ -1058,8 +1049,6 @@ describe('customstyledropdowncommand 1', () => {
           underline: true,
           color: '#c40df2',
         },
-       // toc: false,
-        //isHidden: false,
       },
       {
         styleName: 'A11-Rename',
@@ -1081,150 +1070,9 @@ describe('customstyledropdowncommand 1', () => {
           paragraphSpacingBefore: '5',
           paragraphSpacingAfter: '5',
         },
-      //  toc: false,
-      //  isHidden: false,
       },
     ]);
-    // const mockschema = new Schema({
-    //   nodes: {
-    //     doc: { content: 'paragraph+' },
-    //     paragraph: {
-    //       content: 'text*',
-    //       attrs: {
-    //         align: { default: null },
-    //         color: { default: null },
-    //         id: { default: null },
-    //         indent: { default: null },
-    //         lineSpacing: { default: null },
-    //         paddingBottom: { default: null },
-    //         paddingTop: { default: null },
-    //         capco: { default: null },
-    //         styleName: { default: null },
-    //       },
-    //       toDOM(node) {
-    //         const { align, color } = node.attrs;
-    //         const style: string[] = [];
-    //         if (align) style.push(`text-align: ${align}`);
-    //         if (color) style.push(`color: ${color}`);
-    //         return ['p', { style: style.join('; ') }, 0];
-    //       },
-    //       parseDOM: [
-    //         {
-    //           tag: 'p',
-    //           getAttrs(dom) {
-    //             const style = (dom as unknown as HTMLElement).getAttribute('style') || '';
-    //             const attrs: { align?: string,  color?: string } = {};
-    //             if (style.includes('text-align: left')) attrs.align = 'left';
-    //             if (style.includes('text-align: center'))
-    //               attrs.align = 'center';
-    //             if (style.includes('text-align: right')) attrs.align = 'right';
-    //             const colorMatch = style.match(/color: (.*?);/);
-    //             if (colorMatch) attrs.color = colorMatch[1];
-    //             return attrs;
-    //           },
-    //         },
-    //       ],
-    //     },
-    //     ordered_list: {
-    //       content: 'text*', // Content can be any inline content (e.g., text, marks)
-    //       attrs: {
-    //         level: { default: 1 }, // Add any additional attributes specific to the node
-    //         align: { default: null },
-    //         color: { default: null },
-    //         id: { default: null },
-    //         styleName: { default: null },
-    //         // Add more attributes as needed
-    //       },
-    //       toDOM(node) {
-    //         const { align, color, level } = node.attrs;
-    //         const style: string[] = [];
-    //         if (align) style.push(`text-align: ${align}`);
-    //         if (color) style.push(`color: ${color}`);
-    //         return [`h${level}`, { style: style.join('; ') }, 0];
-    //       },
-    //       parseDOM: [
-    //         {
-    //           tag: 'h1', // Adjust the heading tag based on the desired level
-    //           getAttrs(dom) {
-    //             const style = (dom as unknown as HTMLElement).getAttribute('style') || '';
-    //             const attrs : {align?:string , color?:string} = {};
-    //             if (style.includes('text-align: left')) attrs.align = 'left';
-    //             if (style.includes('text-align: center'))
-    //               attrs.align = 'center';
-    //             if (style.includes('text-align: right')) attrs.align = 'right';
-    //             const colorMatch = style.match(/color: (.*?);/);
-    //             if (colorMatch) attrs.color = colorMatch[1];
-    //             return attrs;
-    //           },
-    //         },
-    //       ],
-    //     },
-    //     doc_heading: {
-    //       content: 'text*',
-    //       attrs: {
-    //         align: { default: null },
-    //         color: { default: null },
-    //         id: { default: null },
-    //         styleName: { default: null },
-    //       },
-    //       toDOM(node) {
-    //         const { align, color } = node.attrs;
-    //         const style : string[] = [];
-    //         if (align) style.push(`text-align: ${align}`);
-    //         if (color) style.push(`color: ${color}`);
-    //         return ['h1', { style: style.join('; ') }, 0];
-    //       },
-    //       parseDOM: [
-    //         {
-    //           tag: 'h1',
-    //           getAttrs(dom) {
-    //             const style = (dom as unknown as HTMLElement).getAttribute('style') || '';
-    //             const attrs : {align?:string , color?:string} = {};
-    //             if (style.includes('text-align: left')) attrs.align = 'left';
-    //             if (style.includes('text-align: center'))
-    //             attrs.align = 'center';
-    //             if (style.includes('text-align: right')) attrs.align = 'right';
-    //             const colorMatch = style.match(/color: (.*?);/);
-    //             if (colorMatch) attrs.color = colorMatch[1];
-    //             return attrs;
-    //           },
-    //         },
-    //       ],
-    //     },
-    //     text: { inline: true },
-    //   },
-    // });
-
-    // Create the editor state
-    // const mockeditorState = {
-    //   schema: mockschema,
-    //   doc: mockschema.nodeFromJSON({
-    //     type: 'doc_heading',
-    //     attrs: {
-    //       align: 'center', // Set the desired alignment
-    //       color: 'blue', // Set the desired color
-    //       id: null,
-    //       styleName: 'Heading-1',
-    //     },
-    //     content: [
-    //       {
-    //         type: 'text',
-    //         text: 'This is a heading',
-    //       },
-    //     ],
-    //   }),
-    //   selection: { from: 0, to: 2 },
-    // };
-
-    // (customstyledropdowncommand as unknown as CustomstyleDropDownCommand).props = {
-    //   dispatch: () => undefined,
-    //   editorState: mockeditorState,
-    //   editorView: {
-    //     disabled: true,
-    //   },
-    // };
     expect(customstyledropdowncommand.render()).toBeDefined();
     spy.mockRestore();
   });
 });
-

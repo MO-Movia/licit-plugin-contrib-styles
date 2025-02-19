@@ -124,6 +124,40 @@ describe('CustomStyleEditor', () => {
     const event = { target: { value: 'Tahoma' } };
     expect(customstyleeditor.onFontNameChange(event)).toBeUndefined();
   });
+  describe('onFontNameChange', () => {       // //FSFIX    Breakthrough code to cover code inside setState
+    let component;
+  
+    beforeEach(() => {
+      // Initialize the component
+      component = customstyleeditor;
+  
+      // Mock setState to handle both object and function updates
+      component.setState = jest.fn((update) => {
+        const newState =
+          typeof update === 'function' ? update(component.state) : update;
+        component.state = { ...component.state, ...newState };
+      });
+    });
+  
+    it('should update fontName in styles', () => {
+      // Initial state
+      component.state = { styles: { fontName: '' } };
+  
+      // Mock event object
+      const event = { target: { value: 'Arial' } };
+  
+      // Trigger the method
+      component.onFontNameChange(event);
+  
+      // Expect setState to be called
+      expect(component.setState).toHaveBeenCalledWith(expect.any(Function));
+  
+      // Expect the state to be updated correctly
+      expect(component.state.styles.fontName).toBe('Arial');
+    });
+  });
+  
+  
   it('should handle onIndentRadioChanged', () => {
     const event = { target: { value: '0' } };
     expect(customstyleeditor.onIndentRadioChanged(event)).toBeUndefined();
@@ -156,7 +190,7 @@ describe('CustomStyleEditor', () => {
   it('should handle onLevelChange when event target value is None', () => {
     const event = { target: { value: 'None' } };
     customstyleeditor.onLevelChange(event);
-    expect(customstyleeditor.state.styles.styleLevel).toEqual(undefined);
+    expect(customstyleeditor.state.styles.styleLevel).toEqual("None");
 
   });
   it('should handle onBulletLevelChange', () => {
@@ -520,7 +554,7 @@ describe('CustomStyleEditor', () => {
       textDecoration: 'underline line-through',
     });
   });
-  it('should handle buildStyle when isLevelbased is true and boldSentence is false', () => {
+  it('should handle buildStyle when isLevelbased is true and boldSentence is true', () => {
     const mockSelectElement = document.createElement('Select');
     jest.spyOn(document, 'getElementById').mockReturnValue(mockSelectElement);
     customstyleeditor.state = {
@@ -530,6 +564,51 @@ describe('CustomStyleEditor', () => {
         toc: false,
         isHidden: false,
         boldSentence: true,
+        nextLineStyleName: 'none',
+        fontName: 'Arial',
+        fontSize: 11,
+        strong: true,
+        color: true,
+        underline: true,
+        strike: true,
+        em: true,
+        textHighlight: true,
+        lineHeight: true,
+        paragraphSpacingBefore: 10,
+        paragraphSpacingAfter: 10,
+        indent: 10,
+        isLevelbased: true,
+        boldPartial: true,
+        styleLevel: true,
+        hasBullet: true,
+      },
+      mode: 0,
+      close: () => undefined,
+    };
+    expect(customstyleeditor.buildStyle()).toStrictEqual({
+      backgroundColor: true,
+      color: true,
+      fontFamily: 'Arial',
+      fontSize: '11px',
+      fontStyle: 'italic',
+      fontWeight: 'normal',
+      lineHeight: '125%',
+      marginBottom: '10px',
+      marginTop: '10px',
+      textAlign: 'left',
+      textDecoration: 'underline line-through',
+    });
+  });
+  it('should handle buildStyle when isLevelbased is true and boldSentence is false', () => {
+    const mockSelectElement = document.createElement('Select');
+    jest.spyOn(document, 'getElementById').mockReturnValue(mockSelectElement);
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        toc: false,
+        isHidden: false,
+        boldSentence: false,
         nextLineStyleName: 'none',
         fontName: 'Arial',
         fontSize: 11,

@@ -414,6 +414,7 @@ describe('applyNormalIfNoStyle', () => {
           nodesBetween: () => {
             return {};
           },
+          nodeAt:()=>{}
         },
         setSelection: setSelection,
       };
@@ -441,6 +442,7 @@ describe('applyNormalIfNoStyle', () => {
             nodesBetween: () => {
               return {};
             },
+            nodeAt:()=>{}
           },
           setSelection: setSelection,
           selection: {
@@ -580,6 +582,7 @@ describe('onUpdateAppendTransaction', () => {
         isTextblock: true,
       } as unknown as Node;
     };
+    mockdoc.nodesBetween = ()=>{};
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -612,6 +615,7 @@ describe('onUpdateAppendTransaction', () => {
               max: () => 1,
             }) as unknown as ResolvedPos,
           nodesBetween: () => ({}),
+          nodeAt:()=>{}
         },
         setSelection: setSelection,
         scrollIntoView: () => {

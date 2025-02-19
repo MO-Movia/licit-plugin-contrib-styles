@@ -6,14 +6,14 @@ const ATTR_OVERRIDDEN = 'overridden';
 
 type getAttrsFn = (p: Node | string) => KeyValuePair;
 
-function convertToBoolean(value) {
-  if (typeof value === 'boolean') {
-    return value;
-  }
-  else {
-    return value === 'true';
-  }
-}
+// function convertToBoolean(value) {
+//   if (typeof value === 'boolean') {
+//     return value;
+//   }
+//   else {
+//     return value === 'true';
+//   }
+// }
 function getAttrs(base: getAttrsFn | undefined, dom: HTMLElement) {
   if (typeof dom != 'string' && undefined !== base) {
     const attrs = base((dom as unknown as Node));

@@ -6,6 +6,7 @@ import { getCustomStyleByName, getHidenumberingFlag } from './customStyle.js';
 
 // This assumes that every 36pt maps to one indent level.
 export const ATTRIBUTE_PREFIX = 'prefix';
+export const ATTRIBUTE_HIDENUMBERING = 'hideNumbering';
 export const INDENT_MARGIN_PT_SIZE = 36;
 export const MIN_INDENT_LEVEL = 0;
 export const MAX_INDENT_LEVEL = 7;
@@ -57,6 +58,7 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
     bulletDetails,
     isListStyle,
     prefix,
+    hideNumbering,
   } = getStyle(node.attrs);
   if (style) {
     output[1].style = style;
@@ -79,6 +81,10 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
 
   if (prefix) {
     output[1][ATTRIBUTE_PREFIX] = prefix;
+  }
+
+  if (hideNumbering) {
+    output[1][ATTRIBUTE_HIDENUMBERING] = hideNumbering;
   }
 
   if (bulletDetails?.symbol?.length > 0) {
@@ -157,6 +163,7 @@ function getStyleEx(align, lineSpacing, styleName) {
   let indentOverriden = '';
   let isListStyle = false;
   let prefix = '';
+  let hideNumbering = false;
   let bulletDetails: {
     symbol: string;
     color: string;
@@ -225,6 +232,7 @@ function getStyleEx(align, lineSpacing, styleName) {
             : 0;
         isListStyle = styleProps.styles.isList;
         prefix = styleProps.styles.prefixValue;
+        hideNumbering = styleProps.styles.hideNumbering;
         style += refreshCounters(styleLevel, isListStyle);
       }
     } else if (styleName?.includes(RESERVED_STYLE_NONE_NUMBERING)) {
@@ -244,6 +252,7 @@ function getStyleEx(align, lineSpacing, styleName) {
     bulletDetails,
     isListStyle,
     prefix,
+    hideNumbering,
   };
 }
 

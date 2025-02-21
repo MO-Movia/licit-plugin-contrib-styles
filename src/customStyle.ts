@@ -57,6 +57,10 @@ export function isHyphenIncluded(styleName) {
   return styleName?.includes('-') ?? false;
 }
 
+export function isNameNull(styleName) {
+  return styleName === '';
+}
+
 // [FS] IRAD-1128 2020-12-30
 // get a style by styleName
 export function getCustomStyleByName(name: string): Style {

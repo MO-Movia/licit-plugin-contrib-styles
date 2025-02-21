@@ -15,6 +15,7 @@ import {
   getStylesAsync,
   addStyleToList,
   isHyphenIncluded,
+  isNameNull,
 } from '../customStyle.js';
 import {
   RESERVED_STYLE_NONE,
@@ -785,8 +786,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
             <p className="molsp-formp">
               Style Name:{' '}
               <span id="errormsg" style={{ display: 'none', color: 'red' }}>
-              {isCustomStyleExists(this.state.styleName) ? 'Style name already exists. ' : ''}
-              {this.state.styleName.includes('-') ? 'Style name should not contain a hyphen.' : ''}
+                {isCustomStyleExists(this.state.styleName)
+                  ? 'Style name already exists. '
+                  : isHyphenIncluded(this.state.styleName)
+                    ? 'Should not contain a hyphen.'
+                    : isNameNull(this.state.styleName)
+                      ? 'Name cannot be empty!'
+                      : ''}
               </span>
             </p>
             <span>
@@ -1525,14 +1531,14 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       >
                         <label style={{ marginRight: '10px' }}>
                           <input
-                            className="molsp-chkboldnumbering"
                             checked={this.state.styles.hideNumbering}
-                            onChange={this.handleHideNumbering.bind(this)}
+                            className="molsp-chkboldnumbering"
                             disabled={
                               this.checkCondition(
                                 this.state.styles.hasNumbering
                               ) || this.state.styleName === RESERVED_STYLE_NONE
                             }
+                            onChange={this.handleHideNumbering.bind(this)}
                             type="checkbox"
                             value="HideNumbering"
                           />
@@ -1872,7 +1878,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     // FIX: able to save a custom style name with already exist style name
     if (
       (0 === this.state.mode && isCustomStyleExists(this.state.styleName)) ||
-      isHyphenIncluded(this.state.styleName)
+      isHyphenIncluded(this.state.styleName) || isNameNull(this.state.styleName)
     ) {
       const errMsg = document.getElementById('errormsg');
       if (errMsg?.style) {

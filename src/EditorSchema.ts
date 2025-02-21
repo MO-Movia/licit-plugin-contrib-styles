@@ -51,7 +51,7 @@ export function effectiveSchema(schema: Schema) {
 function createAttribute(content, key, value) {
   if (content) {
     const attr = content.attrs && Object.keys(content.attrs)[0];
-    let styleAttrSpec = content.attrs[key];
+    let styleAttrSpec = content.attrs?.[key];
     if (attr && content.attrs && !styleAttrSpec) {
       const contentAttr = content.attrs[attr];
       styleAttrSpec = Object.assign(

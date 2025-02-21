@@ -2,7 +2,6 @@
 import { Plugin, PluginKey, EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import {
-  updateOverrideFlag,
   applyLatestStyle,
   getMarkByStyleName,
   getStyleLevel,
@@ -139,8 +138,6 @@ export class CustomstylePlugin extends Plugin {
 export function onInitAppendTransaction(ref, tr, nextState) {
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
-    // tr = updateStyleOverrideFlag(nextState, tr);
-    // tr = updateFormatOverrideFlag(nextState, tr);
     // do this only once when the document is loaded.
     tr = applyStyles(nextState, tr);
   }
@@ -159,9 +156,6 @@ export function onUpdateAppendTransaction(
 ) {
 
   // when user updates
-  if (!slice1 && csview && BACKSPACEKEYCODE !== csview.input.lastKeyCode) {
-    // tr = updateStyleOverrideFlag(nextState, tr);
-  }
   tr = manageHierarchyOnDelete(prevState, nextState, tr, csview);
 
 
@@ -220,7 +214,6 @@ export function onUpdateAppendTransaction(
           _startPos = _endPos;;
         }
         if (slice1.content.content[index].content.size !== 0) {
-          // const tabPos = csview.state.selection.$from.before(1);
           if (index === 0) {
             _startPos = csview.state.selection.$from.before(1);
             node2 = csview.state.tr.doc.nodeAt(_startPos);
@@ -231,39 +224,30 @@ export function onUpdateAppendTransaction(
           if (!node1.content?.content[0]?.attrs) {
             const opt = 1;
             if (node2.type.name === 'table') {
-              const startPos = demoPos;
               const styleName = slice1.content.content[index].attrs.styleName ?? 'Normal';
-              // const node = nextState.tr.doc.nodeAt(startPos);
               const node = nextState.tr.doc.nodeAt(_startPos);
               const len = node.nodeSize;
-              // const endPos = startPos + len;
               _endPos = _startPos + len;
-              // tr = applyLatestStyle(styleName, nextState, tr, node, startPos, endPos, null, opt);
               tr = applyLatestStyle(styleName, nextState, tr, node, _startPos, _endPos, null, opt);
             }
             else {
-              // const startPos = csview.state.selection.from - 1;
               if (index === 0) {
                 _startPos = csview.state.selection.from - 1;
               }
 
-              // const node = nextState.tr.doc.nodeAt(startPos);
               const node = nextState.tr.doc.nodeAt(_startPos);
               //FIX: Copied text show Normal style name instead of showing the applied style in the current paragraph.
               let styleName = (null === slice1.content.content[index].attrs.styleName ? node.attrs.styleName : slice1.content.content[index].attrs.styleName);
               styleName = styleName ?? 'Normal';
               const len = node.nodeSize;
-              // const endPos = startPos + len;
               _endPos = _startPos + len;
-              // tr = applyLatestStyle(styleName ?? '', nextState, tr, node, startPos, endPos, null, opt);
               tr = applyLatestStyle(styleName ?? '', nextState, tr, node, _startPos, _endPos, null, opt);
               const newattrs = { ...node.attrs };
               newattrs.styleName = styleName;
               tr = tr.setNodeMarkup(_startPos, undefined, newattrs);
             }
           }
-          else {
-            if (node2.type.name === 'table') {
+          else if (node2.type.name === 'table') {
               const startPos = demoPos;
               const styleName = node1.attrs.styleName ?? 'Normal';
               const node = nextState.tr.doc.nodeAt(startPos);
@@ -281,9 +265,8 @@ export function onUpdateAppendTransaction(
               const styleProp = getCustomStyleByName(styleName);
               tr = applyStyleToEachNode(nextState, startPos, endPos, tr, styleProp, styleName);
             }
-          }
+          
         }
-        // }
       }
     }
     tr = tr?.scrollIntoView();
@@ -697,82 +680,7 @@ export function applyNormalIfNoStyle(nextState, tr, node, opt?) {
   });
   return tr;
 }
-
-function updateStyleOverrideFlag(state, tr) {
-  const retObj = { modified: true };
-  if (!tr) {
-    tr = state.tr;
-  }
-
-  tr.doc.descendants(function (child) {
-    const contentLen = child.content.size;
-    if (tr && haveEligibleChildren(child, contentLen)) {
-      const parentPos = tr.curSelection.$anchor.pos - tr.curSelection.$anchor.parentOffset - 1; //pos
-      const startPos = tr.curSelection.$anchor.pos; //pos
-      const endPos = tr.curSelection.$head.pos; //pos + contentLen
-
-      // if (!child.attrs.styleName) {
-      //   // FIX: cannot assign to readonly property styleName of object.
-      //   const newAttrs = { ...child.attrs, styleName: 'Normal' };
-      //   tr = tr?.setNodeMarkup(parentPos, undefined, newAttrs);
-      // }
-      // tr = updateOverrideFlag(
-      //   child.attrs.styleName ?? 'Normal',
-      //   tr,
-      //   child,
-      //   startPos,
-      //   endPos,
-      //   retObj,
-      // );
-
-      // if (tr.curSelection && endPos >= startPos && startPos !== endPos) {
-      //   tr = updateOverrideFlag(child.attrs.styleName ?? 'Normal', tr, child, startPos, undefined, retObj, false, parentPos);
-      // }
-      // if (tr.curSelection && startPos === endPos) {
-      //   tr = updateOverrideFlag(child.attrs.styleName ?? 'Normal', tr, child, parentPos, endPos, retObj, true, -1);
-      // }
-
-      tr = updateOverrideFlag(child.attrs.styleName, tr, child, startPos, endPos, retObj);
-
-    }
-  });
-
-  return retObj.modified ? tr : null;
-}
-
-function updateFormatOverrideFlag(state, tr) {
-  if (!tr) {
-    tr = state.tr;
-  }
-  tr.doc.descendants(function (child, pos) {
-    if (child.type.name === 'paragraph') {
-      child = updateOverrideFlagForAlign(child);
-      tr = tr?.setNodeMarkup(pos, undefined, child.attrs);
-    }
-  });
-  return tr;
-}
-
 // using this function we can find if the user overrided the align,line spacing,indent.
-function updateOverrideFlagForAlign(node) {
-  const styleProp = getCustomStyleByName(node.attrs.styleName);
-  const newAttrs = { ...node.attrs };
-  if (null !== node?.attrs.overriddenAlign && styleProp?.styles?.align === node?.attrs?.align) {
-    newAttrs['overriddenAlign'] = false;
-    newAttrs['overriddenAlignValue'] = null;
-  }
-  if (null !== node?.attrs.overriddenLineSpacing && getLineSpacingValue(styleProp?.styles?.lineHeight) === node?.attrs?.lineSpacing) {
-    newAttrs['overriddenLineSpacing'] = false;
-    newAttrs['overriddenLineSpacingValue'] = null;
-  }
-  // first condition is to check if indent is not set in both custom style and toolbar .
-  if ((undefined === styleProp?.styles?.indent && null == node?.attrs?.indent) || (null !== node?.attrs.overriddenIndent && styleProp?.styles?.indent === node?.attrs?.indent)) {
-    newAttrs['overriddenIndent'] = false;
-    newAttrs['overriddenIndentValue'] = null;
-  }
-  // Return a new node with updated attributes
-  return node.type.create(newAttrs, node.content, node.marks);
-}
 
 function haveEligibleChildren(node, contentLen) {
   return (

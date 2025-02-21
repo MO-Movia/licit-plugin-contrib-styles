@@ -600,15 +600,6 @@ export function compareMarkWithStyle(
     mark.attrs[ATTR_OVERRIDDEN] !== overridden &&
     tr.curSelection
   ) {
-    // FIX: cannot assign to readonly property overridden of object.
-    // const newAttrs = { ...mark.attrs };
-    // newAttrs[ATTR_OVERRIDDEN] = overridden;
-    // tr = tr.removeMark(startPos, _endPos, mark.type);
-    // tr = tr.addMark(
-    //   startPos,
-    //   _endPos,
-    //   mark.type.create(newAttrs)
-    // );
     mark.attrs[ATTR_OVERRIDDEN] = overridden;
     retObj.modified = true;
   }
@@ -627,28 +618,8 @@ export function updateOverrideFlag(
   const styleProp = getCustomStyleByName(styleName);
   if (styleProp?.styles) {
     node.descendants(function (child: Node, pos) {
-      // const mystartPos = (undefined === endPos) ? startPos : startPos + pos;
-      // let _startPos = 0;
-      // let _endPos = 0;
       if (child instanceof Node) {
         child.marks.forEach(function (mark) {
-          // tr = compareMarkWithStyle(
-          //   mark,
-          //   styleProp.styles,
-          //   tr,
-          //   pos,
-          //   pos + child.nodeSize,
-          //   retObj
-          // );
-
-          // if ((pos + parentPos) === mystartPos - 1 || (pos + parentPos) === mystartPos || isOnload) {
-          //   if (parentPos === 0) {
-          //     _startPos = mystartPos;
-          //     _endPos = (mystartPos - 1) + child.nodeSize;
-          //   } else {
-          //     _startPos = mystartPos + 1;
-          //     _endPos = (mystartPos + 1) + child.nodeSize;
-          //   }
           tr = compareMarkWithStyle(
             mark,
             styleProp.styles,
@@ -657,7 +628,6 @@ export function updateOverrideFlag(
             endPos,
             retObj
           );
-          // }
         });
       }
     });
@@ -1328,23 +1298,6 @@ export function getStyleLevel(styleName: string) {
   return styleLevel;
 }
 
-// export function executeCommands(
-//   state: EditorState,
-//   tr: Transform,
-//   styleName: string,
-//   startPos: number,
-//   endPos: number
-// ) {
-//   const style = getCustomStyleByName(styleName);
-//   const _commands = getCustomStyleCommands(style);
-//   _commands.forEach((element) => {
-//     if (typeof element.executeCustom == 'function') {
-//       tr = element.executeCustom(state, tr, startPos, endPos, _commands);
-//     }
-//   });
-//   return tr;
-// }
-
 // Need to change this function code duplicates with applyStyle()
 export function applyLatestStyle(
   styleName: string,
@@ -1403,8 +1356,6 @@ export function removeAllMarksExceptLink(
 ) {
   const { doc } = tr;
   const tasks = [];
-  // const posFrom = (tr as Transaction).selection.$from.start(1);
-  // const posTo = (tr as Transaction).selection.$to.end(1) - 1;
   doc.nodesBetween(from, to, (node, pos) => {
     if (node.marks?.length > 0) {
       node.marks.some((mark) => {
@@ -1515,7 +1466,6 @@ export function applyLineStyle(
         // Check styleName is available for node
         if (
           node.attrs?.styleName
-          // && RESERVED_STYLE_NONE !== node.attrs.styleName
         ) {
           const styleProp = getCustomStyleByName(node.attrs.styleName);
           if (styleProp?.styles?.boldPartial) {

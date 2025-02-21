@@ -1307,8 +1307,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           onChange={(e) => this.handleList(e)}
                           type="radio"
                           value="userDefined"
-                        />
-                        User-defined Numbering/Bullets
+                        />User-defined Numbering/Bullets
                       </label>
                       <br />
                       <label>
@@ -1321,8 +1320,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           onChange={this.handleList.bind(this)}
                           type="radio"
                           value="listStyle"
-                        />
-                        List-style (Auto Numbering)
+                        />List-style (Auto Numbering)
                       </label>
                     </div>
                   </div>
@@ -1423,14 +1421,14 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           }
                           name="formatting"
                           onChange={() => {
-                            this.setState({
+                            this.setState((prevState) => ({
                               styles: {
-                                ...this.state.styles,
+                                ...prevState.styles,
                                 hasNumbering: false,
                                 boldNumbering: false,
                                 hasBullet: false,
                               },
-                            });
+                            }));                            
                           }}
                           type="radio"
                           value="none"
@@ -1830,13 +1828,14 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       // Issue fix: In edit all, the style list not showing the first time.
       // FIX: disableControl : disable the numbering,bullet list,level,prefix and list-style controls on modify a style which have selected the numbering and also applied it in the document.
 
-      this.setState({
+      this.setState((prevState) => ({
         customStyles: result,
         disableControl:
-          this.state.mode > 0 &&
-          this.state.styles.hasNumbering &&
+          prevState.mode > 0 &&
+          prevState.styles.hasNumbering &&
           this.isCustomStyleAlreadyApplied(),
-      });
+      }));
+      
     });
   }
 

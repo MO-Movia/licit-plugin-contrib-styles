@@ -1473,7 +1473,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                                 hasBullet: false,
                                 hideNumbering: false,
                               },
-                            }));                            
+                            }));
                           }}
                           type="radio"
                           value="none"
@@ -1523,14 +1523,14 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       >
                         <label style={{ marginRight: '10px' }}>
                           <input
-                            className="molsp-chkboldnumbering"
                             checked={this.state.styles.hideNumbering}
-                            onChange={this.handleHideNumbering.bind(this)}
+                            className="molsp-chkboldnumbering"
                             disabled={
                               this.checkCondition(
                                 this.state.styles.hasNumbering
                               ) || this.state.styleName === RESERVED_STYLE_NONE
                             }
+                            onChange={this.handleHideNumbering.bind(this)}
                             type="checkbox"
                             value="HideNumbering"
                           />
@@ -1927,7 +1927,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
           prevState.styles.hasNumbering &&
           this.isCustomStyleAlreadyApplied(),
       }));
-      
+
     });
   }
 

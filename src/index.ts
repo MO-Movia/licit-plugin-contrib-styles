@@ -202,7 +202,7 @@ export function onUpdateAppendTransaction(
     let _endPos = 0;
     let node2 = null;
     let demoPos = null;
-    let node1 = null
+    let node1 = null;
     for (let index = 0; index < slice1.content.childCount; index++) {
       if (
         !(
@@ -211,7 +211,7 @@ export function onUpdateAppendTransaction(
         )
       ) {
         if (index !== 0) {
-          _startPos = _endPos;;
+          _startPos = _endPos;
         }
         if (slice1.content.content[index].content.size !== 0) {
           if (index === 0) {
@@ -265,7 +265,7 @@ export function onUpdateAppendTransaction(
               const styleProp = getCustomStyleByName(styleName);
               tr = applyStyleToEachNode(nextState, startPos, endPos, tr, styleProp, styleName);
             }
-          
+
         }
       }
     }

@@ -10,7 +10,6 @@ import {
   insertParagraph,
   addElementEx,
   compareMarkWithStyle,
-  updateOverrideFlag,
   applyLatestStyle,
   allowCustomLevelIndent,
   applyLineStyle,
@@ -234,71 +233,6 @@ describe('CustomStyleCommand', () => {
     myDoc.content.findDiffEnd(myDoc.content);
     customstylecommand._customStyleName = 'test';
     expect(customstylecommand.renderLabel()).toBe('test');
-  });
-
-  describe('updateOverrideFlag', () => {
-    it('should handle updateOverrideFlag when styleprop null', () => {
-      const child = new Node();
-      const mockNode = {
-        type: {
-          name: 'paragraph',
-        },
-        content: [
-          child,
-          {
-            type: {
-              name: 'text',
-            },
-            text: 'This is a mock paragraph with some text.',
-            marks: [
-              {
-                type: {
-                  name: 'strong',
-                },
-              },
-            ],
-          } as unknown as Node,
-          {
-            type: {
-              name: 'text',
-            },
-            text: ' More text in the same paragraph.',
-            marks: [
-              {
-                type: {
-                  name: 'em',
-                },
-              },
-            ],
-          },
-        ],
-        descendants: function (callback) {
-          function traverse(node, callback) {
-            callback(node);
-            if (node.content) {
-              node.content.forEach((child) => traverse(child, callback));
-            }
-          }
-          traverse(this, callback);
-        },
-      };
-
-      jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
-        styles: 'color: red; font-size: 16px; font-weight: bold;',
-      } as unknown as Style);
-      expect(
-        updateOverrideFlag(
-          '',
-          {} as Transform,
-          mockNode as unknown as Node,
-          0,
-          1,
-          {
-            modified: true,
-          }
-        )
-      ).toStrictEqual({});
-    });
   });
 
   it('should handle isEmpty  ', () => {
@@ -2155,7 +2089,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
     //   return { removeMark: () => { } };
     // },
     removeMark: () => {
-      return { key: 'mocktr',addMark:()=>{return {};} };
+      return { key: 'mocktr', addMark: () => { return {}; } };
     },
     insert: () => {
       return { key: 'mocktr' };
@@ -2987,7 +2921,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
 
   it('should handle compareMarkWithStyle when type = mark-font-size ', () => {
     const mark = {
-      type: {name:'mark-font-size', create: () => { }},
+      type: { name: 'mark-font-size', create: () => { } },
       attrs: { pt: 11, overridden: false },
     };
     const style1 = {
@@ -4314,25 +4248,7 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
   });
 });
 
-describe('updateOverrideFlag', () => {
-  it('should handle updateOverrideFlag when styleprop null', () => {
-    jest
-      .spyOn(customstyles, 'getCustomStyleByName')
-      .mockReturnValue(null as unknown as Style);
-    expect(
-      updateOverrideFlag(
-        '',
-        {} as unknown as Transform,
-        {} as unknown as Node,
-        0,
-        1,
-        {
-          modified: false,
-        }
-      )
-    ).toStrictEqual({});
-  });
-});
+
 describe('applyLatestStyle', () => {
   it('should handle applyLatestStyle if keepmarks is true', () => {
     const mockschema = new Schema({

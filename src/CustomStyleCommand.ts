@@ -607,33 +607,6 @@ export function compareMarkWithStyle(
   return tr;
 }
 
-export function updateOverrideFlag(
-  styleName: string,
-  tr: Transform,
-  node: Node,
-  startPos: number,
-  endPos: number,
-  retObj: { modified: boolean }
-) {
-  const styleProp = getCustomStyleByName(styleName);
-  if (styleProp?.styles) {
-    node.descendants(function (child: Node, pos) {
-      if (child instanceof Node) {
-        child.marks.forEach(function (mark) {
-          tr = compareMarkWithStyle(
-            mark,
-            styleProp.styles,
-            tr,
-            startPos,
-            endPos,
-            retObj
-          );
-        });
-      }
-    });
-  }
-  return tr;
-}
 
 export function getMarkByStyleName(styleName: string, schema: Schema) {
   const styleProp = getCustomStyleByName(styleName);
@@ -715,10 +688,10 @@ function applyStyleEx(
   // Custom style is applied from menu the endpos is correct ie nodesize is calculating correct
   // when loading the document with a node having custom style the nodesize is one point less
   // to fix that added +1 to endpos
-  let lastChild = tr.doc.nodeAt(endPos);
+  const lastChild = tr.doc.nodeAt(endPos);
   endPos = null === lastChild ? endPos : endPos + 1;
 
-  let cursourPosition = ((tr as Transaction).selection as TextSelection).$cursor?.pos;
+  const cursourPosition = ((tr as Transaction).selection as TextSelection)?.$cursor?.pos;
   // Issue fix: applied link is missing after applying a custom style.
   tr = removeAllMarksExceptLink(startPos, endPos, tr);
 
@@ -798,11 +771,11 @@ function applyStyleEx(
     });
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
-    // Manage to retain the cursour at the position where the user clicked 
+    // Manage to retain the cursour at the position where the user clicked
     // if any selection is available the cursour move to the end of the paragraph
     // to resolve the cursour issue on line break and enter key at the beginning of a para
     if (cursourPosition) {
-      (tr as Transaction).setSelection(TextSelection.create(tr.doc, cursourPosition, cursourPosition))
+      (tr as Transaction).setSelection(TextSelection.create(tr.doc, cursourPosition, cursourPosition));
     }
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     (tr as Transaction).storedMarks = storedmarks;

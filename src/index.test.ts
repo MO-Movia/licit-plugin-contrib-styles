@@ -1341,7 +1341,7 @@ describe('Style Plugin', () => {
   });
   it('should handle getEffectiveSchema ',()=>{
     expect(plugin.getEffectiveSchema(mockSchema)).toBeDefined();
-  })
+  });
   it('SHOULD HANDLE paste', () => {
     const boundHandlePaste = plugin?.props?.handlePaste?.bind(plugin);
     expect(

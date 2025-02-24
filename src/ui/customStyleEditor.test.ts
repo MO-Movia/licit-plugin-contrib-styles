@@ -126,11 +126,11 @@ describe('CustomStyleEditor', () => {
   });
   describe('onFontNameChange', () => {       // //FSFIX    Breakthrough code to cover code inside setState
     let component;
-  
+
     beforeEach(() => {
       // Initialize the component
       component = customstyleeditor;
-  
+
       // Mock setState to handle both object and function updates
       component.setState = jest.fn((update) => {
         const newState =
@@ -138,26 +138,26 @@ describe('CustomStyleEditor', () => {
         component.state = { ...component.state, ...newState };
       });
     });
-  
+
     it('should update fontName in styles', () => {
       // Initial state
       component.state = { styles: { fontName: '' } };
-  
+
       // Mock event object
       const event = { target: { value: 'Arial' } };
-  
+
       // Trigger the method
       component.onFontNameChange(event);
-  
+
       // Expect setState to be called
       expect(component.setState).toHaveBeenCalledWith(expect.any(Function));
-  
+
       // Expect the state to be updated correctly
       expect(component.state.styles.fontName).toBe('Arial');
     });
   });
-  
-  
+
+
   it('should handle onIndentRadioChanged', () => {
     const event = { target: { value: '0' } };
     expect(customstyleeditor.onIndentRadioChanged(event)).toBeUndefined();
@@ -190,7 +190,7 @@ describe('CustomStyleEditor', () => {
   it('should handle onLevelChange when event target value is None', () => {
     const event = { target: { value: 'None' } };
     customstyleeditor.onLevelChange(event);
-    expect(customstyleeditor.state.styles.styleLevel).toEqual("None");
+    expect(customstyleeditor.state.styles.styleLevel).toEqual('None');
 
   });
   it('should handle onBulletLevelChange', () => {

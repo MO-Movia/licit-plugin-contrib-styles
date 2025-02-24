@@ -718,6 +718,7 @@ function applyStyleEx(
   let lastChild = tr.doc.nodeAt(endPos);
   endPos = null === lastChild ? endPos : endPos + 1;
 
+  let cursourPosition = ((tr as Transaction).selection as TextSelection).$cursor?.pos;
   // Issue fix: applied link is missing after applying a custom style.
   tr = removeAllMarksExceptLink(startPos, endPos, tr);
 
@@ -797,6 +798,12 @@ function applyStyleEx(
     });
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
+    // Manage to retain the cursour at the position where the user clicked 
+    // if any selection is available the cursour move to the end of the paragraph
+    // to resolve the cursour issue on line break and enter key at the beginning of a para
+    if (cursourPosition) {
+      (tr as Transaction).setSelection(TextSelection.create(tr.doc, cursourPosition, cursourPosition))
+    }
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     (tr as Transaction).storedMarks = storedmarks;
   }

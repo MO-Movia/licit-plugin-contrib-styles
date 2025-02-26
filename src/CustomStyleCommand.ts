@@ -701,10 +701,6 @@ function applyStyleEx(
   if (styleProp?.styles) {
     const _commands = getCustomStyleCommands(styleProp.styles);
     const newattrs = { ...node.attrs };
-    // Issue fix on not removing center alignment when switch style with center
-    // alignment to style with left alignment
-    newattrs.align = null;
-    newattrs.lineSpacing = null;
 
     // Indent overriding not working on a paragraph where custom style is applied
     if (!node?.attrs?.overriddenIndent) {

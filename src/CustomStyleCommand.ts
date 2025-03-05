@@ -1519,12 +1519,14 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
       }
     }
   }
-  tr = tr.addMark(
-    pos,
-    pos + textContent.length + 1 + counter,
-    markType.create(null)
-  );
-  return tr;
+  return textContent.startsWith('.') ||
+    textContent.startsWith(String.fromCharCode(8212))
+    ? tr
+    : tr.addMark(
+        pos,
+        pos + textContent.length + 1 + counter,
+        markType.create(null)
+      );
 }
 // get text content from selected node
 function getNodeText(node: Node) {

@@ -414,6 +414,7 @@ describe('applyNormalIfNoStyle', () => {
           nodesBetween: () => {
             return {};
           },
+          nodeAt:()=>{}
         },
         setSelection: setSelection,
       };
@@ -441,6 +442,7 @@ describe('applyNormalIfNoStyle', () => {
             nodesBetween: () => {
               return {};
             },
+            nodeAt:()=>{}
           },
           setSelection: setSelection,
           selection: {
@@ -580,6 +582,7 @@ describe('onUpdateAppendTransaction', () => {
         isTextblock: true,
       } as unknown as Node;
     };
+    mockdoc.nodesBetween = ()=>{};
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -612,6 +615,7 @@ describe('onUpdateAppendTransaction', () => {
               max: () => 1,
             }) as unknown as ResolvedPos,
           nodesBetween: () => ({}),
+          nodeAt:()=>{}
         },
         setSelection: setSelection,
         scrollIntoView: () => {
@@ -1334,6 +1338,9 @@ describe('Style Plugin', () => {
       }
     );
     expect(setStyles(customStyleList)).toBeUndefined();
+  });
+  it('should handle getEffectiveSchema ',()=>{
+    expect(plugin.getEffectiveSchema(mockSchema)).toBeDefined();
   });
   it('SHOULD HANDLE paste', () => {
     const boundHandlePaste = plugin?.props?.handlePaste?.bind(plugin);
@@ -2646,6 +2653,21 @@ describe('Cus Style Plugin-Pass', () => {
       styleName: 'A11-Rename',
     };
     expect(setNodeAttrs(null, newattrs)).toStrictEqual(newattrs);
+  });
+  it('should handle setNodeAttrs when nextLineStyleName is Normal ', () => {
+    jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue('Normal' as unknown as Style);
+    const newattrs = {
+      align: 'left',
+      color: null,
+      id: '',
+      indent: null,
+      lineSpacing: null,
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'A11-Rename',
+    };
+    expect(setNodeAttrs('Normal', newattrs)).toStrictEqual(newattrs);
   });
 
   it('should handle applyStyleForNextParagraph', () => {

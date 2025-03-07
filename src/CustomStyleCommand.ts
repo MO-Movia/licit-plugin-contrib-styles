@@ -183,6 +183,21 @@ export function getCustomStyleCommands(customStyle) {
   for (const property in customStyle) {
     commands = getCustomStyleCommandsEx(customStyle, property, commands);
   }
+  commands.sort((a, b) => {
+    if (
+      a.constructor.name === 'MarkToggleCommand' &&
+      b.constructor.name !== 'MarkToggleCommand'
+    ) {
+      return 1; // Move `a` to the end.
+    }
+    if (
+      a.constructor.name !== 'MarkToggleCommand' &&
+      b.constructor.name === 'MarkToggleCommand'
+    ) {
+      return -1; // Keep `b` at the end.
+    }
+    return 0; // Keep relative order if both are the same type.
+  });
   return commands;
 }
 
@@ -552,7 +567,7 @@ export const compareAttributes = (mark, style): boolean => {
     case MARKTEXTCOLOR:
       return mark.attrs['color'] === style[COLOR];
     case MARKFONTSIZE:
-      return mark.attrs['pt'] == style[FONTSIZE];
+      return mark.attrs['pt'] == Number(style[FONTSIZE]);
     case MARKFONTTYPE:
       return mark.attrs['name'] === style[FONTNAME];
     // FIX: strike through formatting not being respected on re-entry into doc editor mode.
@@ -573,7 +588,7 @@ export function compareMarkWithStyle(
   mark,
   style,
   tr,
-  _startPos,
+  startPos,
   _endPos,
   retObj
 ) {
@@ -588,42 +603,10 @@ export function compareMarkWithStyle(
     mark.attrs[ATTR_OVERRIDDEN] = overridden;
     retObj.modified = true;
   }
-  /*
-    case SUPER:
-    case TEXTHL:
-    case ALIGN:
-    case LHEIGHT:*/
 
   return tr;
 }
 
-export function updateOverrideFlag(
-  styleName: string,
-  tr: Transform,
-  node: Node,
-  startPos: number,
-  endPos: number,
-  retObj: { modified: boolean }
-) {
-  const styleProp = getCustomStyleByName(styleName);
-  if (styleProp?.styles) {
-    node.descendants(function (child: Node) {
-      if (child instanceof Node) {
-        child.marks.forEach(function (mark) {
-          tr = compareMarkWithStyle(
-            mark,
-            styleProp.styles,
-            tr,
-            startPos,
-            endPos,
-            retObj
-          );
-        });
-      }
-    });
-  }
-  return tr;
-}
 
 export function getMarkByStyleName(styleName: string, schema: Schema) {
   const styleProp = getCustomStyleByName(styleName);
@@ -702,6 +685,11 @@ function applyStyleEx(
   opt?: number
 ) {
   const loading = !styleProp;
+  // Custom style is applied from menu the endpos is correct ie nodesize is calculating correct
+  // when loading the document with a node having custom style the nodesize is one point less
+  // to fix that added +1 to endpos
+  const lastChild = tr.doc.nodeAt(endPos);
+  endPos = null === lastChild ? endPos : endPos + 1;
 
   // Issue fix: applied link is missing after applying a custom style.
   tr = removeAllMarksExceptLink(startPos, endPos, tr);
@@ -713,10 +701,6 @@ function applyStyleEx(
   if (styleProp?.styles) {
     const _commands = getCustomStyleCommands(styleProp.styles);
     const newattrs = { ...node.attrs };
-    // Issue fix on not removing center alignment when switch style with center
-    // alignment to style with left alignment
-    newattrs.align = null;
-    newattrs.lineSpacing = null;
 
     // Indent overriding not working on a paragraph where custom style is applied
     if (!node?.attrs?.overriddenIndent) {
@@ -733,8 +717,7 @@ function applyStyleEx(
           // using the overridenAlign property we can find align style overrided or not
           if (node?.attrs?.overriddenAlign) {
             newattrs.align = node.attrs.overriddenAlignValue;
-          }
-          else {
+          } else {
             newattrs.align = styleProp.styles.align;
           }
           // to set the node attribute for line-height
@@ -744,8 +727,7 @@ function applyStyleEx(
           // using the overriddenLineSpacing property we can find lineSpacing style overrided or not
           if (node?.attrs?.overriddenLineSpacing) {
             newattrs.lineSpacing = node?.attrs?.overriddenLineSpacingValue;
-          }
-          else {
+          } else {
             newattrs.lineSpacing = getLineSpacingValue(
               styleProp.styles.lineHeight || ''
             );
@@ -763,8 +745,7 @@ function applyStyleEx(
           // using the overriddenIndent property we can find indent style overrided or not
           if (node?.attrs?.overriddenIndent) {
             newattrs.indent = node.attrs.overriddenIndentValue;
-          }
-          else {
+          } else {
             newattrs.indent = styleProp.styles.isLevelbased
               ? styleProp.styles.styleLevel
               : styleProp.styles.indent;
@@ -785,6 +766,7 @@ function applyStyleEx(
     });
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
+
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     (tr as Transaction).storedMarks = storedmarks;
   }
@@ -1286,23 +1268,6 @@ export function getStyleLevel(styleName: string) {
   return styleLevel;
 }
 
-export function executeCommands(
-  state: EditorState,
-  tr: Transform,
-  styleName: string,
-  startPos: number,
-  endPos: number
-) {
-  const style = getCustomStyleByName(styleName);
-  const _commands = getCustomStyleCommands(style);
-  _commands.forEach((element) => {
-    if (typeof element.executeCustom == 'function') {
-      tr = element.executeCustom(state, tr, startPos, endPos);
-    }
-  });
-  return tr;
-}
-
 // Need to change this function code duplicates with applyStyle()
 export function applyLatestStyle(
   styleName: string,
@@ -1361,12 +1326,14 @@ export function removeAllMarksExceptLink(
 ) {
   const { doc } = tr;
   const tasks = [];
-  // const posFrom = (tr as Transaction).selection.$from.start(1);
-  // const posTo = (tr as Transaction).selection.$to.end(1) - 1;
   doc.nodesBetween(from, to, (node, pos) => {
     if (node.marks?.length > 0) {
       node.marks.some((mark) => {
-        if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
+        if (
+          !mark.attrs[ATTR_OVERRIDDEN] &&
+          'link' !== mark.type.name &&
+          'override' !== mark.type.name
+        ) {
           tasks.push({
             node,
             pos,
@@ -1381,10 +1348,7 @@ export function removeAllMarksExceptLink(
   return handleRemoveMarks(tr, tasks);
 }
 
-export function handleRemoveMarks(
-  tr: Transform,
-  tasks
-) {
+export function handleRemoveMarks(tr: Transform, tasks) {
   tasks.forEach((job) => {
     const { mark } = job;
     if (!mark.attrs[ATTR_OVERRIDDEN]) {
@@ -1472,7 +1436,6 @@ export function applyLineStyle(
         // Check styleName is available for node
         if (
           node.attrs?.styleName
-          // && RESERVED_STYLE_NONE !== node.attrs.styleName
         ) {
           const styleProp = getCustomStyleByName(node.attrs.styleName);
           if (styleProp?.styles?.boldPartial) {

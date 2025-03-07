@@ -248,8 +248,9 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
     if (!tasks.length) {
       textAlignNode.forEach((eachnode) => {
-        const { node } = eachnode;
-        node.attrs.styleName = customStyleName;
+        const { node, pos } = eachnode;
+        const newattrs = { ...node.attrs, styleName: customStyleName };
+        tr = tr?.setNodeMarkup(pos, undefined, newattrs);
       });
       // to remove both text align format and line spacing
       tr = this.removeTextAlignAndLineSpacing(tr, editorState.schema);
@@ -259,15 +260,17 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
       const { node, mark, pos } = job;
       tr = tr.removeMark(pos, pos + node.nodeSize, mark.type);
       // reset the custom style name to NONE after remove the styles
-      node.attrs.styleName = customStyleName;
+      const newattrs = { ...node.attrs, styleName: customStyleName };
+      tr = tr.setNodeMarkup(pos, undefined, newattrs);
+      const newNode = tr.doc.nodeAt(pos);
       // FIX: Rest to Normal not working for font size.
       tr = applyLatestStyle(
-        node.attrs.styleName,
+        newNode?.attrs?.styleName,
         editorState,
         tr,
-        node,
+        newNode,
         pos,
-        pos + node.nodeSize,
+        pos + node.nodeSize-1,
         null,
         1
       );

@@ -6,6 +6,7 @@ import {
   RESERVED_STYLE_NONE_NUMBERING,
 } from './CustomStyleNodeSpec.js';
 import { DEFAULT_NORMAL_STYLE } from './Constants.js';
+import { setCustomStyles } from '@modusoperandi/licit-ui-commands';
 let customStyles = new Array(0);
 let styleRuntime;
 let hideNumbering = false;
@@ -83,6 +84,7 @@ export function setView(csview: EditorView) {
 // store styles in cache
 export function setStyles(style: Style[]) {
   customStyles = style;
+  setCustomStyles(style);
   let documentType;
   if (style && Array.isArray(style)) {
     documentType =

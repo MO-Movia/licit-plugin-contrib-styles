@@ -2,7 +2,6 @@
 import { Plugin, PluginKey, EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import {
-  updateOverrideFlag,
   applyLatestStyle,
   getMarkByStyleName,
   getStyleLevel,
@@ -33,7 +32,7 @@ const ATTR_STYLE_NAME = 'styleName';
 let slice1;
 
 const isNodeHasAttribute = (node, attrName) => {
-  return node.attrs?.[attrName];
+  return (attrName in (node?.attrs || {}));
 };
 const requiredAddAttr = (node) => {
   return (
@@ -110,7 +109,9 @@ export class CustomstylePlugin extends Plugin {
         }
         firstTime = ref.firstTime;
         loaded = ref.loaded;
-
+        if (1 === tr?.updated) {
+          slice1 = null;
+        }
         return tr;
       },
     });
@@ -137,8 +138,6 @@ export class CustomstylePlugin extends Plugin {
 export function onInitAppendTransaction(ref, tr, nextState) {
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
-    tr = updateStyleOverrideFlag(nextState, tr);
-    tr = updateFormatOverrideFlag(nextState, tr);
     // do this only once when the document is loaded.
     tr = applyStyles(nextState, tr);
   }
@@ -157,9 +156,6 @@ export function onUpdateAppendTransaction(
 ) {
 
   // when user updates
-  if (!slice1 && csview && BACKSPACEKEYCODE !== csview.input.lastKeyCode) {
-    tr = updateStyleOverrideFlag(nextState, tr);
-  }
   tr = manageHierarchyOnDelete(prevState, nextState, tr, csview);
 
 
@@ -201,6 +197,12 @@ export function onUpdateAppendTransaction(
   }
   tr = applyLineStyleForBoldPartial(nextState, tr);
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
+
+    let _startPos = 0;
+    let _endPos = 0;
+    let node2 = null;
+    let demoPos = null;
+    let node1 = null;
     for (let index = 0; index < slice1.content.childCount; index++) {
       if (
         !(
@@ -208,85 +210,60 @@ export function onUpdateAppendTransaction(
           slice1.content.content[index].type.name === 'doc'
         )
       ) {
-        if (index === 0) {
-          if (slice1.content.content[index].content.size !== 0) {
-            const tabPos = csview.state.selection.$from.before(1);
-            const node2 = csview.state.tr.doc.nodeAt(tabPos);
-            const demoPos = prevState.selection.from;
-            const node1 = prevState.doc.resolve(demoPos).parent;
-            if (!node1.content?.content[0]?.attrs) {
-              const opt = 1;
-              if (node2.type.name === 'table') {
-                const startPos = demoPos;
-                const styleName = slice1.content.content[index].attrs.styleName;
-                const node = nextState.tr.doc.nodeAt(startPos);
-                const len = node.nodeSize;
-                const endPos = startPos + len;
-                tr = applyLatestStyle(
-                  styleName,
-                  nextState,
-                  tr,
-                  node,
-                  startPos,
-                  endPos,
-                  null,
-                  opt
-                );
-              } else {
-                const startPos = csview.state.selection.from - 1;
-                const node = nextState.tr.doc.nodeAt(startPos);
-                //FIX: Copied text show Normal style name instead of showing the applied style in the current paragraph.
-                const styleName = (null === slice1.content.content[index].attrs.styleName ? node.attrs.styleName : slice1.content.content[index].attrs.styleName);
-                const len = node.nodeSize;
-                const endPos = startPos + len;
-                tr = applyLatestStyle(
-                  styleName,
-                  nextState,
-                  tr,
-                  node,
-                  startPos,
-                  endPos,
-                  null,
-                  opt
-                );
-                const newattrs = { ...node.attrs };
-                newattrs.styleName = styleName;
-                tr = tr.setNodeMarkup(startPos, undefined, newattrs);
+        if (index !== 0) {
+          _startPos = _endPos;
+        }
+        if (slice1.content.content[index].content.size !== 0) {
+          if (index === 0) {
+            _startPos = csview.state.selection.$from.before(1);
+            node2 = csview.state.tr.doc.nodeAt(_startPos);
+            demoPos = prevState.selection.from;
+            node1 = prevState.doc.resolve(demoPos).parent;
+          }
+
+          if (!node1.content?.content[0]?.attrs) {
+            const opt = 1;
+            if (node2.type.name === 'table') {
+              const styleName = slice1.content.content[index].attrs.styleName ?? RESERVED_STYLE_NONE;
+              const node = nextState.tr.doc.nodeAt(_startPos);
+              const len = node.nodeSize;
+              _endPos = _startPos + len;
+              tr = applyLatestStyle(styleName, nextState, tr, node, _startPos, _endPos, null, opt);
+            }
+            else {
+              if (index === 0) {
+                _startPos = csview.state.selection.from - 1;
               }
-            } else {
-              if (node2.type.name === 'table') {
-                const startPos = demoPos;
-                const styleName = node1.attrs.styleName;
-                const node = nextState.tr.doc.nodeAt(startPos);
-                const len = node.nodeSize;
-                const endPos = startPos + len;
-                const styleProp = getCustomStyleByName(styleName);
-                tr = applyStyleToEachNode(
-                  nextState,
-                  startPos,
-                  endPos,
-                  tr,
-                  styleProp,
-                  styleName
-                );
-              } else {
-                const startPos = csview.state.selection.$to.after(1) - 1;
-                const styleName = node1.attrs.styleName;
-                const node = nextState.tr.doc.nodeAt(startPos);
-                const len = node.nodeSize;
-                const endPos = startPos + len;
-                const styleProp = getCustomStyleByName(styleName);
-                tr = applyStyleToEachNode(
-                  nextState,
-                  startPos,
-                  endPos,
-                  tr,
-                  styleProp,
-                  styleName
-                );
-              }
+
+              const node = nextState.tr.doc.nodeAt(_startPos);
+              //FIX: Copied text show Normal style name instead of showing the applied style in the current paragraph.
+              let styleName = (null === slice1.content.content[index].attrs.styleName ? node.attrs.styleName : slice1.content.content[index].attrs.styleName);
+              styleName = styleName ?? RESERVED_STYLE_NONE;
+              const len = node.nodeSize;
+              _endPos = _startPos + len;
+              tr = applyLatestStyle(styleName ?? '', nextState, tr, node, _startPos, _endPos, null, opt);
+              const newattrs = { ...node.attrs };
+              newattrs.styleName = styleName;
+              tr = tr.setNodeMarkup(_startPos, undefined, newattrs);
             }
           }
+          else if (node2.type.name === 'table') {
+            const styleName = node1.attrs.styleName ?? RESERVED_STYLE_NONE;
+            const node = nextState.tr.doc.nodeAt(_startPos);
+            const len = node.nodeSize;
+            const endPos = _startPos + len;
+            const styleProp = getCustomStyleByName(styleName);
+            tr = applyStyleToEachNode(nextState, _startPos, endPos, tr, styleProp, styleName);
+          }
+          else {
+            const styleName = node1.attrs.styleName ?? RESERVED_STYLE_NONE;
+            const node = nextState.tr.doc.nodeAt(_startPos);
+            const len = node.nodeSize;
+            const endPos = _startPos + len;
+            const styleProp = getCustomStyleByName(styleName);
+            tr = applyStyleToEachNode(nextState, _startPos, endPos, tr, styleProp, styleName);
+          }
+
         }
       }
     }
@@ -337,7 +314,7 @@ export function applyStyles(state, tr) {
       }
 
       // check if the loaded document's para have valid styleName
-      const styleName = child.attrs.styleName;
+      const styleName = child.attrs.styleName ?? RESERVED_STYLE_NONE;
       tr = applyLatestStyle(styleName, state, tr, child, pos, end);
     }
   });
@@ -346,9 +323,7 @@ export function applyStyles(state, tr) {
 }
 
 function validateStyleName(node) {
-  let bOK = false;
-  bOK = node?.attrs?.styleName;
-  return bOK;
+  return ('styleName' in (node?.attrs || {}));
 }
 
 // [FS] IRAD-1130 2021-01-07
@@ -525,7 +500,7 @@ export function applyStyleForEmptyParagraph(nextState, tr) {
         0 === node.content.content[0].marks.length
       ) {
         tr = applyLatestStyle(
-          node.attrs.styleName,
+          node.attrs.styleName ?? RESERVED_STYLE_NONE,
           nextState,
           tr,
           node,
@@ -703,72 +678,7 @@ export function applyNormalIfNoStyle(nextState, tr, node, opt?) {
   });
   return tr;
 }
-
-function updateStyleOverrideFlag(state, tr) {
-  const retObj = { modified: true };
-  if (!tr) {
-    tr = state.tr;
-  }
-
-  tr.doc.descendants(function (child) {
-    const contentLen = child.content.size;
-    if (tr && haveEligibleChildren(child, contentLen)) {
-      const startPos = tr.curSelection.$anchor.pos; //pos
-      const endPos = tr.curSelection.$head.pos; //pos + contentLen
-
-      if (!child.attrs.styleName) {
-        // FIX: cannot assign to readonly property styleName of object.
-        const newAttrs = { ...child.attrs };
-        newAttrs['styleName'] = 'Normal';
-        child.type.create(newAttrs, child.content, child.marks);
-      }
-      tr = updateOverrideFlag(
-        child.attrs.styleName,
-        tr,
-        child,
-        startPos,
-        endPos,
-        retObj,
-      );
-    }
-  });
-
-  return retObj.modified ? tr : null;
-}
-
-function updateFormatOverrideFlag(state, tr) {
-  if (!tr) {
-    tr = state.tr;
-  }
-  tr.doc.descendants(function (child, pos) {
-    if (child.type.name === 'paragraph') {
-      child = updateOverrideFlagForAlign(child);
-      tr = tr?.setNodeMarkup(pos, undefined, child.attrs);
-    }
-  });
-  return tr;
-}
-
 // using this function we can find if the user overrided the align,line spacing,indent.
-function updateOverrideFlagForAlign(node) {
-  const styleProp = getCustomStyleByName(node.attrs.styleName);
-  const newAttrs = { ...node.attrs };
-  if (null !== node?.attrs.overriddenAlign && styleProp?.styles?.align === node?.attrs?.align) {
-    newAttrs['overriddenAlign'] = false;
-    newAttrs['overriddenAlignValue'] = null;
-  }
-  if (null !== node?.attrs.overriddenLineSpacing && getLineSpacingValue(styleProp?.styles?.lineHeight) === node?.attrs?.lineSpacing) {
-    newAttrs['overriddenLineSpacing'] = false;
-    newAttrs['overriddenLineSpacingValue'] = null;
-  }
-  // first condition is to check if indent is not set in both custom style and toolbar .
-  if ((undefined === styleProp?.styles?.indent && null == node?.attrs?.indent) || (null !== node?.attrs.overriddenIndent && styleProp?.styles?.indent === node?.attrs?.indent)) {
-    newAttrs['overriddenIndent'] = false;
-    newAttrs['overriddenIndentValue'] = null;
-  }
-  // Return a new node with updated attributes
-  return node.type.create(newAttrs, node.content, node.marks);
-}
 
 function haveEligibleChildren(node, contentLen) {
   return (

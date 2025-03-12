@@ -119,6 +119,14 @@ export function setStyleRuntime(runtime) {
   styleRuntime = runtime;
 }
 
+export function setCustomStylesOnLoad() {
+  getStylesAsync().then((result) => {
+    if (result) {
+      setStyles(result);
+    }
+  });
+}
+
 function saveDefaultStyle() {
   saveStyle(DEFAULT_NORMAL_STYLE)?.then(() => {
     /* This is intentional */

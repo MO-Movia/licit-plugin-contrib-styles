@@ -362,12 +362,14 @@ export class CustomStyleCommand extends UICommand {
       tr = applyStyle(
         this._customStyle,
         'Default' === this._customStyle.styleName
-          ? 'None'
+          ? 'Normal'
           : this._customStyle.styleName,
         state,
         tr
       ) as Transaction;
       if (tr.docChanged || tr.storedMarksSet) {
+        const event = new KeyboardEvent("keydown", { keyCode: 0, bubbles: true });
+        view.dom.dispatchEvent(event);
         dispatch?.(tr);
         return true;
       }
@@ -407,35 +409,32 @@ export class CustomStyleCommand extends UICommand {
     // FIX: Clear style not working on multi select paragraph
     const from = selection.$from.before(1);
     const to = selection.$to.after(1) - 1;
-    let customStyleName = RESERVED_STYLE_NONE;
+    let _from = from;
+    let _to = to;
     doc.nodesBetween(from, to, (node) => {
-      if (
-        node.attrs.styleName &&
-        RESERVED_STYLE_NONE !== node.attrs.styleName
-      ) {
-        customStyleName = node.attrs.styleName;
-        const storedmarks = getMarkByStyleName(
-          customStyleName,
-          editorState.schema
-        );
-        tr = this.removeMarks(storedmarks, tr, node);
+      if (node.attrs.styleName) {
+        // Check for overridden marks in text nodes inside the paragraph
+        node.forEach((child) => {
+          if (child.isText && child.marks.length > 0) {
+            const marksToRemove = child.marks.filter(mark => mark.attrs.overridden !== true);
+            _to = _from + child.nodeSize;
+            if (marksToRemove.length > 0) {
+              marksToRemove.forEach(mark => {
+                tr = this.removeMarks(mark, tr, node, _from, _to);
+              });
+            }
+            _from = _to + 1;
+          }
+        });
       }
     });
     return tr;
   }
 
-  removeMarks(marks, tr: Transform, node: Node) {
-    const { selection } = tr as Transaction;
-    // [FS] IRAD-1495 2021-06-25
-    // FIX: Clear style not working on multi select paragraph
-    const from = selection.$from.before(1);
-    const to = selection.$to.after(1);
-
+  removeMarks(mark, tr: Transform, node: Node, from: number, to: number) {
     // reset the custom style name to NONE after remove the styles
     clearCustomStyleAttribute(node);
-    marks.forEach((mark) => {
-      tr = tr.removeMark(from, to, mark.type);
-    });
+    tr = tr.removeMark(from, to, mark.type);
     return tr;
   }
 
@@ -1369,13 +1368,8 @@ export function applyStyle(
 ) {
   let endPos: number;
   const { selection } = state;
-  let startPos = selection.$from.before(1);
-  if (state.doc.nodeAt(startPos).type.name == 'table') {
-    startPos = selection.from - selection.$from.parentOffset - 1;
-    endPos = selection.$to?.parent?.nodeSize + startPos - 1;
-  } else {
-    endPos = selection.$to.after(1) - 1;
-  }
+  let startPos = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
+  endPos = selection.$to.after(selection.$to.depth === 0 ? 1 : selection.$to.depth) - 1;
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
 
@@ -1426,8 +1420,8 @@ export function applyLineStyle(
     }
   } else {
     const { selection } = state;
-    const from = selection.$from.before(1);
-    const to = selection.$to.after(1);
+    const from = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
+    const to = selection.$to.after(selection.$to.depth === 0 ? 1 : selection.$to.depth) - 1;
     // [FS] IRAD-1168 2021-06-21
     // FIX: multi-select paragraphs and apply a style with the bold the first sentence,
     // only the last selected paragraph have bold first sentence.
@@ -1459,31 +1453,62 @@ export function applyLineStyle(
 // add bold marks to node
 export function addMarksToLine(tr, state, node, pos, boldSentence) {
   const markType = state.schema.marks[MARKSTRONG];
+  if (!markType) return tr;
+
   let textContent = getNodeText(node);
-  let content: string[] = [];
-  let counter: number = 0;
+  if (!textContent) return tr;
+
+  // Match first sentence (until '.', '!', '?' or newline)
+  let match: RegExpMatchArray;
   if (boldSentence) {
-    content = textContent.split('.');
-  } else {
-    content = textContent.split(' ');
+    // Match first sentence (until '.', '!', '?' or newline)
+    match = textContent.match(/^([^.!?\n]+[.!?\n]*)/);
   }
-  if ('' !== content[0]) {
-    textContent = content[0];
-  } else if (content.length > 1) {
-    for (let index = 0; index < content.length; index++) {
-      if ('' === content[index]) {
-        counter++;
-      } else {
-        textContent = content[index];
-        index = content.length;
+  else {
+    // Match first word
+    match = textContent.trim().match(/^[A-Za-zÀ-ÖØ-öø-ÿ]+/);
+  }
+
+  if (!match) return tr;
+
+  let firstSentence = match[0]; // Extract the first sentence
+
+  let childSize = 0;
+  let boldSentenceEnd = 0;
+  let childNodePos = pos;
+  node.descendants((child) => {
+    if (child.isText) {
+      boldSentenceEnd = boldSentenceEnd + child.nodeSize;
+      const mark = child.marks.find(mark => mark.type === markType)
+      if (mark) {
+        if (!mark.attrs.overridden) {
+          tr = tr.removeMark(childNodePos, childNodePos + child.nodeSize + 1, markType);
+        }
+
       }
+      childNodePos = boldSentenceEnd;
+
     }
-  }
-  tr = tr.addMark(
-    pos,
-    pos + textContent.length + 1 + counter,
-    markType.create(null)
-  );
+  });
+  node.descendants((child) => {
+    if (child.isText) {
+      let attrs = { boldSentence: true };
+      childSize = childSize + child.nodeSize;
+      if (firstSentence.length <= childSize) {
+        const mark = child.marks.find(mark => mark.type === markType)
+        if (mark) {
+          if (!mark.attrs.overridden) {
+            tr = tr.addMark(pos, pos + firstSentence.length, markType.create(attrs));
+          }
+
+        } else {
+          tr = tr.addMark(pos, pos + firstSentence.length, markType.create());
+        }
+      }
+
+    }
+  });
+
   return tr;
 }
 // get text content from selected node

@@ -189,12 +189,16 @@ export function onUpdateAppendTransaction(
     }
     if (
       ENTERKEYCODE === csview.input.lastKeyCode &&
-      tr.selection.$from.start() == tr.selection.$from.end()
+      tr.selection.$from.start() === tr.selection.$from.end()
     ) {
       tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
     }
-    else if (ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$cursor?.pos == tr.selection.$from.start()) {
+    else if (ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$cursor?.pos === tr.selection.$from.start()) {
       tr = applyStyleForPreviousEmptyParagraph(nextState, tr);
+      const cursourPosition = prevState.tr.selection.$cursor?.pos;
+      if (cursourPosition !== undefined && cursourPosition >= 0 && cursourPosition <= prevState.doc.content.size) {
+        tr = tr.setSelection(TextSelection.create(tr.doc, cursourPosition));
+      }
     }
   }
   tr = applyLineStyleForBoldPartial(nextState, tr);

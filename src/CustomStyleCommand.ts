@@ -312,8 +312,8 @@ export class CustomStyleCommand extends UICommand {
   ): boolean => {
     let tr = state.tr;
     const { selection } = state;
-    const startPos = selection.$from.before(1);
-    const endPos = selection.$to.after(1) - 1;
+    const startPos = selection.$from.before(selection.$from.depth);
+    const endPos = selection.$to.after(selection.$to.depth) - 1;
     const node = getNode(state, startPos, endPos, tr);
     const newattrs = { ...(node ? node.attrs : {}) };
     let isValidated = true;
@@ -407,8 +407,8 @@ export class CustomStyleCommand extends UICommand {
     const { selection, doc } = editorState;
     // [FS] IRAD-1495 2021-06-25
     // FIX: Clear style not working on multi select paragraph
-    const from = selection.$from.before(1);
-    const to = selection.$to.after(1) - 1;
+    const from = selection.$from.before(selection.$from.depth);
+    const to = selection.$to.after(selection.$to.depth) - 1;
     let _from = from;
     let _to = to;
     doc.nodesBetween(from, to, (node) => {
@@ -1465,7 +1465,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   }
   else {
     // Match first word
-    match = textContent.trim().match(/^[A-Za-z�-��-��-�]+/);
+    match = textContent.trim().match(/^[A-Za-zÀ-ÖØ-öø-ÿ]+/);
   }
 
   if (!match) return tr;
@@ -1497,11 +1497,11 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
         const mark = child.marks.find(mark => mark.type === markType);
         if (mark) {
           if (!mark.attrs.overridden) {
-            tr = tr.addMark(pos, pos + firstSentence.length, markType.create(attrs));
+            tr = tr.addMark(pos, pos + firstSentence.length + 1, markType.create(attrs));
           }
 
         } else {
-          tr = tr.addMark(pos, pos + firstSentence.length, markType.create());
+          tr = tr.addMark(pos, pos + firstSentence.length + 1, markType.create());
         }
       }
 

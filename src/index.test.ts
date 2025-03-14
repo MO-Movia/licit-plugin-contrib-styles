@@ -329,6 +329,9 @@ describe('applyNormalIfNoStyle', () => {
     });
     expect(applyNormalIfNoStyle({}, null, mockdoc, true)).toBe(undefined);
   });
+
+
+
   it('should handle applyNormalIfNoStyle when tr is present', () => {
     const linkmark = new Mark();
     const mockschema = new Schema({
@@ -2765,6 +2768,19 @@ describe('Cus Style Plugin-Pass', () => {
               },
             ],
           },
+          // {
+          //   type: 'paragraph',
+          //   attrs: {
+
+          //   },
+          //   content: [
+          //     {
+          //       type: 'text',
+          //       marks: [],
+          //       text: 'Your text here previous',
+          //     },
+          //   ],
+          // },
         ],
       }),
       selection: { from: 2, to: 4 },
@@ -3498,7 +3514,7 @@ describe('Cus Style Plugin-Pass', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'AFDP Bullet',
+              // styleName: 'AFDP Bullet',
             },
             content: [
               {
@@ -3519,7 +3535,7 @@ describe('Cus Style Plugin-Pass', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'AFDP Bullet',
+              // styleName: 'AFDP Bullet',
             },
             content: [
               {
@@ -3540,7 +3556,7 @@ describe('Cus Style Plugin-Pass', () => {
               paddingBottom: null,
               paddingTop: null,
               capco: null,
-              styleName: 'AFDP Bullet',
+              // styleName: 'AFDP Bullet',
             },
             content: [
               {
@@ -4683,7 +4699,16 @@ describe('Cus Style Plugin-Pass', () => {
           },
         ],
       }),
-      selection: { from: 4, to: 8 },
+      selection: {    $from: {
+        start: () => {
+          return 1;
+        },
+      },
+      $to: {
+        end: () => {
+          return 2;
+        },
+      },from: 4, to: 8 },
     };
 
     const schema3 = new Schema({
@@ -6145,5 +6170,170 @@ describe('applyStyleForEmptyParagraph', () => {
 describe('isDocChanged', () => {
   it('should handle isDocChanged', () => {
     expect(isDocChanged([{ docChanged: {} }])).toBeTruthy();
+  });
+});
+
+describe('applyStyleForNextParagraph',()=>{
+  it('should handle applyStyleForNextParagraph',()=>{
+    const paragraph1 = {
+      type: { name: 'paragraph' },
+      isBlock: true,
+      child() {},
+      childCount: 0,
+      attrs: {
+        styleName: 'Bold',
+        id: 'para-1'
+      },
+    };
+
+    const paragraph2 = {
+      type: { name: 'paragraph' },
+      isBlock: true,
+      child() {},
+      childCount: 0,
+      attrs: {
+        styleName: 'Bold',
+        id: 'para-1'
+      },
+    };
+
+    const doc = {
+      type: { name: 'doc' },
+      isBlock: true,
+      child(j) {
+        return j === 0 ? paragraph1 : paragraph2;
+      },
+      childCount: 2
+    };
+
+    const mockFrom = {
+
+      depth: 2,
+      node(depth) {
+        if (depth === 0) return doc;
+        if (depth === 1) return paragraph2;
+        if (depth === 2) return { type: { name: 'text' }, isBlock: false };
+        return null;
+      },
+
+      index(depth) {
+        if (depth === 0) return 1;
+        if (depth === 1) return 0;
+        return 0;
+      }
+    };
+    const prevstate = {doc:{nodeAt:()=>{return  {
+      type: { name: 'paragraph' },
+      isBlock: true,
+      child() {},
+      childCount: 0,
+      attrs: {
+        styleName: 'Bold',
+        id: 'para-1'
+      },
+    }; }},selection:{$from:mockFrom,from:1}};
+    const nextstate = {doc:{nodeAt:()=>{return  {
+      type: { name: 'paragraph' },
+      isBlock: true,
+      child() {},
+      childCount: 0,
+      attrs: {
+        styleName: 'Bold',
+        id: 'para-1'
+      },
+    }; }},selection:{$from:mockFrom,from:3}};
+    const view = {input:{lastKeyCode :13}};
+    const tr = {};
+    expect(applyStyleForNextParagraph(prevstate,nextstate,tr,view)).toBeDefined();
+  });
+  it('should handle applyStyleForNextParagraph',()=>{
+    const paragraph1 = {
+      type: { name: 'header' },
+      isBlock: true,
+      child() {return {
+        type: { name: 'paragraph' },
+        isBlock: true,
+        child() {},
+        childCount: 0,
+        attrs: {
+          styleName: 'Bold',
+          id: 'para-1'
+        },
+      }; },
+      childCount: 2,
+      attrs: {
+        styleName: 'Bold',
+        id: 'para-1'
+      },
+    };
+
+    const paragraph2 = {
+      type: { name: 'header' },
+      isBlock: true,
+      child() {return {
+        type: { name: 'paragraph' },
+        isBlock: true,
+        child() {},
+        childCount: 0,
+        attrs: {
+          styleName: 'Bold',
+          id: 'para-1'
+        },
+      };},
+      childCount: 2,
+      attrs: {
+        styleName: 'Bold',
+        id: 'para-1'
+      },
+    };
+
+    const doc = {
+      type: { name: 'doc' },
+      isBlock: true,
+      child(j) {
+        return j === 0 ? paragraph1 : paragraph2;
+      },
+      childCount: 2
+    };
+
+    const mockFrom = {
+
+      depth: 2,
+      node(depth) {
+        if (depth === 0) return doc;
+        if (depth === 1) return paragraph2;
+        if (depth === 2) return { type: { name: 'text' }, isBlock: false };
+        return null;
+      },
+
+      index(depth) {
+        if (depth === 0) return 1;
+        if (depth === 1) return 0;
+        return 0;
+      }
+    };
+    const prevstate = {doc:{nodeAt:()=>{return  {
+      type: { name: 'paragraph' },
+      isBlock: true,
+      child() {},
+      childCount: 0,
+      attrs: {
+        styleName: 'Bold',
+        id: 'para-1'
+      },
+    }; }},selection:{$from:mockFrom,from:1}};
+    const nextstate = {doc:{nodeAt:()=>{return  {
+      type: { name: 'paragraph' },
+      isBlock: true,
+      child() {},
+      childCount: 0,
+      attrs: {
+        styleName: 'Bold',
+        id: 'para-1'
+      },
+    }; }},selection:{$from:mockFrom,from:3}};
+    const view = {input:{lastKeyCode :13}};
+    const tr = {};
+    expect(applyStyleForNextParagraph(prevstate,nextstate,tr,view)).toBeDefined();
   });
 });

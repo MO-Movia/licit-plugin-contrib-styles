@@ -231,7 +231,6 @@ export function onUpdateAppendTransaction(
         if (!node1.content?.content[0]?.attrs) {
           const opt = 1;
           if (node2?.type?.name === 'table') {
-            const startPos = demoPos;
             const styleName = slice1.content.content[index].attrs.styleName ?? 'Normal';
             const node = nextState.tr.doc.nodeAt(_startPos);
             const len = node.nodeSize;
@@ -256,7 +255,6 @@ export function onUpdateAppendTransaction(
         }
         else {
           if (node2.type.name === 'table') {
-            const startPos = demoPos;
             const styleName = node1.attrs.styleName ?? 'Normal';
             const node = nextState.tr.doc.nodeAt(_startPos);
             const len = node.nodeSize;
@@ -265,7 +263,6 @@ export function onUpdateAppendTransaction(
             tr = applyStyleToEachNode(nextState, _startPos, endPos, tr, styleProp, styleName);
           }
           else {
-            const startPos = csview.state.selection.$to.after(1) - 1;
             const styleName = node1.attrs.styleName ?? 'Normal';
             const node = nextState.tr.doc.nodeAt(_startPos);
             const len = node.nodeSize;
@@ -532,11 +529,12 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
   if (!tr) {
     tr = nextState.tr;
   }
+  if (!nextState?.selection) {
+    return tr;
+  }
   const { $from } = nextState.selection;
-
-
   if (view && isNewParagraph(prevState, nextState, view)) {
-    let prevParagraph = findPreviousParagraph($from);
+    const prevParagraph = findPreviousParagraph($from);
     let required = false;
     if (prevParagraph && requiredAddAttr(prevParagraph)) {
       required = true;
@@ -603,21 +601,21 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
 }
 
 function findPreviousParagraph($from) {
-  let prevParagraph = null;
+  const prevParagraph = null;
 
   // Traverse up to find the previous paragraph
-  for (let i = $from.depth; i > 0; i--) {
+  for (let i = $from?.depth; i > 0; i--) {
     const parent = $from.node(i - 1); // Get parent node
     const index = $from.index(i - 1); // Get index of the current node in its parent
 
     // Traverse backwards within the parent
     for (let j = index - 1; j >= 0; j--) {
       const beforeNode = parent.child(j);
-      if (beforeNode.type.name === "paragraph") {
+      if (beforeNode.type.name === 'paragraph') {
         return beforeNode; // Found previous paragraph
       } else if (beforeNode.isBlock) {
         // If it's a block node, check inside it
-        let found = findLastParagraph(beforeNode);
+        const found = findLastParagraph(beforeNode);
         if (found) return found;
       }
     }
@@ -634,9 +632,9 @@ function findLastParagraph(node) {
 
   for (let i = node.childCount - 1; i >= 0; i--) {
     const child = node.child(i);
-    if (child.type.name === "paragraph") return child;
+    if (child.type.name === 'paragraph') return child;
     if (child.isBlock) {
-      let found = findLastParagraph(child);
+      const found = findLastParagraph(child);
       if (found) return found;
     }
   }

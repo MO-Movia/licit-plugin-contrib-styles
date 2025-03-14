@@ -368,8 +368,8 @@ export class CustomStyleCommand extends UICommand {
         tr
       ) as Transaction;
       if (tr.docChanged || tr.storedMarksSet) {
-        const event = new KeyboardEvent("keydown", { keyCode: 0, bubbles: true });
-        view.dom.dispatchEvent(event);
+        const event = new KeyboardEvent('keydown', { keyCode: 0, bubbles: true });
+        view.dom?.dispatchEvent(event);
         dispatch?.(tr);
         return true;
       }
@@ -1366,10 +1366,9 @@ export function applyStyle(
   state: EditorState,
   tr: Transform
 ) {
-  let endPos: number;
   const { selection } = state;
-  let startPos = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
-  endPos = selection.$to.after(selection.$to.depth === 0 ? 1 : selection.$to.depth) - 1;
+  const startPos = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
+  const endPos = selection.$to.after(selection.$to.depth === 0 ? 1 : selection.$to.depth) - 1;
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
 
@@ -1455,7 +1454,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   const markType = state.schema.marks[MARKSTRONG];
   if (!markType) return tr;
 
-  let textContent = getNodeText(node);
+  const textContent = getNodeText(node);
   if (!textContent) return tr;
 
   // Match first sentence (until '.', '!', '?' or newline)
@@ -1466,12 +1465,12 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   }
   else {
     // Match first word
-    match = textContent.trim().match(/^[A-Za-zÀ-ÖØ-öø-ÿ]+/);
+    match = textContent.trim().match(/^[A-Za-zï¿½-ï¿½ï¿½-ï¿½ï¿½-ï¿½]+/);
   }
 
   if (!match) return tr;
 
-  let firstSentence = match[0]; // Extract the first sentence
+  const firstSentence = match[0]; // Extract the first sentence
 
   let childSize = 0;
   let boldSentenceEnd = 0;
@@ -1479,7 +1478,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   node.descendants((child) => {
     if (child.isText) {
       boldSentenceEnd = boldSentenceEnd + child.nodeSize;
-      const mark = child.marks.find(mark => mark.type === markType)
+      const mark = child.marks.find(mark => mark.type === markType);
       if (mark) {
         if (!mark.attrs.overridden) {
           tr = tr.removeMark(childNodePos, childNodePos + child.nodeSize + 1, markType);
@@ -1492,10 +1491,10 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   });
   node.descendants((child) => {
     if (child.isText) {
-      let attrs = { boldSentence: true };
+      const attrs = { boldSentence: true };
       childSize = childSize + child.nodeSize;
       if (firstSentence.length <= childSize) {
-        const mark = child.marks.find(mark => mark.type === markType)
+        const mark = child.marks.find(mark => mark.type === markType);
         if (mark) {
           if (!mark.attrs.overridden) {
             tr = tr.addMark(pos, pos + firstSentence.length, markType.create(attrs));

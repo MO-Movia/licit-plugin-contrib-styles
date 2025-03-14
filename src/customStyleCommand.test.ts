@@ -616,7 +616,7 @@ describe('CustomStyleCommand', () => {
           toDOM() {
             return ['p', 0];
           },
-        } as unknown as Node
+        } as unknown as Node,0,0
       )
     ).toBeDefined();
   });

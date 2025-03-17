@@ -292,7 +292,9 @@ export class CustomStyleCommand extends UICommand {
       newAttrs['id'] = '';
       // [FS] IRAD-1414 2021-07-12
       // FIX: Applied number/bullet list removes when 'Clear Style'
-      newAttrs['indent'] = 0;
+      newAttrs['indent'] = !newAttrs.overriddenIndent ? 0 : newAttrs.indent;
+      newAttrs['overriddenIndent'] = !newAttrs.overriddenIndent ? null : newAttrs.overriddenIndent;
+      newAttrs['overriddenIndentValue'] = !newAttrs.overriddenIndent ? null : newAttrs.overriddenIndentValue;
       tr = tr.setNodeMarkup(startPos, undefined, newAttrs);
     }
 
@@ -312,8 +314,8 @@ export class CustomStyleCommand extends UICommand {
   ): boolean => {
     let tr = state.tr;
     const { selection } = state;
-    const startPos = selection.$from.before(selection.$from.depth);
-    const endPos = selection.$to.after(selection.$to.depth) - 1;
+    const startPos = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
+    const endPos = selection.$to.after(selection.$to.depth === 0 ? 1 : selection.$to.depth) - 1;
     const node = getNode(state, startPos, endPos, tr);
     const newattrs = { ...(node ? node.attrs : {}) };
     let isValidated = true;
@@ -407,8 +409,8 @@ export class CustomStyleCommand extends UICommand {
     const { selection, doc } = editorState;
     // [FS] IRAD-1495 2021-06-25
     // FIX: Clear style not working on multi select paragraph
-    const from = selection.$from.before(selection.$from.depth);
-    const to = selection.$to.after(selection.$to.depth) - 1;
+    const from = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
+    const to = selection.$to.after(selection.$to.depth === 0 ? 1 : selection.$to.depth) - 1;
     let _from = from;
     let _to = to;
     doc.nodesBetween(from, to, (node) => {
@@ -420,7 +422,9 @@ export class CustomStyleCommand extends UICommand {
             _to = _from + child.nodeSize;
             if (marksToRemove.length > 0) {
               marksToRemove.forEach(mark => {
-                tr = this.removeMarks(mark, tr, node, _from, _to);
+                if ('link' !== mark.type.name) {
+                  tr = this.removeMarks(mark, tr, node, _from, _to);
+                }
               });
             }
             _from = _to + 1;

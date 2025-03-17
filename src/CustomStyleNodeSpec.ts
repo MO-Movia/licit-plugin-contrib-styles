@@ -2,7 +2,7 @@ import { Node, DOMOutputSpec } from 'prosemirror-model';
 import type { KeyValuePair } from './Constants.js';
 import { toCSSLineSpacing } from '@modusoperandi/licit-ui-commands';
 
-import { getCustomStyleByName } from './customStyle.js';
+import { getCustomStyleByName, getHidenumberingFlag } from './customStyle.js';
 
 // This assumes that every 36pt maps to one indent level.
 export const ATTRIBUTE_PREFIX = 'prefix';
@@ -72,7 +72,7 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
       }
     } else {
       output[1][ATTRIBUTE_STYLE_LEVEL] = String(styleLevel);
-      output[1][HIDE_STYLE_LEVEL] = hideNumbering || false ;
+      output[1][HIDE_STYLE_LEVEL] = getHidenumberingFlag();
     }
   }
   if ('' !== indentOverriden) {

@@ -414,7 +414,7 @@ export class CustomStyleCommand extends UICommand {
     let _from = from;
     let _to = to;
     doc.nodesBetween(from, to, (node) => {
-      if (node.attrs.styleName) {
+      if (node.attrs.styleName && node.attrs.styleName !== RESERVED_STYLE_NONE) {
         // Check for overridden marks in text nodes inside the paragraph
         node.forEach((child) => {
           if (child.isText && child.marks.length > 0) {

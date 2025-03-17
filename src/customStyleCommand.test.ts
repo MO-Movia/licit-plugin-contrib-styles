@@ -29,6 +29,7 @@ import * as customstyles from './customStyle';
 import { Transform } from 'prosemirror-transform';
 import type { Style } from './StyleRuntime.js';
 import { doc, p } from 'jest-prosemirror';
+import { clearMarks } from '@modusoperandi/licit-ui-commands';
 
 describe('CustomStyleCommand', () => {
   const styl = {
@@ -568,6 +569,79 @@ describe('CustomStyleCommand', () => {
         mockeditorstate as unknown as EditorState
       )
     ).toBeDefined();
+  });
+  it('should handle clearCustomStyles', () => {
+    const mySchema = new Schema({
+      nodes: {
+        doc: { content: "block+" },
+        paragraph: {
+          content: "text*",
+          attrs: { styleName: { default: "custom-style" } }, // styleName set
+          group: "block",
+          parseDOM: [{ tag: "p", getAttrs: (dom) => ({ styleName: dom.getAttribute("data-style-name") }) }],
+          toDOM(node) { return ["p", { "data-style-name": node.attrs.styleName }, 0]; }
+        },
+        text: { group: "inline" },
+      },
+      marks: {
+        bold: {
+          attrs: { overridden: { default: false } }, // Override attribute
+          toDOM() { return ["strong", 0]; },
+          parseDOM: [{ tag: "strong", getAttrs: (dom) => ({ overridden: dom.getAttribute("data-overridden") === "true" }) }]
+        },
+        italic: {
+          attrs: { overridden: { default: false } }, // Another mark
+          toDOM() { return ["em", 0]; },
+          parseDOM: [{ tag: "em", getAttrs: (dom) => ({ overridden: dom.getAttribute("data-overridden") === "true" }) }]
+        },
+        link: {
+          attrs: { href: {}, overridden: { default: false } },
+          toDOM(mark) { return ["a", { href: mark.attrs.href }, 0]; },
+          parseDOM: [{ tag: "a", getAttrs: (dom) => ({ href: dom.getAttribute("href"), overridden: dom.getAttribute("data-overridden") === "true" }) }]
+        },
+      }
+    });
+    
+    const jsonDoc = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          attrs: { styleName: "custom-style" }, // Condition 1: styleName exists and is not RESERVED_STYLE_NONE
+          content: [
+            {
+              type: "text",
+              text: "Hello",
+              marks: [
+                { type: "bold", attrs: { overridden: false } }, // Condition 2: Mark that is not overridden
+                { type: "italic", attrs: { overridden: true } }, // Condition 3: Mark that is overridden
+                { type: "link", attrs: { href: "https://example.com", overridden: false } } // Condition 4: A link mark
+              ]
+            },
+            {
+              type: "text",
+              text: " World",
+              marks: [{ type: "bold", attrs: { overridden: false } }] // Another non-overridden mark
+            }
+          ]
+        }
+      ]
+    };
+    
+    const doc = mySchema.nodeFromJSON(jsonDoc);
+    console.log(doc);
+      expect(customstylecommand.clearCustomStyles({doc:doc,removeMark:()=>{return {doc:doc,removeMark:()=>{return {}}} as unknown as Transform}} as unknown as Transform,{doc:doc, selection: {
+        $from: {
+          before: () => {
+            return  1;
+          },
+        },
+        $to: {
+          after: () => {
+            return 12;
+          },
+        },
+      },} as unknown as EditorState))
   });
 
   it('should handle showAlert when popup null', () => {

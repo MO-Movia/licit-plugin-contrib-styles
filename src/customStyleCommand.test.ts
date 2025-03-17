@@ -427,7 +427,7 @@ describe('CustomStyleCommand', () => {
     expect(
       customstylecommand.executeClearStyle(
         mockeditorstate as unknown as EditorState,
-        () => { },
+        () => {},
         0,
         1,
         2,
@@ -616,7 +616,9 @@ describe('CustomStyleCommand', () => {
           toDOM() {
             return ['p', 0];
           },
-        } as unknown as Node,0,0
+        } as unknown as Node,
+        0,
+        0
       )
     ).toBeDefined();
   });
@@ -742,7 +744,7 @@ describe('CustomStyleCommand', () => {
         },
       ],
     } as unknown as Node;
-    const mockdispatch = () => { };
+    const mockdispatch = () => {};
     const mockval = {
       styles: {
         hasBullet: true,
@@ -904,7 +906,7 @@ describe('CustomStyleCommand', () => {
       ]),
     ]);
 
-    const mockdispatch = () => { };
+    const mockdispatch = () => {};
     const mockval = {
       styles: {
         hasBullet: true,
@@ -2089,7 +2091,12 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
     //   return { removeMark: () => { } };
     // },
     removeMark: () => {
-      return { key: 'mocktr', addMark: () => { return {}; } };
+      return {
+        key: 'mocktr',
+        addMark: () => {
+          return {};
+        },
+      };
     },
     insert: () => {
       return { key: 'mocktr' };
@@ -2544,6 +2551,10 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
     const result = addMarksToLine(trmock, statemock, nodemock, 0, true);
     expect(result).toBeDefined();
   });
+  it('should handle addMarksToLine if boldsentance false', () => {
+    const result = addMarksToLine(trmock, statemock, nodemock, 0, false);
+    expect(result).toBeDefined();
+  });
 
   it('should handle addMarksToLine when boldSentence is false', () => {
     const json = {
@@ -2581,6 +2592,18 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       ],
     };
     const nodemock = schema1.nodeFromJSON(json);
+    expect(addMarksToLine(trmock, statemock, nodemock, 0, true)).toBeDefined();
+  });
+  it('should handle addMarksToLine when markstrong is not present', () => {
+    const trmock = {};
+    const statemock = { schema: { marks: { strong: true } } };
+    const nodemock = { descendants: () => {} };
+    expect(addMarksToLine(trmock, statemock, nodemock, 0, true)).toBeDefined();
+  });
+  it('should handle addMarksToLine when markstrong is not present', () => {
+    const trmock = {};
+    const statemock = { schema: { marks: {} } };
+    const nodemock = { descendants: () => {} };
     expect(addMarksToLine(trmock, statemock, nodemock, 0, true)).toBeDefined();
   });
   it('should handle manageElementsAfterSelection', () => {
@@ -2921,7 +2944,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
 
   it('should handle compareMarkWithStyle when type = mark-font-size ', () => {
     const mark = {
-      type: { name: 'mark-font-size', create: () => { } },
+      type: { name: 'mark-font-size', create: () => {} },
       attrs: { pt: 11, overridden: false },
     };
     const style1 = {
@@ -2987,7 +3010,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
   });
   it('should handle compareMarkWithStyle when type = MARK_TEXT_COLOR ', () => {
     const mark = {
-      type: { name: 'mark-text-color', create: () => { }, },
+      type: { name: 'mark-text-color', create: () => {} },
       attrs: { overridden: false },
     };
     const style1 = {
@@ -3011,7 +3034,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
   });
   it('should handle compareMarkWithStyle when type = MARKFONTSIZE ', () => {
     const mark = {
-      type: { name: 'mark-font-size', create: () => { }, },
+      type: { name: 'mark-font-size', create: () => {} },
       attrs: { overridden: false },
     };
     const style1 = {
@@ -3035,7 +3058,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
   });
   it('should handle compareMarkWithStyle when type = MARKFONTTYPE ', () => {
     const mark = {
-      type: { name: 'mark-font-type', create: () => { }, },
+      type: { name: 'mark-font-type', create: () => {} },
       attrs: { overridden: false },
     };
     const style1 = {
@@ -3084,10 +3107,10 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
   it('should handle compareMarkWithStyle when type = MARKSTRIKE ', () => {
     const mark = {
       type: {
-        name: 'strike', create: () => {
-
-        },
-      }, attrs: { overridden: false }
+        name: 'strike',
+        create: () => {},
+      },
+      attrs: { overridden: false },
     };
     const style1 = {
       align: 'justify',
@@ -3665,7 +3688,7 @@ describe('updateDocument', () => {
       },
     ],
     addMark: () => {
-      return { removeMark: () => { } };
+      return { removeMark: () => {} };
     },
     removeMark: () => {
       return { key: 'mocktr' };
@@ -4247,7 +4270,6 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
     ).toBeTruthy();
   });
 });
-
 
 describe('applyLatestStyle', () => {
   it('should handle applyLatestStyle if keepmarks is true', () => {
@@ -5278,6 +5300,14 @@ describe('compareAttributes', () => {
     expect(
       compareAttributes(
         { attrs: { overridden: undefined }, type: { name: 'super' } },
+        {}
+      )
+    ).toBeFalsy();
+  });
+  it('should handle compareAttributes when mark.type.name is something else', () => {
+    expect(
+      compareAttributes(
+        { attrs: { overridden: undefined }, type: { name: 'test' } },
         {}
       )
     ).toBeFalsy();

@@ -14,7 +14,8 @@ import {
   setStyleRuntime,
   setHidenumberingFlag,
   isStylesLoaded,
-  setView
+  setView,
+  setCustomStylesOnLoad
 } from './customStyle.js';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec.js';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
@@ -54,6 +55,7 @@ export class CustomstylePlugin extends Plugin {
           loaded = false;
           firstTime = true;
           setStyleRuntime(runtime);
+          setCustomStylesOnLoad();
         },
         apply(tr) {
           // [FS] IRAD-1202 2021-02-15

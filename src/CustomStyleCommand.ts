@@ -292,9 +292,10 @@ export class CustomStyleCommand extends UICommand {
       newAttrs['id'] = '';
       // [FS] IRAD-1414 2021-07-12
       // FIX: Applied number/bullet list removes when 'Clear Style'
-      newAttrs['indent'] = !newAttrs.overriddenIndent ? 0 : newAttrs.indent;
-      newAttrs['overriddenIndent'] = !newAttrs.overriddenIndent ? null : newAttrs.overriddenIndent;
-      newAttrs['overriddenIndentValue'] = !newAttrs.overriddenIndent ? null : newAttrs.overriddenIndentValue;
+      const isOverriddenIndent = newAttrs.overriddenIndent ?? null;
+      newAttrs['indent'] = isOverriddenIndent ? newAttrs.indent : 0;
+      newAttrs['overriddenIndent'] = isOverriddenIndent;
+      newAttrs['overriddenIndentValue'] = isOverriddenIndent ? newAttrs.overriddenIndentValue : null;
       tr = tr.setNodeMarkup(startPos, undefined, newAttrs);
     }
 
@@ -315,7 +316,7 @@ export class CustomStyleCommand extends UICommand {
     let tr = state.tr;
     const { selection } = state;
     const startPos = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
-    const endPos = selection.$to.after(selection.$to.depth === 0 ? 1 : selection.$to.depth) - 1;
+    const endPos = selection.$to.end();
     const node = getNode(state, startPos, endPos, tr);
     const newattrs = { ...(node ? node.attrs : {}) };
     let isValidated = true;
@@ -410,7 +411,7 @@ export class CustomStyleCommand extends UICommand {
     // [FS] IRAD-1495 2021-06-25
     // FIX: Clear style not working on multi select paragraph
     const from = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
-    const to = selection.$to.after(selection.$to.depth === 0 ? 1 : selection.$to.depth) - 1;
+    const to = selection.$to.end();
     let _from = from;
     let _to = to;
     doc.nodesBetween(from, to, (node) => {
@@ -1372,7 +1373,7 @@ export function applyStyle(
 ) {
   const { selection } = state;
   const startPos = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
-  const endPos = selection.$to.after(selection.$to.depth === 0 ? 1 : selection.$to.depth) - 1;
+  const endPos = selection.$to.end();
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
 
@@ -1424,7 +1425,7 @@ export function applyLineStyle(
   } else {
     const { selection } = state;
     const from = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
-    const to = selection.$to.after(selection.$to.depth === 0 ? 1 : selection.$to.depth) - 1;
+    const to = selection.$to.end();
     // [FS] IRAD-1168 2021-06-21
     // FIX: multi-select paragraphs and apply a style with the bold the first sentence,
     // only the last selected paragraph have bold first sentence.
@@ -1460,22 +1461,26 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
 
   const textContent = getNodeText(node);
   if (!textContent) return tr;
-
-  // Match first sentence (until '.', '!', '?' or newline)
-  let match: RegExpMatchArray;
+  let endIndex = -1;
   if (boldSentence) {
-    // Match first sentence (until '.', '!', '?' or newline)
-    match = textContent.match(/^([^.!?\n]+[.!?\n]*)/);
+    // Get the index of the first sentence-ending character
+    const sentenceEndChars = ['.', '!', '?', '\n'];
+    endIndex = Math.min(
+      ...sentenceEndChars
+        .map((char) => textContent.indexOf(char))
+        .filter((index) => index !== -1)
+    );
+  } else {
+    // Get the index of the first space or sentence-ending character
+    endIndex = textContent.indexOf(' ');
+    if (endIndex === -1) {
+      endIndex = textContent.length;
+    }
   }
-  else {
-    // Match first word
-    match = textContent.trim().match(/^[A-Za-zÀ-ÖØ-öø-ÿ]+/);
-  }
 
-  if (!match) return tr;
-
-  const firstSentence = match[0]; // Extract the first sentence
-
+  // No valid sentence or word found
+  if (endIndex === -1 || endIndex === Infinity) return tr;
+  const firstSentence = textContent.slice(0, endIndex + (boldSentence ? 1 : 0));
   let childSize = 0;
   let boldSentenceEnd = 0;
   let childNodePos = pos;

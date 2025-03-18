@@ -37,7 +37,7 @@ const isNodeHasAttribute = (node, attrName) => {
 };
 const requiredAddAttr = (node) => {
   return (
-    'paragraph' === node.type.name && isNodeHasAttribute(node, ATTR_STYLE_NAME)
+    'paragraph' === node?.type?.name && isNodeHasAttribute(node, ATTR_STYLE_NAME)
   );
 };
 
@@ -496,7 +496,7 @@ function applyLineStyleForBoldPartial(nextState, tr) {
 export function applyStyleForEmptyParagraph(nextState, tr) {
   const opt = 1;
   const startPos = nextState.selection?.$from.before(nextState.selection?.$from.depth === 0 ? 1 : nextState.selection?.$from.depth);
-  const endPos = nextState.selection?.$to.after(nextState.selection?.$to.depth === 0 ? 1 : nextState.selection?.$to.depth) - 1;
+  const endPos = nextState.selection?.$to.end();
   if (null === tr) {
     tr = nextState.tr;
   }
@@ -539,10 +539,7 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
   const { $from } = nextState.selection;
   if (view && isNewParagraph(prevState, nextState, view)) {
     const prevParagraph = findPreviousParagraph($from);
-    let required = false;
-    if (prevParagraph && requiredAddAttr(prevParagraph)) {
-      required = true;
-    }
+    const required = requiredAddAttr(prevParagraph);
     if (required) {
       let newattrs = { styleName: prevParagraph.attrs.styleName, indent: prevParagraph.attrs.indent, align: prevParagraph.attrs.align };
 

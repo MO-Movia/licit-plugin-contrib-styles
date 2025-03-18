@@ -316,7 +316,7 @@ export class CustomStyleCommand extends UICommand {
     let tr = state.tr;
     const { selection } = state;
     const startPos = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
-    const endPos = selection.$to.end();
+    const endPos = selection.$to?.end();
     const node = getNode(state, startPos, endPos, tr);
     const newattrs = { ...(node ? node.attrs : {}) };
     let isValidated = true;
@@ -411,7 +411,7 @@ export class CustomStyleCommand extends UICommand {
     // [FS] IRAD-1495 2021-06-25
     // FIX: Clear style not working on multi select paragraph
     const from = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
-    const to = selection.$to.end();
+    const to = selection.$to?.end();
     let _from = from;
     let _to = to;
     doc.nodesBetween(from, to, (node) => {
@@ -1373,7 +1373,7 @@ export function applyStyle(
 ) {
   const { selection } = state;
   const startPos = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
-  const endPos = selection.$to.end();
+  const endPos = selection.$to?.end();
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
 
@@ -1425,7 +1425,7 @@ export function applyLineStyle(
   } else {
     const { selection } = state;
     const from = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
-    const to = selection.$to.end();
+    const to = selection.$to?.end();
     // [FS] IRAD-1168 2021-06-21
     // FIX: multi-select paragraphs and apply a style with the bold the first sentence,
     // only the last selected paragraph have bold first sentence.

@@ -417,7 +417,7 @@ describe('applyNormalIfNoStyle', () => {
           nodesBetween: () => {
             return {};
           },
-          nodeAt:()=>{}
+          nodeAt: () => { }
         },
         setSelection: setSelection,
       };
@@ -445,7 +445,7 @@ describe('applyNormalIfNoStyle', () => {
             nodesBetween: () => {
               return {};
             },
-            nodeAt:()=>{}
+            nodeAt: () => { }
           },
           setSelection: setSelection,
           selection: {
@@ -585,7 +585,7 @@ describe('onUpdateAppendTransaction', () => {
         isTextblock: true,
       } as unknown as Node;
     };
-    mockdoc.nodesBetween = ()=>{};
+    mockdoc.nodesBetween = () => { };
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -618,7 +618,7 @@ describe('onUpdateAppendTransaction', () => {
               max: () => 1,
             }) as unknown as ResolvedPos,
           nodesBetween: () => ({}),
-          nodeAt:()=>{}
+          nodeAt: () => { }
         },
         setSelection: setSelection,
         scrollIntoView: () => {
@@ -678,12 +678,15 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-              $end: () => {
+              end: () => {
                 return 1;
               },
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
               pos: 0,
@@ -929,12 +932,15 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-              $end: () => {
+              end: () => {
                 return 1;
               },
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
             },
@@ -1178,13 +1184,13 @@ describe('onUpdateAppendTransaction', () => {
               },
               $start: () => {
                 return 1;
-              },
-              $end: () => {
-                return 1;
-              },
+              }
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
             },
@@ -1241,6 +1247,9 @@ describe('onUpdateAppendTransaction', () => {
               $to: {
                 after() {
                   return 10;
+                },
+                end: () => {
+                  return 1;
                 },
               },
             },
@@ -1342,7 +1351,7 @@ describe('Style Plugin', () => {
     );
     expect(setStyles(customStyleList)).toBeUndefined();
   });
-  it('should handle getEffectiveSchema ',()=>{
+  it('should handle getEffectiveSchema ', () => {
     expect(plugin.getEffectiveSchema(mockSchema)).toBeDefined();
   });
   it('SHOULD HANDLE paste', () => {
@@ -1925,7 +1934,7 @@ describe('Custom Style Plugin pass', () => {
 
   it('Test 1 ', () => {
     const props = {
-      dispatch: () => {},
+      dispatch: () => { },
       editorState: state,
       editorView: editor.view,
     };
@@ -4699,16 +4708,18 @@ describe('Cus Style Plugin-Pass', () => {
           },
         ],
       }),
-      selection: {    $from: {
-        start: () => {
-          return 1;
+      selection: {
+        $from: {
+          start: () => {
+            return 1;
+          },
         },
+        $to: {
+          end: () => {
+            return 2;
+          },
+        }, from: 4, to: 8
       },
-      $to: {
-        end: () => {
-          return 2;
-        },
-      },from: 4, to: 8 },
     };
 
     const schema3 = new Schema({
@@ -5579,6 +5590,9 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
+              end: () => {
+                return 1;
+              },
               nodeSize: 1,
             },
           },
@@ -5603,6 +5617,9 @@ describe('onUpdateAppendTransaction', () => {
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
             },
@@ -5690,6 +5707,11 @@ describe('onUpdateAppendTransaction', () => {
                 return 1;
               },
             },
+            $to: {
+              end: () => {
+                return 1;
+              },
+            },
           },
         },
         {
@@ -5702,12 +5724,13 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-              $end: () => {
-                return 1;
-              },
+
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
               nodeSize: 1,
@@ -5726,10 +5749,16 @@ describe('onUpdateAppendTransaction', () => {
               $from: {
                 start: () => {
                   return 1;
+                }
+              },
+              $to: {
+                after: () => {
+                  return 1;
                 },
                 end: () => {
                   return 2;
                 },
+                nodeSize: 1,
               },
             },
           },
@@ -5745,6 +5774,9 @@ describe('onUpdateAppendTransaction', () => {
             $to: {
               after: () => {
                 return 1;
+              },
+              end: () => {
+                return 2;
               },
               nodeSize: 1,
             },
@@ -5832,6 +5864,15 @@ describe('onUpdateAppendTransaction', () => {
                 return 1;
               },
             },
+            $to: {
+              after: () => {
+                return 1;
+              },
+              end: () => {
+                return 1;
+              },
+
+            },
           },
         },
         {
@@ -5844,12 +5885,13 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-              $end: () => {
-                return 1;
-              },
+
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
               nodeSize: 1,
@@ -5873,6 +5915,15 @@ describe('onUpdateAppendTransaction', () => {
                   return 2;
                 },
               },
+              $to: {
+                after: () => {
+                  return 1;
+                },
+                end: () => {
+                  return 1;
+                },
+                nodeSize: 1,
+              },
             },
           },
           doc: mockdoc,
@@ -5886,6 +5937,9 @@ describe('onUpdateAppendTransaction', () => {
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
               nodeSize: 1,
@@ -5970,10 +6024,19 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-              $end: () => {
+              end: () => {
                 return 1;
               },
             },
+            $to: {
+              after: () => {
+                return 1;
+              },
+              end: () => {
+                return 1;
+              },
+            }
+
           },
           curSelection: { $head: 1 },
         },
@@ -5986,13 +6049,14 @@ describe('onUpdateAppendTransaction', () => {
               },
               $start: () => {
                 return 1;
-              },
-              $end: () => {
-                return 1;
-              },
+              }
+
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
               nodeSize: 1,
@@ -6030,6 +6094,9 @@ describe('onUpdateAppendTransaction', () => {
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
               nodeSize: 1,
@@ -6173,12 +6240,12 @@ describe('isDocChanged', () => {
   });
 });
 
-describe('applyStyleForNextParagraph',()=>{
-  it('should handle applyStyleForNextParagraph',()=>{
+describe('applyStyleForNextParagraph', () => {
+  it('should handle applyStyleForNextParagraph', () => {
     const paragraph1 = {
       type: { name: 'paragraph' },
       isBlock: true,
-      child() {},
+      child() { },
       childCount: 0,
       attrs: {
         styleName: 'Bold',
@@ -6189,7 +6256,7 @@ describe('applyStyleForNextParagraph',()=>{
     const paragraph2 = {
       type: { name: 'paragraph' },
       isBlock: true,
-      child() {},
+      child() { },
       childCount: 0,
       attrs: {
         styleName: 'Bold',
@@ -6222,44 +6289,58 @@ describe('applyStyleForNextParagraph',()=>{
         return 0;
       }
     };
-    const prevstate = {doc:{nodeAt:()=>{return  {
-      type: { name: 'paragraph' },
-      isBlock: true,
-      child() {},
-      childCount: 0,
-      attrs: {
-        styleName: 'Bold',
-        id: 'para-1'
-      },
-    }; }},selection:{$from:mockFrom,from:1}};
-    const nextstate = {doc:{nodeAt:()=>{return  {
-      type: { name: 'paragraph' },
-      isBlock: true,
-      child() {},
-      childCount: 0,
-      attrs: {
-        styleName: 'Bold',
-        id: 'para-1'
-      },
-    }; }},selection:{$from:mockFrom,from:3}};
-    const view = {input:{lastKeyCode :13}};
+    const prevstate = {
+      doc: {
+        nodeAt: () => {
+          return {
+            type: { name: 'paragraph' },
+            isBlock: true,
+            child() { },
+            childCount: 0,
+            attrs: {
+              styleName: 'Bold',
+              id: 'para-1'
+            },
+          };
+        }
+      }, selection: { $from: mockFrom, from: 1 }
+    };
+    const nextstate = {
+      doc: {
+        nodeAt: () => {
+          return {
+            type: { name: 'paragraph' },
+            isBlock: true,
+            child() { },
+            childCount: 0,
+            attrs: {
+              styleName: 'Bold',
+              id: 'para-1'
+            },
+          };
+        }
+      }, selection: { $from: mockFrom, from: 3 }
+    };
+    const view = { input: { lastKeyCode: 13 } };
     const tr = {};
-    expect(applyStyleForNextParagraph(prevstate,nextstate,tr,view)).toBeDefined();
+    expect(applyStyleForNextParagraph(prevstate, nextstate, tr, view)).toBeDefined();
   });
-  it('should handle applyStyleForNextParagraph',()=>{
+  it('should handle applyStyleForNextParagraph', () => {
     const paragraph1 = {
       type: { name: 'header' },
       isBlock: true,
-      child() {return {
-        type: { name: 'paragraph' },
-        isBlock: true,
-        child() {},
-        childCount: 0,
-        attrs: {
-          styleName: 'Bold',
-          id: 'para-1'
-        },
-      }; },
+      child() {
+        return {
+          type: { name: 'paragraph' },
+          isBlock: true,
+          child() { },
+          childCount: 0,
+          attrs: {
+            styleName: 'Bold',
+            id: 'para-1'
+          },
+        };
+      },
       childCount: 2,
       attrs: {
         styleName: 'Bold',
@@ -6270,16 +6351,18 @@ describe('applyStyleForNextParagraph',()=>{
     const paragraph2 = {
       type: { name: 'header' },
       isBlock: true,
-      child() {return {
-        type: { name: 'paragraph' },
-        isBlock: true,
-        child() {},
-        childCount: 0,
-        attrs: {
-          styleName: 'Bold',
-          id: 'para-1'
-        },
-      };},
+      child() {
+        return {
+          type: { name: 'paragraph' },
+          isBlock: true,
+          child() { },
+          childCount: 0,
+          attrs: {
+            styleName: 'Bold',
+            id: 'para-1'
+          },
+        };
+      },
       childCount: 2,
       attrs: {
         styleName: 'Bold',
@@ -6312,28 +6395,40 @@ describe('applyStyleForNextParagraph',()=>{
         return 0;
       }
     };
-    const prevstate = {doc:{nodeAt:()=>{return  {
-      type: { name: 'paragraph' },
-      isBlock: true,
-      child() {},
-      childCount: 0,
-      attrs: {
-        styleName: 'Bold',
-        id: 'para-1'
-      },
-    }; }},selection:{$from:mockFrom,from:1}};
-    const nextstate = {doc:{nodeAt:()=>{return  {
-      type: { name: 'paragraph' },
-      isBlock: true,
-      child() {},
-      childCount: 0,
-      attrs: {
-        styleName: 'Bold',
-        id: 'para-1'
-      },
-    }; }},selection:{$from:mockFrom,from:3}};
-    const view = {input:{lastKeyCode :13}};
+    const prevstate = {
+      doc: {
+        nodeAt: () => {
+          return {
+            type: { name: 'paragraph' },
+            isBlock: true,
+            child() { },
+            childCount: 0,
+            attrs: {
+              styleName: 'Bold',
+              id: 'para-1'
+            },
+          };
+        }
+      }, selection: { $from: mockFrom, from: 1 }
+    };
+    const nextstate = {
+      doc: {
+        nodeAt: () => {
+          return {
+            type: { name: 'paragraph' },
+            isBlock: true,
+            child() { },
+            childCount: 0,
+            attrs: {
+              styleName: 'Bold',
+              id: 'para-1'
+            },
+          };
+        }
+      }, selection: { $from: mockFrom, from: 3 }
+    };
+    const view = { input: { lastKeyCode: 13 } };
     const tr = {};
-    expect(applyStyleForNextParagraph(prevstate,nextstate,tr,view)).toBeDefined();
+    expect(applyStyleForNextParagraph(prevstate, nextstate, tr, view)).toBeDefined();
   });
 });

@@ -384,6 +384,9 @@ describe('CustomStyleCommand', () => {
         after: (x) => {
           return x + 1;
         },
+        end: () => {
+          return 2;
+        },
       },
     };
     const mockeditorstate = {
@@ -414,6 +417,9 @@ describe('CustomStyleCommand', () => {
               $to: {
                 after: () => {
                   return 1;
+                },
+                end: () => {
+                  return 2;
                 },
               },
             },
@@ -523,6 +529,9 @@ describe('CustomStyleCommand', () => {
         after: (x) => {
           return x + 1;
         },
+        end: () => {
+          return 2;
+        },
       },
     };
     const mockeditorstate = {
@@ -561,6 +570,9 @@ describe('CustomStyleCommand', () => {
             $to: {
               after: () => {
                 return 1;
+              },
+              end: () => {
+                return 2;
               },
             },
           },
@@ -640,6 +652,9 @@ describe('CustomStyleCommand', () => {
           after: () => {
             return 12;
           },
+          end: () => {
+            return 2;
+          },
         },
       },
     } as unknown as EditorState));
@@ -677,7 +692,11 @@ describe('CustomStyleCommand', () => {
           },
         ],
         {
-          selection: { $from: { before: () => 0 }, $to: { after: () => 1 } },
+          selection: {
+            $from: { before: () => 0 }, $to: { after: () => 1 }, end: () => {
+              return 2;
+            },
+          },
           removeMark: () => {
             return {
               key: 'markremoved tr',
@@ -956,6 +975,9 @@ describe('CustomStyleCommand', () => {
         $to: {
           after: () => {
             return 1;
+          },
+          end: () => {
+            return 2;
           },
           pos: 1,
         },
@@ -2894,6 +2916,9 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       $to: {
         after: (x) => {
           return x + 1;
+        },
+        end: () => {
+          return 2;
         },
       },
     };
@@ -4850,6 +4875,9 @@ describe('applyLineStyle', () => {
               after: (x) => {
                 return x + 1;
               },
+              end: () => {
+                return 2;
+              },
               pos: 1,
             },
           },
@@ -4962,6 +4990,9 @@ describe('applyLineStyle', () => {
               $to: {
                 after: (x) => {
                   return x + 1;
+                },
+                end: () => {
+                  return 2;
                 },
                 pos: 1,
               },

@@ -496,7 +496,7 @@ function applyLineStyleForBoldPartial(nextState, tr) {
 export function applyStyleForEmptyParagraph(nextState, tr) {
   const opt = 1;
   const startPos = nextState.selection?.$from.before(nextState.selection?.$from.depth === 0 ? 1 : nextState.selection?.$from.depth);
-  const endPos = nextState.selection?.$to.end();
+  const endPos = nextState.selection?.$to?.end();
   if (null === tr) {
     tr = nextState.tr;
   }

@@ -428,7 +428,7 @@ export class CustomStyleCommand extends UICommand {
                 }
               });
             }
-            _from = _to + 1;
+            _from = _to;
           }
         });
       }

@@ -430,6 +430,10 @@ html {
   margin-left: -20pt;
 }
 
+.ProseMirror p[hideNumbering='true'] {
+  margin-left: 0 !important;
+}
+
 .ProseMirror p[hideNumbering='true']::before {
-  visibility: hidden;
+  content: none !important;
 }

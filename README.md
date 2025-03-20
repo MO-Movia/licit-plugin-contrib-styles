@@ -46,5 +46,5 @@ ReactDOM.render(<Licit docID={''} plugins={plugins}/>)
 - import the customstyle.css file in the default global CSS file (src\styles.scss) of the angular project.
 
 ```
-@import  "~@modusoperandi/licit-custom-styles/customstyle.css";
+@import  "@modusoperandi/licit-custom-styles/customstyle.css";
 ```

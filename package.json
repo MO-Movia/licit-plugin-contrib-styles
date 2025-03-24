@@ -1,6 +1,6 @@
 {
   "name": "@modusoperandi/licit-custom-styles",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "license": "MIT",
   "type": "module",
   "subversion": "1",
@@ -27,11 +27,11 @@
   "peerDependencies": {
     "@modusoperandi/licit-doc-attrs-step": "^1.0.2",
     "@modusoperandi/licit-ui-commands": "^1.0.11",
-    "uuid": "^9.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "dependencies": {
+    "uuid": "^11.0.0",
     "classnames": "^2.3.1",
     "color": "^5.0.0"
   },

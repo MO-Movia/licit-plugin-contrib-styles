@@ -324,7 +324,10 @@ export function applyStyles(state, tr) {
         // Can't be out of range.
         end = docLen;
       }
-
+      if (pos > docLen) {
+        // Can't be out of range.
+        pos = docLen;
+      }
       // check if the loaded document's para have valid styleName
       const styleName = child.attrs.styleName ?? RESERVED_STYLE_NONE;
       tr = applyLatestStyle(styleName, state, tr, child, pos, end);

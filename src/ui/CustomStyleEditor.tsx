@@ -371,20 +371,20 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   // handles Level drop down change
   onLevelChange(e) {
-    let isCheckboxDisabled;
-    const val = RESERVED_STYLE_NONE === e.target.value ? null : e.target.value;
-    if (val === 'None') {
+    let isCheckboxDisabled = false;
+    // const val = RESERVED_STYLE_NONE === e.target.value ? null : e.target.value;
+    if (e.target.value === 'None') {
       isCheckboxDisabled = true;
     }
 
     this.setState((prevState) => ({
       styles: {
         ...prevState.styles,
-        styleLevel: val,
+        styleLevel: e.target.value,
         hasNumbering: isCheckboxDisabled
           ? false
-          : prevState.styles.hasNumbering,
-        hasBullet: isCheckboxDisabled ? false : prevState.style?.hasBullet,
+          : prevState.styles?.hasNumbering,
+        hasBullet: isCheckboxDisabled ? false : prevState.styles?.hasBullet,
       },
     }));
   }

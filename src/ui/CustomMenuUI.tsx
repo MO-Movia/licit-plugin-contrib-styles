@@ -356,7 +356,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
                 // [FS] IRAD-1350 2021-05-19
                 // blocks edit if the style is already applied in editor
-                if (
+                if (val.styles?.hasBullet ||
                   !isLevelUpdated(this.props.editorState, val.styleName, val)
                 ) {
                   saveStyle(val).then((result) => {

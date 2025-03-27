@@ -1,7 +1,8 @@
 html {
   counter-reset: C1 C2 C3 C4 C5 C6 C7 C8 C9 C10;
   counter-reset: L1 L2 L3 L4 L5 L6 L7 L8 L9 L10;
-
+  counter-reset: D1;
+  counter-reset: F1;
   --czi-counter-bold: 100;
 }
 
@@ -10,7 +11,7 @@ html {
   counter-increment: L1;
 
   /* Reset all other variables under the current one. */
-  counter-reset: L2 L3 L4 L5 L6 L7 L8 L9 L10;
+  counter-reset: L2 L3 L4 L5 L6 L7 L8 L9 L10 F1 D1;
   margin-left: 12pt;
 }
 
@@ -174,7 +175,7 @@ html {
   counter-increment: C1;
 
   /* Reset all other variables under the current one. */
-  counter-reset: C2 C3 C4 C5 C6 C7 C8 C9 C10;
+  counter-reset: C2 C3 C4 C5 C6 C7 C8 C9 C10 F1 D1;
   margin-left: 12pt;
 }
 
@@ -436,4 +437,28 @@ html {
 
 .ProseMirror p[hideNumbering='true']::before {
   content: none !important;
+}
+
+.ProseMirror p[data-style-level='2'][tof='true'] {
+  counter-increment: F1;
+  margin-left: 16pt;
+}
+
+.ProseMirror p[data-style-level='2'][tot='true'] {
+  counter-increment: D1;
+  margin-left: 16pt;
+}
+
+.ProseMirror p[data-style-level='2'][tof='true']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(F1, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  margin-left: -16pt;
+  font-size: var(--czi-content-font-size);
+}
+
+.ProseMirror p[data-style-level='2'][tot='true']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(D1, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  margin-left: -16pt;
+  font-size: var(--czi-content-font-size);
 }

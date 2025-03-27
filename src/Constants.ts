@@ -22,6 +22,8 @@ export const DEFAULT_NORMAL_STYLE = {
     nextLineStyleName: 'Normal',
     paragraphSpacingAfter: '3',
     toc: false,
+    tot:false,
+    tof:false
   }
 };
 

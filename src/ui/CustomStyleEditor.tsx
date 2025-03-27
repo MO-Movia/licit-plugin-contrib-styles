@@ -76,6 +76,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     editedStyles.splice(0, editedStyles.length);
     this.state = {
       ...props,
+      tot: false,
+      tof: false,
       toc: false,
       isHidden: false,
       otherStyleSelected,
@@ -90,6 +92,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     if (0 === this.state.mode) {
       this.state.styles.boldNumbering = true;
       this.state.styles.toc = false;
+      this.state.styles.tof = false;
+      this.state.styles.tot = false;
       this.state.styles.isHidden = false;
       this.state.styles.boldSentence = true;
       this.state.styles.nextLineStyleName = RESERVED_STYLE_NONE;
@@ -607,6 +611,18 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     }));
   }
 
+  handleTOT(val) {
+    this.setState((prevState) => ({
+      styles: { ...prevState.styles, tot: val.target.checked },
+    }));
+  }
+
+  handleTOF(val) {
+    this.setState((prevState) => ({
+      styles: { ...prevState.styles, tof: val.target.checked },
+    }));
+  }
+
   handleList(val) {
     const selectedStyle = val.target.value;
     const isList = selectedStyle === 'listStyle';
@@ -1106,8 +1122,14 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     </span>
                   </span>
                 </div>
-                <div>
-                  <span style={{ float: 'left', marginTop: '3px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
                     <label style={{ fontSize: '12px', color: '#464343' }}>
                       <input
                         checked={this.state.styles.toc}
@@ -1123,6 +1145,46 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         }}
                       >
                         TOC
+                      </span>
+                    </label>
+                  </span>
+
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    <label style={{ fontSize: '12px', color: '#464343' }}>
+                      <input
+                        checked={this.state.styles.tot}
+                        data-cy="cyStyleTOT"
+                        onChange={this.handleTOT.bind(this)}
+                        type="checkbox"
+                      />
+                      <span
+                        style={{
+                          marginLeft: '2px',
+                          position: 'relative',
+                          top: '-2px',
+                        }}
+                      >
+                        TOT
+                      </span>
+                    </label>
+                  </span>
+
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    <label style={{ fontSize: '12px', color: '#464343' }}>
+                      <input
+                        checked={this.state.styles.tof}
+                        data-cy="cyStyleTOF"
+                        onChange={this.handleTOF.bind(this)}
+                        type="checkbox"
+                      />
+                      <span
+                        style={{
+                          marginLeft: '2px',
+                          position: 'relative',
+                          top: '-2px',
+                        }}
+                      >
+                        TOF
                       </span>
                     </label>
                   </span>
@@ -1343,7 +1405,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           onChange={(e) => this.handleList(e)}
                           type="radio"
                           value="userDefined"
-                        />User-defined Numbering/Bullets
+                        />
+                        User-defined Numbering/Bullets
                       </label>
                       <br />
                       <label>
@@ -1356,7 +1419,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           onChange={this.handleList.bind(this)}
                           type="radio"
                           value="listStyle"
-                        />List-style (Auto Numbering)
+                        />
+                        List-style (Auto Numbering)
                       </label>
                     </div>
                   </div>
@@ -1927,7 +1991,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
           prevState.styles.hasNumbering &&
           this.isCustomStyleAlreadyApplied(),
       }));
-
     });
   }
 

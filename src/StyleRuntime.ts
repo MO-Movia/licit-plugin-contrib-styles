@@ -21,6 +21,8 @@ export type HTMLStyles = {
   indent?: string; // Text indent
   nextLineStyleName?: string;
   toc?: boolean;
+  tot?: boolean;
+  tof?: boolean;
   isHidden?: boolean;
   strike?: string;
   isList?: boolean;

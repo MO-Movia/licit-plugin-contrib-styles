@@ -295,7 +295,9 @@ export class CustomStyleCommand extends UICommand {
       const isOverriddenIndent = newAttrs.overriddenIndent ?? null;
       newAttrs['indent'] = isOverriddenIndent ? newAttrs.indent : 0;
       newAttrs['overriddenIndent'] = isOverriddenIndent;
-      newAttrs['overriddenIndentValue'] = isOverriddenIndent ? newAttrs.overriddenIndentValue : null;
+      newAttrs['overriddenIndentValue'] = isOverriddenIndent
+        ? newAttrs.overriddenIndentValue
+        : null;
       tr = tr.setNodeMarkup(startPos, undefined, newAttrs);
     }
 
@@ -315,7 +317,9 @@ export class CustomStyleCommand extends UICommand {
   ): boolean => {
     let tr = state.tr;
     const { selection } = state;
-    const startPos = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
+    const startPos = selection.$from.before(
+      selection.$from.depth === 0 ? 1 : selection.$from.depth
+    );
     const endPos = selection.$to?.end();
     const node = getNode(state, startPos, endPos, tr);
     const newattrs = { ...(node ? node.attrs : {}) };
@@ -371,7 +375,10 @@ export class CustomStyleCommand extends UICommand {
         tr
       ) as Transaction;
       if (tr.docChanged || tr.storedMarksSet) {
-        const event = new KeyboardEvent('keydown', { keyCode: 0, bubbles: true });
+        const event = new KeyboardEvent('keydown', {
+          keyCode: 0,
+          bubbles: true,
+        });
         view.dom?.dispatchEvent(event);
         dispatch?.(tr);
         return true;
@@ -410,19 +417,26 @@ export class CustomStyleCommand extends UICommand {
     const { selection, doc } = editorState;
     // [FS] IRAD-1495 2021-06-25
     // FIX: Clear style not working on multi select paragraph
-    const from = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
+    const from = selection.$from.before(
+      selection.$from.depth === 0 ? 1 : selection.$from.depth
+    );
     const to = selection.$to?.end();
     let _from = from;
     let _to = to;
     doc.nodesBetween(from, to, (node) => {
-      if (node.attrs.styleName && node.attrs.styleName !== RESERVED_STYLE_NONE) {
+      if (
+        node.attrs.styleName &&
+        node.attrs.styleName !== RESERVED_STYLE_NONE
+      ) {
         // Check for overridden marks in text nodes inside the paragraph
         node.forEach((child) => {
           if (child.isText && child.marks.length > 0) {
-            const marksToRemove = child.marks.filter(mark => mark.attrs.overridden !== true);
+            const marksToRemove = child.marks.filter(
+              (mark) => mark.attrs.overridden !== true
+            );
             _to = _from + child.nodeSize;
             if (marksToRemove.length > 0) {
-              marksToRemove.forEach(mark => {
+              marksToRemove.forEach((mark) => {
                 if ('link' !== mark.type.name) {
                   tr = this.removeMarks(mark, tr, node, _from, _to);
                 }
@@ -610,7 +624,6 @@ export function compareMarkWithStyle(
 
   return tr;
 }
-
 
 export function getMarkByStyleName(styleName: string, schema: Schema) {
   const styleProp = getCustomStyleByName(styleName);
@@ -1372,7 +1385,9 @@ export function applyStyle(
   tr: Transform
 ) {
   const { selection } = state;
-  const startPos = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
+  const startPos = selection.$from.before(
+    selection.$from.depth === 0 ? 1 : selection.$from.depth
+  );
   const endPos = selection.$to?.end();
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
@@ -1424,7 +1439,9 @@ export function applyLineStyle(
     }
   } else {
     const { selection } = state;
-    const from = selection.$from.before(selection.$from.depth === 0 ? 1 : selection.$from.depth);
+    const from = selection.$from.before(
+      selection.$from.depth === 0 ? 1 : selection.$from.depth
+    );
     const to = selection.$to?.end();
     // [FS] IRAD-1168 2021-06-21
     // FIX: multi-select paragraphs and apply a style with the bold the first sentence,
@@ -1432,9 +1449,7 @@ export function applyLineStyle(
     tr.doc.nodesBetween(from, to, (node, pos) => {
       if (node.content && node.content.size > 0) {
         // Check styleName is available for node
-        if (
-          node.attrs?.styleName
-        ) {
+        if (node.attrs?.styleName) {
           const styleProp = getCustomStyleByName(node.attrs.styleName);
           if (styleProp?.styles?.boldPartial) {
             if (!tr) {
@@ -1484,36 +1499,58 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   let childSize = 0;
   let boldSentenceEnd = 0;
   let childNodePos = pos;
-  node.descendants((child) => {
+  let stopTraversal = false;
+  // eslint-disable-next-line
+  node.descendants(function (child: Node) {
+    if (stopTraversal) return false;
     if (child.isText) {
+      if (boldSentenceEnd > firstSentence.length) {
+        stopTraversal = true;
+        return false;
+      }
       boldSentenceEnd = boldSentenceEnd + child.nodeSize;
-      const mark = child.marks.find(mark => mark.type === markType);
+      const mark = child.marks.find((mark) => mark.type === markType);
       if (mark) {
         if (!mark.attrs.overridden) {
-          tr = tr.removeMark(childNodePos, childNodePos + child.nodeSize + 1, markType);
+          tr = tr.removeMark(
+            childNodePos,
+            childNodePos + child.nodeSize + 1,
+            markType
+          );
         }
-
       }
-      childNodePos = boldSentenceEnd;
-
+      childNodePos = pos + boldSentenceEnd;
     }
   });
-  node.descendants((child) => {
+  let stopTraversal_1 = false;
+  // eslint-disable-next-line
+  node.descendants(function (child: Node) {
+    if (stopTraversal_1) return false;
     if (child.isText) {
       const attrs = { boldSentence: true };
       childSize = childSize + child.nodeSize;
       if (firstSentence.length <= childSize) {
-        const mark = child.marks.find(mark => mark.type === markType);
+        const mark = child.marks.find((mark) => mark.type === markType);
         if (mark) {
           if (!mark.attrs.overridden) {
-            tr = tr.addMark(pos, pos + firstSentence.length + 1, markType.create(attrs));
+            tr = tr.addMark(
+              pos,
+              pos + firstSentence.length + 1,
+              markType.create(attrs)
+            );
+            stopTraversal_1 = true;
+            return false;
           }
-
         } else {
-          tr = tr.addMark(pos, pos + firstSentence.length + 1, markType.create());
+          tr = tr.addMark(
+            pos,
+            pos + firstSentence.length + 1,
+            markType.create()
+          );
+          stopTraversal_1 = true;
+          return false;
         }
       }
-
     }
   });
 

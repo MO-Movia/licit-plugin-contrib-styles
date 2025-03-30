@@ -315,6 +315,10 @@ export function applyStyles(state, tr) {
   tr?.doc?.descendants(function (child, pos) {
     const contentLen = child.content.size;
     if (tr && haveEligibleChildren(child, contentLen)) {
+      // temp Fix for applying style for textnodes
+      const paragraphNodeInfo = findNearestParagraph(tr.doc, pos);
+      pos = paragraphNodeInfo.pos;
+      child = paragraphNodeInfo.child;
       // [FS] IRAD-1170 2021-02-02
       // FIX: When loading some documents on load show "Cannot read nodeSize property of undefined" error.
       const docLen = tr.doc.content.size;
@@ -335,6 +339,25 @@ export function applyStyles(state, tr) {
   });
 
   return tr;
+}
+// traverse back to find the nearest paragraph
+// to resolve the issue of applying style for textnodes, temp fix
+// some time instead of paragraph node textnodes are getting selected in loop
+function findNearestParagraph(doc, pos) {
+  while (pos >= 0) {
+    const node = doc.nodeAt(pos);
+
+    // Check if the node exists and is a paragraph
+    if (node && node.type.name === 'paragraph') {
+      return { pos, child: node, styleName: node.attrs.styleName };
+    }
+
+    // Move to the previous position
+    pos--;
+  }
+
+  // Return null if no paragraph is found
+  return { pos, child: null, styleName: 'Normal' };
 }
 
 function validateStyleName(node) {

@@ -1500,58 +1500,57 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   let boldSentenceEnd = 0;
   let childNodePos = pos;
   let stopTraversal = false;
-  // eslint-disable-next-line
-  node.descendants(function (child: Node) {
-    if (stopTraversal) return false;
-    if (child.isText) {
-      if (boldSentenceEnd > firstSentence.length) {
-        stopTraversal = true;
-        return false;
-      }
-      boldSentenceEnd = boldSentenceEnd + child.nodeSize;
-      const mark = child.marks.find((mark) => mark.type === markType);
-      if (mark) {
-        if (!mark.attrs.overridden) {
-          tr = tr.removeMark(
-            childNodePos,
-            childNodePos + child.nodeSize + 1,
-            markType
-          );
-        }
-      }
+  node.descendants((child) => {
+    if (stopTraversal || !child.isText) {
+      return !stopTraversal; // Stop if already traversed or not text
+    }
+
+    if (boldSentenceEnd > firstSentence.length) {
+      stopTraversal = true;
+      return false;
+    }
+
+    boldSentenceEnd += child.nodeSize;
+    const mark = child.marks.find(mark => mark.type === markType);
+
+    if (!mark || mark.attrs.overridden) {
       childNodePos = pos + boldSentenceEnd;
+      return true;
     }
+
+    tr = tr.removeMark(childNodePos, childNodePos + child.nodeSize + 1, markType);
+    childNodePos = pos + boldSentenceEnd;
+    return true;
   });
+
   let stopTraversal_1 = false;
-  // eslint-disable-next-line
-  node.descendants(function (child: Node) {
-    if (stopTraversal_1) return false;
-    if (child.isText) {
-      const attrs = { boldSentence: true };
-      childSize = childSize + child.nodeSize;
-      if (firstSentence.length <= childSize) {
-        const mark = child.marks.find((mark) => mark.type === markType);
-        if (mark) {
-          if (!mark.attrs.overridden) {
-            tr = tr.addMark(
-              pos,
-              pos + firstSentence.length + 1,
-              markType.create(attrs)
-            );
-            stopTraversal_1 = true;
-            return false;
-          }
-        } else {
-          tr = tr.addMark(
-            pos,
-            pos + firstSentence.length + 1,
-            markType.create()
-          );
-          stopTraversal_1 = true;
-          return false;
-        }
-      }
+  node.descendants((child) => {
+    if (stopTraversal_1 || !child.isText) {
+      return !stopTraversal_1; // Stop if already traversed or not text
     }
+
+    const attrs = { boldSentence: true };
+    childSize += child.nodeSize;
+
+    if (firstSentence.length > childSize) {
+      return true; // Continue if sentence length not yet reached
+    }
+
+    const mark = child.marks.find(mark => mark.type === markType);
+
+    if (!mark) {
+      tr = tr.addMark(pos, pos + firstSentence.length + 1, markType.create());
+      stopTraversal_1 = true;
+      return false;
+    }
+
+    if (mark.attrs.overridden) {
+      return false; // Skip if mark is overridden
+    }
+
+    tr = tr.addMark(pos, pos + firstSentence.length + 1, markType.create(attrs));
+    stopTraversal_1 = true;
+    return false;
   });
 
   return tr;

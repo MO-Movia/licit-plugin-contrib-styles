@@ -1341,9 +1341,8 @@ export function removeAllMarksExceptLink(
   to: number,
   tr: Transform
 ) {
-  const { doc } = tr;
   const tasks = [];
-  doc.nodesBetween(from, to, (node, pos) => {
+  tr?.doc.nodesBetween(from, to, (node, pos) => {
     if (node.marks?.length > 0) {
       node.marks.some((mark) => {
         if (

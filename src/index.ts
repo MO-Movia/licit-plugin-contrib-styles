@@ -307,61 +307,27 @@ export function remapCounterFlags(tr) {
   }
 }
 
-export function applyStyles(state, tr) {
-  if (!tr) {
-    tr = state.tr;
+export function applyStyles(state: EditorState, tr?: Transform) {
+  tr ??= state.tr;
+  tr?.doc?.descendants(function (child) {
+    if (child.type.name !== 'paragraph') {
+      return true;
   }
-
-  tr?.doc?.descendants(function (child, pos) {
-    const contentLen = child.content.size;
-    if (tr && haveEligibleChildren(child, contentLen)) {
-      // temp Fix for applying style for textnodes
-      const paragraphNodeInfo = findNearestParagraph(tr.doc, pos);
-      pos = paragraphNodeInfo.pos;
-      child = paragraphNodeInfo.child;
-      // [FS] IRAD-1170 2021-02-02
-      // FIX: When loading some documents on load show "Cannot read nodeSize property of undefined" error.
-      const docLen = tr.doc.content.size;
-      let end = pos + contentLen;
-      // Validate end position.
-      if (end > docLen) {
-        // Can't be out of range.
-        end = docLen;
-      }
-      if (pos > docLen) {
-        // Can't be out of range.
-        pos = docLen;
+    if (!child.content.size) {
+      // need to handle normal, but normal is running oom
+      return false;
       }
       // check if the loaded document's para have valid styleName
       const styleName = child.attrs.styleName ?? RESERVED_STYLE_NONE;
-      tr = applyLatestStyle(styleName, state, tr, child, pos, end);
-    }
+    tr = applyLatestStyle(styleName, state, tr, child, 0, child.nodeSize);
+    return false;
   });
 
   return tr;
 }
-// traverse back to find the nearest paragraph
-// to resolve the issue of applying style for textnodes, temp fix
-// some time instead of paragraph node textnodes are getting selected in loop
-function findNearestParagraph(doc, pos) {
-  while (pos >= 0) {
-    const node = doc.nodeAt(pos);
-
-    // Check if the node exists and is a paragraph
-    if (node && node.type.name === 'paragraph') {
-      return { pos, child: node, styleName: node.attrs.styleName };
-    }
-
-    // Move to the previous position
-    pos--;
-  }
-
-  // Return null if no paragraph is found
-  return { pos, child: null, styleName: 'Normal' };
-}
 
 function validateStyleName(node) {
-  return ('styleName' in (node?.attrs || {}));
+  return 'styleName' in (node?.attrs || {});
 }
 
 // [FS] IRAD-1130 2021-01-07

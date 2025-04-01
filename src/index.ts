@@ -41,8 +41,6 @@ const requiredAddAttr = (node) => {
   );
 };
 
-// [FS] IRAD-1503 2021-07-02
-// Fix: Update the private plugin classes as a named export rather than the default
 export class CustomstylePlugin extends Plugin {
   constructor(runtime: StyleRuntime, hideNumbering?: boolean) {
     let csview = null;
@@ -58,12 +56,10 @@ export class CustomstylePlugin extends Plugin {
           setCustomStylesOnLoad();
         },
         apply(tr) {
-          // [FS] IRAD-1202 2021-02-15
           remapCounterFlags(tr);
         },
       },
       view: (view) => {
-        // [FS] IRAD-1668 2022-01-21
         // dummy plugin view so that EditorView is accessible when refreshing the document
         // to apply styles after getting the styles.
         csview = view;
@@ -81,7 +77,7 @@ export class CustomstylePlugin extends Plugin {
 
       props: {
         handlePaste(_view, _event, slice) {
-          if ((slice.content as unknown as Slice)?.content[0]?.attrs) {     //LINTFIX
+          if ((slice.content as unknown as Slice)?.content[0]?.attrs) {
             slice1 = slice;
           }
           return false;
@@ -223,7 +219,6 @@ export function onUpdateAppendTransaction(
         demoPos = prevState.selection.from;
         node1 = prevState.doc.resolve(demoPos).parent;
         if (index === 0) {
-          // _startPos = csview.state.selection.$from.before(1);
           _startPos = csview.state.selection.$from.before(csview.state.selection.$from.depth === 0 ? 1 : csview.state.selection.$from.depth);
           node2 = csview.state.tr.doc.nodeAt(_startPos);
 
@@ -295,7 +290,6 @@ export function applyStyleForPreviousEmptyParagraph(nextState: EditorState, tr: 
   return tr;
 }
 
-// [FS] IRAD-1202 2021-02-15
 export function remapCounterFlags(tr) {
   // Depending on the window variables,
   // set counters for numbering.
@@ -309,21 +303,19 @@ export function remapCounterFlags(tr) {
 
 export function applyStyles(state: EditorState, tr?: Transform) {
   tr ??= state.tr;
-  tr?.doc?.descendants(function (child) {
-    if (child.type.name !== 'paragraph') {
-      return true;
-  }
-    if (!child.content.size) {
-      // need to handle normal, but normal is running oom
-      return false;
-      }
+  tr?.doc?.descendants(function (child, pos) {
+    const contentLen = child.content.size;
+    if (haveEligibleChildren(child, contentLen)) {
+      const docLen = tr.doc.content.size;
+      // Validate end position.
+      const end = Math.min(pos + contentLen, docLen);
       // check if the loaded document's para have valid styleName
       const styleName = child.attrs.styleName ?? RESERVED_STYLE_NONE;
-    tr = applyLatestStyle(styleName, state, tr, child, 0, child.nodeSize);
-    return false;
+      tr = applyLatestStyle(styleName, state, tr, child, pos, end);
+    }
   });
-
   return tr;
+
 }
 
 function validateStyleName(node) {
@@ -454,7 +446,6 @@ export function nodeAssignment(state) {
   return nodes;
 }
 
-// [FS] IRAD-1481 2021-07-02
 // FIX: Style with First Word Bold and Continue is not showing properly when entering text in a new paragraph
 function applyLineStyleForBoldPartial(nextState, tr) {
   const { selection, schema } = nextState;
@@ -569,7 +560,6 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
             styleName = style.styles?.nextLineStyleName ?? RESERVED_STYLE_NONE;
           }
 
-          // [FS] IRAD-1201 2021-02-18
           // get the nextLine Style from the current style object.
           const marks = getMarkByStyleName(styleName, nextState.schema);
           nextNode.descendants((child) => {
@@ -621,7 +611,7 @@ function findPreviousParagraph($from) {
 * Finds the last paragraph inside a given node (e.g., inside a list item).
 */
 function findLastParagraph(node) {
-  if (!node || !node.isBlock) return null;
+  if (!node?.isBlock) return null;
 
   for (let i = node.childCount - 1; i >= 0; i--) {
     const child = node.child(i);
@@ -660,13 +650,11 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       newattrs.overriddenLineSpacing = null;
       newattrs.overriddenLineSpacingValue = null;
 
-      // [FS] IRAD-1223 2021-03-04
       // Line spacing not working for next line style
       newattrs.lineSpacing = getLineSpacingValue(
         nextLineStyle.styles.lineHeight ? nextLineStyle.styles.lineHeight : ''
       );
     } else if (RESERVED_STYLE_NONE === nextLineStyleName) {
-      // [FS] IRAD-1229 2021-03-03
       // Next line style None not applied
       newattrs = resetNodeAttrs(newattrs, nextLineStyleName);
     }
@@ -697,19 +685,13 @@ export function isDocChanged(transactions) {
 }
 
 export function applyNormalIfNoStyle(nextState, tr, node, opt?) {
-  if (!tr) {
-    tr = nextState.tr;
-  }
+  tr ??= nextState.tr;
   node.descendants(function (child, pos) {
     const contentLen = child.content.size;
     if (tr && haveEligibleChildren(child, contentLen)) {
       const docLen = tr.doc.content.size;
-      let end = pos + contentLen;
       // Validate end position.
-      if (end > docLen) {
-        // Can't be out of range.
-        end = docLen;
-      }
+      const end = Math.min(pos + contentLen, docLen);
       let styleName = child.attrs.styleName;
       if (RESERVED_STYLE_NONE === styleName || undefined === styleName) {
         child.attrs.styleName = RESERVED_STYLE_NONE;

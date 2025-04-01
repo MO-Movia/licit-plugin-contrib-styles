@@ -309,21 +309,29 @@ export function remapCounterFlags(tr) {
 
 export function applyStyles(state: EditorState, tr?: Transform) {
   tr ??= state.tr;
-  tr?.doc?.descendants(function (child) {
-    if (child.type.name !== 'paragraph') {
-      return true;
-  }
-    if (!child.content.size) {
-      // need to handle normal, but normal is running oom
-      return false;
+  tr?.doc?.descendants(function (child, pos) {
+    const contentLen = child.content.size;
+    if (tr && haveEligibleChildren(child, contentLen)) {
+      // [FS] IRAD-1170 2021-02-02
+      // FIX: When loading some documents on load show "Cannot read nodeSize property of undefined" error.
+      const docLen = tr.doc.content.size;
+      let end = pos + contentLen;
+      // Validate end position.
+      if (end > docLen) {
+        // Can't be out of range.
+        end = docLen;
+      }
+      if (pos > docLen) {
+        // Can't be out of range.
+        pos = docLen;
       }
       // check if the loaded document's para have valid styleName
       const styleName = child.attrs.styleName ?? RESERVED_STYLE_NONE;
-    tr = applyLatestStyle(styleName, state, tr, child, 0, child.nodeSize);
-    return false;
+      tr = applyLatestStyle(styleName, state, tr, child, pos, end);
+    }
   });
-
   return tr;
+
 }
 
 function validateStyleName(node) {

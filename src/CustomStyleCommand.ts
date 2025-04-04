@@ -5,6 +5,7 @@ import {
   Transaction,
 } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
+import { CellSelection } from "prosemirror-tables";
 import { EditorView } from 'prosemirror-view';
 import { Node, Fragment, Schema } from 'prosemirror-model';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
@@ -1384,10 +1385,19 @@ export function applyStyle(
   tr: Transform
 ) {
   const { selection } = state;
-  const startPos = selection.$from.before(
-    selection.$from.depth === 0 ? 1 : selection.$from.depth
-  );
-  const endPos = selection.$to?.end();
+  let startPos, endPos;
+  if (selection instanceof CellSelection) {
+    // When selecting multiple cells
+    startPos = selection.$anchorCell.pos;
+    endPos = selection.$headCell.pos + selection.$headCell.nodeAfter.nodeSize;
+  } else {
+    startPos = selection.$from.before(
+      selection.$from.depth === 0 ? 1 : selection.$from.depth
+    );
+    endPos = selection.$to?.end();
+  }
+
+
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
 
@@ -1438,10 +1448,19 @@ export function applyLineStyle(
     }
   } else {
     const { selection } = state;
-    const from = selection.$from.before(
-      selection.$from.depth === 0 ? 1 : selection.$from.depth
-    );
-    const to = selection.$to?.end();
+    let from, to;
+    if (selection instanceof CellSelection) {
+      // When selecting multiple cells
+      from = selection.$anchorCell.pos;
+      to = selection.$headCell.pos + selection.$headCell.nodeAfter.nodeSize;
+    } else {
+      from = selection.$from.before(
+        selection.$from.depth === 0 ? 1 : selection.$from.depth
+      );
+      to = selection.$to?.end();
+    }
+
+
     // [FS] IRAD-1168 2021-06-21
     // FIX: multi-select paragraphs and apply a style with the bold the first sentence,
     // only the last selected paragraph have bold first sentence.

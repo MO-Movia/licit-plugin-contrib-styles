@@ -346,6 +346,9 @@ export class CustomStyleCommand extends UICommand {
         newattrs,
         selection
       );
+    } else if ('reset' === this._customStyle) {
+      this.resetNumber(state, dispatch, startPos, newattrs);
+      return false;
     }
 
     // [FS] IRAD-1213 2020-02-23
@@ -539,6 +542,22 @@ export class CustomStyleCommand extends UICommand {
           dispatch(tr);
         }
       });
+    }
+  }
+
+  resetNumber(
+    state: EditorState,
+    dispatch?: (tr: Transform | Transaction) => void,
+    startPos?: number,
+    newattrs?
+  ) {
+    let tr = state.tr;
+    if (newattrs) {
+      newattrs['reset'] = 'true';
+      tr = tr.setNodeMarkup(startPos, undefined, newattrs);
+    }
+    if (dispatch) {
+      dispatch(tr);
     }
   }
 

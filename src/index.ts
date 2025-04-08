@@ -643,6 +643,9 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       if (newattrs.innerLink) {
         newattrs.innerLink = null;
       }
+            if (newattrs.reset === 'true') {
+        newattrs.reset = 'false';
+      }
       newattrs.overriddenAlign = null;
       newattrs.overriddenAlignValue = null;
       newattrs.overriddenIndent = null;

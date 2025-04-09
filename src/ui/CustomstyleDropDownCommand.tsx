@@ -87,7 +87,10 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
       'clearstyle',
       'Clear Style'
     );
-    MENU_COMMANDS['reset'] = new CustomStyleCommand('reset', 'Reset');
+    MENU_COMMANDS['reset'] = new CustomStyleCommand(
+      'reset',
+      'Restart Numbering'
+    );
     return [MENU_COMMANDS];
   }
   isAllowedNode(node: Node) {

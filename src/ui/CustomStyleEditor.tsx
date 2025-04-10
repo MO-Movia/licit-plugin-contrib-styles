@@ -613,13 +613,21 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   handleTOT(val) {
     this.setState((prevState) => ({
-      styles: { ...prevState.styles, tot: val.target.checked },
+      styles: {
+        ...prevState.styles,
+        tot: val.target.checked,
+        prefixValue: val.target.checked ? 'TABLE' : '',
+      },
     }));
   }
 
   handleTOF(val) {
     this.setState((prevState) => ({
-      styles: { ...prevState.styles, tof: val.target.checked },
+      styles: {
+        ...prevState.styles,
+        tof: val.target.checked,
+        prefixValue: val.target.checked ? 'FIGURE' : '',
+      },
     }));
   }
 
@@ -1133,6 +1141,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <label style={{ fontSize: '12px', color: '#464343' }}>
                       <input
                         checked={this.state.styles.toc}
+                        disabled={
+                          this.state.styles.tot || this.state.styles.tof
+                        }
                         data-cy="cyStyleTOC"
                         onChange={this.handleTOC.bind(this)}
                         type="checkbox"
@@ -1153,6 +1164,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <label style={{ fontSize: '12px', color: '#464343' }}>
                       <input
                         checked={this.state.styles.tot}
+                        disabled={
+                          this.state.styles.toc || this.state.styles.tof
+                        }
                         data-cy="cyStyleTOT"
                         onChange={this.handleTOT.bind(this)}
                         type="checkbox"
@@ -1173,6 +1187,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <label style={{ fontSize: '12px', color: '#464343' }}>
                       <input
                         checked={this.state.styles.tof}
+                        disabled={
+                          this.state.styles.tot || this.state.styles.toc
+                        }
                         data-cy="cyStyleTOF"
                         onChange={this.handleTOF.bind(this)}
                         type="checkbox"
@@ -1801,8 +1818,10 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <div className="molsp-settingsdiv">
                     <input
                       checked={
+                        !(this.state.styles.tot || this.state.styles.tof) &&
                         this.state.styles.nextLineStyleName ===
-                          this.state.styleName && !this.state.otherStyleSelected
+                          this.state.styleName &&
+                        !this.state.otherStyleSelected
                       }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 1)}
@@ -1830,8 +1849,10 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   >
                     <input
                       checked={
+                        this.state.styles.tot ||
+                        this.state.styles.tof ||
                         this.state.styles.nextLineStyleName ===
-                        RESERVED_STYLE_NONE
+                          RESERVED_STYLE_NONE
                       }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 0)}

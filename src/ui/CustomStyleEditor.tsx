@@ -617,9 +617,11 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         ...prevState.styles,
         tot: val.target.checked,
         prefixValue: val.target.checked ? 'TABLE' : '',
+        hasNumbering: val.target.checked,
         nextLineStyleName: val.target.checked
           ? RESERVED_STYLE_NONE
           : prevState.styles.nextLineStyleName,
+        styleLevel: val.target.checked ? '2' : 'none',
       },
     }));
   }
@@ -630,9 +632,11 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         ...prevState.styles,
         tof: val.target.checked,
         prefixValue: val.target.checked ? 'FIGURE' : '',
+        hasNumbering: val.target.checked,
         nextLineStyleName: val.target.checked
           ? RESERVED_STYLE_NONE
           : prevState.styles.nextLineStyleName,
+        styleLevel: val.target.checked ? '2' : 'none',
       },
     }));
   }

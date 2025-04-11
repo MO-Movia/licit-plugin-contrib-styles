@@ -617,6 +617,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         ...prevState.styles,
         tot: val.target.checked,
         prefixValue: val.target.checked ? 'TABLE' : '',
+        nextLineStyleName: val.target.checked
+          ? RESERVED_STYLE_NONE
+          : prevState.styles.nextLineStyleName,
       },
     }));
   }
@@ -627,6 +630,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         ...prevState.styles,
         tof: val.target.checked,
         prefixValue: val.target.checked ? 'FIGURE' : '',
+        nextLineStyleName: val.target.checked
+          ? RESERVED_STYLE_NONE
+          : prevState.styles.nextLineStyleName,
       },
     }));
   }
@@ -1141,10 +1147,10 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <label style={{ fontSize: '12px', color: '#464343' }}>
                       <input
                         checked={this.state.styles.toc}
+                        data-cy="cyStyleTOC"
                         disabled={
                           this.state.styles.tot || this.state.styles.tof
                         }
-                        data-cy="cyStyleTOC"
                         onChange={this.handleTOC.bind(this)}
                         type="checkbox"
                       />
@@ -1164,10 +1170,10 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <label style={{ fontSize: '12px', color: '#464343' }}>
                       <input
                         checked={this.state.styles.tot}
+                        data-cy="cyStyleTOT"
                         disabled={
                           this.state.styles.toc || this.state.styles.tof
                         }
-                        data-cy="cyStyleTOT"
                         onChange={this.handleTOT.bind(this)}
                         type="checkbox"
                       />
@@ -1187,10 +1193,10 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <label style={{ fontSize: '12px', color: '#464343' }}>
                       <input
                         checked={this.state.styles.tof}
+                        data-cy="cyStyleTOF"
                         disabled={
                           this.state.styles.tot || this.state.styles.toc
                         }
-                        data-cy="cyStyleTOF"
                         onChange={this.handleTOF.bind(this)}
                         type="checkbox"
                       />

@@ -28,10 +28,10 @@ export function clearCustomStyleAttribute(node: Node) {
     // FIX: cannot assign to readonly property styleName of object.
     const newAttrs = { ...node.attrs };
     if (node.attrs.styleName) {
-      newAttrs['styleName'] = RESERVED_STYLE_NONE;
+      newAttrs.styleName = RESERVED_STYLE_NONE;
     }
     //SL-3
-    newAttrs['indent'] = null;
+    newAttrs.indent = null;
     node?.type?.create(newAttrs, node.content, node.marks);
   }
 }

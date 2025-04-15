@@ -2,23 +2,20 @@ import React from 'react';
 
 import { canUseCSSFont } from './canUseCSSFont.js';
 
-const cached = {};
+const cached: Record<string, React.ReactElement> = {};
 
-const CSS_CDN_URL = '//fonts.googleapis.com/icon?family=Material+Icons';
-const CSS_FONT = 'Material Icons';
+canUseCSSFont('Material Icons')
+  .then((fontSupported) => {
+    if (!fontSupported) {
+      console.warn(
+        'Material fonts missing! Add CSS from //fonts.googleapis.com/icon?family=Material+Icons'
+      );
+      // Now loaded locally, so that it work in closed network as well.
+    }
+  })
+  .catch(console.error);
 
-(async function () {
-  // Inject CSS Fonts reuqired for toolbar icons.
-  const fontSupported = await canUseCSSFont(CSS_FONT);
-  if (!fontSupported) {
-    console.info('Add CSS from ', CSS_CDN_URL);
-    // [FS] IRAD-1061 2020-09-19
-    // Now loaded locally, so that it work in closed network as well.
-    //injectStyleSheet(CSS_CDN_URL);
-  }
-})();
-
-class SuperscriptIcon extends React.PureComponent {
+export class SuperscriptIcon extends React.PureComponent {
   render(): React.ReactElement {
     return (
       <span className="superscript-wrap">
@@ -28,7 +25,7 @@ class SuperscriptIcon extends React.PureComponent {
     );
   }
 }
-class SubscriptIcon extends React.PureComponent {
+export class SubscriptIcon extends React.PureComponent {
   render(): React.ReactElement {
     return (
       <span className="subscript-wrap">

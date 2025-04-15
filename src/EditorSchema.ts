@@ -109,12 +109,12 @@ function createStyleNodeAttributes(schema: Schema) {
 
 function getAnExistingAttribute(schema) {
   let existingAttr = null;
-  existingAttr = schema['marks']['link']['attrs']['href'];
+  existingAttr = schema.marks.link.attrs.href;
   return existingAttr;
 }
 function getMarkContent(type, schema, nodeAttrs, toDOM) {
   let content = null;
-  const contentArr = schema[SPEC]['marks']['content'];
+  const contentArr = schema[SPEC].marks.content;
   const len = contentArr.length;
   // check even index to find the content type name
   for (let i = 0; i < len; i += 2) {
@@ -144,7 +144,7 @@ function getRequiredMarks(marks, markName, schema) {
   const mark = getMarkContent(markName, schema, getMarkAttrs, toMarkDOM);
   if (mark) {
     marks.push(mark);
-    marks.push(schema[SPEC]['marks'][markName]);
+    marks.push(schema[SPEC].marks[markName]);
   }
 }
 export function createMarkAttributes(mark, existingAttr) {
@@ -152,7 +152,7 @@ export function createMarkAttributes(mark, existingAttr) {
     const requiredAttrs = [...NEWATTRS];
     requiredAttrs.forEach((key) => {
       if (!mark.attrs) {
-        mark['attrs'] = {};
+        mark.attrs = {};
       }
       if (mark.attrs) {
         let newAttr = mark.attrs[key];

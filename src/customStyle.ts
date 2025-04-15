@@ -26,11 +26,12 @@ function isValidStyleName(styleName) {
 
 export function addStyleToList(style: Style) {
   if (0 < customStyles.length) {
-    const index = customStyles.findIndex(item => item.styleName === style.styleName);
+    const index = customStyles.findIndex(
+      (item) => item.styleName === style.styleName
+    );
     if (index !== -1) {
       customStyles[index] = style;
-    }
-    else {
+    } else {
       customStyles.push(style);
     }
   }

@@ -1,4 +1,4 @@
-import { Icon } from './Icon';
+import { Icon, SubscriptIcon, SuperscriptIcon } from './Icon';
 
 describe('Icon', () => {
   const props = {
@@ -16,6 +16,7 @@ describe('Icon', () => {
     };
     const icon = new Icon(props);
     expect(icon.render()).toBeDefined();
+    expect(new SuperscriptIcon({}).render()).toBeDefined();
   });
   it('should handle render when props is subscript', () => {
     const props = {
@@ -24,6 +25,7 @@ describe('Icon', () => {
     };
     const icon = new Icon(props);
     expect(icon.render()).toBeDefined();
+    expect(new SubscriptIcon({}).render()).toBeDefined();
   });
 
   it('should handle render when props anything else', () => {
@@ -35,7 +37,7 @@ describe('Icon', () => {
 
     expect(icon.render()).toBeDefined();
   });
-  it('should handle render when props is null', () => {
+  it('should handle render when props is blank', () => {
     const props = {
       type: '',
       title: '',

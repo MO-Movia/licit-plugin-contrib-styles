@@ -1,4 +1,4 @@
-export type HTMLStyles = {
+export interface HTMLStyles {
   align?: string; // Text align
   boldNumbering?: boolean; // true= Bold the Numbering part
   boldPartial?: boolean; // true = Bold first word
@@ -21,14 +21,17 @@ export type HTMLStyles = {
   indent?: string; // Text indent
   nextLineStyleName?: string;
   toc?: boolean;
+  tot?: boolean;
+  tof?: boolean;
   isHidden?: boolean;
   strike?: string;
   isList?: boolean;
   prefixValue?: string;
   hideNumbering?: boolean;
-};
+  resetValue?: boolean;
+}
 
-export type Style = {
+export interface Style {
   /**
    * Name of the style. Case insensitive value must be unique.
    */
@@ -37,12 +40,12 @@ export type Style = {
   description?: string; // style description
   styles?: HTMLStyles;
   docType?: string;
-};
+}
 
 /**
  * Styles to display in Preview text
  **/
-export type CSSStyle = {
+export interface CSSStyle {
   float?: string; // css float property
   fontWeight?: string; // css font-weight property
   fontStyle?: string; //css font-style property
@@ -58,9 +61,10 @@ export type CSSStyle = {
   isList?: boolean;
   prefixValue?: string;
   hideNumbering?: boolean;
-};
+  resetValue?: boolean;
+}
 
-export type StyleRuntime = {
+export interface StyleRuntime {
   /**
    * Gets array of styles asynchronously from the service
    */
@@ -82,4 +86,4 @@ export type StyleRuntime = {
    * @param name
    */
   removeStyle: (name: string) => Promise<Style[]>;
-};
+}

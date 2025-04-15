@@ -2,6 +2,7 @@ import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { CustomMenuButton } from './CustomMenuButton';
 import { EditorState } from 'prosemirror-state';
 import { Schema } from 'prosemirror-model';
+import { PopUpHandle } from '@modusoperandi/licit-ui-commands';
 
 describe('CustomMenuButton', () => {
   const mockState = {
@@ -43,7 +44,7 @@ describe('CustomMenuButton', () => {
           _popUp: null,
         },
       },
-    ] as unknown as Array<{ [string: string]: UICommand }>,
+    ] as unknown as Record<string, UICommand>[],
     staticCommand: [
       {
         newstyle: {
@@ -62,7 +63,7 @@ describe('CustomMenuButton', () => {
           _popUp: null,
         },
       },
-    ] as unknown as Array<{ [string: string]: UICommand }>,
+    ] as unknown as Record<string, UICommand>[],
     disabled: true,
     dispatch: () => undefined,
     editorState: mockState,
@@ -80,7 +81,7 @@ describe('CustomMenuButton', () => {
     custommenubutton.componentWillUnmount();
     expect(spy).toHaveBeenCalled();
   });
-  it('should handle _onClick ', () => {
+  it('should handle _onClick', () => {
     custommenubutton.state = { expanded: true };
     custommenubutton._showMenu = () => undefined;
     const spy = jest.spyOn(custommenubutton, '_showMenu');
@@ -90,31 +91,37 @@ describe('CustomMenuButton', () => {
   });
   it('should handle _onClick when this.state.expanded = true', () => {
     custommenubutton.state = { expanded: true };
-    custommenubutton._menu = { close: () => undefined } as unknown as null;
+    custommenubutton._menu = {
+      close: () => undefined,
+    } as unknown as PopUpHandle;
     const spy = jest.spyOn(custommenubutton, '_hideMenu');
     custommenubutton._onClick();
     expect(spy).toBeDefined();
     spy.mockReset();
   });
-  it('should handle _onCommand ', () => {
+  it('should handle _onCommand', () => {
     custommenubutton.state.expanded = true;
-    custommenubutton._menu = { close: () => undefined };
+    custommenubutton._menu = {
+      close: () => undefined,
+    } as unknown as PopUpHandle;
     const spy = jest.spyOn(custommenubutton, '_hideMenu');
     custommenubutton._onCommand();
     expect(spy).toHaveBeenCalled();
     spy.mockReset();
   });
-  it('should handle _onClose  ', () => {
+  it('should handle _onClose', () => {
     custommenubutton.state.expanded = true;
-    custommenubutton._menu = { close: () => undefined };
+    custommenubutton._menu = {
+      close: () => undefined,
+    } as unknown as PopUpHandle;
     custommenubutton._onClose();
-    expect(custommenubutton._menu).toBeNull();
+    expect(custommenubutton._menu).toBeFalsy();
   });
-  it('should handle _onClose when menu is not present ', () => {
+  it('should handle _onClose when menu is not present', () => {
     custommenubutton.state.expanded = true;
-    custommenubutton._menu = null;
+    custommenubutton._menu = undefined;
     custommenubutton._onClose();
-    expect(custommenubutton._menu).toBeNull();
+    expect(custommenubutton._menu).toBeFalsy();
   });
   describe('_onClick', () => {
     let component;
@@ -162,7 +169,7 @@ describe('CustomMenuButton', () => {
   });
 });
 describe('custommenubutton', () => {
-  it('should handle _showMenu ', () => {
+  it('should handle _showMenu', () => {
     const mockState = {
       doc: {
         type: 'doc',
@@ -202,7 +209,7 @@ describe('custommenubutton', () => {
             _popUp: null,
           },
         },
-      ] as unknown as Array<{ [string: string]: UICommand }>,
+      ] as unknown as Record<string, UICommand>[],
       staticCommand: [
         {
           newstyle: {
@@ -221,7 +228,7 @@ describe('custommenubutton', () => {
             _popUp: null,
           },
         },
-      ] as unknown as Array<{ [string: string]: UICommand }>,
+      ] as unknown as Record<string, UICommand>[],
       disabled: true,
       dispatch: () => undefined,
       editorState: mockState,
@@ -230,15 +237,15 @@ describe('custommenubutton', () => {
     };
     const custommenubutton = new CustomMenuButton(props);
     custommenubutton.state.expanded = true;
+    const spy = jest.fn();
     custommenubutton._menu = {
       close: () => undefined,
-      update: () => undefined,
+      update: spy,
     };
-    const spy = jest.spyOn(custommenubutton._menu, 'update');
     custommenubutton._showMenu();
     expect(spy).toHaveBeenCalled();
   });
-  it('should handle _showMenu ', () => {
+  it('should handle _showMenu with schema', () => {
     const mockschema = new Schema({
       nodes: {
         doc: {
@@ -320,7 +327,7 @@ describe('custommenubutton', () => {
             _popUp: null,
           },
         },
-      ] as unknown as Array<{ [string: string]: UICommand }>,
+      ] as unknown as Record<string, UICommand>[],
       staticCommand: [
         {
           newstyle: {
@@ -339,7 +346,7 @@ describe('custommenubutton', () => {
             _popUp: null,
           },
         },
-      ] as unknown as Array<{ [string: string]: UICommand }>,
+      ] as unknown as Record<string, UICommand>[],
       disabled: true,
       dispatch: () => undefined,
       editorState: mockState,
@@ -348,7 +355,7 @@ describe('custommenubutton', () => {
     };
     const custommenubutton = new CustomMenuButton(props);
     custommenubutton.state.expanded = true;
-    custommenubutton._menu = null;
+    custommenubutton._menu = undefined;
     expect(custommenubutton._showMenu()).toBeUndefined();
   });
 });

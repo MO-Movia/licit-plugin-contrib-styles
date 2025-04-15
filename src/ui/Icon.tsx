@@ -18,7 +18,7 @@ const CSS_FONT = 'Material Icons';
   }
 })();
 
-class SuperscriptIcon extends React.PureComponent {
+export class SuperscriptIcon extends React.PureComponent {
   render(): React.ReactElement {
     return (
       <span className="superscript-wrap">
@@ -28,7 +28,7 @@ class SuperscriptIcon extends React.PureComponent {
     );
   }
 }
-class SubscriptIcon extends React.PureComponent {
+export class SubscriptIcon extends React.PureComponent {
   render(): React.ReactElement {
     return (
       <span className="subscript-wrap">

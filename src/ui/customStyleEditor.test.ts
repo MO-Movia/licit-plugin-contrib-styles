@@ -1341,11 +1341,9 @@ describe('CustomStyleEditor', () => {
     expect(customstyleeditor.onSelectCustomStyle(() => {})).toBeUndefined();
   });
   it('should handle onSelectCustomStyle', () => {
-    jest.spyOn(customstyle, 'getStylesAsync').mockReturnValue(
-      new Promise((resolve, reject) => {
-        resolve([{ styleName: 'test', mode: 3 }]);
-      }) as unknown as Promise<Style[]>
-    );
+    jest
+      .spyOn(customstyle, 'getStylesAsync')
+      .mockReturnValue(Promise.resolve([{ styleName: 'test', mode: 3 }]));
     customstyleeditor.getCustomStyles();
     customstyleeditor.getCustomStyles();
     expect(

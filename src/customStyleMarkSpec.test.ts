@@ -9,7 +9,7 @@ describe('getAttrs', () => {
     it('should handle getAttrs', () => {
         expect(getMarkAttrs(base, dom)).toBeDefined();
     });
-    it('should handle getAttrs when base returns type != object ', () => {
+    it('should handle getAttrs when base returns type != object', () => {
         const base = () => { return {key:'value'}; };
         expect(getMarkAttrs(base, dom)).toBeDefined();
     });

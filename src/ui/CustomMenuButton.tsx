@@ -3,28 +3,24 @@
 // Need to add Icons instead of label
 
 import cx from 'classnames';
-import { EditorState } from 'prosemirror-state';
-import { Transform } from 'prosemirror-transform';
-import { EditorView } from 'prosemirror-view';
 import React from 'react';
-import { CustomButton, createPopUp } from '@modusoperandi/licit-ui-commands';
-import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
+import {
+  CustomButton,
+  PopUpHandle,
+  createPopUp,
+} from '@modusoperandi/licit-ui-commands';
 import { uuid } from './Uuid.js';
 import { CustomMenuUI } from './CustomMenuUI.js';
 
+type CustomMenuProps = {
+  className?: string;
+  disabled?: boolean;
+  icon?: string | React.ReactElement | null;
+  label?: string | React.ReactElement | null;
+  title?: string;
+};
 export class CustomMenuButton extends React.PureComponent<
-  {
-    className?: string;
-    commandGroups: Array<{ [string: string]: UICommand }>;
-    staticCommand: Array<{ [string: string]: UICommand }>;
-    disabled?: boolean;
-    dispatch: (tr: Transform) => void;
-    editorState: EditorState;
-    editorView?: EditorView | null;
-    icon?: string | React.ReactElement | null;
-    label?: string | React.ReactElement | null;
-    title?: string;
-  },
+  CustomMenuProps,
   {
     expanded: boolean;
   }
@@ -32,7 +28,7 @@ export class CustomMenuButton extends React.PureComponent<
   state = {
     expanded: false,
   };
-  _menu = null;
+  _menu?: PopUpHandle = null;
   _id = uuid();
 
   render(): React.ReactElement {
@@ -77,7 +73,7 @@ export class CustomMenuButton extends React.PureComponent<
   _hideMenu = (): void => {
     const menu = this._menu;
     this._menu = null;
-    menu?.close();
+    menu?.close(undefined);
   };
 
   _showMenu = (): void => {
@@ -86,7 +82,7 @@ export class CustomMenuButton extends React.PureComponent<
       ...this.props,
       onCommand: this._onCommand,
       // popupId: this._popupId
-    };
+    } as CustomMenuProps;
     if (menu) {
       menu.update(menuProps);
     } else {

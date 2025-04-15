@@ -434,7 +434,7 @@ describe('customstyledropdowncommand', () => {
   const spyhas = jest.spyOn(cusstyles, 'hasStyleRuntime').mockReturnValue(true);
   const customstyledropdowncommand = new CustomstyleDropDownCommand(props);
 
-  it('should handle getCommandGroups when hasStyleRuntime is true ', async () => {
+  it('should handle getCommandGroups when hasStyleRuntime is true', async () => {
     const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([]);
     const commandGroups = await customstyledropdowncommand.getCommandGroups();
     const headingCommands = commandGroups[0];
@@ -445,13 +445,13 @@ describe('customstyledropdowncommand', () => {
   it('should handle staticCommands', () => {
     expect(customstyledropdowncommand.staticCommands()).toBeInstanceOf(Array);
   });
-  it('should handle isAllowedNode', () => {
+  it('should handle isAllowedNode p', () => {
     const node = { type: { name: 'paragraph' } };
     expect(
       customstyledropdowncommand.isAllowedNode(node as unknown as Node)
     ).toBe(true);
   });
-  it('should handle isAllowedNode', () => {
+  it('should handle isAllowedNode ol', () => {
     const node = { type: { name: 'ordered_list' } };
     expect(
       customstyledropdowncommand.isAllowedNode(node as unknown as Node)
@@ -579,7 +579,7 @@ describe('customstyledropdowncommand', () => {
                 if (style.includes('text-align: center'))
                   attrs.align = 'center';
                 if (style.includes('text-align: right')) attrs.align = 'right';
-                const colorMatch = style.match(/color: (.*?);/);
+                const colorMatch = /color: (.*?);/.exec(style);
                 if (colorMatch) attrs.color = colorMatch[1];
                 return attrs;
               },
@@ -614,7 +614,7 @@ describe('customstyledropdowncommand', () => {
                 if (style.includes('text-align: center'))
                   attrs.align = 'center';
                 if (style.includes('text-align: right')) attrs.align = 'right';
-                const colorMatch = style.match(/color: (.*?);/);
+                const colorMatch = /color: (.*?);/.exec(style);
                 if (colorMatch) attrs.color = colorMatch[1];
                 return attrs;
               },
@@ -860,13 +860,13 @@ describe('customstyledropdowncommand 1', () => {
   };
   jest.spyOn(cusstyles, 'hasStyleRuntime').mockReturnValue(false);
   const customstyledropdowncommand = new CustomstyleDropDownCommand(props);
-  it('should handle getCommandGroups when hasStyleRuntime is false ', async () => {
+  it('should handle getCommandGroups when hasStyleRuntime is false', async () => {
     jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([]);
     const commandGroups = await customstyledropdowncommand.getCommandGroups();
     const headingCommands = commandGroups[0];
     expect(headingCommands).toBeDefined();
   });
-  it('should handle render when styleName not null', () => {
+  it('should handle render when styleName not null 2', () => {
     const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([
       {
         styleName: 'A Apply Stylefff',
@@ -942,7 +942,7 @@ describe('customstyledropdowncommand 1', () => {
                 if (style.includes('text-align: center'))
                   attrs.align = 'center';
                 if (style.includes('text-align: right')) attrs.align = 'right';
-                const colorMatch = style.match(/color: (.*?);/);
+                const colorMatch = /color: (.*?);/.exec(style);
                 if (colorMatch) attrs.color = colorMatch[1];
                 return attrs;
               },
@@ -977,7 +977,7 @@ describe('customstyledropdowncommand 1', () => {
                 if (style.includes('text-align: center'))
                   attrs.align = 'center';
                 if (style.includes('text-align: right')) attrs.align = 'right';
-                const colorMatch = style.match(/color: (.*?);/);
+                const colorMatch = /color: (.*?);/.exec(style);
                 if (colorMatch) attrs.color = colorMatch[1];
                 return attrs;
               },
@@ -1030,7 +1030,7 @@ describe('customstyledropdowncommand 1', () => {
     expect(customstyledropdowncommand.render()).toBeDefined();
     spy.mockRestore();
   });
-  it('should handle render when styleName not null', () => {
+  it('should handle render when styleName not null 3', () => {
     const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([
       {
         styleName: 'A Apply Stylefff',

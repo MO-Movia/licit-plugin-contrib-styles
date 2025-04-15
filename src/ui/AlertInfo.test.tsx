@@ -10,7 +10,7 @@ describe('alertinfo', () => {
   it('should handle alertinfo', () => {
     expect(alertinfo).toBeDefined();
   });
-  it('should handle _cancel ', () => {
+  it('should handle _cancel', () => {
     const props = {
       title: 'Alert Title',
       content: 'Alert content',
@@ -22,7 +22,7 @@ describe('alertinfo', () => {
     alertinfo._cancel();
     expect(spy).toHaveBeenCalled();
   });
-  it('should handle render ', () => {
+  it('should handle render', () => {
     const props = {
       title: '',
       content: '',

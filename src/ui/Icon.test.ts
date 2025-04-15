@@ -37,7 +37,7 @@ describe('Icon', () => {
 
     expect(icon.render()).toBeDefined();
   });
-  it('should handle render when props is blank', () => {
+  it('should handle render when props is null', () => {
     const props = {
       type: '',
       title: '',

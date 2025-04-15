@@ -1,4 +1,4 @@
-export const cached: Record<string, Promise<boolean> | undefined> = {};
+export const cached: { [key: string]: Promise<boolean> } = {};
 
 export function canUseCSSFont(fontName: string): Promise<boolean> {
   const doc = document;
@@ -17,6 +17,7 @@ export function canUseCSSFont(fontName: string): Promise<boolean> {
     // Feature is not supported, install the CSS anyway
     // https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/check#Browser_compatibility
     // SL-1
+    console.log('FontFaceSet is not supported');
     cached[fontName] = Promise.resolve(false);
   } else {
     cached[fontName] = new Promise((resolve) => {
@@ -29,7 +30,7 @@ export function canUseCSSFont(fontName: string): Promise<boolean> {
         const result = !!matched;
         resolve(result);
       };
-      doc.fonts.ready.then(check).catch(console.error);
+      doc.fonts.ready.then(check);
     });
   }
   return cached[fontName];

@@ -101,7 +101,7 @@ export class ParagraphSpacingCommand extends UICommand {
   executeWithUserInput(): boolean {
     return false;
   }
-  executeCustom(_state: EditorState, tr: Transform): Transform {
+  executeCustom(state: EditorState, tr: Transform): Transform {
     return tr;
   }
   _paragraphSpacing?: string;

@@ -4,8 +4,9 @@ import { EditorState } from 'prosemirror-state';
 import { CustomStyleCommand } from '../CustomStyleCommand';
 
 describe('customstyleitem', () => {
+
   const ed = new EditorState();
-  const props = {
+   const props = {
     command: {
       _customStyleName: 'Normal',
       _customStyle: {
@@ -49,7 +50,7 @@ describe('customstyleitem', () => {
   it('should handle render when label is not defined branch coverage', () => {
     jest.spyOn(cusstyle, 'getCustomStyleByName').mockReturnValue({
       styles: undefined,
-      styleName: '',
+      styleName: ''
     });
     const ed = new EditorState();
     const props = {
@@ -88,7 +89,7 @@ describe('customstyleitem', () => {
       hasText: false,
     };
     const customstyleitem = new CustomStyleItem(props);
-    jest.spyOn(customstyleitem, 'sampleLevel').mockReturnValue('thing');
+    jest.spyOn(customstyleitem, 'sampleLevel').mockReturnValue('');
     jest.spyOn(customstyleitem, 'hasBoldSentence').mockReturnValue(true);
 
     expect(customstyleitem.render()).toBeDefined();
@@ -96,7 +97,7 @@ describe('customstyleitem', () => {
   it('should handle render when label is not defined when hasBoldPartial and hasBoldSentance true and false respectively', () => {
     jest.spyOn(cusstyle, 'getCustomStyleByName').mockReturnValue({
       styles: undefined,
-      styleName: '',
+      styleName: ''
     });
     const ed = new EditorState();
     const props = {
@@ -121,6 +122,7 @@ describe('customstyleitem', () => {
     const customstyleitem = new CustomStyleItem(props);
     expect(customstyleitem.render()).toBeDefined();
   });
+
 
   it('should return an empty string when hasText is true and styles.hasBullet is true', () => {
     const styles = {
@@ -155,4 +157,7 @@ describe('customstyleitem', () => {
     const result = customstyleitem.sampleLevel(styles);
     expect(result).toBe('A1.1.1.');
   });
+
+
+
 });

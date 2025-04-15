@@ -17,8 +17,8 @@ import {
   hasStyleRuntime,
   isCustomStyleExists,
 } from '../customStyle.js';
-import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 
+// [FS] IRAD-1042 2020-09-09
 // To include custom styles in the toolbar
 
 let HEADING_COMMANDS = {
@@ -31,9 +31,11 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
   editorView?: EditorView;
 }> {
   hasRuntime: boolean = hasStyleRuntime();
+  //[FS] IRAD-1085 2020-10-09
   //method to build commands for list buttons
-  async getCommandGroups(): Promise<Record<string, UICommand>[]> {
+  getCommandGroups() {
     HEADING_COMMANDS = {
+      // [FS] IRAD-1074 2020-12-09
       // When apply 'None' from style menu, not clearing the applied custom style.
       [RESERVED_STYLE_NONE]: new CustomStyleCommand(
         RESERVED_STYLE_NONE,
@@ -44,7 +46,7 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     // Get styles form server configured in runtime
     let HEADING_NAMES = null;
     if (this.hasRuntime) {
-      return getStylesAsync().then((result) => {
+      getStylesAsync().then((result) => {
         if (result) {
           setStyles(result);
           HEADING_NAMES = result;
@@ -78,6 +80,7 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     const MENU_COMMANDS = {
       ['newstyle']: new CustomStyleCommand('newstyle', 'New Style..'),
     };
+    // [FS] IRAD-1176 2021-02-08
     // Added a menu "Edit All" for Edit All custom styles
     MENU_COMMANDS['editall'] = new CustomStyleCommand('editall', 'Edit All');
     MENU_COMMANDS['clearstyle'] = new CustomStyleCommand(
@@ -95,19 +98,23 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
   }
 
   render(): React.ReactElement {
-    const { editorState } = this.props;
+    const { dispatch, editorState, editorView } = this.props;
     const { selection, doc } = editorState;
     const { from, to } = selection;
     let customStyleName;
     let selectedStyleCount = 0;
+    // [FS] IRAD-1088 2020-10-05
     // get the custom style name from node attribute
     doc.nodesBetween(from, to, (node) => {
-      // Applied custom style name shows only when click start and end position of paragraph,
+      // [FS] IRAD-1231 2021-03-05
+      // Issue fix : Applied custom style name shows only when click start and end position of paragraph,
       // otherwise shows 'None'.
       if (this.isAllowedNode(node)) {
         if (node.attrs.styleName) {
+          // [FS] IRAD-1043 2020-10-27
           // Show blank as style name when select paragraphs with multiple custom styles applied
           selectedStyleCount++;
+          // [FS] IRAD-1100 2020-10-30
           // Issue fix: style name shows blank when select multiple paragraph with same custom style applied
           if (
             1 === selectedStyleCount ||
@@ -122,8 +129,14 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
             customStyleName = RESERVED_STYLE_NONE;
           }
         }
+        // [FS] IRAD-1231 2021-03-02
         // Show the custom style as None for paste paragraph from outside.
         else {
+          const updatedAttrs = {
+            ...node.attrs,
+            styleName: RESERVED_STYLE_NONE,
+          };
+          node = { ...node, attrs: updatedAttrs } as unknown as Node;
           customStyleName = RESERVED_STYLE_NONE;
         }
       }
@@ -137,8 +150,15 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
       <span data-cy="cyStyleBtn">
         <CustomMenuButton
           className={backgroundColorClass}
+          // [FS] IRAD-1008 2020-07-16
+          // Disable font type menu on editor disable state
+          commandGroups={this.getCommandGroups()}
           disabled={!this.hasRuntime}
+          dispatch={dispatch}
+          editorState={editorState}
+          editorView={editorView}
           label={customStyleName}
+          staticCommand={this.staticCommands()}
         />
       </span>
     );

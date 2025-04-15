@@ -36,19 +36,7 @@ describe('paragraphspacingcommand', () => {
       setParagraphSpacing(trmock, mockschema as unknown as Schema)
     ).toBeDefined();
   });
-  it('should handle setParagraphSpacing of unknown selection', () => {
-    // Mock transform object
-    const trmock = {
-      selection: {}, // Mock selection object
-      doc: {}, // Mock doc object
-    } as unknown as Transaction;
-
-    // Mock schema object with required nodes
-    const mockschema = {} as Schema;
-
-    expect(setParagraphSpacing(trmock, mockschema)).toBeDefined();
-  });
-  it('should handle setParagraphSpacing 2', () => {
+  it('should handle setParagraphSpacing', () => {
     const doc = schema.node('doc', null, [
       schema.node('paragraph'),
       schema.node('heading'),
@@ -74,8 +62,20 @@ describe('paragraphspacingcommand', () => {
       setParagraphSpacing(trmock, mockschema as unknown as Schema)
     ).toBeDefined();
   });
+  it('should handle setParagraphSpacing of unknown selection', () => {
+    // Mock transform object
+    const trmock = {
+      selection: {}, // Mock selection object
+      doc: {}, // Mock doc object
+    } as unknown as Transaction;
+
+    // Mock schema object with required nodes
+    const mockschema = {} as Schema;
+
+    expect(setParagraphSpacing(trmock, mockschema)).toBeDefined();
+  });
 });
-describe('ParagraphSpacingCommand', () => {
+describe('ParagraphSpacingCommand ', () => {
   it('should handle ParagraphSpacingCommand', () => {
     expect(new ParagraphSpacingCommand('', true)).toBeDefined();
   });
@@ -175,6 +175,7 @@ describe('ParagraphSpacingCommand', () => {
         },
       },
     };
+    // const mockview = {};
     const dispatch = () => undefined;
     const psc = new ParagraphSpacingCommand('', true).execute(
       mockstate as unknown as EditorState,
@@ -208,6 +209,7 @@ describe('ParagraphSpacingCommand', () => {
         docChanged: true,
       },
     } as unknown as EditorState;
+    // const mockview = {};
     const dispatch = () => {
       return true;
     };
@@ -219,7 +221,7 @@ describe('ParagraphSpacingCommand', () => {
     expect(psc).toBeDefined();
   });
 
-  it('should handle execute when tr.docChanged is true 2', () => {
+  it('should handle execute when tr.docChanged is true', () => {
     const mockstate = {
       schema: {},
       selection: {},

@@ -341,6 +341,9 @@ export class CustomStyleCommand extends UICommand {
         newattrs,
         selection
       );
+    } else if ('reset' === this._customStyle) {
+      this.resetNumber(state, dispatch, startPos, newattrs);
+      return false;
     }
 
     // validating the appropariate styles with corresponding levels are defined
@@ -529,6 +532,22 @@ export class CustomStyleCommand extends UICommand {
           }
         })
         .catch(console.warn);
+    }
+  }
+
+  resetNumber(
+    state: EditorState,
+    dispatch?: (tr: Transform | Transaction) => void,
+    startPos?: number,
+    newattrs?
+  ) {
+    let tr = state.tr;
+    if (newattrs) {
+      newattrs['reset'] = 'true';
+      tr = tr.setNodeMarkup(startPos, undefined, newattrs);
+    }
+    if (dispatch) {
+      dispatch(tr);
     }
   }
 

@@ -28,6 +28,7 @@ export type HTMLStyles = {
   isList?: boolean;
   prefixValue?: string;
   hideNumbering?: boolean;
+    resetValue?: boolean;
 };
 
 export type Style = {
@@ -60,6 +61,7 @@ export type CSSStyle = {
   isList?: boolean;
   prefixValue?: string;
   hideNumbering?: boolean;
+  resetValue?: boolean;
 };
 
 export type StyleRuntime = {

@@ -39,7 +39,7 @@
     "color": "^5.0.0"
   },
   "devDependencies": {
-    "@cyclonedx/cyclonedx-npm": "^2.0.0",
+    "@cyclonedx/cyclonedx-npm": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",

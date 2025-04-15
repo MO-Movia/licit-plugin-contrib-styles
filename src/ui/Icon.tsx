@@ -2,18 +2,21 @@ import React from 'react';
 
 import { canUseCSSFont } from './canUseCSSFont.js';
 
-const cached: Record<string, React.ReactElement> = {};
+const cached = {};
 
-canUseCSSFont('Material Icons')
-  .then((fontSupported) => {
-    if (!fontSupported) {
-      console.warn(
-        'Material fonts missing! Add CSS from //fonts.googleapis.com/icon?family=Material+Icons'
-      );
-      // Now loaded locally, so that it work in closed network as well.
-    }
-  })
-  .catch(console.error);
+const CSS_CDN_URL = '//fonts.googleapis.com/icon?family=Material+Icons';
+const CSS_FONT = 'Material Icons';
+
+(async function () {
+  // Inject CSS Fonts reuqired for toolbar icons.
+  const fontSupported = await canUseCSSFont(CSS_FONT);
+  if (!fontSupported) {
+    console.info('Add CSS from ', CSS_CDN_URL);
+    // [FS] IRAD-1061 2020-09-19
+    // Now loaded locally, so that it work in closed network as well.
+    //injectStyleSheet(CSS_CDN_URL);
+  }
+})();
 
 export class SuperscriptIcon extends React.PureComponent {
   render(): React.ReactElement {

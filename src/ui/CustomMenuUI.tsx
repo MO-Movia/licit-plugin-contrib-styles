@@ -192,17 +192,15 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                     this.props.editorState
                   )
                 ) {
-                  removeStyle(val.command._customStyleName)
-                    .then(() => {
-                      // [FS] IRAD-1099 2020-11-17
-                      // Issue fix: Even the applied style is removed the style name is showing in the editor
-                      this.removeCustomStyleName(
-                        this.props.editorState,
-                        val.command._customStyleName,
-                        this.props.editorView.dispatch
-                      );
-                    })
-                    .catch(console.error);
+                  removeStyle(val.command._customStyleName).then(() => {
+                    // [FS] IRAD-1099 2020-11-17
+                    // Issue fix: Even the applied style is removed the style name is showing in the editor
+                    this.removeCustomStyleName(
+                      this.props.editorState,
+                      val.command._customStyleName,
+                      this.props.editorView.dispatch
+                    );
+                  });
                 } else {
                   this.showAlert();
                 }
@@ -272,7 +270,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
         tr,
         newNode,
         pos,
-        pos + node.nodeSize - 1,
+        pos + node.nodeSize-1,
         null,
         1
       );
@@ -361,8 +359,45 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                 if (
                   !isLevelUpdated(this.props.editorState, val.styleName, val)
                 ) {
-                  saveStyle(val)
-                    .then((result) => {
+                  saveStyle(val).then((result) => {
+                    if (result) {
+                      //in bladelicitruntime, the response of the saveStyle() changed from list to a object
+                      //so need to add that style object to the current style list
+                      if (!Array.isArray(result)) {
+                        result = addStyleToList(result);
+                      }
+                      setStyles(result);
+                      result.forEach((obj) => {
+                        if (val.styleName === obj.styleName) {
+                          tr = updateDocument(
+                            this.props.editorState,
+                            this.props.editorState.tr,
+                            val.styleName,
+                            obj
+                          );
+                        }
+                      });
+                      if (tr) {
+                        dispatch(tr);
+                      }
+                    }
+                    this.props.editorView.focus();
+                    this._stylePopup.close();
+                    this._stylePopup = null;
+                  });
+                } else {
+                  this.showAlert();
+                }
+              } else {
+                // rename
+                renameStyle(this._styleName, val.styleName).then((result) => {
+                  // [FS] IRAD-1133 2021-01-06
+                  // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
+
+                  if (null != result) {
+                    let tr;
+                    delete val.editorView;
+                    saveStyle(val).then((result) => {
                       if (result) {
                         //in bladelicitruntime, the response of the saveStyle() changed from list to a object
                         //so need to add that style object to the current style list
@@ -372,11 +407,11 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                         setStyles(result);
                         result.forEach((obj) => {
                           if (val.styleName === obj.styleName) {
-                            tr = updateDocument(
+                            tr = this.renameStyleInDocument(
                               this.props.editorState,
                               this.props.editorState.tr,
-                              val.styleName,
-                              obj
+                              this._styleName,
+                              val.styleName
                             );
                           }
                         });
@@ -387,51 +422,9 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                       this.props.editorView.focus();
                       this._stylePopup.close();
                       this._stylePopup = null;
-                    })
-                    .catch(console.error);
-                } else {
-                  this.showAlert();
-                }
-              } else {
-                // rename
-                renameStyle(this._styleName, val.styleName)
-                  .then((result) => {
-                    // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
-
-                    if (null != result) {
-                      let tr;
-                      delete val.editorView;
-                      saveStyle(val)
-                        .then((result) => {
-                          if (result) {
-                            //in bladelicitruntime, the response of the saveStyle() changed from list to a object
-                            //so need to add that style object to the current style list
-                            if (!Array.isArray(result)) {
-                              result = addStyleToList(result);
-                            }
-                            setStyles(result);
-                            for (const obj of result) {
-                              if (val.styleName === obj.styleName) {
-                                tr = this.renameStyleInDocument(
-                                  this.props.editorState,
-                                  this.props.editorState.tr,
-                                  this._styleName,
-                                  val.styleName
-                                );
-                              }
-                            }
-                            if (tr) {
-                              dispatch(tr);
-                            }
-                          }
-                          this.props.editorView.focus();
-                          this._stylePopup.close();
-                          this._stylePopup = null;
-                        })
-                        .catch(console.error);
-                    }
-                  })
-                  .catch(console.error);
+                    });
+                  }
+                });
               }
             }
           }
@@ -441,6 +434,8 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     );
   }
 
+  // [FS] IRAD-1237 2021-05-05
+  // Issue fix: Rename style not working on the fly
   renameStyleInDocument(
     state: EditorState,
     tr: Transform,
@@ -449,7 +444,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   ) {
     const { doc } = state;
 
-    doc.descendants((child, pos) => {
+    doc.descendants(function (child, pos) {
       if (oldStyleName === child.attrs.styleName) {
         const newAttrs = { ...child.attrs, styleName };
         tr = tr.setNodeMarkup(pos, undefined, newAttrs);
@@ -458,6 +453,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     return tr;
   }
 
+  // [FS] IRAD-1308 2020-04-21
   // To get the customstylename of the selected paragraph
   getTheSelectedCustomStyle(editorState) {
     const { selection, doc } = editorState;

@@ -8,10 +8,7 @@ describe('canUseCSSFont', () => {
   });
 
   it('should resolve false if FontFaceSet is not supported', async () => {
-    Object.defineProperty(document, 'fonts', {
-      value: undefined,
-      writable: true,
-    });
+    Object.defineProperty(document, 'fonts', { value: undefined, writable: true });
     const result = await canUseCSSFont('TestFont');
     expect(result).toBe(false);
   });
@@ -47,7 +44,7 @@ describe('canUseCSSFont', () => {
   });
 
   it('should return cached result if font check was done before', async () => {
-    cached.CachedFont = Promise.resolve(true);
+    cached['CachedFont'] = Promise.resolve(true);
     const result = await canUseCSSFont('CachedFont');
     expect(result).toBe(true);
   });

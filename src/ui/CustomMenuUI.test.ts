@@ -1,15 +1,20 @@
+// import Enzyme from 'enzyme';
 import { createEditor, doc, p } from 'jest-prosemirror';
+// import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { CustomstylePlugin } from '../index';
 import { CustomMenuUI } from './CustomMenuUI';
-import { Schema, Node } from 'prosemirror-model';
+import { Schema } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { CustomStyleCommand } from '../CustomStyleCommand';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { SyntheticEvent } from 'react';
 import { Transform } from 'prosemirror-transform';
+import { Node } from 'prosemirror-model';
 
-describe('Custom Menu UI', () => {
+// Enzyme.configure({ adapter: new Adapter() });
+
+describe('Custom Menu UI   ', () => {
   const TestCustomStyleRuntime = {
     saveStyle: jest.fn().mockReturnValue(Promise.resolve([])),
     getStylesAsync: jest.fn().mockReturnValue(Promise.resolve([])),
@@ -432,6 +437,7 @@ describe('Custom Menu UI', () => {
     },
   });
   const mockdoc = doc(p('Hello World!!!'));
+  // mockdoc.styleName = '';
   const state = EditorState.create({
     doc: mockdoc,
     schema: schema,
@@ -467,9 +473,11 @@ describe('Custom Menu UI', () => {
   document.getElementsByClassName = jest.fn().mockImplementation(() => {
     // Return a custom Element instance with the given class name
     const mockElement = new MockElement('div');
+    // mockElement.classList.add(className);
     return [mockElement];
   });
   const custommenuui = new CustomMenuUI(CustomMenuTestProps);
+  //(custommenuui as any).props = CustomMenuTestProps;
 
   it('should render the component', () => {
     expect(custommenuui.render()).toBeDefined();
@@ -492,9 +500,10 @@ describe('Custom Menu UI', () => {
     jest.spyOn(custommenuui, 'isAllowedNode').mockReturnValue(false);
     const custommenuuipro = new CustomMenuUI(CustomMenuTestProps);
 
+    // (custommenuui as any).props = CustomMenuTestProps;
     expect(custommenuuipro.render()).toBeDefined();
   });
-  it('should render the component 1', () => {
+  it('should render the component', () => {
     const CustomMenuTestProps = {
       className: 'molcs-menu-button',
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
@@ -527,7 +536,7 @@ describe('Custom Menu UI', () => {
     const node = { type: { name: 'ordered_list' } } as unknown as Node;
     expect(custommenuui.isAllowedNode(node)).toBe(true);
   });
-  it('should handle _onUIEnter', () => {
+  it('should handle _onUIEnter ', () => {
     const parent = document.createElement('div');
     parent.setAttribute('data-test', 'test-value');
     const input = document.createElement('input');
@@ -541,16 +550,18 @@ describe('Custom Menu UI', () => {
       view: window,
       currentTarget: input,
     };
+    // const ui = new UICommand();
     const ui = {
       shouldRespondToUIEvent: () => {
         return true;
       },
     } as unknown as UICommand;
+    //jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(true);
     const spy1 = jest.spyOn(custommenuui, 'showSubMenu');
     custommenuui._onUIEnter(ui, event as unknown as SyntheticEvent);
     expect(spy1).toHaveBeenCalled();
   });
-  it('should handle _onUIEnter  when shouldRespondToUIEvent is false event.currentTarget.className === czi-custom-menu-item edit-icon', () => {
+  it('should handle _onUIEnter  when shouldRespondToUIEvent is false event.currentTarget.className === czi-custom-menu-item edit-icon ', () => {
     const parent = document.createElement('div');
     parent.setAttribute('data-test', 'test-value');
     const input = document.createElement('input');
@@ -569,13 +580,15 @@ describe('Custom Menu UI', () => {
         return false;
       },
     } as unknown as UICommand;
+    //jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(false);
+    // const spy1 = jest.spyOn(custommenuui, 'showSubMenu');
     const test = custommenuui._onUIEnter(
       ui,
       event as unknown as SyntheticEvent
     );
     expect(test).toBeUndefined();
   });
-  it('should handle _onUIEnter when shouldRespondToUIEvent is false', () => {
+  it('should handle _onUIEnter when shouldRespondToUIEvent is false ', () => {
     const parent = document.createElement('div');
     parent.setAttribute('data-test', 'test-value');
     const input = document.createElement('input');
@@ -597,6 +610,7 @@ describe('Custom Menu UI', () => {
         return true;
       },
     } as unknown as UICommand;
+    //jest.spyOn(ui, 'shouldRespondToUIEvent').mockReturnValue(true);
     const spy1 = jest.spyOn(custommenuui, '_execute');
     custommenuui._onUIEnter(ui, event as unknown as SyntheticEvent);
 
@@ -634,6 +648,7 @@ describe('Custom Menu UI', () => {
   });
   it('should handle showsubmenu when popup not null', () => {
     custommenuui._popUp = null;
+    // custommenuui._stylePopup = {close:()=>{}};
     const ui = {
       _customStyleName: 'Normal',
       _customStyle: {
@@ -659,8 +674,9 @@ describe('Custom Menu UI', () => {
       } as unknown as SyntheticEvent)
     ).toBeUndefined();
   });
-  it('should handle showsubmenu when popup not null 1', () => {
+  it('should handle showsubmenu when popup not null', () => {
     custommenuui._stylePopup = { close: () => {} } as unknown as null;
+    // custommenuui._stylePopup = {close:()=>{}};
     const ui = {
       _customStyleName: 'Normal',
       _customStyle: {
@@ -707,11 +723,9 @@ describe('Custom Menu UI', () => {
       },
     } as unknown as Transform);
     expect(
-      custommenuui.removeCustomStyleName(
-        state,
-        'AFDP_Bullet',
-        (x: unknown) => x
-      )
+      custommenuui.removeCustomStyleName(state, 'AFDP_Bullet', (x) => {
+        return x;
+      })
     ).toBe(true);
   });
 
@@ -1107,7 +1121,7 @@ describe('Custom Menu UI', () => {
     expect(custommenuui.showStyleWindow(uicommands, event, 0)).toBeUndefined();
     expect(custommenuui.showStyleWindow(uicommands, event, 0)).toBeUndefined();
   });
-  it('should handle showStyleWindow 2', () => {
+  it('should handle showStyleWindow', () => {
     const event = new Event('click');
     const uicommands = {
       _customStyleName: 'test',
@@ -1122,7 +1136,7 @@ describe('Custom Menu UI', () => {
       )
     ).toBeUndefined();
   });
-  it('should handle showStyleWindow 3', () => {
+  it('should handle showStyleWindow', () => {
     const view = new EditorView(document.createElement('div'), {
       state,
     });
@@ -1160,7 +1174,7 @@ describe('Custom Menu UI', () => {
       )
     ).toBeUndefined();
   });
-  it('should handle showStyleWindow 4', () => {
+  it('should handle showStyleWindow', () => {
     const view = new EditorView(document.createElement('div'), {
       state,
     });

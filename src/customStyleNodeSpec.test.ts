@@ -28,7 +28,7 @@ describe('toCustomStyleDOM', () => {
     return ['span', { styleName: '' }] as unknown as DOMOutputSpec;
   };
 
-  it('should handle toCustomStyleDOM', () => {
+  it('should handle toCustomStyleDOM ', () => {
     jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
       styles: {
         hasBullet: true,
@@ -44,7 +44,7 @@ describe('toCustomStyleDOM', () => {
         fontName: 'Tahoma',
         indent: '10',
         hasNumbering: true,
-        isList: true,
+        isList:true,
       },
       styleName: '',
     });
@@ -115,6 +115,7 @@ describe('toCustomStyleDOM', () => {
       },
       styleName: '',
     });
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -160,6 +161,7 @@ describe('toCustomStyleDOM', () => {
     ]);
   });
   it('should handle toCustomStyleDOM when styleName includes(RESERVED_STYLE_NONE_NUMBERING)', () => {
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -224,6 +226,7 @@ describe('toCustomStyleDOM', () => {
       },
       styleName: '',
     });
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -268,7 +271,7 @@ describe('toCustomStyleDOM', () => {
     ]);
   });
 
-  it('should handle toCustomStyleDOM when  hasBullet: false 2', () => {
+  it('should handle toCustomStyleDOM when  hasBullet: false', () => {
     jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
       styles: {
         hasBullet: true,
@@ -288,6 +291,7 @@ describe('toCustomStyleDOM', () => {
       },
       styleName: '',
     });
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -351,6 +355,7 @@ describe('toCustomStyleDOM', () => {
       },
       styleName: '',
     });
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -410,6 +415,7 @@ describe('toCustomStyleDOM', () => {
       },
       styleName: '',
     });
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -454,6 +460,7 @@ describe('toCustomStyleDOM', () => {
     ]);
   });
   it('should handle toCustomStyleDOM when  styleprops null', () => {
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -498,6 +505,7 @@ describe('toCustomStyleDOM', () => {
     ]);
   });
   it('should handle toCustomStyleDOM when  styleprops null and stylename has reservedStylenumbering and no styleLvel', () => {
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -542,6 +550,7 @@ describe('toCustomStyleDOM', () => {
     ]);
   });
   it('should handle toCustomStyleDOM when  styleprops null and stylename has reservedStylenumbering and no styleLvel and 2 not equal to indices.length', () => {
+    // const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -604,6 +613,7 @@ describe('toCustomStyleDOM', () => {
       },
       styleName: '',
     });
+    //const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -670,6 +680,7 @@ describe('toCustomStyleDOM', () => {
       },
       styleName: '',
     });
+    // const base = undefined;
     const node = {
       type: 'paragraph',
       attrs: {
@@ -718,6 +729,8 @@ describe('toCustomStyleDOM', () => {
     ]);
   });
 
+
+
   it('should reset list style counters in window variables', () => {
     const styleLevel = 3;
     const isListStyle = true;
@@ -728,4 +741,6 @@ describe('toCustomStyleDOM', () => {
     expect(window['set-cust-list-style-counter-1']).toBe(true);
     expect(window['set-cust-list-style-counter-2']).toBe(true);
   });
+
+
 });

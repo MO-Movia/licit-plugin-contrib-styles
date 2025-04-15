@@ -126,7 +126,7 @@ describe('CustomStyleEditor', () => {
     expect(customstyleeditor.onFontNameChange(event)).toBeUndefined();
   });
   describe('onFontNameChange', () => {
-    // Breakthrough code to cover code inside setState
+    // //FSFIX    Breakthrough code to cover code inside setState
     let component;
 
     beforeEach(() => {
@@ -279,7 +279,7 @@ describe('CustomStyleEditor', () => {
     const event = { target: { value: '', checked: true } };
     expect(customstyleeditor.handleTOC(event)).toBeUndefined();
   });
-  it('should handle stateless selectStyleCheckboxState', () => {
+  it('should handle selectStyleCheckboxState', () => {
     expect(customstyleeditor.selectStyleCheckboxState()).toBe(false);
   });
   it('should handle selectStyleCheckboxState', () => {
@@ -302,7 +302,7 @@ describe('CustomStyleEditor', () => {
     };
     expect(customstyleeditor.selectStyleCheckboxState()).toBe(true);
   });
-  it('should handle _save stateless', () => {
+  it('should handle _save ', () => {
     const props = {
       styles: {
         align: 'left',
@@ -322,7 +322,7 @@ describe('CustomStyleEditor', () => {
 
     expect(CustomStyleEditors._save()).toBeUndefined();
   });
-  it('should handle _save when there is errMsg', () => {
+  it('should handle _save when there is errMsg ', () => {
     customstyleeditor.state = {
       styles: {
         align: 'left',
@@ -396,7 +396,7 @@ describe('CustomStyleEditor', () => {
     const CustomStyleEditors = new CustomStyleEditor(props);
     expect(CustomStyleEditors._save()).toBeUndefined();
   });
-  it('should handle disableRename', () => {
+  it('should handle disableRename ', () => {
     const props = {
       styles: {
         align: 'left',
@@ -434,7 +434,7 @@ describe('CustomStyleEditor', () => {
       pointerEvents: 'none',
     });
   });
-  it('should handle buildStyle', () => {
+  it('should handle buildStyle ', () => {
     customstyleeditor.state = {
       styles: {
         align: 'left',
@@ -474,7 +474,7 @@ describe('CustomStyleEditor', () => {
       textDecoration: 'underline line-through',
     });
   });
-  it('should handle buildStyle when fontName and fontSize not present', () => {
+  it('should handle buildStyle when fontName and fontSize not present ', () => {
     customstyleeditor.state = {
       styles: {
         align: null,
@@ -645,6 +645,11 @@ describe('CustomStyleEditor', () => {
     });
   });
   it('should handle buildStyle when isLevelbased is true and boldnumbering false', () => {
+    const mockSelectElement = document.createElement('div');
+    mockSelectElement.innerHTML = jest
+      .spyOn(document, 'getElementById')
+      .mockReturnValue(mockSelectElement)
+      .toString();
     customstyleeditor.state = {
       styles: {
         align: 'left',
@@ -671,7 +676,7 @@ describe('CustomStyleEditor', () => {
         hasBullet: true,
       },
       mode: 0,
-      close: () => undefined,
+      close: () => {},
     };
     expect(customstyleeditor.buildStyle()).toStrictEqual({
       backgroundColor: true,
@@ -688,6 +693,11 @@ describe('CustomStyleEditor', () => {
     });
   });
   it('should handle buildStyle when underline false', () => {
+    const mockSelectElement = document.createElement('div');
+    mockSelectElement.innerHTML = jest
+      .spyOn(document, 'getElementById')
+      .mockReturnValue(mockSelectElement)
+      .toString();
     customstyleeditor.state = {
       styles: {
         align: 'left',
@@ -736,7 +746,7 @@ describe('CustomStyleEditor', () => {
     jest.spyOn(document, 'getElementById').mockReturnValue(dom);
     expect(customstyleeditor.onNextLineStyleSelected(0)).toBeUndefined();
   });
-  it('should handle onNextLineStyleSelected null', () => {
+  it('should handle onNextLineStyleSelected', () => {
     jest.spyOn(document, 'getElementById').mockReturnValue(null);
     expect(customstyleeditor.onNextLineStyleSelected(0)).toBeUndefined();
   });
@@ -808,6 +818,7 @@ describe('CustomStyleEditor', () => {
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
 
+    console.log('jifi', CustomStyleEditors.state.mode);
     const spy = jest.spyOn(CustomStyleEditors.props, 'close');
 
     CustomStyleEditors._cancel();
@@ -850,7 +861,7 @@ describe('CustomStyleEditor', () => {
     CustomStyleEditors._cancel();
     expect(spy).toHaveBeenCalled();
   });
-  it('should handle _save', () => {
+  it('should handle _save ', () => {
     const dom = document.createElement('div');
     dom.className = 'errormsg';
     dom.setAttribute('style', '');
@@ -884,7 +895,7 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 0,
-      close: () => undefined,
+      close: () => {},
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
     jest.spyOn(customstyle, 'isCustomStyleExists').mockReturnValue(true);
@@ -925,28 +936,28 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 3,
-      close: () => undefined,
+      close: () => {},
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
-    CustomStyleEditors.modifyCustomStyle = () => undefined;
+    CustomStyleEditors.modifyCustomStyle = () => {};
     const spy = jest.spyOn(CustomStyleEditors, 'modifyCustomStyle');
     CustomStyleEditors._save();
     expect(spy).toHaveBeenCalled();
   });
 
-  it('should handle handleKeyDown stateless', () => {
+  it('should handle handleKeyDown ', () => {
     const dom1 = document.createElement('div');
-    dom1.focus = () => undefined;
+    dom1.focus = () => {};
     jest.spyOn(document, 'getElementById').mockReturnValue(dom1);
     const spy = jest.spyOn(dom1, 'focus');
     customstyleeditor.handleKeyDown();
     expect(spy).toHaveBeenCalled();
   });
-  it('should handle handleKeyDown', () => {
+  it('should handle handleKeyDown ', () => {
     jest.spyOn(document, 'getElementById').mockReturnValue(null);
     expect(customstyleeditor.handleKeyDown()).toBeUndefined();
   });
-  it('should handle setNextLineStyle', () => {
+  it('should handle setNextLineStyle ', () => {
     customstyleeditor.state = {
       styles: {
         align: 'left',
@@ -975,7 +986,7 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 1,
-      close: () => undefined,
+      close: () => {},
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
 
@@ -1014,7 +1025,7 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 1,
-      close: () => undefined,
+      close: () => {},
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
 
@@ -1024,7 +1035,7 @@ describe('CustomStyleEditor', () => {
     CustomStyleEditors.setNextLineStyle('Arial');
     expect(spy).toHaveBeenCalled();
   });
-  it('should handle componentDidMount', () => {
+  it('should handle componentDidMount ', () => {
     customstyleeditor.state = {
       styles: {
         align: 'left',
@@ -1055,8 +1066,9 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 1,
-      close: () => undefined,
+      close: () => {},
     };
+    // customstyleeditor.props.mode = 1;
     const CustomStyleEditors = new CustomStyleEditor(props);
 
     const dom = document.createElement('div');
@@ -1157,7 +1169,7 @@ describe('CustomStyleEditor', () => {
   it('should return true if custom style is already applied in the document', () => {
     const editorState = {
       doc: {
-        nodesBetween: jest.fn().mockImplementation((_start, _end, callback) => {
+        nodesBetween: jest.fn().mockImplementation((start, end, callback) => {
           const node = {
             attrs: {
               styleName: 'YourCustomStyle',
@@ -1214,7 +1226,7 @@ describe('CustomStyleEditor', () => {
   it('custom style is already applied in the document', () => {
     const editorState = {
       doc: {
-        nodesBetween: jest.fn().mockImplementation((_start, _end, callback) => {
+        nodesBetween: jest.fn().mockImplementation((start, end, callback) => {
           const node = {
             attrs: {
               styleName: 'YourCustomStyle',
@@ -1324,30 +1336,26 @@ describe('CustomStyleEditor', () => {
     customstyleeditor.handleList({ target: { value: '', checked: false } });
     expect(spy).not.toHaveBeenCalled();
   });
-  it('should handle onSelectCustomStyle with undefined', () => {
+  it('should handle onSelectCustomStyle', () => {
     customstyleeditor.getCustomStyles();
-    expect(
-      customstyleeditor.onSelectCustomStyle(() => undefined)
-    ).toBeUndefined();
+    expect(customstyleeditor.onSelectCustomStyle(() => {})).toBeUndefined();
   });
   it('should handle onSelectCustomStyle', () => {
     jest
       .spyOn(customstyle, 'getStylesAsync')
-      .mockReturnValue(
-        Promise.resolve([{ styleName: 'test', mode: 3 } as Style])
-      );
+      .mockReturnValue(Promise.resolve([{ styleName: 'test', mode: 3 }]));
     customstyleeditor.getCustomStyles();
     customstyleeditor.getCustomStyles();
     expect(
       customstyleeditor.onSelectCustomStyle({ target: { value: 'test' } })
     ).toBeUndefined();
   });
-  it('should handle basic handleList', () => {
+  it('should handle handleList', () => {
     expect(
       customstyleeditor.handleList({ target: { value: 'none' } })
     ).toBeUndefined();
   });
-  it('should handle componentDidMount stateless', () => {
+  it('should handle componentDidMount ', () => {
     const props = {
       styles: {
         align: 'left',
@@ -1360,7 +1368,7 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 1,
-      close: () => undefined,
+      close: () => {},
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
     CustomStyleEditors.state = {
@@ -1380,11 +1388,11 @@ describe('CustomStyleEditor', () => {
       styleName: 'Normal',
       otherStyleSelected: '',
       customStyles: '',
-      editorView: { state: { doc: { nodesBetween: () => undefined } } },
+      editorView: { state: { doc: { nodesBetween: () => {} } } },
     };
     expect(CustomStyleEditors.componentDidMount()).toBeUndefined();
   });
-  it('should handle render 2', () => {
+  it('should handle render', () => {
     customstyleeditor.state = {
       styles: {
         align: 'center',

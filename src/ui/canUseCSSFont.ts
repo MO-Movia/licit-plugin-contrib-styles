@@ -1,4 +1,4 @@
-export const cached: { [key: string]: Promise<boolean> | undefined } = {};
+export const cached: Record<string, Promise<boolean> | undefined> = {};
 
 export function canUseCSSFont(fontName: string): Promise<boolean> {
   const doc = document;
@@ -23,10 +23,6 @@ export function canUseCSSFont(fontName: string): Promise<boolean> {
       // https://stackoverflow.com/questions/5680013/how-to-be-notified-once-a-web-font-has-loaded
       // All fonts in use by visible text have loaded.
       const check = () => {
-        if (doc.fonts.status !== 'loaded') {
-          setTimeout(check, 350);
-          return;
-        }
         // Do not use `doc.fonts.check()` because it may return falsey result.
         const fontFaces = Array.from(doc.fonts.values());
         const matched = fontFaces.find((ff) => ff.family === fontName);

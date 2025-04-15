@@ -36,6 +36,18 @@ describe('paragraphspacingcommand', () => {
       setParagraphSpacing(trmock, mockschema as unknown as Schema)
     ).toBeDefined();
   });
+  it('should handle setParagraphSpacing of unknown selection', () => {
+    // Mock transform object
+    const trmock = {
+      selection: {}, // Mock selection object
+      doc: {}, // Mock doc object
+    } as unknown as Transaction;
+
+    // Mock schema object with required nodes
+    const mockschema = {} as Schema;
+
+    expect(setParagraphSpacing(trmock, mockschema)).toBeDefined();
+  });
   it('should handle setParagraphSpacing 2', () => {
     const doc = schema.node('doc', null, [
       schema.node('paragraph'),

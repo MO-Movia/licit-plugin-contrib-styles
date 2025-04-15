@@ -12,13 +12,13 @@ import {
 import { uuid } from './Uuid.js';
 import { CustomMenuUI } from './CustomMenuUI.js';
 
-type CustomMenuProps = {
+interface CustomMenuProps {
   className?: string;
   disabled?: boolean;
   icon?: string | React.ReactElement | null;
   label?: string | React.ReactElement | null;
   title?: string;
-};
+}
 export class CustomMenuButton extends React.PureComponent<
   CustomMenuProps,
   {
@@ -81,14 +81,12 @@ export class CustomMenuButton extends React.PureComponent<
     const menuProps = {
       ...this.props,
       onCommand: this._onCommand,
-      // popupId: this._popupId
-    } as CustomMenuProps;
+    };
     if (menu) {
       menu.update(menuProps);
     } else {
       this._menu = createPopUp(CustomMenuUI, menuProps, {
         autoDismiss: true,
-        // Id: this._popupId,
         anchor: document.getElementById(this._id),
         onClose: this._onClose,
       });

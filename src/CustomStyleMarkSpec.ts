@@ -8,7 +8,7 @@ type getAttrsFn = (p: Node | string) => KeyValuePair;
 
 function getAttrs(base: getAttrsFn | undefined, dom: HTMLElement) {
   if (typeof dom != 'string' && undefined !== base) {
-    const attrs = base((dom as unknown as Node));
+    const attrs = base(dom as unknown as Node);
     // [FS] IRAD-1623 2021-11-11
     return attrs;
   } else {

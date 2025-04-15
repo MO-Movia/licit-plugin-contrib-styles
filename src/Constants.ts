@@ -7,7 +7,7 @@ export const PARAGRAPH = 'paragraph';
 export const STYLEKEY = 'styleName';
 export const ATTR_OVERRIDDEN = 'overridden';
 // eslint-disable-next-line
-export type KeyValuePair = { [key: string]: any };
+export type KeyValuePair = Record<string, any>;
 
 export const DEFAULT_NORMAL_STYLE = {
   styleName: 'Normal',
@@ -22,9 +22,9 @@ export const DEFAULT_NORMAL_STYLE = {
     nextLineStyleName: 'Normal',
     paragraphSpacingAfter: '3',
     toc: false,
-    tot:false,
-    tof:false
-  }
+    tot: false,
+    tof: false,
+  },
 };
 
 //to get the selected node

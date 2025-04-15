@@ -44,7 +44,7 @@ describe('CustomMenuButton', () => {
           _popUp: null,
         },
       },
-    ] as unknown as Array<{ [string: string]: UICommand }>,
+    ] as unknown as Record<string, UICommand>[],
     staticCommand: [
       {
         newstyle: {
@@ -63,7 +63,7 @@ describe('CustomMenuButton', () => {
           _popUp: null,
         },
       },
-    ] as unknown as Array<{ [string: string]: UICommand }>,
+    ] as unknown as Record<string, UICommand>[],
     disabled: true,
     dispatch: () => undefined,
     editorState: mockState,
@@ -209,7 +209,7 @@ describe('custommenubutton', () => {
             _popUp: null,
           },
         },
-      ] as unknown as Array<{ [string: string]: UICommand }>,
+      ] as unknown as Record<string, UICommand>[],
       staticCommand: [
         {
           newstyle: {
@@ -228,7 +228,7 @@ describe('custommenubutton', () => {
             _popUp: null,
           },
         },
-      ] as unknown as Array<{ [string: string]: UICommand }>,
+      ] as unknown as Record<string, UICommand>[],
       disabled: true,
       dispatch: () => undefined,
       editorState: mockState,
@@ -327,7 +327,7 @@ describe('custommenubutton', () => {
             _popUp: null,
           },
         },
-      ] as unknown as Array<{ [string: string]: UICommand }>,
+      ] as unknown as Record<string, UICommand>[],
       staticCommand: [
         {
           newstyle: {
@@ -346,7 +346,7 @@ describe('custommenubutton', () => {
             _popUp: null,
           },
         },
-      ] as unknown as Array<{ [string: string]: UICommand }>,
+      ] as unknown as Record<string, UICommand>[],
       disabled: true,
       dispatch: () => undefined,
       editorState: mockState,

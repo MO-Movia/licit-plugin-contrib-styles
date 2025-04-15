@@ -19,7 +19,6 @@ import {
 } from '../customStyle.js';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 
-// [FS] IRAD-1042 2020-09-09
 // To include custom styles in the toolbar
 
 let HEADING_COMMANDS = {
@@ -79,7 +78,6 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     const MENU_COMMANDS = {
       ['newstyle']: new CustomStyleCommand('newstyle', 'New Style..'),
     };
-    // [FS] IRAD-1176 2021-02-08
     // Added a menu "Edit All" for Edit All custom styles
     MENU_COMMANDS['editall'] = new CustomStyleCommand('editall', 'Edit All');
     MENU_COMMANDS['clearstyle'] = new CustomStyleCommand(

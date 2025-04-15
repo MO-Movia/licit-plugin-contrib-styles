@@ -285,13 +285,13 @@ export class CustomStyleCommand extends UICommand {
     // FIX: cannot assign to readonly property styleName of object.
     const newAttrs = { ...node.attrs };
     if (newAttrs) {
-      newAttrs['styleName'] = RESERVED_STYLE_NONE;
-      newAttrs['id'] = '';
+      newAttrs.styleName = RESERVED_STYLE_NONE;
+      newAttrs.id = '';
       // FIX: Applied number/bullet list removes when 'Clear Style'
       const isOverriddenIndent = newAttrs.overriddenIndent ?? null;
-      newAttrs['indent'] = isOverriddenIndent ? newAttrs.indent : 0;
-      newAttrs['overriddenIndent'] = isOverriddenIndent;
-      newAttrs['overriddenIndentValue'] = isOverriddenIndent
+      newAttrs.indent = isOverriddenIndent ? newAttrs.indent : 0;
+      newAttrs.overriddenIndent = isOverriddenIndent;
+      newAttrs.overriddenIndentValue = isOverriddenIndent
         ? newAttrs.overriddenIndentValue
         : null;
       tr = tr.setNodeMarkup(startPos, undefined, newAttrs);
@@ -543,7 +543,7 @@ export class CustomStyleCommand extends UICommand {
   ) {
     let tr = state.tr;
     if (newattrs) {
-      newattrs['reset'] = 'true';
+      newattrs.reset = 'true';
       tr = tr.setNodeMarkup(startPos, undefined, newattrs);
     }
     if (dispatch) {
@@ -594,18 +594,18 @@ export const compareAttributes = (mark, style): boolean => {
     case MARKEM:
       return style[EM] !== undefined;
     case MARKTEXTCOLOR:
-      return mark.attrs['color'] === style[COLOR];
+      return mark.attrs.color === style[COLOR];
     case MARKFONTSIZE:
-      return mark.attrs['pt'] == Number(style[FONTSIZE]);
+      return mark.attrs.pt == Number(style[FONTSIZE]);
     case MARKFONTTYPE:
-      return mark.attrs['name'] === style[FONTNAME];
+      return mark.attrs.name === style[FONTNAME];
     // FIX: strike through formatting not being respected on re-entry into doc editor mode.
     case MARKSTRIKE:
     case MARKSUPER:
     case MARKSUB:
       return false;
     case MARKTEXTHIGHLIGHT:
-      return mark.attrs['highlightColor'] === style['textHighlight'];
+      return mark.attrs.highlightColor === style.textHighlight;
     case MARKUNDERLINE:
       return style[UNDERLINE] !== undefined;
     default:
@@ -838,7 +838,7 @@ function hasMismatchHeirarchy(
   nodesBeforeSelection.splice(0);
   nodesAfterSelection.splice(0);
   const attrs = { ...node.attrs };
-  attrs['styleName'] = styleName;
+  attrs.styleName = styleName;
   let previousLevel = null;
   let levelDiff = 0;
   let isAfter = false;

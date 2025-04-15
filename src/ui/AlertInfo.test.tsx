@@ -6,7 +6,7 @@ describe('alertinfo', () => {
     content: 'Alert content',
     close: () => {},
   };
-   const alertinfo = new AlertInfo(props);
+  const alertinfo = new AlertInfo(props);
   it('should handle alertinfo', () => {
     expect(alertinfo).toBeDefined();
   });

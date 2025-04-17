@@ -18,7 +18,6 @@ import {
 import {
   RESERVED_STYLE_NONE,
   getDetailsBullet,
-  BULLET_POINTS,
 } from '../CustomStyleNodeSpec.js';
 import type { Style } from '../StyleRuntime.js';
 import { AlertInfo } from './AlertInfo.js';

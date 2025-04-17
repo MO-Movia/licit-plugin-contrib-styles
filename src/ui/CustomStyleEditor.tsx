@@ -1854,6 +1854,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <div className="molsp-indentdiv">
                     <input
                       checked={this.state.otherStyleSelected}
+                      disabled={this.state.styles.tot || this.state.styles.tof}
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 2)}
                       type="radio"

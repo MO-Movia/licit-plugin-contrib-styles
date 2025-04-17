@@ -21,11 +21,14 @@ export type HTMLStyles = {
   indent?: string; // Text indent
   nextLineStyleName?: string;
   toc?: boolean;
+  tot?: boolean;
+  tof?: boolean;
   isHidden?: boolean;
   strike?: string;
   isList?: boolean;
   prefixValue?: string;
   hideNumbering?: boolean;
+    resetValue?: boolean;
 };
 
 export type Style = {
@@ -58,6 +61,7 @@ export type CSSStyle = {
   isList?: boolean;
   prefixValue?: string;
   hideNumbering?: boolean;
+  resetValue?: boolean;
 };
 
 export type StyleRuntime = {

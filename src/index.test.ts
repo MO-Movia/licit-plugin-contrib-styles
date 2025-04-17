@@ -6226,7 +6226,7 @@ describe('applyStyleForPreviousEmptyParagraph', () => {
 });
 describe('applyStyles', () => {
   it('should handle applyStyles', () => {
-    expect(applyStyles({ tr: {} }, null)).toStrictEqual({});
+    expect(applyStyles({ tr: {} } as EditorState)).toStrictEqual({});
   });
 });
 describe('applyStyleForEmptyParagraph', () => {

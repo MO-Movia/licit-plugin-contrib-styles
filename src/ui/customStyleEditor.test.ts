@@ -1,6 +1,7 @@
 import { CustomStyleEditor } from './CustomStyleEditor';
 import * as customstyle from '../customStyle';
 import { SyntheticEvent } from 'react';
+import { Style } from '@modusoperandi/licit-ui-commands';
 
 describe('CustomStyleEditor', () => {
   jest.spyOn(customstyle, 'getStylesAsync').mockResolvedValue([]);
@@ -124,7 +125,8 @@ describe('CustomStyleEditor', () => {
     const event = { target: { value: 'Tahoma' } };
     expect(customstyleeditor.onFontNameChange(event)).toBeUndefined();
   });
-  describe('onFontNameChange', () => {       // //FSFIX    Breakthrough code to cover code inside setState
+  describe('onFontNameChange', () => {
+    // //FSFIX    Breakthrough code to cover code inside setState
     let component;
 
     beforeEach(() => {
@@ -156,7 +158,6 @@ describe('CustomStyleEditor', () => {
       expect(component.state.styles.fontName).toBe('Arial');
     });
   });
-
 
   it('should handle onIndentRadioChanged', () => {
     const event = { target: { value: '0' } };
@@ -191,7 +192,6 @@ describe('CustomStyleEditor', () => {
     const event = { target: { value: 'None' } };
     customstyleeditor.onLevelChange(event);
     expect(customstyleeditor.state.styles.styleLevel).toEqual('None');
-
   });
   it('should handle onBulletLevelChange', () => {
     const event = { target: { value: '' } };
@@ -1261,6 +1261,20 @@ describe('CustomStyleEditor', () => {
       })
     ).toBeUndefined();
   });
+  it('should handle modifyCustomStyle when saveStyle does not return array', () => {
+    jest
+      .spyOn(customstyle, 'saveStyle')
+      .mockResolvedValue(null as unknown as Style[] | Promise<Style[]>);
+    expect(
+      customstyleeditor.modifyCustomStyle({
+        editorView: {},
+        styleName: 'styleName',
+        mode: 1,
+        description: 'description',
+        styles: {},
+      })
+    ).toBeUndefined();
+  });
   it('should handle showAlert', () => {
     expect(customstyleeditor.showAlert()).toBeUndefined();
   });
@@ -1325,6 +1339,16 @@ describe('CustomStyleEditor', () => {
   it('should handle onSelectCustomStyle', () => {
     customstyleeditor.getCustomStyles();
     expect(customstyleeditor.onSelectCustomStyle(() => {})).toBeUndefined();
+  });
+  it('should handle onSelectCustomStyle', () => {
+    jest
+      .spyOn(customstyle, 'getStylesAsync')
+      .mockReturnValue(Promise.resolve([{ styleName: 'test', mode: 3 }]));
+    customstyleeditor.getCustomStyles();
+    customstyleeditor.getCustomStyles();
+    expect(
+      customstyleeditor.onSelectCustomStyle({ target: { value: 'test' } })
+    ).toBeUndefined();
   });
   it('should handle handleList', () => {
     expect(

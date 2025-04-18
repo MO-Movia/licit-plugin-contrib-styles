@@ -81,7 +81,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       selectedStyleMode: 'none',
       isHidden: false,
       otherStyleSelected,
-      disableControl: false,
       customStyles,
       selectedStyle: 'userDefined',
     };
@@ -378,20 +377,20 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   // handles Level drop down change
   onLevelChange(e) {
-    let isCheckboxDisabled;
-    const val = RESERVED_STYLE_NONE === e.target.value ? null : e.target.value;
-    if (val === 'None') {
+    let isCheckboxDisabled = false;
+    // const val = RESERVED_STYLE_NONE === e.target.value ? null : e.target.value;
+    if (e.target.value === 'None') {
       isCheckboxDisabled = true;
     }
 
     this.setState((prevState) => ({
       styles: {
         ...prevState.styles,
-        styleLevel: val,
+        styleLevel: e.target.value,
         hasNumbering: isCheckboxDisabled
           ? false
-          : prevState.styles.hasNumbering,
-        hasBullet: isCheckboxDisabled ? false : prevState.style?.hasBullet,
+          : prevState.styles?.hasNumbering,
+        hasBullet: isCheckboxDisabled ? false : prevState.styles?.hasBullet,
       },
     }));
   }
@@ -1451,7 +1450,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         <input
                           checked={!this.state.styles.isList}
                           disabled={
-                            this.state.disableControl ||
                             this.state.styleName === RESERVED_STYLE_NONE
                           }
                           onChange={(e) => this.handleList(e)}
@@ -1493,7 +1491,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         <input
                           checked={this.state.selectedStyle === 'userDefined'}
                           disabled={
-                            this.state.disableControl ||
                             this.state.styleName === RESERVED_STYLE_NONE
                           }
                           onChange={(e) => this.handleList(e)}
@@ -1515,7 +1512,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         <input
                           checked={this.state.selectedStyle === 'listStyle'}
                           disabled={
-                            this.state.disableControl ||
                             this.state.styleName === RESERVED_STYLE_NONE
                           }
                           onChange={this.handleList.bind(this)}
@@ -1550,7 +1546,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     className="molsp-leveltype molsp-fontstyle"
                     data-cy="cyStyleLevel"
                     disabled={
-                      this.state.disableControl ||
                       this.state.styles.isList === true ||
                       this.state.styleName === RESERVED_STYLE_NONE ||
                       this.state.styles.tot ||
@@ -1579,7 +1574,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           }
                           className="molsp-chknumbering"
                           disabled={
-                            this.state.disableControl ||
                             this.state.styles.isList === true ||
                             this.state.styleName === RESERVED_STYLE_NONE ||
                             this.state.styles.tot ||
@@ -1616,7 +1610,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           checked={this.state.styles.hasNumbering}
                           className="molsp-chknumbering"
                           disabled={
-                            this.state.disableControl ||
                             this.state.styles.styleLevel === undefined ||
                             this.state.isRadioDisabled ||
                             this.state.styles.styleLevel === 'None' ||
@@ -1985,14 +1978,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       customStyles = result;
       // [FS] IRAD-1222 2021-03-01
       // Issue fix: In edit all, the style list not showing the first time.
-      // FIX: disableControl : disable the numbering,bullet list,level,prefix and list-style controls on modify a style which have selected the numbering and also applied it in the document.
 
-      this.setState((prevState) => ({
+      this.setState(() => ({
         customStyles: result,
-        disableControl:
-          prevState.mode > 0 &&
-          prevState.styles.hasNumbering &&
-          this.isCustomStyleAlreadyApplied(),
       }));
     });
   }

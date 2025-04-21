@@ -302,7 +302,6 @@ export class CustomStyleCommand extends UICommand {
     }
 
     tr = removeTextAlignAndLineSpacing(tr, state.schema);
-    tr = createEmptyElement(state, tr, node, startPos);
     if (dispatch && tr.docChanged) {
       dispatch(tr);
       done = true;
@@ -953,129 +952,6 @@ function hasMismatchHeirarchy(
   return hasHeirarchyBroken;
 }
 
-// add new blank element and apply curresponding styles
-function createEmptyElement(
-  state: EditorState,
-  tr: Transform,
-  _node: Node /* The current node */,
-  startPos: number
-) {
-  /* Validate the missed heirachy object details are availale */
-  if (undefined !== MISSED_HEIRACHY_ELEMENT.attrs) {
-    if (!MISSED_HEIRACHY_ELEMENT.isAfter) {
-      const appliedLevel = Number(
-        getStyleLevel(MISSED_HEIRACHY_ELEMENT.attrs.styleName)
-      );
-      let hasNodeAfter = false;
-      let subsequantLevel = 0;
-      let posArray = [];
-      let counter = 0;
-      let newattrs = null;
-
-      if (nodesBeforeSelection.length > 0) {
-        nodesBeforeSelection.forEach((item) => {
-          subsequantLevel = Number(getStyleLevel(item.node.attrs.styleName));
-          if (0 === startPos && 0 === counter) {
-            if (subsequantLevel !== appliedLevel) {
-              newattrs = { ...item.node.attrs };
-              posArray.push({
-                pos: startPos,
-                appliedLevel: appliedLevel,
-                currentLevel: subsequantLevel,
-              });
-            }
-          } else if (startPos >= item.pos) {
-            if (
-              startPos !== 0 &&
-              RESERVED_STYLE_NONE !== item.node.attrs.styleName &&
-              Number(getStyleLevel(item.node.attrs.styleName)) > 0
-            ) {
-              if (appliedLevel - subsequantLevel > 1) {
-                newattrs = { ...item.node.attrs };
-                posArray = [];
-                posArray.push({
-                  pos: startPos,
-                  appliedLevel: appliedLevel,
-                  currentLevel: subsequantLevel,
-                });
-              } else if (1 === appliedLevel - subsequantLevel) {
-                posArray = [];
-                hasNodeAfter = true;
-              }
-            } else if (
-              startPos !== 0 &&
-              RESERVED_STYLE_NONE === item.node.attrs.styleName
-            ) {
-              newattrs = { ...item.node.attrs };
-              posArray.push({
-                pos: startPos,
-                appliedLevel: appliedLevel,
-                currentLevel: subsequantLevel,
-              });
-            }
-          }
-          counter++;
-        });
-      }
-      if (nodesAfterSelection.length > 0 && !hasNodeAfter) {
-        nodesAfterSelection.forEach((item) => {
-          if (startPos > item.pos) {
-            posArray.push({
-              pos: startPos,
-              appliedLevel: appliedLevel,
-              currentLevel: 0,
-            });
-          } else {
-            newattrs = MISSED_HEIRACHY_ELEMENT.attrs;
-            posArray.push({
-              pos: startPos,
-              appliedLevel: appliedLevel,
-              currentLevel: 0,
-            });
-          }
-        });
-      }
-      // }
-      if (
-        nodesBeforeSelection.length === 0 &&
-        nodesAfterSelection.length === 0
-      ) {
-        newattrs = MISSED_HEIRACHY_ELEMENT.attrs;
-        posArray.push({
-          pos: startPos,
-          appliedLevel: appliedLevel,
-          currentLevel: 0,
-        });
-      }
-
-      if (posArray.length > 0) {
-        tr = addElement(
-          newattrs,
-          state,
-          tr,
-          posArray[0].pos,
-          false,
-          posArray[0].appliedLevel,
-          posArray[0].currentLevel
-        );
-      }
-    } else {
-      tr = manageElementsAfterSelection(
-        nodesAfterSelection.length > 0
-          ? nodesAfterSelection
-          : nodesBeforeSelection,
-        state,
-        tr
-      );
-    }
-  }
-
-  nodesAfterSelection.splice(0);
-  nodesBeforeSelection.splice(0);
-  setNewElementObject(undefined, 0, null, false);
-  return tr;
-}
-
 // [FS] IRAD-1387 2021-05-25
 // Indent/deindent without heirachy break
 export function allowCustomLevelIndent(
@@ -1420,15 +1296,12 @@ export function applyStyleToEachNode(
   styleName: string
 ) {
   const way = 0;
-  let _node = null;
   tr.doc.nodesBetween(from, to, (node, startPos) => {
     if (node.type.name === 'paragraph') {
       // Issue fix: When style applied to multiple paragraphs, some of the paragraph's objectId found in deletedObjectId's
       tr = applyStyleEx(style, styleName, state, tr, node, startPos, to, way);
-      _node = node;
     }
   });
-  tr = createEmptyElement(state, tr, _node, from);
   tr = applyLineStyle(state, tr, null, 0);
   return tr;
 }

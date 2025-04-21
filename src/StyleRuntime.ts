@@ -27,7 +27,7 @@ export type HTMLStyles = {
   strike?: string;
   isList?: boolean;
   prefixValue?: string;
-  selectedStyleMode: string;
+  selectedStyleMode?: string;
   hideNumbering?: boolean;
   resetValue?: boolean;
 };

@@ -1701,7 +1701,56 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           />
                         </div>
                       </div>
-                    </div>
+                    <label>
+                        <input
+                          checked={this.state.styles?.hasBullet}
+                          className="molsp-chknumbering"
+                          disabled={
+                            this.state.isRadioDisabled ||
+                            this.state.styles.styleLevel === 'None' ||
+                            this.state.styles.styleLevel === undefined ||
+                            (this.state.styles.styleLevel === 1 &&
+                              this.state.styles.isList === true) ||
+                            this.state.styleName === RESERVED_STYLE_NONE ||
+                            this.state.styles.tot ||
+                            this.state.styles.tof
+                          }
+                          name="bullet"
+                          onChange={this.handleBulletPoints.bind(this)}
+                          type="radio"
+                        />
+                        <span
+                          style={{
+                            marginLeft: '2px',
+                            position: 'relative',
+                            top: '-2px',
+                          }}
+                        >
+                          Bullet{' '}
+                        </span>
+                        <span>
+                          <select
+                            className="molsp-fontstyle"
+                            disabled={
+                              this.checkCondition(
+                                this.state.styles?.hasBullet
+                              ) ||
+                              this.state.styleName === RESERVED_STYLE_NONE
+                            }
+                            id="bulletValue"
+                            onChange={this.onBulletLevelChange.bind(this)}
+                            style={{ textAlign: 'center' }}
+                            value={this.state.styles.bulletLevel || ''}
+                          >
+                            {BULLET_POINTS.map((value) => (
+                              <option key={value.key} value={value.key}>
+                                {value.symbol}
+                              </option>
+                            ))}
+                          </select>
+                        </span>
+                      </label>
+                      </div>
                   </fieldset>
                 </div>
                 <p className="molsp-formp">Indenting:</p>

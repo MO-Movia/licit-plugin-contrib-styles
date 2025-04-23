@@ -11,7 +11,6 @@ import { CustomStyleEditor } from './CustomStyleEditor.js';
 import {
   applyLatestStyle,
   updateDocument,
-  isCustomStyleAlreadyApplied,
 } from '../CustomStyleCommand.js';
 import {
   setStyles,
@@ -183,26 +182,15 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
             if (undefined !== val && val.command._customStyle) {
               // do edit,remove,rename code here
               if ('remove' === val.type) {
-                // [FS] IRAD-1223 2021-03-01
-                // Not allow user to remove already in used custom style with numbering, which shall break the heirarchy.
-                if (
-                  !isCustomStyleAlreadyApplied(
+                removeStyle(val.command._customStyleName).then(() => {
+                  // [FS] IRAD-1099 2020-11-17
+                  // Issue fix: Even the applied style is removed the style name is showing in the editor
+                  this.removeCustomStyleName(
+                    this.props.editorState,
                     val.command._customStyleName,
-                    this.props.editorState
-                  )
-                ) {
-                  removeStyle(val.command._customStyleName).then(() => {
-                    // [FS] IRAD-1099 2020-11-17
-                    // Issue fix: Even the applied style is removed the style name is showing in the editor
-                    this.removeCustomStyleName(
-                      this.props.editorState,
-                      val.command._customStyleName,
-                      this.props.editorView.dispatch
-                    );
-                  });
-                } else {
-                  this.showAlert();
-                }
+                    this.props.editorView.dispatch
+                  );
+                });
               } else if ('rename' === val.type) {
                 this.showStyleWindow(command, event, 2);
               } else {
@@ -269,7 +257,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
         tr,
         newNode,
         pos,
-        pos + node.nodeSize-1,
+        pos + node.nodeSize - 1,
         null,
         1
       );
@@ -277,7 +265,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
     // to remove both text align format and line spacing
     tr = this.removeTextAlignAndLineSpacing(tr, editorState.schema);
-    editorState.doc.nodesBetween(from, to, (node, startPos) => {
+    tr.doc.nodesBetween(from, to, (node, startPos) => {
       if (node.type.name === 'paragraph') {
         tr = tr.setNodeMarkup(startPos, undefined, node.attrs);
       }

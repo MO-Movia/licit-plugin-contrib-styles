@@ -718,6 +718,7 @@ describe('Custom Menu UI   ', () => {
     jest.spyOn(custommenuui, 'removeTextAlignAndLineSpacing').mockReturnValue({
       key: 'tr',
       docChanged: true,
+      doc:mockdoc,
       setNodeMarkup: () => {
         return { key: 'tr', docChanged: true };
       },

@@ -1,5 +1,11 @@
 // Plugin to handle Styles.
-import { Plugin, PluginKey, EditorState, TextSelection, Transaction } from 'prosemirror-state';
+import {
+  Plugin,
+  PluginKey,
+  EditorState,
+  TextSelection,
+  Transaction,
+} from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import {
   applyLatestStyle,
@@ -13,7 +19,7 @@ import {
   setHidenumberingFlag,
   isStylesLoaded,
   setView,
-  setCustomStylesOnLoad
+  setCustomStylesOnLoad,
 } from './customStyle.js';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec.js';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
@@ -30,11 +36,12 @@ const ATTR_STYLE_NAME = 'styleName';
 let slice1;
 
 const isNodeHasAttribute = (node, attrName) => {
-  return (attrName in (node?.attrs || {}));
+  return attrName in (node?.attrs || {});
 };
 const requiredAddAttr = (node) => {
   return (
-    'paragraph' === node?.type?.name && isNodeHasAttribute(node, ATTR_STYLE_NAME)
+    'paragraph' === node?.type?.name &&
+    isNodeHasAttribute(node, ATTR_STYLE_NAME)
   );
 };
 
@@ -118,6 +125,10 @@ export class CustomstylePlugin extends Plugin {
     };
   }
 
+  static setLevelCounter(styleCounter) {
+    document.documentElement.style.counterSet = `C1 ${styleCounter - 1}`;
+  }
+
   getEffectiveSchema(schema: Schema) {
     schema = applyEffectiveSchema(schema);
     const nodes = schema.spec.nodes;
@@ -154,13 +165,16 @@ export function onUpdateAppendTransaction(
   // custom style for next line
   if (csview) {
     if (BACKSPACEKEYCODE === csview.input.lastKeyCode) {
-      const paraPositionDiff = prevState.selection.from - nextState.selection.from;
+      const paraPositionDiff =
+        prevState.selection.from - nextState.selection.from;
       if (paraPositionDiff === 2 || paraPositionDiff === 0) {
         const { schema } = nextState;
-        const para = findParentNodeClosestToPos(tr.curSelection.$head,
+        const para = findParentNodeClosestToPos(
+          tr.curSelection.$head,
           (node) => {
             return node.type === schema.nodes.paragraph;
-          });
+          }
+        );
         if (para) {
           let styleName = para.node.attrs.styleName;
           if (RESERVED_STYLE_NONE === styleName || undefined === styleName) {
@@ -169,8 +183,17 @@ export function onUpdateAppendTransaction(
             tr = tr.setNodeMarkup(para.pos, undefined, newattrs);
             styleName = RESERVED_STYLE_NONE;
           }
-          tr = applyLatestStyle(styleName, nextState, tr, para.node, para.pos, para.pos + para.node.nodeSize - 1);
-          tr = tr.setSelection(TextSelection.create(tr.doc, nextState.selection.from));
+          tr = applyLatestStyle(
+            styleName,
+            nextState,
+            tr,
+            para.node,
+            para.pos,
+            para.pos + para.node.nodeSize - 1
+          );
+          tr = tr.setSelection(
+            TextSelection.create(tr.doc, nextState.selection.from)
+          );
         }
       }
     }
@@ -179,18 +202,23 @@ export function onUpdateAppendTransaction(
       tr.selection.$from.start() === tr.selection.$from.end()
     ) {
       tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
-    }
-    else if (ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$cursor?.pos === tr.selection.$from.start()) {
+    } else if (
+      ENTERKEYCODE === csview.input.lastKeyCode &&
+      tr.selection.$cursor?.pos === tr.selection.$from.start()
+    ) {
       tr = applyStyleForPreviousEmptyParagraph(nextState, tr);
       const cursourPosition = prevState.tr.selection.$cursor?.pos;
-      if (cursourPosition !== undefined && cursourPosition >= 0 && cursourPosition <= prevState.doc.content.size) {
+      if (
+        cursourPosition !== undefined &&
+        cursourPosition >= 0 &&
+        cursourPosition <= prevState.doc.content.size
+      ) {
         tr = tr.setSelection(TextSelection.create(tr.doc, cursourPosition));
       }
     }
   }
   tr = applyLineStyleForBoldPartial(nextState, tr);
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
-
     let _startPos = 0;
     let _endPos = 0;
     let node2 = null;
@@ -205,60 +233,94 @@ export function onUpdateAppendTransaction(
       ) {
         if (index !== 0) {
           _startPos = _endPos;
-
         }
         demoPos = prevState.selection.from;
         node1 = prevState.doc.resolve(demoPos).parent;
         if (index === 0) {
-          _startPos = csview.state.selection.$from.before(csview.state.selection.$from.depth === 0 ? 1 : csview.state.selection.$from.depth);
+          _startPos = csview.state.selection.$from.before(
+            csview.state.selection.$from.depth === 0
+              ? 1
+              : csview.state.selection.$from.depth
+          );
           node2 = csview.state.tr.doc.nodeAt(_startPos);
-
         } else {
-
           node2 = csview.state.tr.doc.nodeAt(demoPos);
         }
 
         if (!node1.content?.content[0]?.attrs) {
           const opt = 1;
           if (node2?.type?.name === 'table') {
-            const styleName = slice1.content.content[index].attrs.styleName ?? 'Normal';
+            const styleName =
+              slice1.content.content[index].attrs.styleName ?? 'Normal';
             const node = nextState.tr.doc.nodeAt(_startPos);
             const len = node.nodeSize;
             _endPos = _startPos + len;
-            tr = applyLatestStyle(styleName, nextState, tr, node, _startPos, _endPos, null, opt);
-          }
-          else {
+            tr = applyLatestStyle(
+              styleName,
+              nextState,
+              tr,
+              node,
+              _startPos,
+              _endPos,
+              null,
+              opt
+            );
+          } else {
             if (index === 0) {
               _startPos = csview.state.selection.from - 1;
             }
             const node = nextState.tr.doc.nodeAt(_startPos);
             //FIX: Copied text show Normal style name instead of showing the applied style in the current paragraph.
-            let styleName = (null === slice1.content.content[index]?.attrs?.styleName ? node?.attrs?.styleName : slice1.content.content[index]?.attrs?.styleName);
+            let styleName =
+              null === slice1.content.content[index]?.attrs?.styleName
+                ? node?.attrs?.styleName
+                : slice1.content.content[index]?.attrs?.styleName;
             styleName = styleName ?? RESERVED_STYLE_NONE;
             const len = node.nodeSize;
             _endPos = _startPos + len;
-            tr = applyLatestStyle(styleName ?? '', nextState, tr, node, _startPos, _endPos - 1, null, opt);
+            tr = applyLatestStyle(
+              styleName ?? '',
+              nextState,
+              tr,
+              node,
+              _startPos,
+              _endPos - 1,
+              null,
+              opt
+            );
             const newattrs = { ...node.attrs };
             newattrs.styleName = styleName;
             tr = tr.setNodeMarkup(_startPos, undefined, newattrs);
           }
-        }
-        else {
+        } else {
           if (node2.type.name === 'table') {
             const styleName = node1.attrs.styleName ?? 'Normal';
             const node = nextState.tr.doc.nodeAt(_startPos);
             const len = node.nodeSize;
             const endPos = _startPos + len;
             const styleProp = getCustomStyleByName(styleName);
-            tr = applyStyleToEachNode(nextState, _startPos, endPos, tr, styleProp, styleName);
-          }
-          else {
+            tr = applyStyleToEachNode(
+              nextState,
+              _startPos,
+              endPos,
+              tr,
+              styleProp,
+              styleName
+            );
+          } else {
             const styleName = node1.attrs.styleName ?? 'Normal';
             const node = nextState.tr.doc.nodeAt(_startPos);
             const len = node.nodeSize;
             const endPos = _startPos + len;
             const styleProp = getCustomStyleByName(styleName);
-            tr = applyStyleToEachNode(nextState, _startPos, endPos, tr, styleProp, styleName);
+            tr = applyStyleToEachNode(
+              nextState,
+              _startPos,
+              endPos,
+              tr,
+              styleProp,
+              styleName
+            );
           }
         }
       }
@@ -269,13 +331,25 @@ export function onUpdateAppendTransaction(
   return tr;
 }
 
-
 //LIC-254 Create new line by placing cursor at the beginning of a paragraph applies the current style instead of Normal style
-export function applyStyleForPreviousEmptyParagraph(nextState: EditorState, tr: Transform) {
+export function applyStyleForPreviousEmptyParagraph(
+  nextState: EditorState,
+  tr: Transform
+) {
   if ((tr as Transaction).selection.$from.parentOffset === 0) {
-    const prevNode = nextState.doc.resolve((tr as Transaction).selection.$anchor.pos - 1).nodeBefore;
+    const prevNode = nextState.doc.resolve(
+      (tr as Transaction).selection.$anchor.pos - 1
+    ).nodeBefore;
     if (prevNode) {
-      tr = applyLatestStyle(prevNode?.attrs?.styleName, nextState, tr, prevNode, (tr as Transaction).selection.$head.before(), ((tr as Transaction).selection.$from.end()), null);
+      tr = applyLatestStyle(
+        prevNode?.attrs?.styleName,
+        nextState,
+        tr,
+        prevNode,
+        (tr as Transaction).selection.$head.before(),
+        (tr as Transaction).selection.$from.end(),
+        null
+      );
     }
   }
   return tr;
@@ -306,7 +380,6 @@ export function applyStyles(state: EditorState, tr?: Transform) {
     }
   });
   return tr;
-
 }
 
 function validateStyleName(node) {
@@ -359,7 +432,11 @@ function applyLineStyleForBoldPartial(nextState, tr) {
 // Select multiple paragraph with empty paragraph and apply style not working.
 export function applyStyleForEmptyParagraph(nextState, tr) {
   const opt = 1;
-  const startPos = nextState.selection?.$from.before(nextState.selection?.$from.depth === 0 ? 1 : nextState.selection?.$from.depth);
+  const startPos = nextState.selection?.$from.before(
+    nextState.selection?.$from.depth === 0
+      ? 1
+      : nextState.selection?.$from.depth
+  );
   const endPos = nextState.selection?.$to?.end();
   if (null === tr) {
     tr = nextState.tr;
@@ -405,14 +482,20 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
     const prevParagraph = findPreviousParagraph($from);
     const required = requiredAddAttr(prevParagraph);
     if (required) {
-      let newattrs = { styleName: prevParagraph.attrs.styleName, indent: prevParagraph.attrs.indent, align: prevParagraph.attrs.align };
+      let newattrs = {
+        styleName: prevParagraph.attrs.styleName,
+        indent: prevParagraph.attrs.indent,
+        align: prevParagraph.attrs.align,
+      };
 
       const nextNodePos = nextState.selection.from - 1;
       const nextNode = nextState.doc.nodeAt(nextNodePos);
 
       let IsActiveNode = false;
-      if (nextNodePos > prevState.selection.from &&
-        nextNodePos < nextState.selection.from) {
+      if (
+        nextNodePos > prevState.selection.from &&
+        nextNodePos < nextState.selection.from
+      ) {
         IsActiveNode = true;
       }
 
@@ -424,14 +507,18 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
           // [FS] IRAD-1217 2021-02-24
           // Select style for next line not working continuously for more that 2 paragraphs
           if ($from.node(-1).type.name !== 'list_item') {
-            newattrs = setNodeAttrs(resetTheDefaultStyleNameToNone(style.styles.nextLineStyleName), newattrs);
+            newattrs = setNodeAttrs(
+              resetTheDefaultStyleNameToNone(style.styles.nextLineStyleName),
+              newattrs
+            );
           }
           if (style.styles.isList === true) {
             if (Listnode.isText === false) {
               newattrs.indent = Listnode.attrs.indent;
-            }
-            else {
-              const ListnodeAlt = prevState.doc.nodeAt(posList - Listnode.nodeSize);
+            } else {
+              const ListnodeAlt = prevState.doc.nodeAt(
+                posList - Listnode.nodeSize
+              );
               newattrs.indent = ListnodeAlt.attrs.indent;
             }
           }
@@ -489,8 +576,8 @@ function findPreviousParagraph($from) {
 }
 
 /*
-* Finds the last paragraph inside a given node (e.g., inside a list item).
-*/
+ * Finds the last paragraph inside a given node (e.g., inside a list item).
+ */
 function findLastParagraph(node) {
   if (!node?.isBlock) return null;
 
@@ -524,7 +611,7 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       if (newattrs.innerLink) {
         newattrs.innerLink = null;
       }
-            if (newattrs.reset === 'true') {
+      if (newattrs.reset === 'true') {
         newattrs.reset = 'false';
       }
       newattrs.overriddenAlign = null;
@@ -557,8 +644,10 @@ function resetNodeAttrs(newattrs, nextLineStyleName) {
 
 function isNewParagraph(prevState, nextState, view) {
   let bOk = false;
-  if (ENTERKEYCODE === view.input.lastKeyCode &&
-    nextState.selection.from - prevState.selection.from <= PARA_POSITION_DIFF) {
+  if (
+    ENTERKEYCODE === view.input.lastKeyCode &&
+    nextState.selection.from - prevState.selection.from <= PARA_POSITION_DIFF
+  ) {
     bOk = true;
   }
   return bOk;

@@ -443,7 +443,7 @@ describe('customstyledropdowncommand', () => {
     spy.mockRestore();
   });
   it('should handle staticCommands', () => {
-    expect(customstyledropdowncommand.staticCommands()).toBeInstanceOf(Array);
+    expect(customstyledropdowncommand.staticCommands('')).toBeInstanceOf(Array);
   });
   it('should handle isAllowedNode', () => {
     const node = { type: { name: 'paragraph' } };

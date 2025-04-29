@@ -55,7 +55,7 @@ import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
 } from './CustomStyleNodeSpec.js';
-
+import JSONEditor from './ui/JSONEditor.js';
 export const STRONG = 'strong';
 export const EM = 'em';
 export const COLOR = 'color';
@@ -312,7 +312,8 @@ export class CustomStyleCommand extends UICommand {
   execute = (
     state: EditorState,
     dispatch?: (tr: Transform) => void,
-    view?: EditorView
+    view?: EditorView,
+    event?: KeyboardEvent | MouseEvent,
   ): boolean => {
     let tr = state.tr;
     const { selection } = state;
@@ -327,7 +328,13 @@ export class CustomStyleCommand extends UICommand {
       this.editWindow(state, view, 0);
       return false;
     } else if ('editall' === this._customStyle) {
-      this.editWindow(state, view, 3);
+      if (event && event.ctrlKey) {
+        this.jsonEditor(view);
+
+      } else {
+        this.editWindow(state, view, 3);
+
+      }
       return false;
     }
     // [FS] IRAD-1053 2020-10-08
@@ -492,6 +499,26 @@ export class CustomStyleCommand extends UICommand {
           view.focus();
         },
       }
+    );
+  }
+  jsonEditor(view: EditorView) {
+    this._popUp = createPopUp(
+      JSONEditor,
+      {
+        editorView: view,
+      },
+      {
+        autoDismiss: false,
+        modal: true,
+        position: atViewportCenter,
+        onClose: () => {
+          if (this._popUp) {
+            this._popUp = null;
+            view.focus();
+          }
+        },
+      }
+
     );
   }
   createNewStyle(

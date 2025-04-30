@@ -4,8 +4,8 @@ import {
   setTextAlign,
   setTextLineSpacing,
 } from '@modusoperandi/licit-ui-commands';
-import { setParagraphSpacing } from './ParagraphSpacingCommand.js';
-import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec.js';
+import { setParagraphSpacing } from './ParagraphSpacingCommand';
+import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 
 // [FS] IRAD-1053 2020-11-13
 // Issue fix: Line spacing and paragraph spacing not removed when select Remove style.

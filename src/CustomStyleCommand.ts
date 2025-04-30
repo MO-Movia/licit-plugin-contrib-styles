@@ -21,13 +21,13 @@ import {
   IndentCommand,
   getLineSpacingValue,
 } from '@modusoperandi/licit-ui-commands';
-import { AlertInfo } from './ui/AlertInfo.js';
-import { CustomStyleEditor } from './ui/CustomStyleEditor.js';
-import { ParagraphSpacingCommand } from './ParagraphSpacingCommand.js';
+import { AlertInfo } from './ui/AlertInfo';
+import { CustomStyleEditor } from './ui/CustomStyleEditor';
+import { ParagraphSpacingCommand } from './ParagraphSpacingCommand';
 import {
   removeTextAlignAndLineSpacing,
   clearCustomStyleAttribute,
-} from './clearCustomStyleMarks.js';
+} from './clearCustomStyleMarks';
 import {
   getCustomStyleByName,
   getCustomStyleByLevel,
@@ -36,8 +36,8 @@ import {
   saveStyle,
   getStylesAsync,
   addStyleToList,
-} from './customStyle.js';
-import type { Style } from './StyleRuntime.js';
+} from './customStyle';
+import type { Style } from './StyleRuntime';
 import {
   MARKSTRONG,
   MARKEM,
@@ -49,13 +49,13 @@ import {
   MARKSUB,
   MARKTEXTHIGHLIGHT,
   MARKUNDERLINE,
-} from './MarkNames.js';
-import { PARAGRAPH } from './NodeNames.js';
+} from './MarkNames';
+import { PARAGRAPH } from './NodeNames';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
-} from './CustomStyleNodeSpec.js';
-
+} from './CustomStyleNodeSpec';
+import JSONEditor from './ui/JSONEditor';
 export const STRONG = 'strong';
 export const EM = 'em';
 export const COLOR = 'color';
@@ -221,13 +221,19 @@ export class CustomStyleCommand extends UICommand {
 
   _customStyleName: string;
   _customStyle;
+  _styleNameToCreate;
   _popUp = null;
   _level = 0;
 
-  constructor(customStyle, customStyleName: string) {
+  constructor(
+    customStyle,
+    customStyleName: string,
+    styleNameToCreate?: string
+  ) {
     super();
     this._customStyle = customStyle;
     this._customStyleName = customStyleName;
+    this._styleNameToCreate = styleNameToCreate;
   }
 
   renderLabel = () => {
@@ -312,7 +318,8 @@ export class CustomStyleCommand extends UICommand {
   execute = (
     state: EditorState,
     dispatch?: (tr: Transform) => void,
-    view?: EditorView
+    view?: EditorView,
+    event?: KeyboardEvent | MouseEvent
   ): boolean => {
     let tr = state.tr;
     const { selection } = state;
@@ -327,7 +334,11 @@ export class CustomStyleCommand extends UICommand {
       this.editWindow(state, view, 0);
       return false;
     } else if ('editall' === this._customStyle) {
-      this.editWindow(state, view, 3);
+      if (event && event.ctrlKey) {
+        this.jsonEditor(view);
+      } else {
+        this.editWindow(state, view, 3);
+      }
       return false;
     }
     // [FS] IRAD-1053 2020-10-08
@@ -494,6 +505,25 @@ export class CustomStyleCommand extends UICommand {
       }
     );
   }
+  jsonEditor(view: EditorView) {
+    this._popUp = createPopUp(
+      JSONEditor,
+      {
+        editorView: view,
+      },
+      {
+        autoDismiss: false,
+        modal: true,
+        position: atViewportCenter,
+        onClose: () => {
+          if (this._popUp) {
+            this._popUp = null;
+            view.focus();
+          }
+        },
+      }
+    );
+  }
   createNewStyle(
     val,
     tr: Transaction,
@@ -582,7 +612,7 @@ export class CustomStyleCommand extends UICommand {
   // creates a sample style object
   createCustomObject(editorView: EditorView, mode: number) {
     return {
-      styleName: '',
+      styleName: this._styleNameToCreate,
       mode: mode, //0 = new , 1- modify, 2- rename, 3- editall
       styles: {},
       // runtime: runtime,
@@ -1402,14 +1432,18 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
     }
 
     boldSentenceEnd += child.nodeSize;
-    const mark = child.marks.find(mark => mark.type === markType);
+    const mark = child.marks.find((mark) => mark.type === markType);
 
     if (!mark || mark.attrs.overridden) {
       childNodePos = pos + boldSentenceEnd;
       return true;
     }
 
-    tr = tr.removeMark(childNodePos, childNodePos + child.nodeSize + 1, markType);
+    tr = tr.removeMark(
+      childNodePos,
+      childNodePos + child.nodeSize + 1,
+      markType
+    );
     childNodePos = pos + boldSentenceEnd;
     return true;
   });
@@ -1427,7 +1461,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
       return true; // Continue if sentence length not yet reached
     }
 
-    const mark = child.marks.find(mark => mark.type === markType);
+    const mark = child.marks.find((mark) => mark.type === markType);
 
     if (!mark) {
       tr = tr.addMark(pos, pos + firstSentence.length + 1, markType.create());
@@ -1439,7 +1473,11 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
       return false; // Skip if mark is overridden
     }
 
-    tr = tr.addMark(pos, pos + firstSentence.length + 1, markType.create(attrs));
+    tr = tr.addMark(
+      pos,
+      pos + firstSentence.length + 1,
+      markType.create(attrs)
+    );
     stopTraversal_1 = true;
     return false;
   });

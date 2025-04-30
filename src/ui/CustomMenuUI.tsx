@@ -3,30 +3,26 @@ import { EditorState } from 'prosemirror-state';
 import { Schema, Node } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
-import { uuid } from './Uuid.js';
-import { CustomStyleItem } from './CustomStyleItem.js';
-import { AlertInfo } from './AlertInfo.js';
-import { CustomStyleSubMenu } from './CustomStyleSubMenu.js';
-import { CustomStyleEditor } from './CustomStyleEditor.js';
-import {
-  applyLatestStyle,
-  updateDocument,
-} from '../CustomStyleCommand.js';
+import { uuid } from './Uuid';
+import { CustomStyleItem } from './CustomStyleItem';
+import { CustomStyleSubMenu } from './CustomStyleSubMenu';
+import { CustomStyleEditor } from './CustomStyleEditor';
+import { applyLatestStyle, updateDocument } from '../CustomStyleCommand';
 import {
   setStyles,
   saveStyle,
   renameStyle,
   removeStyle,
   addStyleToList,
-} from '../customStyle.js';
+} from '../customStyle';
 import {
   setTextAlign,
   setTextLineSpacing,
   atViewportCenter,
   createPopUp,
 } from '@modusoperandi/licit-ui-commands';
-import { setParagraphSpacing } from '../ParagraphSpacingCommand.js';
-import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec.js';
+import { setParagraphSpacing } from '../ParagraphSpacingCommand';
+import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 
 // [FS] IRAD-1039 2020-09-24
 // UI to show the list buttons
@@ -284,27 +280,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     tr = setParagraphSpacing(tr, schema, '0', true);
     tr = setParagraphSpacing(tr, schema, '0', false);
     return tr;
-  }
-
-  showAlert() {
-    const anchor = null;
-    this._popUp = createPopUp(
-      AlertInfo,
-      {
-        content:
-          'This custom style already in use, by removing this style breaks the heirarchy ',
-        title: 'Style Error!!!',
-      },
-      {
-        anchor,
-        position: atViewportCenter,
-        onClose: () => {
-          if (this._popUp) {
-            this._popUp = null;
-          }
-        },
-      }
-    );
   }
 
   //shows the alignment and line spacing option

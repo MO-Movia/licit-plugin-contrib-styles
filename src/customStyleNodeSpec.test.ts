@@ -2,7 +2,7 @@ import {
   toCustomStyleDOM,
   getCustomStyleAttrs,
   countersRefresh,
-} from './CustomStyleNodeSpec.js';
+} from './CustomStyleNodeSpec';
 import * as customstyle from './customStyle';
 import { Node, DOMOutputSpec } from 'prosemirror-model';
 
@@ -44,7 +44,7 @@ describe('toCustomStyleDOM', () => {
         fontName: 'Tahoma',
         indent: '10',
         hasNumbering: true,
-        isList:true,
+        isList: true,
       },
       styleName: '',
     });
@@ -729,8 +729,6 @@ describe('toCustomStyleDOM', () => {
     ]);
   });
 
-
-
   it('should reset list style counters in window variables', () => {
     const styleLevel = 3;
     const isListStyle = true;
@@ -741,6 +739,4 @@ describe('toCustomStyleDOM', () => {
     expect(window['set-cust-list-style-counter-1']).toBe(true);
     expect(window['set-cust-list-style-counter-2']).toBe(true);
   });
-
-
 });

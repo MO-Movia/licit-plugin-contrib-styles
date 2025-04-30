@@ -14,14 +14,14 @@ import {
   saveStyle,
   getStylesAsync,
   addStyleToList,
-} from '../customStyle.js';
+} from '../customStyle';
 import {
   RESERVED_STYLE_NONE,
   getDetailsBullet,
-  BULLET_POINTS
-} from '../CustomStyleNodeSpec.js';
-import type { Style } from '../StyleRuntime.js';
-import { AlertInfo } from './AlertInfo.js';
+  BULLET_POINTS,
+} from '../CustomStyleNodeSpec';
+import type { Style } from '../StyleRuntime';
+import { AlertInfo } from './AlertInfo';
 
 let customStyles: Style[] = [];
 const otherStyleSelected = false;
@@ -1702,7 +1702,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           />
                         </div>
                       </div>
-                    <label>
+                      <label>
                         <input
                           checked={this.state.styles?.hasBullet}
                           className="molsp-chknumbering"
@@ -1735,8 +1735,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             disabled={
                               this.checkCondition(
                                 this.state.styles?.hasBullet
-                              ) ||
-                              this.state.styleName === RESERVED_STYLE_NONE
+                              ) || this.state.styleName === RESERVED_STYLE_NONE
                             }
                             id="bulletValue"
                             onChange={this.onBulletLevelChange.bind(this)}
@@ -1751,7 +1750,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           </select>
                         </span>
                       </label>
-                      </div>
+                    </div>
                   </fieldset>
                 </div>
                 <p className="molsp-formp">Indenting:</p>

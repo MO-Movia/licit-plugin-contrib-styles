@@ -1,6 +1,6 @@
-import { CustomMenuButton } from './CustomMenuButton.js';
+import { CustomMenuButton } from './CustomMenuButton';
 import { HeadingCommand } from '@modusoperandi/licit-ui-commands';
-import { CustomStyleCommand } from '../CustomStyleCommand.js';
+import { CustomStyleCommand } from '../CustomStyleCommand';
 
 import React from 'react';
 import { EditorState } from 'prosemirror-state';
@@ -10,13 +10,13 @@ import { Node } from 'prosemirror-model';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
-} from '../CustomStyleNodeSpec.js';
+} from '../CustomStyleNodeSpec';
 import {
   setStyles,
   getStylesAsync,
   hasStyleRuntime,
   isCustomStyleExists,
-} from '../customStyle.js';
+} from '../customStyle';
 
 // [FS] IRAD-1042 2020-09-09
 // To include custom styles in the toolbar
@@ -78,7 +78,11 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
 
   staticCommands(customStyleName) {
     const MENU_COMMANDS = {
-      ['newstyle']: new CustomStyleCommand('newstyle', 'New Style..', customStyleName),
+      ['newstyle']: new CustomStyleCommand(
+        'newstyle',
+        'New Style..',
+        customStyleName
+      ),
     };
     // [FS] IRAD-1176 2021-02-08
     // Added a menu "Edit All" for Edit All custom styles
@@ -158,7 +162,9 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
           editorState={editorState}
           editorView={editorView}
           label={customStyleName}
-          staticCommand={this.staticCommands(toCreateStyle ? customStyleName : '')}
+          staticCommand={this.staticCommands(
+            toCreateStyle ? customStyleName : ''
+          )}
         />
         <span className="custom-tooltip">
           <span className="tooltip-text">{customStyleName}</span>

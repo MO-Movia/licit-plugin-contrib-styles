@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { canUseCSSFont } from './canUseCSSFont.js';
+import { canUseCSSFont } from './canUseCSSFont';
 
 const cached = {};
 

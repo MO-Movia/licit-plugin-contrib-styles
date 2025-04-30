@@ -12,7 +12,7 @@ import {
   getMarkByStyleName,
   applyLineStyle,
   applyStyleToEachNode,
-} from './CustomStyleCommand.js';
+} from './CustomStyleCommand';
 import {
   getCustomStyleByName,
   setStyleRuntime,
@@ -20,14 +20,14 @@ import {
   isStylesLoaded,
   setView,
   setCustomStylesOnLoad,
-} from './customStyle.js';
-import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec.js';
+} from './customStyle';
+import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
 import { Node, Schema, Slice } from 'prosemirror-model';
-import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand.js';
-import { applyEffectiveSchema } from './EditorSchema.js';
-import type { StyleRuntime } from './StyleRuntime.js';
+import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand';
+import { applyEffectiveSchema } from './EditorSchema';
+import type { StyleRuntime } from './StyleRuntime';
 
 const ENTERKEYCODE = 13;
 const BACKSPACEKEYCODE = 8;

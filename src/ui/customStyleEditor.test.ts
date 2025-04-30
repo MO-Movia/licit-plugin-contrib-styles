@@ -191,7 +191,7 @@ describe('CustomStyleEditor', () => {
   it('should handle onLevelChange when event target value is None', () => {
     const event = { target: { value: 'None' } };
     customstyleeditor.onLevelChange(event);
-    expect(customstyleeditor.state.styles.styleLevel).toEqual('None');
+    expect(customstyleeditor.state.styles.styleLevel).toEqual(0);
   });
   it('should handle onBulletLevelChange', () => {
     const event = { target: { value: '' } };

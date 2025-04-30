@@ -17,7 +17,7 @@ import {
   handleRemoveMarks,
   compareAttributes,
   resetNodeAttrs,
-} from './CustomStyleCommand.js';
+} from './CustomStyleCommand';
 import * as cusstylecommand from './CustomStyleCommand';
 import { EditorState, Selection, Transaction } from 'prosemirror-state';
 
@@ -27,7 +27,7 @@ import { Schema, Node } from 'prosemirror-model';
 import { schema } from 'prosemirror-schema-basic';
 import * as customstyles from './customStyle';
 import { Transform } from 'prosemirror-transform';
-import type { Style } from './StyleRuntime.js';
+import type { Style } from './StyleRuntime';
 import { doc, p } from 'jest-prosemirror';
 
 describe('CustomStyleCommand', () => {

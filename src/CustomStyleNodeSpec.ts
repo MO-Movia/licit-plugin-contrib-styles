@@ -1,8 +1,8 @@
 import { Node, DOMOutputSpec } from 'prosemirror-model';
-import type { KeyValuePair } from './Constants.js';
+import type { KeyValuePair } from './Constants';
 import { toCSSLineSpacing } from '@modusoperandi/licit-ui-commands';
 
-import { getCustomStyleByName, getHidenumberingFlag } from './customStyle.js';
+import { getCustomStyleByName, getHidenumberingFlag } from './customStyle';
 
 // This assumes that every 36pt maps to one indent level.
 export const ATTRIBUTE_PREFIX = 'prefix';

@@ -1,10 +1,7 @@
 import { Schema } from 'prosemirror-model';
-import {
-  toCustomStyleDOM,
-  getCustomStyleAttrs,
-} from './CustomStyleNodeSpec.js';
-import { toMarkDOM, getMarkAttrs } from './CustomStyleMarkSpec.js';
-import { STYLEKEY, PARAGRAPH } from './Constants.js';
+import { toCustomStyleDOM, getCustomStyleAttrs } from './CustomStyleNodeSpec';
+import { toMarkDOM, getMarkAttrs } from './CustomStyleMarkSpec';
+import { STYLEKEY, PARAGRAPH } from './Constants';
 
 import {
   MARKSTRONG,
@@ -17,7 +14,7 @@ import {
   MARKSUB,
   MARKTEXTHIGHLIGHT,
   MARKUNDERLINE,
-} from './MarkNames.js';
+} from './MarkNames';
 
 const ALLOWED_MARKS = [
   MARKSTRONG,

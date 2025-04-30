@@ -1,11 +1,11 @@
 // [FS] IRAD-1085 2020-10-09
-import type { Style, CSSStyle } from './StyleRuntime.js';
+import type { Style, CSSStyle } from './StyleRuntime';
 import { EditorView } from 'prosemirror-view';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
-} from './CustomStyleNodeSpec.js';
-import { DEFAULT_NORMAL_STYLE } from './Constants.js';
+} from './CustomStyleNodeSpec';
+import { DEFAULT_NORMAL_STYLE } from './Constants';
 import { setCustomStyles } from '@modusoperandi/licit-ui-commands';
 let customStyles = new Array(0);
 let styleRuntime;
@@ -25,11 +25,12 @@ function isValidStyleName(styleName) {
 
 export function addStyleToList(style: Style) {
   if (0 < customStyles.length) {
-    const index = customStyles.findIndex(item => item.styleName === style.styleName);
+    const index = customStyles.findIndex(
+      (item) => item.styleName === style.styleName
+    );
     if (index !== -1) {
       customStyles[index] = style;
-    }
-    else {
+    } else {
       customStyles.push(style);
     }
   }

@@ -5,7 +5,6 @@ import { Transform } from 'prosemirror-transform';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { uuid } from './Uuid.js';
 import { CustomStyleItem } from './CustomStyleItem.js';
-import { AlertInfo } from './AlertInfo.js';
 import { CustomStyleSubMenu } from './CustomStyleSubMenu.js';
 import { CustomStyleEditor } from './CustomStyleEditor.js';
 import {
@@ -284,27 +283,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     tr = setParagraphSpacing(tr, schema, '0', true);
     tr = setParagraphSpacing(tr, schema, '0', false);
     return tr;
-  }
-
-  showAlert() {
-    const anchor = null;
-    this._popUp = createPopUp(
-      AlertInfo,
-      {
-        content:
-          'This custom style already in use, by removing this style breaks the heirarchy ',
-        title: 'Style Error!!!',
-      },
-      {
-        anchor,
-        position: atViewportCenter,
-        onClose: () => {
-          if (this._popUp) {
-            this._popUp = null;
-          }
-        },
-      }
-    );
   }
 
   //shows the alignment and line spacing option

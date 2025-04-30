@@ -76,9 +76,9 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     return [HEADING_COMMANDS];
   }
 
-  staticCommands() {
+  staticCommands(customStyleName) {
     const MENU_COMMANDS = {
-      ['newstyle']: new CustomStyleCommand('newstyle', 'New Style..'),
+      ['newstyle']: new CustomStyleCommand('newstyle', 'New Style..', customStyleName),
     };
     // [FS] IRAD-1176 2021-02-08
     // Added a menu "Edit All" for Edit All custom styles
@@ -142,24 +142,27 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
       }
     });
     let backgroundColorClass = 'width-100';
+    let toCreateStyle = false;
     if (!isCustomStyleExists(customStyleName)) {
       backgroundColorClass = 'width-100 stylemenu-backgroundcolor';
+      toCreateStyle = true;
     }
 
     return (
-      <span data-cy="cyStyleBtn">
+      <span className="tooltip-wrapper">
         <CustomMenuButton
           className={backgroundColorClass}
-          // [FS] IRAD-1008 2020-07-16
-          // Disable font type menu on editor disable state
           commandGroups={this.getCommandGroups()}
           disabled={!this.hasRuntime}
           dispatch={dispatch}
           editorState={editorState}
           editorView={editorView}
           label={customStyleName}
-          staticCommand={this.staticCommands()}
+          staticCommand={this.staticCommands(toCreateStyle ? customStyleName : '')}
         />
+        <span className="custom-tooltip">
+          <span className="tooltip-text">{customStyleName}</span>
+        </span>
       </span>
     );
   }

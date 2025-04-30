@@ -221,13 +221,15 @@ export class CustomStyleCommand extends UICommand {
 
   _customStyleName: string;
   _customStyle;
+  _styleNameToCreate;
   _popUp = null;
   _level = 0;
 
-  constructor(customStyle, customStyleName: string) {
+  constructor(customStyle, customStyleName: string, styleNameToCreate?: string) {
     super();
     this._customStyle = customStyle;
     this._customStyleName = customStyleName;
+    this._styleNameToCreate = styleNameToCreate;
   }
 
   renderLabel = () => {
@@ -609,7 +611,7 @@ export class CustomStyleCommand extends UICommand {
   // creates a sample style object
   createCustomObject(editorView: EditorView, mode: number) {
     return {
-      styleName: '',
+      styleName: this._styleNameToCreate,
       mode: mode, //0 = new , 1- modify, 2- rename, 3- editall
       styles: {},
       // runtime: runtime,

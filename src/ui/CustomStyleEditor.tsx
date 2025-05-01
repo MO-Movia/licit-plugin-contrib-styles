@@ -379,15 +379,16 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   // handles Level drop down change
   onLevelChange(e) {
     let isCheckboxDisabled = false;
-    // const val = RESERVED_STYLE_NONE === e.target.value ? null : e.target.value;
+    let level = Number(e.target.value);
     if (e.target.value === 'None') {
       isCheckboxDisabled = true;
+      level = 0;
     }
 
     this.setState((prevState) => ({
       styles: {
         ...prevState.styles,
-        styleLevel: e.target.value,
+        styleLevel: level,
         hasNumbering: isCheckboxDisabled
           ? false
           : prevState.styles?.hasNumbering,
@@ -619,7 +620,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         prefixValue: '',
         hasNumbering: false,
         nextLineStyleName: RESERVED_STYLE_NONE,
-        styleLevel: 'none',
+        styleLevel: 0,
       },
     }));
   }
@@ -634,7 +635,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         tof: false,
         prefixValue: '',
         hasNumbering: false,
-        styleLevel: 'none',
+        styleLevel: 0,
         nextLineStyleName: RESERVED_STYLE_NONE,
       },
     }));
@@ -653,7 +654,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         nextLineStyleName: val.target.checked
           ? RESERVED_STYLE_NONE
           : prevState.styles.nextLineStyleName,
-        styleLevel: val.target.checked ? '2' : 'none',
+        styleLevel: val.target.checked ? 2 : 0,
       },
     }));
   }
@@ -671,7 +672,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         nextLineStyleName: val.target.checked
           ? RESERVED_STYLE_NONE
           : prevState.styles.nextLineStyleName,
-        styleLevel: val.target.checked ? '2' : 'none',
+        styleLevel: val.target.checked ? 2 : 0,
       },
     }));
   }
@@ -1478,60 +1479,60 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     </div>
                   </div>
                 ) : (
-                  <div
-                    className="molsp-hierarchydiv"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginLeft: '-1px',
-                    }}
-                  >
-                    <div className="molsp-hierarchydiv">
-                      <label>
-                        <input
-                          checked={this.state.selectedStyle === 'userDefined'}
-                          disabled={
-                            this.state.styleName === RESERVED_STYLE_NONE
-                          }
-                          onChange={(e) => this.handleList(e)}
-                          type="radio"
-                          value="userDefined"
-                        />
-                        <span
-                          style={{
-                            marginLeft: '2px',
-                            position: 'relative',
-                            top: '-2px',
-                          }}
-                        >
-                          User-defined Numbering/Bullets
+                    <div
+                      className="molsp-hierarchydiv"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginLeft: '-1px',
+                      }}
+                    >
+                      <div className="molsp-hierarchydiv">
+                        <label>
+                          <input
+                            checked={this.state.selectedStyle === 'userDefined'}
+                            disabled={
+                              this.state.styleName === RESERVED_STYLE_NONE
+                            }
+                            onChange={(e) => this.handleList(e)}
+                            type="radio"
+                            value="userDefined"
+                          />
+                          <span
+                            style={{
+                              marginLeft: '2px',
+                              position: 'relative',
+                              top: '-2px',
+                            }}
+                          >
+                            User-defined Numbering/Bullets
                         </span>
-                      </label>
-                      <br />
-                      <label>
-                        <input
-                          checked={this.state.selectedStyle === 'listStyle'}
-                          disabled={
-                            this.state.styleName === RESERVED_STYLE_NONE
-                          }
-                          onChange={this.handleList.bind(this)}
-                          type="radio"
-                          value="listStyle"
-                        />
-                        <span
-                          style={{
-                            marginLeft: '2px',
-                            position: 'relative',
-                            top: '-2px',
-                          }}
-                        >
-                          List-style (Auto Numbering)
+                        </label>
+                        <br />
+                        <label>
+                          <input
+                            checked={this.state.selectedStyle === 'listStyle'}
+                            disabled={
+                              this.state.styleName === RESERVED_STYLE_NONE
+                            }
+                            onChange={this.handleList.bind(this)}
+                            type="radio"
+                            value="listStyle"
+                          />
+                          <span
+                            style={{
+                              marginLeft: '2px',
+                              position: 'relative',
+                              top: '-2px',
+                            }}
+                          >
+                            List-style (Auto Numbering)
                         </span>
-                      </label>
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
                 <div
                   className="molsp-hierarchydiv"
                   style={{
@@ -1613,7 +1614,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           disabled={
                             this.state.styles.styleLevel === undefined ||
                             this.state.isRadioDisabled ||
-                            this.state.styles.styleLevel === 'None' ||
+                            this.state.styles.styleLevel === 0 ||
                             (this.state.styles.styleLevel === 1 &&
                               this.state.styles.isList === true) ||
                             this.state.styleName === RESERVED_STYLE_NONE
@@ -1708,7 +1709,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           className="molsp-chknumbering"
                           disabled={
                             this.state.isRadioDisabled ||
-                            this.state.styles.styleLevel === 'None' ||
+                            this.state.styles.styleLevel === 0 ||
                             this.state.styles.styleLevel === undefined ||
                             (this.state.styles.styleLevel === 1 &&
                               this.state.styles.isList === true) ||
@@ -1843,7 +1844,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       checked={
                         !(this.state.styles.tot || this.state.styles.tof) &&
                         this.state.styles.nextLineStyleName ===
-                          this.state.styleName &&
+                        this.state.styleName &&
                         !this.state.otherStyleSelected
                       }
                       name="nextlinestyle"
@@ -1875,7 +1876,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         this.state.styles.tot ||
                         this.state.styles.tof ||
                         this.state.styles.nextLineStyleName ===
-                          RESERVED_STYLE_NONE
+                        RESERVED_STYLE_NONE
                       }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 0)}
@@ -2085,7 +2086,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   checkCondition(mainCondition: boolean) {
     return (
       !mainCondition ||
-      this.state.styles.styleLevel === 'None' ||
+      this.state.styles.styleLevel === 0 ||
       this.state.styles.styleLevel === undefined ||
       (this.state.styles.styleLevel === 1 && this.state.styles.isList === true)
     );

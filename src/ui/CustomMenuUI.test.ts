@@ -529,7 +529,7 @@ describe('Custom Menu UI   ', () => {
       .spyOn(document, 'getElementsByClassName')
       .mockReturnValue([dom] as unknown as HTMLCollectionOf<Element>);
     custommenuui.componentDidMount();
-    expect(dom.scrollTop).toBe(695);
+    expect(dom.scrollTop).toBe(751);
   });
 
   it('should handle isAllowedNode', () => {
@@ -718,6 +718,7 @@ describe('Custom Menu UI   ', () => {
     jest.spyOn(custommenuui, 'removeTextAlignAndLineSpacing').mockReturnValue({
       key: 'tr',
       docChanged: true,
+      doc:mockdoc,
       setNodeMarkup: () => {
         return { key: 'tr', docChanged: true };
       },
@@ -1111,7 +1112,6 @@ describe('Custom Menu UI   ', () => {
     ).toBeUndefined();
     expect(custommenuui.getTheSelectedCustomStyle(statemock)).toBeDefined();
 
-    expect(custommenuui.showAlert()).toBeUndefined();
     const uicommands = {
       _customStyleName: 'test',
       _customStyle: { description: 'description', styles: {} },

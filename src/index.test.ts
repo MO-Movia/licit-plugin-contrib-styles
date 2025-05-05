@@ -8,7 +8,6 @@ import {
   setNodeAttrs,
   applyStyleForNextParagraph,
   nodeAssignment,
-  manageHierarchyOnDelete,
   onInitAppendTransaction,
   onUpdateAppendTransaction,
   applyNormalIfNoStyle,
@@ -41,8 +40,8 @@ import { EditorView } from 'prosemirror-view';
 import * as DOMfunc from './CustomStyleNodeSpec';
 
 import { CustomStyleCommand } from './CustomStyleCommand';
-import * as ccommand from './CustomStyleCommand.js';
-import { Style } from './StyleRuntime.js';
+import * as ccommand from './CustomStyleCommand';
+import { Style } from './StyleRuntime';
 
 const attrs = {
   align: { default: null },
@@ -330,8 +329,6 @@ describe('applyNormalIfNoStyle', () => {
     expect(applyNormalIfNoStyle({}, null, mockdoc, true)).toBe(undefined);
   });
 
-
-
   it('should handle applyNormalIfNoStyle when tr is present', () => {
     const linkmark = new Mark();
     const mockschema = new Schema({
@@ -417,7 +414,7 @@ describe('applyNormalIfNoStyle', () => {
           nodesBetween: () => {
             return {};
           },
-          nodeAt: () => { }
+          nodeAt: () => {},
         },
         setSelection: setSelection,
       };
@@ -445,7 +442,7 @@ describe('applyNormalIfNoStyle', () => {
             nodesBetween: () => {
               return {};
             },
-            nodeAt: () => { }
+            nodeAt: () => {},
           },
           setSelection: setSelection,
           selection: {
@@ -585,7 +582,7 @@ describe('onUpdateAppendTransaction', () => {
         isTextblock: true,
       } as unknown as Node;
     };
-    mockdoc.nodesBetween = () => { };
+    mockdoc.nodesBetween = () => {};
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -618,7 +615,7 @@ describe('onUpdateAppendTransaction', () => {
               max: () => 1,
             }) as unknown as ResolvedPos,
           nodesBetween: () => ({}),
-          nodeAt: () => { }
+          nodeAt: () => {},
         },
         setSelection: setSelection,
         scrollIntoView: () => {
@@ -1184,7 +1181,7 @@ describe('onUpdateAppendTransaction', () => {
               },
               $start: () => {
                 return 1;
-              }
+              },
             },
             $to: {
               after: () => {
@@ -1934,7 +1931,7 @@ describe('Custom Style Plugin pass', () => {
 
   it('Test 1 ', () => {
     const props = {
-      dispatch: () => { },
+      dispatch: () => {},
       editorState: state,
       editorView: editor.view,
     };
@@ -2667,7 +2664,9 @@ describe('Cus Style Plugin-Pass', () => {
     expect(setNodeAttrs(null, newattrs)).toStrictEqual(newattrs);
   });
   it('should handle setNodeAttrs when nextLineStyleName is Normal ', () => {
-    jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue('Normal' as unknown as Style);
+    jest
+      .spyOn(CustStyl, 'getCustomStyleByName')
+      .mockReturnValue('Normal' as unknown as Style);
     const newattrs = {
       align: 'left',
       color: null,
@@ -3309,177 +3308,6 @@ describe('Cus Style Plugin-Pass', () => {
       applyStyleForNextParagraph({}, {}, {}, { input: { lastKeyCode: 10 } })
     ).toBeDefined();
     expect(nodeAssignment(prevstate)).toBeDefined();
-    const schemamhod = new Schema({
-      nodes: {
-        doc: {
-          attrs: {
-            layout: { default: null },
-            padding: { default: null },
-            width: { default: null },
-            counterFlags: { default: null },
-            capcoMode: { default: 0 },
-          },
-          content: 'paragraph+',
-        },
-        paragraph: {
-          attrs: {
-            align: { default: 'left' },
-            color: { default: null },
-            id: { default: null },
-            indent: { default: null },
-            lineSpacing: { default: null },
-            paddingBottom: { default: null },
-            paddingTop: { default: null },
-            capco: { default: null },
-            styleName: { default: 'AFDP Bullet' },
-          },
-          content: 'inline*',
-          parseDOM: [{ tag: 'p' }],
-          toDOM() {
-            return ['p', 0];
-          },
-        },
-        image: {
-          attrs: {
-            src: {},
-            alt: { default: '' },
-            title: { default: null },
-            styleName: { default: null },
-          },
-          inline: true,
-          group: 'inline',
-          draggable: true,
-          parseDOM: [
-            {
-              tag: 'img[src]',
-              getAttrs(dom) {
-                return {
-                  src: (dom as unknown as HTMLElement).getAttribute('src'),
-                  alt: (dom as unknown as HTMLElement).getAttribute('alt'),
-                  title: (dom as unknown as HTMLElement).getAttribute('title'),
-                  styleName: (dom as unknown as HTMLElement).getAttribute(
-                    'styleName'
-                  ),
-                };
-              },
-            },
-          ],
-          toDOM(node) {
-            const { src, alt, title, styleName } = node.attrs;
-            return ['img', { src, alt, title, styleName }];
-          },
-        },
-        text: {
-          marks: 'mark-font-size mark-font-type',
-        },
-      },
-      marks: {
-        'mark-font-size': {
-          attrs: {
-            pt: { default: 11 },
-            overridden: { default: false },
-          },
-        },
-        'mark-font-type': {
-          attrs: {
-            name: { default: 'Arial' },
-            overridden: { default: false },
-          },
-        },
-      },
-    });
-    const prevstatemhod = {
-      schema: schemamhod,
-      doc: schemamhod.nodeFromJSON({
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-        ],
-      }),
-      selection: { from: 2, to: 4 },
-    };
-
     const spymhod = jest.spyOn(ccommand, 'getStyleLevel').mockReturnValue(2);
     jest.spyOn(CustStyl, 'getCustomStyleByLevel').mockReturnValue({
       styles: {
@@ -3489,105 +3317,7 @@ describe('Cus Style Plugin-Pass', () => {
         nextLineStyleName: 'Normal',
       },
     } as unknown as null);
-    // expect(
-    //   manageHierarchyOnDelete(prevstatemhod, nextstate, null, mockview1)
-    // ).toBeDefined();
     spymhod.mockClear();
-    const mockview2 = {
-      state: mockState,
-      input: { lastKeyCode: 8 },
-    };
-    // expect(
-    //   manageHierarchyOnDelete(prevstatemhod, nextstate, null, mockview2)
-    // ).toBeDefined();
-    const nextstatemhod = {
-      schema: schema2,
-      doc: schema2.nodeFromJSON({
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              // styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              // styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              // styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-        ],
-      }),
-      selection: { from: 2, to: 8 },
-    };
-    expect(
-      manageHierarchyOnDelete(
-        prevstatemhod,
-        nextstatemhod,
-        transaction1,
-        mockview2
-      )
-    ).toBeDefined();
-    //expect(manageHierarchyOnDelete({doc:{key:'value'}},{selection:{from:0},doc:{key:'value'}},transaction1,mockview2)).toBeDefined();
   });
   it('should handle function manageHierarchyOnDelete nodesBeforeSelection.length > 0', () => {
     jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
@@ -4202,177 +3932,6 @@ describe('Cus Style Plugin-Pass', () => {
       applyStyleForNextParagraph({}, {}, {}, { input: { lastKeyCode: 10 } })
     ).toBeDefined();
     expect(nodeAssignment(prevstate)).toBeDefined();
-    const schemamhod = new Schema({
-      nodes: {
-        doc: {
-          attrs: {
-            layout: { default: null },
-            padding: { default: null },
-            width: { default: null },
-            counterFlags: { default: null },
-            capcoMode: { default: 0 },
-          },
-          content: 'paragraph+',
-        },
-        paragraph: {
-          attrs: {
-            align: { default: 'left' },
-            color: { default: null },
-            id: { default: null },
-            indent: { default: null },
-            lineSpacing: { default: null },
-            paddingBottom: { default: null },
-            paddingTop: { default: null },
-            capco: { default: null },
-            styleName: { default: 'AFDP Bullet' },
-          },
-          content: 'inline*',
-          parseDOM: [{ tag: 'p' }],
-          toDOM() {
-            return ['p', 0];
-          },
-        },
-        image: {
-          attrs: {
-            src: {},
-            alt: { default: '' },
-            title: { default: null },
-            styleName: { default: null },
-          },
-          inline: true,
-          group: 'inline',
-          draggable: true,
-          parseDOM: [
-            {
-              tag: 'img[src]',
-              getAttrs(dom) {
-                return {
-                  src: (dom as unknown as HTMLElement).getAttribute('src'),
-                  alt: (dom as unknown as HTMLElement).getAttribute('alt'),
-                  title: (dom as unknown as HTMLElement).getAttribute('title'),
-                  styleName: (dom as unknown as HTMLElement).getAttribute(
-                    'styleName'
-                  ),
-                };
-              },
-            },
-          ],
-          toDOM(node) {
-            const { src, alt, title, styleName } = node.attrs;
-            return ['img', { src, alt, title, styleName }];
-          },
-        },
-        text: {
-          marks: 'mark-font-size mark-font-type',
-        },
-      },
-      marks: {
-        'mark-font-size': {
-          attrs: {
-            pt: { default: 11 },
-            overridden: { default: false },
-          },
-        },
-        'mark-font-type': {
-          attrs: {
-            name: { default: 'Arial' },
-            overridden: { default: false },
-          },
-        },
-      },
-    });
-    const prevstatemhod = {
-      schema: schemamhod,
-      doc: schemamhod.nodeFromJSON({
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-        ],
-      }),
-      selection: { from: 2, to: 4 },
-    };
-
     const spymhod = jest.spyOn(ccommand, 'getStyleLevel').mockReturnValue(2);
     jest.spyOn(CustStyl, 'getCustomStyleByLevel').mockReturnValue({
       styles: {
@@ -4384,97 +3943,6 @@ describe('Cus Style Plugin-Pass', () => {
     } as unknown as null);
 
     spymhod.mockClear();
-    const mockview2 = {
-      state: mockState,
-      input: { lastKeyCode: 46 },
-    };
-    const nextstatemhod = {
-      schema: schema2,
-      doc: schema2.nodeFromJSON({
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-        ],
-      }),
-      selection: { from: 2, to: 8 },
-    };
-    expect(
-      manageHierarchyOnDelete(
-        prevstatemhod,
-        nextstatemhod,
-        transaction1,
-        mockview2
-      )
-    ).toBeDefined();
   });
   it('should handle applyStyleForNextParagraph', () => {
     jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
@@ -4718,7 +4186,9 @@ describe('Cus Style Plugin-Pass', () => {
           end: () => {
             return 2;
           },
-        }, from: 4, to: 8
+        },
+        from: 4,
+        to: 8,
       },
     };
 
@@ -5100,177 +4570,6 @@ describe('Cus Style Plugin-Pass', () => {
       applyStyleForNextParagraph({}, {}, {}, { input: { lastKeyCode: 10 } })
     ).toBeDefined();
     expect(nodeAssignment(prevstate)).toBeDefined();
-    const schemamhod = new Schema({
-      nodes: {
-        doc: {
-          attrs: {
-            layout: { default: null },
-            padding: { default: null },
-            width: { default: null },
-            counterFlags: { default: null },
-            capcoMode: { default: 0 },
-          },
-          content: 'paragraph+',
-        },
-        paragraph: {
-          attrs: {
-            align: { default: 'left' },
-            color: { default: null },
-            id: { default: null },
-            indent: { default: null },
-            lineSpacing: { default: null },
-            paddingBottom: { default: null },
-            paddingTop: { default: null },
-            capco: { default: null },
-            styleName: { default: 'AFDP Bullet' },
-          },
-          content: 'inline*',
-          parseDOM: [{ tag: 'p' }],
-          toDOM() {
-            return ['p', 0];
-          },
-        },
-        image: {
-          attrs: {
-            src: {},
-            alt: { default: '' },
-            title: { default: null },
-            styleName: { default: null },
-          },
-          inline: true,
-          group: 'inline',
-          draggable: true,
-          parseDOM: [
-            {
-              tag: 'img[src]',
-              getAttrs(dom) {
-                return {
-                  src: (dom as unknown as HTMLElement).getAttribute('src'),
-                  alt: (dom as unknown as HTMLElement).getAttribute('alt'),
-                  title: (dom as unknown as HTMLElement).getAttribute('title'),
-                  styleName: (dom as unknown as HTMLElement).getAttribute(
-                    'styleName'
-                  ),
-                };
-              },
-            },
-          ],
-          toDOM(node) {
-            const { src, alt, title, styleName } = node.attrs;
-            return ['img', { src, alt, title, styleName }];
-          },
-        },
-        text: {
-          marks: 'mark-font-size mark-font-type',
-        },
-      },
-      marks: {
-        'mark-font-size': {
-          attrs: {
-            pt: { default: 11 },
-            overridden: { default: false },
-          },
-        },
-        'mark-font-type': {
-          attrs: {
-            name: { default: 'Arial' },
-            overridden: { default: false },
-          },
-        },
-      },
-    });
-    const prevstatemhod = {
-      schema: schemamhod,
-      doc: schemamhod.nodeFromJSON({
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-        ],
-      }),
-      selection: { from: 2, to: 4 },
-    };
-
     const spymhod = jest.spyOn(ccommand, 'getStyleLevel').mockReturnValue(2);
     jest.spyOn(CustStyl, 'getCustomStyleByLevel').mockReturnValue({
       styles: {
@@ -5282,107 +4581,6 @@ describe('Cus Style Plugin-Pass', () => {
     } as unknown as null);
 
     spymhod.mockClear();
-    const mockview2 = {
-      state: mockState,
-      input: { lastKeyCode: 8 },
-    };
-    const nextstatemhod = {
-      schema: schema2,
-      doc: schema2.nodeFromJSON({
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-        ],
-      }),
-      selection: { from: 0, to: 8 },
-    };
-    expect(
-      manageHierarchyOnDelete(
-        prevstatemhod,
-        nextstatemhod,
-        transaction1,
-        mockview2
-      )
-    ).toBeDefined();
-  });
-  it('should handle manageHierarchyOnDelete when prevState.doc === nextState.doc', () => {
-    expect(
-      manageHierarchyOnDelete(
-        { doc: 1 },
-        { selection: { from: 0 }, doc: 1 },
-        {},
-        {}
-      )
-    ).toBeDefined();
   });
 });
 
@@ -5724,7 +4922,6 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-
             },
             $to: {
               after: () => {
@@ -5749,7 +4946,7 @@ describe('onUpdateAppendTransaction', () => {
               $from: {
                 start: () => {
                   return 1;
-                }
+                },
               },
               $to: {
                 after: () => {
@@ -5871,7 +5068,6 @@ describe('onUpdateAppendTransaction', () => {
               end: () => {
                 return 1;
               },
-
             },
           },
         },
@@ -5885,7 +5081,6 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-
             },
             $to: {
               after: () => {
@@ -6035,8 +5230,7 @@ describe('onUpdateAppendTransaction', () => {
               end: () => {
                 return 1;
               },
-            }
-
+            },
           },
           curSelection: { $head: 1 },
         },
@@ -6049,8 +5243,7 @@ describe('onUpdateAppendTransaction', () => {
               },
               $start: () => {
                 return 1;
-              }
-
+              },
             },
             $to: {
               after: () => {
@@ -6245,22 +5438,22 @@ describe('applyStyleForNextParagraph', () => {
     const paragraph1 = {
       type: { name: 'paragraph' },
       isBlock: true,
-      child() { },
+      child() {},
       childCount: 0,
       attrs: {
         styleName: 'Bold',
-        id: 'para-1'
+        id: 'para-1',
       },
     };
 
     const paragraph2 = {
       type: { name: 'paragraph' },
       isBlock: true,
-      child() { },
+      child() {},
       childCount: 0,
       attrs: {
         styleName: 'Bold',
-        id: 'para-1'
+        id: 'para-1',
       },
     };
 
@@ -6270,11 +5463,10 @@ describe('applyStyleForNextParagraph', () => {
       child(j) {
         return j === 0 ? paragraph1 : paragraph2;
       },
-      childCount: 2
+      childCount: 2,
     };
 
     const mockFrom = {
-
       depth: 2,
       node(depth) {
         if (depth === 0) return doc;
@@ -6287,7 +5479,7 @@ describe('applyStyleForNextParagraph', () => {
         if (depth === 0) return 1;
         if (depth === 1) return 0;
         return 0;
-      }
+      },
     };
     const prevstate = {
       doc: {
@@ -6295,15 +5487,16 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
-            child() { },
+            child() {},
             childCount: 0,
             attrs: {
               styleName: 'Bold',
-              id: 'para-1'
+              id: 'para-1',
             },
           };
-        }
-      }, selection: { $from: mockFrom, from: 1 }
+        },
+      },
+      selection: { $from: mockFrom, from: 1 },
     };
     const nextstate = {
       doc: {
@@ -6311,19 +5504,22 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
-            child() { },
+            child() {},
             childCount: 0,
             attrs: {
               styleName: 'Bold',
-              id: 'para-1'
+              id: 'para-1',
             },
           };
-        }
-      }, selection: { $from: mockFrom, from: 3 }
+        },
+      },
+      selection: { $from: mockFrom, from: 3 },
     };
     const view = { input: { lastKeyCode: 13 } };
     const tr = {};
-    expect(applyStyleForNextParagraph(prevstate, nextstate, tr, view)).toBeDefined();
+    expect(
+      applyStyleForNextParagraph(prevstate, nextstate, tr, view)
+    ).toBeDefined();
   });
   it('should handle applyStyleForNextParagraph', () => {
     const paragraph1 = {
@@ -6333,18 +5529,18 @@ describe('applyStyleForNextParagraph', () => {
         return {
           type: { name: 'paragraph' },
           isBlock: true,
-          child() { },
+          child() {},
           childCount: 0,
           attrs: {
             styleName: 'Bold',
-            id: 'para-1'
+            id: 'para-1',
           },
         };
       },
       childCount: 2,
       attrs: {
         styleName: 'Bold',
-        id: 'para-1'
+        id: 'para-1',
       },
     };
 
@@ -6355,18 +5551,18 @@ describe('applyStyleForNextParagraph', () => {
         return {
           type: { name: 'paragraph' },
           isBlock: true,
-          child() { },
+          child() {},
           childCount: 0,
           attrs: {
             styleName: 'Bold',
-            id: 'para-1'
+            id: 'para-1',
           },
         };
       },
       childCount: 2,
       attrs: {
         styleName: 'Bold',
-        id: 'para-1'
+        id: 'para-1',
       },
     };
 
@@ -6376,11 +5572,10 @@ describe('applyStyleForNextParagraph', () => {
       child(j) {
         return j === 0 ? paragraph1 : paragraph2;
       },
-      childCount: 2
+      childCount: 2,
     };
 
     const mockFrom = {
-
       depth: 2,
       node(depth) {
         if (depth === 0) return doc;
@@ -6393,7 +5588,7 @@ describe('applyStyleForNextParagraph', () => {
         if (depth === 0) return 1;
         if (depth === 1) return 0;
         return 0;
-      }
+      },
     };
     const prevstate = {
       doc: {
@@ -6401,15 +5596,16 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
-            child() { },
+            child() {},
             childCount: 0,
             attrs: {
               styleName: 'Bold',
-              id: 'para-1'
+              id: 'para-1',
             },
           };
-        }
-      }, selection: { $from: mockFrom, from: 1 }
+        },
+      },
+      selection: { $from: mockFrom, from: 1 },
     };
     const nextstate = {
       doc: {
@@ -6417,18 +5613,21 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
-            child() { },
+            child() {},
             childCount: 0,
             attrs: {
               styleName: 'Bold',
-              id: 'para-1'
+              id: 'para-1',
             },
           };
-        }
-      }, selection: { $from: mockFrom, from: 3 }
+        },
+      },
+      selection: { $from: mockFrom, from: 3 },
     };
     const view = { input: { lastKeyCode: 13 } };
     const tr = {};
-    expect(applyStyleForNextParagraph(prevstate, nextstate, tr, view)).toBeDefined();
+    expect(
+      applyStyleForNextParagraph(prevstate, nextstate, tr, view)
+    ).toBeDefined();
   });
 });

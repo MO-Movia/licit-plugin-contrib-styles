@@ -1,11 +1,13 @@
 import { Node, DOMOutputSpec } from 'prosemirror-model';
-import type { KeyValuePair } from './Constants.js';
+import type { KeyValuePair } from './Constants';
 import { toCSSLineSpacing } from '@modusoperandi/licit-ui-commands';
 
-import { getCustomStyleByName, getHidenumberingFlag } from './customStyle.js';
+import { getCustomStyleByName, getHidenumberingFlag } from './customStyle';
 
 // This assumes that every 36pt maps to one indent level.
 export const ATTRIBUTE_PREFIX = 'prefix';
+export const ATTRIBUTE_TOT = 'tot';
+export const ATTRIBUTE_TOF = 'tof';
 export const ATTRIBUTE_HIDENUMBERING = 'hideNumbering';
 export const INDENT_MARGIN_PT_SIZE = 36;
 export const MIN_INDENT_LEVEL = 0;
@@ -59,6 +61,8 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
     isListStyle,
     prefix,
     hideNumbering,
+    tot,
+    tof,
   } = getStyle(node.attrs);
   if (style) {
     output[1].style = style;
@@ -81,6 +85,12 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
 
   if (prefix) {
     output[1][ATTRIBUTE_PREFIX] = prefix;
+  }
+  if (tot) {
+    output[1][ATTRIBUTE_TOT] = tot;
+  }
+  if (tof) {
+    output[1][ATTRIBUTE_TOF] = tof;
   }
 
   if (hideNumbering) {
@@ -163,6 +173,8 @@ function getStyleEx(align, lineSpacing, styleName) {
   let indentOverriden = '';
   let isListStyle = false;
   let prefix = '';
+  let tot = false;
+  let tof = false;
   let hideNumbering = false;
   let bulletDetails: {
     symbol: string;
@@ -231,6 +243,8 @@ function getStyleEx(align, lineSpacing, styleName) {
             ? styleProps.styles.styleLevel
             : 0;
         isListStyle = styleProps.styles.isList;
+        tot = styleProps.styles.tot;
+        tof = styleProps.styles.tof;
         prefix = styleProps.styles.prefixValue;
         hideNumbering = styleProps.styles.hideNumbering;
         style += refreshCounters(styleLevel, isListStyle);
@@ -252,6 +266,8 @@ function getStyleEx(align, lineSpacing, styleName) {
     bulletDetails,
     isListStyle,
     prefix,
+    tot,
+    tof,
     hideNumbering,
   };
 }

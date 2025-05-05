@@ -5,7 +5,7 @@ import {
   TextSelection,
   Transaction,
 } from 'prosemirror-state';
-import { BLOCKQUOTE, HEADING, LIST_ITEM, PARAGRAPH } from './NodeNames.js';
+import { BLOCKQUOTE, HEADING, LIST_ITEM, PARAGRAPH } from './NodeNames';
 import { Schema } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
 

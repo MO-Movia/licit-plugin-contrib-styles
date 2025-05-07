@@ -1,5 +1,5 @@
 // [FS] IRAD-1085 2020-10-09
-import type { Style, CSSStyle } from './StyleRuntime';
+import type { Style, CSSStyle, StyleRuntime } from './StyleRuntime';
 import { EditorView } from 'prosemirror-view';
 import {
   RESERVED_STYLE_NONE,
@@ -117,6 +117,9 @@ export function setStyleRuntime(runtime) {
   styleRuntime = runtime;
 }
 
+export function getStyleRuntime(): StyleRuntime {
+  return styleRuntime;
+}
 export function setCustomStylesOnLoad() {
   getStylesAsync().then((result) => {
     if (result) {

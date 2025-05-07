@@ -5,7 +5,7 @@ import {
   Transaction,
 } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
-import { CellSelection } from "prosemirror-tables";
+import { CellSelection } from 'prosemirror-tables';
 import { EditorView } from 'prosemirror-view';
 import { Node, Fragment, Schema } from 'prosemirror-model';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
@@ -1313,8 +1313,13 @@ export function applyStyle(
   let startPos, endPos;
   if (selection instanceof CellSelection) {
     // When selecting multiple cells
-    startPos = selection.$anchorCell.pos;
-    endPos = selection.$headCell.pos + selection.$headCell.nodeAfter.nodeSize;
+    const $anchor = selection.$anchorCell;
+    const $head = selection.$headCell;
+
+    const firstCell = $anchor.pos < $head.pos ? $anchor : $head;
+    const lastCell = $anchor.pos < $head.pos ? $head : $anchor;
+    startPos = firstCell.start(-1);
+    endPos = lastCell.pos + lastCell.nodeAfter.nodeSize;
   } else {
     startPos = selection.$from.before(
       selection.$from.depth === 0 ? 1 : selection.$from.depth
@@ -1373,15 +1378,19 @@ export function applyLineStyle(
     let from, to;
     if (selection instanceof CellSelection) {
       // When selecting multiple cells
-      from = selection.$anchorCell.pos;
-      to = selection.$headCell.pos + selection.$headCell.nodeAfter.nodeSize;
+      const $anchor = selection.$anchorCell;
+      const $head = selection.$headCell;
+
+      const firstCell = $anchor.pos < $head.pos ? $anchor : $head;
+      const lastCell = $anchor.pos < $head.pos ? $head : $anchor;
+      from = firstCell.start(-1);
+      to = lastCell.pos + lastCell.nodeAfter.nodeSize;
     } else {
       from = selection.$from.before(
         selection.$from.depth === 0 ? 1 : selection.$from.depth
       );
       to = selection.$to?.end();
     }
-
 
     // [FS] IRAD-1168 2021-06-21
     // FIX: multi-select paragraphs and apply a style with the bold the first sentence,

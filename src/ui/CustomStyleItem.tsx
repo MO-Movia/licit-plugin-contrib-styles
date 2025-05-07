@@ -2,7 +2,7 @@ import React from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
-import { getCustomStyleByName, getCustomStyle } from '../customStyle';
+import { getCustomStyleByName, getCustomStyle, getStyleRuntime } from '../customStyle';
 import { getDetailsBullet } from '../CustomStyleNodeSpec';
 import { PointerSurface } from '@modusoperandi/licit-ui-commands';
 import type { PointerSurfaceProps } from '@modusoperandi/licit-ui-commands';
@@ -92,8 +92,8 @@ export class CustomStyleItem extends React.PureComponent<
               : 'none',
             color: pointerProps.command._customStyle.styles?.bulletLevel
               ? getDetailsBullet(
-                  pointerProps.command._customStyle.styles.bulletLevel
-                ).color
+                pointerProps.command._customStyle.styles.bulletLevel
+              ).color
               : '',
             marginTop: '-4px',
           }}
@@ -101,8 +101,8 @@ export class CustomStyleItem extends React.PureComponent<
           <PointerSurface {...pointerProps} className={klass}>
             {pointerProps.command._customStyle.styles?.bulletLevel
               ? getDetailsBullet(
-                  pointerProps.command._customStyle.styles.bulletLevel
-                ).symbol
+                pointerProps.command._customStyle.styles.bulletLevel
+              ).symbol
               : ''}
           </PointerSurface>
         </div>
@@ -135,7 +135,7 @@ export class CustomStyleItem extends React.PureComponent<
         <div
           className="molsp-arrow-right"
           data-cy="cyStyleEdit"
-          style={{ width: '50px', display: hasText ? 'block' : 'none' }}
+          style={{ width: '50px', display: (hasText && getStyleRuntime()?.canEditStyle) ? 'block' : 'none' }}
         >
           {/* Need to change the below icon to downarroe */}
           <PointerSurface {...pointerProps} className={klass + ' edit-icon'}>

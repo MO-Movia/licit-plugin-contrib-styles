@@ -1318,7 +1318,7 @@ export function applyStyle(
 
     const firstCell = $anchor.pos < $head.pos ? $anchor : $head;
     const lastCell = $anchor.pos < $head.pos ? $head : $anchor;
-    startPos = firstCell.start(-1);
+    startPos = firstCell.pos;
     endPos = lastCell.pos + lastCell.nodeAfter.nodeSize;
   } else {
     startPos = selection.$from.before(
@@ -1383,7 +1383,7 @@ export function applyLineStyle(
 
       const firstCell = $anchor.pos < $head.pos ? $anchor : $head;
       const lastCell = $anchor.pos < $head.pos ? $head : $anchor;
-      from = firstCell.start(-1);
+      from = firstCell.pos;
       to = lastCell.pos + lastCell.nodeAfter.nodeSize;
     } else {
       from = selection.$from.before(

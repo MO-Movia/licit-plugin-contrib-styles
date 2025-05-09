@@ -583,11 +583,13 @@ html {
 .ProseMirror p[data-style-level='2'][tof='true'] {
   counter-increment: F1;
   margin-left: 16pt;
+  counter-reset: none;
 }
 
 .ProseMirror p[data-style-level='2'][tot='true'] {
   counter-increment: D1;
   margin-left: 16pt;
+  counter-reset: none;
 }
 
 .ProseMirror p[data-style-level='2'][tof='true']::before {

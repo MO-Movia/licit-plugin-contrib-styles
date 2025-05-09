@@ -66,6 +66,8 @@ export type CSSStyle = {
 };
 
 export type StyleRuntime = {
+
+  canEditStyle?: boolean; // true= User has permission to edit styles
   /**
    * Gets array of styles asynchronously from the service
    */

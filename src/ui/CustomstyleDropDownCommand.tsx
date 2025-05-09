@@ -16,6 +16,7 @@ import {
   getStylesAsync,
   hasStyleRuntime,
   isCustomStyleExists,
+  getStyleRuntime
 } from '../customStyle';
 
 // [FS] IRAD-1042 2020-09-09
@@ -77,24 +78,32 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
   }
 
   staticCommands(customStyleName) {
-    const MENU_COMMANDS = {
-      ['newstyle']: new CustomStyleCommand(
+    const MENU_COMMANDS = {};
+
+    // Only include these if the user has the canEditStyle permission
+    if (getStyleRuntime()?.canEditStyle) {
+      MENU_COMMANDS['newstyle'] = new CustomStyleCommand(
         'newstyle',
         'New Style..',
         customStyleName
-      ),
-    };
-    // [FS] IRAD-1176 2021-02-08
-    // Added a menu "Edit All" for Edit All custom styles
-    MENU_COMMANDS['editall'] = new CustomStyleCommand('editall', 'Edit All');
+      );
+
+      MENU_COMMANDS['editall'] = new CustomStyleCommand(
+        'editall',
+        'Edit All'
+      );
+    }
+
     MENU_COMMANDS['clearstyle'] = new CustomStyleCommand(
       'clearstyle',
       'Clear Style'
     );
+
     MENU_COMMANDS['reset'] = new CustomStyleCommand(
       'reset',
       'Restart Numbering'
     );
+
     return [MENU_COMMANDS];
   }
   isAllowedNode(node: Node) {

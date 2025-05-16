@@ -312,7 +312,7 @@ html {
 
 /* List style counter */
 
-.ProseMirror p[data-style-level='1'] {
+.ProseMirror p[data-style-level='1'][hide-style-level='false'] {
   counter-increment: C1;
 
   /* Reset all other variables under the current one. */
@@ -320,7 +320,7 @@ html {
   margin-left: 12pt;
 }
 
-.ProseMirror p[data-style-level='2'] {
+.ProseMirror p[data-style-level='2'][hide-style-level='false'] {
   counter-increment: C2;
 
   /* Reset all other variables under the current one. */
@@ -328,7 +328,7 @@ html {
   margin-left: 16pt;
 }
 
-.ProseMirror p[data-style-level='3'] {
+.ProseMirror p[data-style-level='3'][hide-style-level='false'] {
   counter-increment: C3;
 
   /* Reset all other variables under the current one. */
@@ -336,7 +336,7 @@ html {
   margin-left: 25pt;
 }
 
-.ProseMirror p[data-style-level='4'] {
+.ProseMirror p[data-style-level='4'][hide-style-level='false'] {
   counter-increment: C4;
 
   /* Reset all other variables under the current one. */
@@ -344,7 +344,7 @@ html {
   margin-left: 37pt;
 }
 
-.ProseMirror p[data-style-level='5'] {
+.ProseMirror p[data-style-level='5'][hide-style-level='false'] {
   counter-increment: C5;
 
   /* Reset all other variables under the current one. */
@@ -352,7 +352,7 @@ html {
   margin-left: 46pt;
 }
 
-.ProseMirror p[data-style-level='6'] {
+.ProseMirror p[data-style-level='6'][hide-style-level='false'] {
   counter-increment: C6;
 
   /* Reset all other variables under the current one. */
@@ -360,7 +360,7 @@ html {
   margin-left: 56pt;
 }
 
-.ProseMirror p[data-style-level='7'] {
+.ProseMirror p[data-style-level='7'][hide-style-level='false'] {
   counter-increment: C7;
 
   /* Reset all other variables under the current one. */
@@ -368,7 +368,7 @@ html {
   margin-left: 65pt;
 }
 
-.ProseMirror p[data-style-level='8'] {
+.ProseMirror p[data-style-level='8'][hide-style-level='false'] {
   counter-increment: C8;
 
   /* Reset all other variables under the current one. */
@@ -376,7 +376,7 @@ html {
   margin-left: 73pt;
 }
 
-.ProseMirror p[data-style-level='9'] {
+.ProseMirror p[data-style-level='9'][hide-style-level='false'] {
   counter-increment: C9;
 
   /* Reset all other variables under the current one. */
@@ -384,7 +384,7 @@ html {
   margin-left: 85pt;
 }
 
-.ProseMirror p[data-style-level='10'] {
+.ProseMirror p[data-style-level='10'][hide-style-level='false'] {
   counter-increment: C10;
   margin-left: 92pt;
 }
@@ -577,7 +577,7 @@ html {
 }
 
 .ProseMirror p[hideNumbering='true']::before {
-  content: none !important;
+  visibility: hidden;
 }
 
 .ProseMirror p[data-style-level='2'][tof='true'] {

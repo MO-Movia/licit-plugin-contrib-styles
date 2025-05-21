@@ -1327,7 +1327,6 @@ export function applyStyle(
     endPos = selection.$to?.end();
   }
 
-
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
 
@@ -1441,9 +1440,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
       endIndex = textContent.length;
     }
   }
-
-  // No valid sentence or word found
-  if (endIndex === -1 || endIndex === Infinity) return tr;
+  endIndex = endIndex === -1 ? textContent.length : endIndex;
   const firstSentence = textContent.slice(0, endIndex + (boldSentence ? 1 : 0));
   let childSize = 0;
   let boldSentenceEnd = 0;

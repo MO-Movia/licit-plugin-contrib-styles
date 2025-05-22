@@ -15,7 +15,7 @@ let hasdocTypechanged = false;
 let docType = null;
 // None & None-@#$- have same effect of None.
 // None-@#$-<styleLevel> is used for numbering to set style level for None, based on the cursor level style level.
-function isValidStyleName(styleName) {
+function isValidStyleName(styleName?: string) {
   return (
     styleName &&
     !styleName.includes(RESERVED_STYLE_NONE_NUMBERING) &&
@@ -42,8 +42,7 @@ export function isCustomStyleExists(styleName: string) {
   let bOK = false;
   if (isValidStyleName(styleName)) {
     for (const style of customStyles) {
-      // [FS] IRAD-1432 2021-07-08
-      // FIX: Able to add same style name
+      // Able to add same style name
       if (styleName.toUpperCase() === style?.styleName?.toUpperCase()) {
         bOK = true;
         return bOK;
@@ -64,7 +63,7 @@ export function getCustomStyleByName(name: string): Style {
         style = customStyles[i];
         has = true;
       }
-      // FIX: Marks are not getting applied to an undefined style.
+      // Marks are not getting applied to an undefined style.
       else {
         style = DEFAULT_NORMAL_STYLE;
       }
@@ -85,8 +84,7 @@ export function setStyles(style: Style[]) {
   setCustomStyles(style);
   let documentType;
   if (style && Array.isArray(style)) {
-    documentType =
-      style.length > 0 && style[0].docType ? style[0].docType : null;
+    documentType = style?.[0]?.docType;
   }
   hasdocTypechanged = docType !== documentType;
   docType = documentType;
@@ -129,9 +127,7 @@ export function setCustomStylesOnLoad() {
 }
 
 function saveDefaultStyle() {
-  saveStyle(DEFAULT_NORMAL_STYLE)?.then(() => {
-    /* This is intentional */
-  });
+  saveStyle(DEFAULT_NORMAL_STYLE)?.catch(console.error);
 }
 
 export function isStylesLoaded() {

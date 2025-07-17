@@ -830,11 +830,15 @@ function applyStyleEx(
         }
       }
     });
+    const originalSelectionPos = state.selection?.from;
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
 
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     (tr as Transaction).storedMarks = storedmarks;
+    if (originalSelectionPos) {
+      (tr as Transaction).setSelection(TextSelection.create(tr.doc, originalSelectionPos));
+    }
   }
   return tr;
 }

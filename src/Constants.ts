@@ -32,8 +32,8 @@ export const DEFAULT_NORMAL_STYLE = {
 export function getNode(from: number, to: number, tr: Transform): Node {
   let selectedNode = null;
   tr.doc.nodesBetween(from, to, (node) => {
-    if (node.type.name === 'paragraph') {
-      if (null == selectedNode) {
+    if (node.type.name === 'paragraph' || node.type.name === 'enhanced-table-figure-notes') {
+      if (null === selectedNode) {
         selectedNode = node;
       }
     }

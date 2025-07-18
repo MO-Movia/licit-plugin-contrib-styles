@@ -1240,7 +1240,7 @@ export function applyLatestStyle(
 }
 
 function isAllowedNode(node) {
-  return node.type.name === 'paragraph';
+  return node.type.name === 'paragraph' || node.type.name === 'enhanced_table_figure';
 }
 
 // [FS] IRAD-1088 2020-10-05
@@ -1533,7 +1533,7 @@ export function getNode(
   let selectedNode = null;
   selectedNodes.splice(0);
   tr.doc.nodesBetween(from, to, (node, startPos) => {
-    if (node.type.name === 'paragraph') {
+    if (node.type.name === 'paragraph' || node.type.name === 'enhanced-table-figure-notes') {
       if (null == selectedNode) {
         selectedNode = node;
       }

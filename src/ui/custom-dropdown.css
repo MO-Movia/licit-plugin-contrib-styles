@@ -12,33 +12,31 @@
   padding: 5px;
 }
 
-.czi-editor-frameset .molsp-dropbtn.dark {
-  background-color: #333;
-  border-color: #555;
-  color: #ddd;
+.czi-editor-frameset .molsp-dropbtn {
+  background-color: var(--czi-bg);
+  border-color: var(--czi-molsp-dropbtn-border-color);
+  color: var(--czi-text-color);
   box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.8);
 }
 
-.czi-editor-frameset .molsp-dropbtn.light {
-  background-color: #fff;
-  border-color: #cec7c7;
-  color: #5a615e;
-  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-}
 .czi-editor-frameset .molsp-stylenames {
   max-height: 205px;
-  min-height: 30px;
+  min-height: 28px;
   overflow: auto;
 }
 
+.czi-editor-frameset .molsp-stylenames-hr {
+  margin: 2px;
+}
+
 .czi-editor-frameset .molsp-dropdown-content {
-  background-color: #f9f9f9;
-  border-color: #cec7c7;
+  background-color: var(--czi-bg);
+  border-color: var(--czi-molsp-dropbtn-border-color);
+  color: var(--czi-text-color);
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.8);
   border-style: solid;
   border-width: 1px;
-  box-shadow: 0 8px 16px 0 rgba(26, 25, 25, 0.2);
   box-sizing: border-box;
-  color: #5a615e;
   font-family: 'Arial', sans-serif;
   font-size: 14px;
   height: 95px;
@@ -51,39 +49,46 @@
 }
 
 .czi-editor-frameset .div-height-small {   
-  height: 35px; 
+  height: 25px; 
 }
 
 .czi-editor-frameset .molsp-dropdown-content a {
   display: block;
-  padding-bottom: 10px;
+  padding-bottom: 6px;
   padding-left: 14px;
   padding-right: 14px;
-  padding-top: 10px;
+  padding-top: 6px;
   text-decoration: none;
 }
 
 .czi-editor-frameset .molsp-dropdown-content a:hover {
-  background-color: lightgrey;
+  background-color: var(--czi-button-hover-background-color);
+  border: 1px solid;
+  border-radius: 6px;
 }
 
 #container1 {
   display: flex;
   justify-content: space-between;
-  line-height: 2;
+  line-height: 1.6;
   width: 265px;
 }
 
 #container1>div {
-  height: 30px;
+  height: 22px;
+  padding: 1px 4px;
 }
 
 #container1:hover {
-  background-color: lightgrey;
+  background-color: var(--czi-button-hover-background-color);
+  border: 1px solid;
+  border-radius: 6px;
 }
 
 .selectbackground {
-  background-color: lightgrey;
+  background-color: var(--czi-button-hover-background-color);
+  border: 1px solid;
+  border-radius: 6px;
 }
 
 .czi-editor-frameset .molsp-arrow-right {

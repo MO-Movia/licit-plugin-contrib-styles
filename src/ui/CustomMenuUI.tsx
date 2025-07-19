@@ -126,7 +126,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
         <div className={className} id={this._id}>
           <div className="molsp-stylenames">{children}</div>
 
-          <hr></hr>
+          <hr className="molsp-stylenames-hr"></hr>
           {children1}
         </div>
         </span>
@@ -177,6 +177,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
       CustomStyleSubMenu,
       {
         command: command,
+        theme: this.props.theme
       },
       {
         anchor,

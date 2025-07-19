@@ -807,7 +807,6 @@ function hasMismatchHeirarchy(
   styleName? /* New style to be applied */
 ) {
   const styleLevel = Number(getStyleLevel(styleName || ''));
-  const style = getCustomStyleByName(styleName || '');
   const currentLevel = getStyleLevel(node.attrs?.styleName);
   nodesBeforeSelection.splice(0);
   nodesAfterSelection.splice(0);
@@ -819,10 +818,6 @@ function hasMismatchHeirarchy(
 
   let hasHeirarchyBroken = false;
 
-  //need to check heirarchy only if user apply a style with numbering.No need to check heirarchy if the style has only the style level.
-  if (undefined == style.styles.hasNumbering || !style.styles.hasNumbering) {
-    return hasHeirarchyBroken;
-  }
   // Manage heirachy for nodes of previous  position
   // if (startPos !== 0) {
   // Fix: document Load Error- Instead of state doc here give transaction doc,because when we apply changes
@@ -1213,7 +1208,7 @@ export function addElementEx(
     addElementAfter(nodeAttrs, state, tr, startPos, nextLevel);
   } else {
     level = previousLevel ? previousLevel - 1 : 0;
-    counter = currentLevel ? currentLevel : 0;
+    counter = currentLevel ?? 0;
   }
 
   for (let index = level; index > counter; index--) {
@@ -1630,7 +1625,7 @@ export function isLevelUpdated(
         undefined !== style.styles.hasNumbering &&
         !style.styles.hasNumbering) ||
       (style?.styles && undefined === style?.styles?.styleLevel) ||
-      (style?.styles?.styleLevel !== currentLevel && undefined !== style.styles.hasNumbering && !style.styles.hasNumbering)
+      style?.styles?.styleLevel !== currentLevel
     ) {
       bOK = true;
     }

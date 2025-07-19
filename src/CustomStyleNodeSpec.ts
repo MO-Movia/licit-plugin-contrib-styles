@@ -59,7 +59,9 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
     isListStyle,
     prefix,
   } = getStyle(node.attrs);
-  style && (output[1].style = style);
+  if (style) {
+    output[1].style = style;
+  }
   if (styleLevel) {
     if (isListStyle) {
       if (node.attrs.indent !== null) {
@@ -215,7 +217,7 @@ function getStyleEx(align, lineSpacing, styleName) {
           style += `font-family: ${styleProps.styles.fontName};`;
         }
         if (styleProps.styles.indent) {
-          indentOverriden = styleProps.styles.isLevelbased? styleProps.styles.styleLevel.toString() : styleProps.styles.indent;
+          indentOverriden = styleProps.styles.indent;
         }
         // [FS] IRAD-1462 2021-06-17
         // FIX:  Numbering applied for paragraph even though the custom style not selected numbering(but set level)

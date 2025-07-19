@@ -67,7 +67,11 @@ export class CustomMenuButton extends React.PureComponent<
   _onClick = (): void => {
     this.setState((lastState) => {
       const expanded = !lastState.expanded;
-      expanded ? this._showMenu() : this._hideMenu();
+      if (expanded) {
+        this._showMenu();
+      } else {
+        this._hideMenu();
+      }
       return {
         expanded,
       };

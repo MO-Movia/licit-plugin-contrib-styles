@@ -1,10 +1,10 @@
 .czi-editor-frameset .molsp-customedit-div {
-  background: #e6e6e6;
+  background: var(--czi-bg);;
   border-color: #4a4949;
   border-style: solid;
   border-width: 1px;
   box-sizing: border-box !important;
-  color: white;
+  color: var(--czi-text-color);
   font-family: 'Arial', sans-serif;
   height: 438px;
   overflow: hidden;
@@ -20,10 +20,11 @@
   margin-left: -3px;
   padding: 5px;
   width: auto;
+  font-size: 12px;
 }
 
 .czi-editor-frameset .molsp-spacingdiv label {
-  color: #464343;
+  color: var(--czi-text-color);
   font-size: 12px;
   margin-bottom: 4px;
   margin-left: -4px;
@@ -32,7 +33,7 @@
 }
 
 .czi-editor-frameset .molsp-formp {
-  color: #464343;
+  color: var(--czi-text-color);
   font-size: 12px;
   margin-bottom: 2px;
   margin-left: -2px;
@@ -72,7 +73,7 @@
 
 .czi-editor-frameset .molsp-customedit-body {
   background: transparent;
-  color: #464343;
+  color: var(--czi-text-color);
   display: grid;
   grid-gap: 10px;
   grid-template-columns: auto auto;
@@ -84,7 +85,7 @@
 }
 
 .czi-editor-frameset label {
-  color: black;
+  color: var(--czi-text-color);
 }
 
 .czi-editor-frameset .molsp-stylenameinput {
@@ -177,8 +178,6 @@
   width: 83px;
 }
 
-
-
 .czi-editor-frameset .molsp-btns {
   margin-bottom: 2px;
   margin-left: 28px;
@@ -195,7 +194,6 @@
   margin-top: 2px;
   padding-left: 6px;
 }
-
 
 .czi-editor-frameset .molsp-visible-sampletext {
   color: black;
@@ -326,7 +324,6 @@
   border-color: transparent;
 }
 
-
 .czi-editor-frameset .molsp-fontstyle {
   font-size: 13px;
 }
@@ -343,15 +340,20 @@
   box-sizing: border-box;
   margin-left: -1px;
   padding: 5px;
-  width: auto;
+  width: 100%;
+}
+
+.czi-editor-frameset .molsp-fw-label {
+font-size: 12px;
+color: var(--czi-text-color);
 }
 
 .czi-editor-frameset .molsp-hierarchydiv label {
   box-sizing: content-box !important;
-  color: #464343;
-  font-size: 12px;
+  color: var(--czi-text-color);
+  font-size: 11px;
   margin-bottom: 4px;
-  margin-left: -4px;
+  margin-left: 0;
   margin-right: 0;
   margin-top: 4px;
 }
@@ -380,4 +382,16 @@ div[disabled='disabled'] {
   color: white;
   padding: 20px;
   width: 340px;
+}
+
+.czi-editor-frameset .molsp-hierarchydiv .formatting-fieldset {
+  width: 100%;
+  min-width: 0;
+  padding-left: 10px;
+  margin: 0;
+  border: inherit;
+}
+
+.czi-editor-frameset .molsp-hierarchydiv .formatting-legend {
+  all: unset;
 }

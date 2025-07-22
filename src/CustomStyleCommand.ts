@@ -830,11 +830,15 @@ function applyStyleEx(
         }
       }
     });
+    const originalSelectionPos = state.selection?.from;
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
 
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     (tr as Transaction).storedMarks = storedmarks;
+    if (originalSelectionPos) {
+      (tr as Transaction).setSelection(TextSelection.create(tr.doc, originalSelectionPos));
+    }
   }
   return tr;
 }
@@ -1240,7 +1244,7 @@ export function applyLatestStyle(
 }
 
 function isAllowedNode(node) {
-  return node.type.name === 'paragraph';
+  return node.type.name === 'paragraph' || node.type.name === 'enhanced_table_figure_notes';
 }
 
 // [FS] IRAD-1088 2020-10-05
@@ -1533,7 +1537,7 @@ export function getNode(
   let selectedNode = null;
   selectedNodes.splice(0);
   tr.doc.nodesBetween(from, to, (node, startPos) => {
-    if (node.type.name === 'paragraph') {
+    if (node.type.name === 'paragraph' || node.type.name === 'enhanced_table_figure_notes') {
       if (null == selectedNode) {
         selectedNode = node;
       }

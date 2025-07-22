@@ -131,7 +131,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   }
 
   isAllowedNode(node: Node) {
-    return node.type.name === 'paragraph' || node.type.name === 'ordered_list';
+    return node.type.name === 'paragraph' || node.type.name === 'ordered_list' || node.type.name === 'enhanced_table_figure_notes';
   }
 
   _onUIEnter = (command: UICommand, event: SyntheticEvent<Element>) => {

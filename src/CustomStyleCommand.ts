@@ -166,7 +166,7 @@ function getCustomStyleCommandsEx(
     case LEVELBASEDINDENT:
       // [FS] IRAD-1162 2021-1-25
       // Bug fix: indent not working along with level
-      if (customStyle[LEVEL] && Number(customStyle[LEVEL]) > 0) {
+      if (customStyle[property] && customStyle[LEVEL] && Number(customStyle[LEVEL]) > 0) {
         commands.push(new IndentCommand(customStyle[LEVEL]));
       }
       break;

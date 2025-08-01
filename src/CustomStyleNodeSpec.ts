@@ -79,8 +79,12 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
       output[1][HIDE_STYLE_LEVEL] = getHidenumberingFlag();
     }
   }
-  if ('' !== indentOverriden) {
-    output[1][ATTRIBUTE_INDENT] = String(indentOverriden);
+  if(node.attrs.overriddenIndent)
+  {
+      output[1][ATTRIBUTE_INDENT] = String(node.attrs.overriddenIndentValue);
+  }
+  else if('' !== indentOverriden){
+      output[1][ATTRIBUTE_INDENT] = String(indentOverriden);
   }
 
   if (prefix) {

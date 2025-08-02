@@ -529,7 +529,6 @@ html {
 
 .ProseMirror p[data-style-level='2'][tot='true']::before {
   content: attr(prefix) counter(C1, decimal) '.' counter(D1, decimal) ' ';
-  font-weight: var(--czi-counter-bold);
-  margin-left: -16pt;
+  font-weight: var(--czi-counter-bold); 
   font-size: var(--czi-content-font-size);
 }

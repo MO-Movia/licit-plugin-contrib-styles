@@ -1060,8 +1060,7 @@ export function manageElementsAfterSelection(nodeArray, state, tr) {
   let subsequantLevel = 0;
   let counter = 0;
 
-  for (let index = 0; index < nodeArray.length; index++) {
-    const item = nodeArray[index];
+  for (const item of nodeArray) {
     subsequantLevel = Number(getStyleLevel(item.node.attrs.styleName));
     if (subsequantLevel !== 0 && selectedLevel !== subsequantLevel) {
       if (subsequantLevel - selectedLevel > 1) {

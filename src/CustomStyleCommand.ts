@@ -1295,7 +1295,6 @@ export function removeAllMarksExceptLink(
           });
         }
       });
-      return true;
     }
     return true;
   });

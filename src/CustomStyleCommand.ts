@@ -166,7 +166,11 @@ function getCustomStyleCommandsEx(
     case LEVELBASEDINDENT:
       // [FS] IRAD-1162 2021-1-25
       // Bug fix: indent not working along with level
-      if (customStyle[property] && customStyle[LEVEL] && Number(customStyle[LEVEL]) > 0) {
+      if (
+        customStyle[property] &&
+        customStyle[LEVEL] &&
+        Number(customStyle[LEVEL]) > 0
+      ) {
         commands.push(new IndentCommand(customStyle[LEVEL]));
       }
       break;
@@ -837,7 +841,9 @@ function applyStyleEx(
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     (tr as Transaction).storedMarks = storedmarks;
     if (originalSelectionPos) {
-      (tr as Transaction).setSelection(TextSelection.create(tr.doc, originalSelectionPos));
+      (tr as Transaction).setSelection(
+        TextSelection.create(tr.doc, originalSelectionPos)
+      );
     }
   }
   return tr;
@@ -1069,7 +1075,7 @@ export function manageElementsAfterSelection(nodeArray, state, tr) {
         }
         counter++;
       } else {
-        index = nodeArray.length + 1;
+        break;
       }
     } else if (
       subsequantLevel !== 0 &&
@@ -1244,7 +1250,10 @@ export function applyLatestStyle(
 }
 
 function isAllowedNode(node) {
-  return node.type.name === 'paragraph' || node.type.name === 'enhanced_table_figure_notes';
+  return (
+    node.type.name === 'paragraph' ||
+    node.type.name === 'enhanced_table_figure_notes'
+  );
 }
 
 // [FS] IRAD-1088 2020-10-05
@@ -1330,7 +1339,6 @@ export function applyStyle(
     );
     endPos = selection.$to?.end();
   }
-
 
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
@@ -1537,7 +1545,10 @@ export function getNode(
   let selectedNode = null;
   selectedNodes.splice(0);
   tr.doc.nodesBetween(from, to, (node, startPos) => {
-    if (node.type.name === 'paragraph' || node.type.name === 'enhanced_table_figure_notes') {
+    if (
+      node.type.name === 'paragraph' ||
+      node.type.name === 'enhanced_table_figure_notes'
+    ) {
       if (null == selectedNode) {
         selectedNode = node;
       }

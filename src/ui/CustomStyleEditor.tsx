@@ -1458,7 +1458,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           type="radio"
                           value="userDefined"
                         />
-                        User-defined Numbering/Bullets
+                        {'User-defined Numbering/Bullets'}
                       </label>
                       <br />
                       <label>
@@ -1474,65 +1474,65 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           type="radio"
                           value="listStyle"
                         />
-                        List-style (Auto Numbering)
+                        {'List-style (Auto Numbering)'}
                       </label>
                     </div>
                   </div>
                 ) : (
-                    <div
-                      className="molsp-hierarchydiv"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginLeft: '-1px',
-                      }}
-                    >
-                      <div className="molsp-hierarchydiv">
-                        <label>
-                          <input
-                            checked={this.state.selectedStyle === 'userDefined'}
-                            disabled={
-                              this.state.styleName === RESERVED_STYLE_NONE
-                            }
-                            onChange={(e) => this.handleList(e)}
-                            type="radio"
-                            value="userDefined"
-                          />
-                          <span
-                            style={{
-                              marginLeft: '2px',
-                              position: 'relative',
-                              top: '-2px',
-                            }}
-                          >
-                            User-defined Numbering/Bullets
+                  <div
+                    className="molsp-hierarchydiv"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginLeft: '-1px',
+                    }}
+                  >
+                    <div className="molsp-hierarchydiv">
+                      <label>
+                        <input
+                          checked={this.state.selectedStyle === 'userDefined'}
+                          disabled={
+                            this.state.styleName === RESERVED_STYLE_NONE
+                          }
+                          onChange={(e) => this.handleList(e)}
+                          type="radio"
+                          value="userDefined"
+                        />
+                        <span
+                          style={{
+                            marginLeft: '2px',
+                            position: 'relative',
+                            top: '-2px',
+                          }}
+                        >
+                          User-defined Numbering/Bullets
                         </span>
-                        </label>
-                        <br />
-                        <label>
-                          <input
-                            checked={this.state.selectedStyle === 'listStyle'}
-                            disabled={
-                              this.state.styleName === RESERVED_STYLE_NONE
-                            }
-                            onChange={this.handleList.bind(this)}
-                            type="radio"
-                            value="listStyle"
-                          />
-                          <span
-                            style={{
-                              marginLeft: '2px',
-                              position: 'relative',
-                              top: '-2px',
-                            }}
-                          >
-                            List-style (Auto Numbering)
+                      </label>
+                      <br />
+                      <label>
+                        <input
+                          checked={this.state.selectedStyle === 'listStyle'}
+                          disabled={
+                            this.state.styleName === RESERVED_STYLE_NONE
+                          }
+                          onChange={this.handleList.bind(this)}
+                          type="radio"
+                          value="listStyle"
+                        />
+                        <span
+                          style={{
+                            marginLeft: '2px',
+                            position: 'relative',
+                            top: '-2px',
+                          }}
+                        >
+                          List-style (Auto Numbering)
                         </span>
-                        </label>
-                      </div>
+                      </label>
                     </div>
-                  )}
+                  </div>
+                )}
                 <div
                   className="molsp-hierarchydiv"
                   style={{
@@ -1844,7 +1844,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       checked={
                         !(this.state.styles.tot || this.state.styles.tof) &&
                         this.state.styles.nextLineStyleName ===
-                        this.state.styleName &&
+                          this.state.styleName &&
                         !this.state.otherStyleSelected
                       }
                       name="nextlinestyle"
@@ -1876,7 +1876,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         this.state.styles.tot ||
                         this.state.styles.tof ||
                         this.state.styles.nextLineStyleName ===
-                        RESERVED_STYLE_NONE
+                          RESERVED_STYLE_NONE
                       }
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 0)}

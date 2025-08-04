@@ -293,35 +293,19 @@ export function onUpdateAppendTransaction(
             tr = tr.setNodeMarkup(_startPos, undefined, newattrs);
           }
         } else {
-          if (node2.type.name === 'table') {
-            const styleName = node1.attrs.styleName ?? 'Normal';
-            const node = nextState.tr.doc.nodeAt(_startPos);
-            const len = node.nodeSize;
-            const endPos = _startPos + len;
-            const styleProp = getCustomStyleByName(styleName);
-            tr = applyStyleToEachNode(
-              nextState,
-              _startPos,
-              endPos,
-              tr,
-              styleProp,
-              styleName
-            );
-          } else {
-            const styleName = node1.attrs.styleName ?? 'Normal';
-            const node = nextState.tr.doc.nodeAt(_startPos);
-            const len = node.nodeSize;
-            const endPos = _startPos + len;
-            const styleProp = getCustomStyleByName(styleName);
-            tr = applyStyleToEachNode(
-              nextState,
-              _startPos,
-              endPos,
-              tr,
-              styleProp,
-              styleName
-            );
-          }
+          const styleName = node1.attrs.styleName ?? 'Normal';
+          const node = nextState.tr.doc.nodeAt(_startPos);
+          const len = node.nodeSize;
+          const endPos = _startPos + len;
+          const styleProp = getCustomStyleByName(styleName);
+          tr = applyStyleToEachNode(
+            nextState,
+            _startPos,
+            endPos,
+            tr,
+            styleProp,
+            styleName
+          );
         }
       }
     }

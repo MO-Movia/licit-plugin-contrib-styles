@@ -391,3 +391,8 @@ div[disabled='disabled'] {
 .czi-editor-frameset .molsp-hierarchydiv .formatting-legend {
   all: unset;
 }
+
+.czi-editor-frameset .noButton {
+  border: none;
+  background-color: inherit;
+}

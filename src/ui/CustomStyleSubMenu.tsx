@@ -19,6 +19,7 @@ export class CustomStyleSubMenu extends React.PureComponent<
         id="mo-submenu"
       >
         <button
+          className="noButton"
           onClick={this.onButtonClick.bind(this, {
             type: 'modify',
             command: command,
@@ -27,6 +28,7 @@ export class CustomStyleSubMenu extends React.PureComponent<
           Modify Style..
         </button>
         <button
+          className="noButton"
           onClick={this.onButtonClick.bind(this, {
             type: 'rename',
             command: command,
@@ -35,6 +37,7 @@ export class CustomStyleSubMenu extends React.PureComponent<
           Rename Style..
         </button>
         <button
+          className="noButton"
           data-cy="cyStyleEditReset"
           onClick={this.onButtonClick.bind(this, {
             type: 'remove',

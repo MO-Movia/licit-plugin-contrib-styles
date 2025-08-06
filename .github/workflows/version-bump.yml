@@ -40,10 +40,12 @@ jobs:
           npx npm-check-updates --peer --target semver -u
           npm update
           npm i
-      - name: Verify
-        run: npm run verify
-      - name: Commit
+      - name: Prepare Release
         run: |
           TAG=v$(npm pkg get version --workspaces=false | tr -d \")
+          git checkout -b "Release/${TAG}"
           git commit -a -m "Bump version to ${TAG}"
           git push origin
+          gh pr create -B main --title '${TAG} Release' --fill
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

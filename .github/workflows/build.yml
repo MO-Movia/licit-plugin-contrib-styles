@@ -16,6 +16,8 @@ jobs:
       matrix:
         node-version: [20.x]
 
+    # Ignore PRs from master. Assumtion is master is always a good branch, so this PR is just a sync.
+    if: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
     steps:
       - uses: actions/checkout@v4
         with:

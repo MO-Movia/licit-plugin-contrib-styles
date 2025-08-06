@@ -23,6 +23,7 @@ jobs:
       matrix:
         node-version: [20.x]
 
+    timeout-minutes: 60 # Default 5 days for self hosted
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

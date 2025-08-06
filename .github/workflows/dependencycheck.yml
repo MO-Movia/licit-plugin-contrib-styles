@@ -27,7 +27,7 @@ jobs:
 
       # Dependency-Check
       - name: Dependency-Check
-        run: npx owasp-dependency-check --scan . --failOnCVSS 1 --suppression suppression.xml --nvdApiKey ${{ secrets.NVD_KEY }} --disableYarnAudit --exclude node_modules/node-gyp/**/* --exclude dependency-check-bin/**/* 
+        run: npx owasp-dependency-check --scan . --failOnCVSS 1 --nvdApiKey ${{ secrets.NVD_KEY }} --disableYarnAudit --exclude node_modules/node-gyp/**/* --exclude dependency-check-bin/**/* # --suppression suppression.xml
       - name: Upload Report
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}

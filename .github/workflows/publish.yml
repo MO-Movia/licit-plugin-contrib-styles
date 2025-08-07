@@ -10,7 +10,7 @@ jobs:
   publish:
     runs-on: self-hosted
     permissions:
-      contents: read
+      contents: write # write for release
       id-token: write # required for provenance cert #https://docs.npmjs.com/generating-provenance-statements
 
     strategy:

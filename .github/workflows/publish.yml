@@ -10,13 +10,14 @@ jobs:
   publish:
     runs-on: self-hosted
     permissions:
-      contents: read
+      contents: write # write for release
       id-token: write # required for provenance cert #https://docs.npmjs.com/generating-provenance-statements
 
     strategy:
       matrix:
         node-version: [20.x]
 
+    timeout-minutes: 60 # Default 5 days for self hosted
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,21 +34,14 @@ jobs:
       - name: NPM Publish
         env: 
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish ./dist --provenance --access public
+        run: npm publish ./dist --access public # --provenance # provenance requires a github hosted runner
+        continue-on-error: true
 
-      - name: Setup GH auth
-        uses: actions/setup-node@v4
-        with:
-          registry-url: 'https://npm.pkg.github.com'
-      - name: GH Publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm publish ./dist --provenance --access public
       - name: Set Version number
         run: echo "TAG=$(npm pkg get version --workspaces=false | tr -d \")" >> "$GITHUB_ENV"
+
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: github.ref_type == 'tag'
         with:
-          tag_name: ${TAG}
+          tag_name: ${{ env.TAG }}
           generate_release_notes: true

@@ -34,7 +34,7 @@ jobs:
       - name: NPM Publish
         env: 
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish ./dist --provenance --access public
+        run: npm publish ./dist --access public # --provenance # provenance requires a github hosted runner
 
       - name: Setup GH auth
         uses: actions/setup-node@v4
@@ -43,7 +43,7 @@ jobs:
       - name: GH Publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm publish ./dist --provenance --access public
+        run: npm publish ./dist --access public # --provenance # provenance requires a github hosted runner
       - name: Set Version number
         run: echo "TAG=$(npm pkg get version --workspaces=false | tr -d \")" >> "$GITHUB_ENV"
       - name: Release

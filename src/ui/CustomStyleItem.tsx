@@ -24,7 +24,7 @@ export class CustomStyleItem extends React.PureComponent<
     onCommand?: () => void; //Function changed to ()=>void
     selectionClassName?: string;
   }
-> {
+  > {
   render(): React.ReactElement {
     const { label, hasText, ...pointerProps } = this.props;
     let text = '';
@@ -123,15 +123,17 @@ export class CustomStyleItem extends React.PureComponent<
             {hasBoldPartial && hasBoldSentence ? BOLD_SENTENCE : BOLD_WORD}
           </PointerSurface>
         </div>
-        <div className="molsp-style-sampletext" style={customStyle}>
-          <PointerSurface
-            {...pointerProps}
-            className={klass}
-            style={customStyle}
-          >
-            {text}
-          </PointerSurface>
-        </div>
+        {hasText && (
+          <div className="molsp-style-sampletext" style={customStyle}>
+            <PointerSurface
+              {...pointerProps}
+              className={klass}
+              style={customStyle}
+            >
+              {text}
+            </PointerSurface>
+          </div>
+        )}
         <div
           className="molsp-arrow-right"
           data-cy="cyStyleEdit"

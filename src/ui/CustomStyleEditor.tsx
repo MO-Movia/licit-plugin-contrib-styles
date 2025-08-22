@@ -1842,22 +1842,24 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <input
                       checked={this.state.styles.isHangingIndent}
+                      id='hanging-indent-checkbox'
                       onChange={this.onHangingIndentChange.bind(this)}
                       type="checkbox"
                     />
-                    <label style={{ marginLeft: '4px' }}>Hanging Indent</label>
+                    <label htmlFor='hanging-indent-checkbox' style={{ marginLeft: '4px' }}>Hanging Indent</label>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', marginLeft: '34px' }}>
-                    <label style={{ marginRight: '8px' }}>Indent position: </label>
+                    <label htmlFor='indent-position-input' style={{ marginRight: '8px' }}>Indent position: </label>
                     <input
                       disabled={
                         !this.state.styles.isHangingIndent
                       }
+                      id='indent-position-input'
                       onChange={this.onIndentPositionChange.bind(this)}
                       style={{ width: '34px', marginRight: '6px' }}
                       type="text"
-                      value={this.state.styles.indentPosition || ''}
+                      value={this.state.styles.indentPosition ?? ''}
                     />
                     <span>inches</span>
                   </div>

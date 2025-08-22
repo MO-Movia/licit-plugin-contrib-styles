@@ -774,6 +774,9 @@ function applyStyleEx(
     }
 
     newattrs.styleName = styleName;
+    if (styleProp.styles.indentPosition) {
+      newattrs.indentPosition = styleProp.styles.indentPosition;
+    }
 
     _commands.forEach((element) => {
       if (styleProp?.styles) {

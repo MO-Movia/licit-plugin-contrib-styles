@@ -57,6 +57,7 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
     style,
     styleLevel,
     indentOverriden,
+    indentPosition,
     bulletDetails,
     isListStyle,
     prefix,
@@ -79,12 +80,14 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
       output[1][HIDE_STYLE_LEVEL] = getHidenumberingFlag();
     }
   }
-  if(node.attrs.overriddenIndent)
-  {
-      output[1][ATTRIBUTE_INDENT] = String(node.attrs.overriddenIndentValue);
+  if (indentPosition) {
+    output[1]['indentPosition'] = indentPosition;
   }
-  else if('' !== indentOverriden){
-      output[1][ATTRIBUTE_INDENT] = String(indentOverriden);
+  if (node.attrs.overriddenIndent) {
+    output[1][ATTRIBUTE_INDENT] = String(node.attrs.overriddenIndentValue);
+  }
+  else if ('' !== indentOverriden) {
+    output[1][ATTRIBUTE_INDENT] = String(indentOverriden);
   }
 
   if (prefix) {
@@ -175,6 +178,7 @@ function getStyleEx(align, lineSpacing, styleName) {
   let style = '';
   let styleLevel = 0;
   let indentOverriden = '';
+  let indentPosition = '';
   let isListStyle = false;
   let prefix = '';
   let tot = false;
@@ -204,6 +208,10 @@ function getStyleEx(align, lineSpacing, styleName) {
       if (styleProps.styles.hasBullet) {
         bulletDetails = getBulletDetails(styleProps.styles.bulletLevel);
         styleLevel = styleProps.styles.styleLevel;
+      }
+
+      if (styleProps.styles.indentPosition) {
+        indentPosition = styleProps.styles.indentPosition;
       }
 
       if (null === align && styleProps.styles.align) {
@@ -267,6 +275,7 @@ function getStyleEx(align, lineSpacing, styleName) {
     style,
     styleLevel,
     indentOverriden,
+    indentPosition,
     bulletDetails,
     isListStyle,
     prefix,

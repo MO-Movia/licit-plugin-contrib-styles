@@ -45,6 +45,8 @@ describe('toCustomStyleDOM', () => {
         indent: '10',
         hasNumbering: true,
         isList: true,
+        indentPosition: '1.5',
+        isHangingIndentapplied: true,
       },
       styleName: '',
     });
@@ -88,6 +90,7 @@ describe('toCustomStyleDOM', () => {
         'data-bullet-symbol': '● ',
         'data-indent': '10',
         'data-show-bullet': true,
+        'indentPosition': '1.5',
         'list-style-level': 1,
         // 'hide-style-level': false,
         style:

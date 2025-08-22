@@ -236,6 +236,12 @@ describe('CustomStyleEditor', () => {
       customstyleeditor.onOtherStyleSelectionChanged(event)
     ).toBeUndefined();
   });
+    it('should handle onIndentPositionChange', () => {
+    const event = { target: { value: '1.5' } };
+    expect(
+      customstyleeditor.onIndentPositionChange(event)
+    ).toBeUndefined();
+  });
   it('should handle onOtherStyleSelectionChanged when this.state.otherStyleSelected', () => {
     const event = { target: { value: '', checked: true } };
     customstyleeditor.state = {

@@ -271,26 +271,11 @@ const mockSchema = new Schema({
         return ['span', mark_type_attr, 0];
       },
     },
-    'mark-hanging-indent': {
-      attrs: {
-        prefix: { default: null },
-        overridden: { default: false },
-      },
-      inline: true,
-      group: 'inline',
-      parseDOM: [
-        {
-          tag: 'span[prefix]',
-          getAttrs: (domNode) => {
-            const _prefix = domNode.getAttribute('prefix');
-            return { prefix: _prefix || null };
-          },
-        },
-      ],
-      toDOM() {
-        return ['span', { prefix: 0 }, 0];
-      },
-      rank: 5000
+
+    "mark-hanging-indent": {
+      attrs: { prefix: { default: 0 } },
+      parseDOM: [{ tag: "span.hanging" }],
+      toDOM(mark) { return ["span", { class: "hanging", "data-prefix": mark.attrs.prefix }, 0]; }
     }
   },
 });
@@ -436,7 +421,7 @@ describe('applyNormalIfNoStyle', () => {
           nodesBetween: () => {
             return {};
           },
-          nodeAt: () => {},
+          nodeAt: () => { },
         },
         setSelection: setSelection,
       };
@@ -464,7 +449,7 @@ describe('applyNormalIfNoStyle', () => {
             nodesBetween: () => {
               return {};
             },
-            nodeAt: () => {},
+            nodeAt: () => { },
           },
           setSelection: setSelection,
           selection: {
@@ -604,7 +589,7 @@ describe('onUpdateAppendTransaction', () => {
         isTextblock: true,
       } as unknown as Node;
     };
-    mockdoc.nodesBetween = () => {};
+    mockdoc.nodesBetween = () => { };
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -637,7 +622,7 @@ describe('onUpdateAppendTransaction', () => {
               max: () => 1,
             }) as unknown as ResolvedPos,
           nodesBetween: () => ({}),
-          nodeAt: () => {},
+          nodeAt: () => { },
         },
         setSelection: setSelection,
         scrollIntoView: () => {
@@ -1953,7 +1938,7 @@ describe('Custom Style Plugin pass', () => {
 
   it('Test 1 ', () => {
     const props = {
-      dispatch: () => {},
+      dispatch: () => { },
       editorState: state,
       editorView: editor.view,
     };
@@ -5460,7 +5445,7 @@ describe('applyStyleForNextParagraph', () => {
     const paragraph1 = {
       type: { name: 'paragraph' },
       isBlock: true,
-      child() {},
+      child() { },
       childCount: 0,
       attrs: {
         styleName: 'Bold',
@@ -5471,7 +5456,7 @@ describe('applyStyleForNextParagraph', () => {
     const paragraph2 = {
       type: { name: 'paragraph' },
       isBlock: true,
-      child() {},
+      child() { },
       childCount: 0,
       attrs: {
         styleName: 'Bold',
@@ -5509,7 +5494,7 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
-            child() {},
+            child() { },
             childCount: 0,
             attrs: {
               styleName: 'Bold',
@@ -5526,7 +5511,7 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
-            child() {},
+            child() { },
             childCount: 0,
             attrs: {
               styleName: 'Bold',
@@ -5551,7 +5536,7 @@ describe('applyStyleForNextParagraph', () => {
         return {
           type: { name: 'paragraph' },
           isBlock: true,
-          child() {},
+          child() { },
           childCount: 0,
           attrs: {
             styleName: 'Bold',
@@ -5573,7 +5558,7 @@ describe('applyStyleForNextParagraph', () => {
         return {
           type: { name: 'paragraph' },
           isBlock: true,
-          child() {},
+          child() { },
           childCount: 0,
           attrs: {
             styleName: 'Bold',
@@ -5618,7 +5603,7 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
-            child() {},
+            child() { },
             childCount: 0,
             attrs: {
               styleName: 'Bold',
@@ -5635,7 +5620,7 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
-            child() {},
+            child() { },
             childCount: 0,
             attrs: {
               styleName: 'Bold',

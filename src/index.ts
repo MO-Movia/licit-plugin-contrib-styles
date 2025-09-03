@@ -686,54 +686,79 @@ function haveEligibleChildren(node, contentLen) {
   );
 }
 
-// Hanging indent implementation
 export function applyHangingIndentTransform(tr, state, node, pos) {
   if (!node || node.type.name !== 'paragraph') return tr;
 
-  const newContent = [];
   let spacerRemoved = false;
   let foundSpacer = false;
-  let foundHangingIndent = false;
 
-  // Scan once for spacers and existing hanging-indents
   node.content.forEach((child) => {
     if (child.marks.some(m => m?.type.name === 'spacer')) {
       foundSpacer = true;
     }
-    if (child.marks.some(m => m?.type.name === 'mark-hanging-indent')) {
-      foundHangingIndent = true;
-    }
   });
 
-  // Skip if no spacer or already has hanging-indent
-  if (!foundSpacer || foundHangingIndent) return tr;
+  // No spacer → skip
+  if (!foundSpacer) return tr;
 
+  const newContent = [];
+  const childNode = [];
   node.content.forEach((child) => {
-    let _node = child;
-
-    // Remove the *first* spacer-marked text node
-    if (!spacerRemoved && child.marks.some(m => m.type.name === 'spacer')) {
+    // First spacer encountered → replace with prefix:0 dummy
+    if (!spacerRemoved && child.marks.some(m => m?.type.name === 'spacer')) {
       spacerRemoved = true;
-      return;
+
+      const prefix0 = state.schema.marks['mark-hanging-indent'].create({ prefix: 0 });
+      const existingMarks = child.marks.filter(m => m?.type.name !== 'spacer');
+      const wrapped = child.mark([...existingMarks, prefix0]);
+      if (childNode.length > 0) {
+        childNode.forEach((c) => {
+          const existingMarks = c.marks.filter(m => m?.type.name !== 'spacer');
+          const wrapped = c.mark([...existingMarks, prefix0]);
+          newContent.push(wrapped);
+        }
+        );
+        childNode.length = 0;
+      } else {
+        newContent.push(wrapped);
+      }
+
+      return; // skip spacer text itself
     }
 
-    // Remove existing spacer marks
-    const existingMarks = child.marks.filter(m => m.type.name !== 'spacer');
-
-    // Create hangingIndent mark
-    const hangingIndentMark = state.schema.marks['mark-hanging-indent'].create({
-      prefix: spacerRemoved ? 1 : 0,
-    });
-
-    // Ensure hangingIndent is the *outermost* mark
-    _node = _node.mark([hangingIndentMark, ...existingMarks]);
-
-    newContent.push(_node);
+    // Wrap all other text (before + after) with prefix:1
+    const prefix1 = state.schema.marks['mark-hanging-indent'].create({ prefix: 1 });
+    const existingMarks = child.marks.filter(m => m?.type.name !== 'spacer');
+    if (spacerRemoved === false) {
+      childNode.push(child);
+    } else {
+      const wrapped = child.mark([...existingMarks, prefix1]);
+      newContent.push(wrapped);
+    }
   });
 
-  // Recreate updated paragraph
+  // Special case: paragraph was empty except spacer
+  if (newContent.length === 1 && newContent[0].text.trim() === '') {
+    let hasdummy = false;
+    let dummy0 = null;
+    if (newContent[0].marks.some(m => m.type.name === 'mark-hanging-indent')) {
+      const prefix0 = state.schema.marks['mark-hanging-indent'].create({ prefix: 0 });
+      dummy0 = state.schema.text(' ', [prefix0]);
+      hasdummy = true;
+    }
+    const prefix1 = state.schema.marks['mark-hanging-indent'].create({ prefix: 1 });
+    const dummy1 = state.schema.text(' ', [prefix1]);
+    if (hasdummy) {
+      newContent.splice(0, 1, dummy0, dummy1);
+    } else {
+      newContent.splice(0, 1, dummy1);
+    }
+  }
   const newParagraph = node.type.create(node.attrs, newContent);
   tr.replaceWith(pos, pos + node.nodeSize, newParagraph);
 
   return tr;
 }
+
+
+

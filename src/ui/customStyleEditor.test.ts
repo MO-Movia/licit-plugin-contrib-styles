@@ -248,7 +248,7 @@ describe('CustomStyleEditor', () => {
       customstyleeditor.onHangingIndentChange(event)
     ).toBeUndefined();
   });
-   
+
   it('should handle onOtherStyleSelectionChanged when this.state.otherStyleSelected', () => {
     const event = { target: { value: '', checked: true } };
     customstyleeditor.state = {

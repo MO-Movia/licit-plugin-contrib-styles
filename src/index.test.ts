@@ -16,6 +16,7 @@ import {
   applyStyles,
   applyStyleForEmptyParagraph,
   isDocChanged,
+  applyHangingIndentTransform,
 } from './index';
 import { builders } from 'prosemirror-test-builder';
 import {
@@ -270,6 +271,27 @@ const mockSchema = new Schema({
         return ['span', mark_type_attr, 0];
       },
     },
+    'mark-hanging-indent': {
+      attrs: {
+        prefix: { default: null },
+        overridden: { default: false },
+      },
+      inline: true,
+      group: 'inline',
+      parseDOM: [
+        {
+          tag: 'span[prefix]',
+          getAttrs: (domNode) => {
+            const _prefix = domNode.getAttribute('prefix');
+            return { prefix: _prefix || null };
+          },
+        },
+      ],
+      toDOM() {
+        return ['span', { prefix: 0 }, 0];
+      },
+      rank: 5000
+    }
   },
 });
 
@@ -5629,5 +5651,72 @@ describe('applyStyleForNextParagraph', () => {
     expect(
       applyStyleForNextParagraph(prevstate, nextstate, tr, view)
     ).toBeDefined();
+  });
+});
+
+describe('applyHangingIndentTransform', () => {
+  const schema = mockSchema;
+
+  it('returns tr if node is null', () => {
+    const state = EditorState.create({ schema });
+    const tr = state.tr;
+    const result = applyHangingIndentTransform(tr, state, null, 0);
+    expect(result).toBe(tr);
+  });
+
+  it('returns tr if node is not paragraph', () => {
+    const state = EditorState.create({ schema });
+    const node = schema.text('hello');
+    const tr = state.tr;
+    const result = applyHangingIndentTransform(tr, state, node, 0);
+    expect(result).toBe(tr);
+  });
+
+  it('returns tr if paragraph has no spacer mark', () => {
+    const state = EditorState.create({ schema });
+    const node = schema.nodes.paragraph.create({}, schema.text('hello'));
+    const tr = state.tr;
+    const result = applyHangingIndentTransform(tr, state, node, 0);
+    expect(result).toBe(tr);
+  });
+
+  it('returns tr if paragraph already has hanging indent mark', () => {
+    const state = EditorState.create({ schema });
+    const hanging = schema.marks['mark-hanging-indent']?.create({ prefix: 0 });
+    const node = schema.nodes.paragraph.create(
+      {},
+      schema.text('hello', [hanging])
+    );
+    const tr = state.tr;
+    const result = applyHangingIndentTransform(tr, state, node, 0);
+    expect(result).toBe(tr);
+  });
+
+  it('transforms when spacer exists and no hanging indent', () => {
+    const state = EditorState.create({ schema });
+    const spacer = schema.marks.spacer?.create();
+    const node = schema.nodes.paragraph.create(
+      {},
+      [
+        schema.text(' ', [spacer]), // first spacer → should be removed
+        schema.text('word1'),       // should get prefix=0
+        schema.text(' word2'),      // should get prefix=1
+      ]
+    );
+
+    const tr = state.tr;
+    const result = applyHangingIndentTransform(tr, state, node, 0);
+    const newDoc = result.doc;
+    const newParagraph = newDoc.firstChild!;
+    expect(newParagraph.attrs.hangingIndent).toBe(undefined);
+
+    const texts = [];
+    newParagraph.content.forEach(ch => {
+      texts.push(ch.text);
+      const hangingMarks = ch.marks.filter(m => m?.type.name === 'mark-hanging-indent');
+      expect(hangingMarks.length).toBe(1);
+    });
+    expect(texts.join('')).toBe('');
+
   });
 });

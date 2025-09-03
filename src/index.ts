@@ -423,6 +423,9 @@ function applyLineStyleForBoldPartial(nextState, tr) {
       if (style?.styles?.boldPartial) {
         tr = applyLineStyle(nextState, tr, node, pos);
       }
+      if (style?.styles?.indentPosition) {
+        tr = applyHangingIndentTransform(tr, nextState, node, pos);
+      }
     }
   }
   return tr;
@@ -681,4 +684,56 @@ function haveEligibleChildren(node, contentLen) {
   return (
     node instanceof Node && 0 < contentLen && node.type.name === 'paragraph'
   );
+}
+
+// Hanging indent implementation
+export function applyHangingIndentTransform(tr, state, node, pos) {
+  if (!node || node.type.name !== 'paragraph') return tr;
+
+  const newContent = [];
+  let spacerRemoved = false;
+  let foundSpacer = false;
+  let foundHangingIndent = false;
+
+  // Scan once for spacers and existing hanging-indents
+  node.content.forEach((child) => {
+    if (child.marks.some(m => m?.type.name === 'spacer')) {
+      foundSpacer = true;
+    }
+    if (child.marks.some(m => m?.type.name === 'mark-hanging-indent')) {
+      foundHangingIndent = true;
+    }
+  });
+
+  // Skip if no spacer or already has hanging-indent
+  if (!foundSpacer || foundHangingIndent) return tr;
+
+  node.content.forEach((child) => {
+    let _node = child;
+
+    // Remove the *first* spacer-marked text node
+    if (!spacerRemoved && child.marks.some(m => m.type.name === 'spacer')) {
+      spacerRemoved = true;
+      return;
+    }
+
+    // Remove existing spacer marks
+    const existingMarks = child.marks.filter(m => m.type.name !== 'spacer');
+
+    // Create hangingIndent mark
+    const hangingIndentMark = state.schema.marks['mark-hanging-indent'].create({
+      prefix: spacerRemoved ? 1 : 0,
+    });
+
+    // Ensure hangingIndent is the *outermost* mark
+    _node = _node.mark([hangingIndentMark, ...existingMarks]);
+
+    newContent.push(_node);
+  });
+
+  // Recreate updated paragraph
+  const newParagraph = node.type.create(node.attrs, newContent);
+  tr.replaceWith(pos, pos + node.nodeSize, newParagraph);
+
+  return tr;
 }

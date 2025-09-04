@@ -709,7 +709,7 @@ export function applyHangingIndentTransform(tr, state, node, pos) {
       spacerRemoved = true;
 
       const prefix0 = state.schema.marks['mark-hanging-indent'].create({ prefix: 0 });
-      const existingMarks = child.marks.filter(m => m?.type.name !== 'spacer');
+      const existingMarks = child.marks.filter(m => m?.type.name !== 'spacer' && m?.type.name !== 'mark-hanging-indent');
       const wrapped = child.mark([...existingMarks, prefix0]);
       if (childNode.length > 0) {
         childNode.forEach((c) => {
@@ -728,7 +728,7 @@ export function applyHangingIndentTransform(tr, state, node, pos) {
 
     // Wrap all other text (before + after) with prefix:1
     const prefix1 = state.schema.marks['mark-hanging-indent'].create({ prefix: 1 });
-    const existingMarks = child.marks.filter(m => m?.type.name !== 'spacer');
+    const existingMarks = child.marks.filter(m => m?.type.name !== 'spacer' && m?.type.name !== 'mark-hanging-indent');
     if (spacerRemoved === false) {
       childNode.push(child);
     } else {
@@ -759,6 +759,7 @@ export function applyHangingIndentTransform(tr, state, node, pos) {
 
   return tr;
 }
+
 
 
 

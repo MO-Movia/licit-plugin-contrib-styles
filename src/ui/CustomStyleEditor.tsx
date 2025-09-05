@@ -76,9 +76,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     editedStyles.splice(0, editedStyles.length);
     this.state = {
       ...props,
-      tot: false,
-      tof: false,
-      toc: false,
       selectedStyleMode: 'none',
       isHidden: false,
       otherStyleSelected,

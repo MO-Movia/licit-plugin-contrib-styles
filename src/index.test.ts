@@ -16,6 +16,7 @@ import {
   applyStyles,
   applyStyleForEmptyParagraph,
   isDocChanged,
+  applyHangingIndentTransform,
 } from './index';
 import { builders } from 'prosemirror-test-builder';
 import {
@@ -270,6 +271,13 @@ const mockSchema = new Schema({
         return ['span', mark_type_attr, 0];
       },
     },
+
+    'mark-hanging-indent': {
+      attrs: { prefix: { default: 0 } },
+      parseDOM: [{ tag: 'span.hanging' }],
+      toDOM(mark) { return ['span', { class: 'hanging', 'data-prefix': mark.attrs.prefix }, 0]; }
+    },
+    spacer: { attrs: {} }
   },
 });
 
@@ -414,7 +422,7 @@ describe('applyNormalIfNoStyle', () => {
           nodesBetween: () => {
             return {};
           },
-          nodeAt: () => {},
+          nodeAt: () => { },
         },
         setSelection: setSelection,
       };
@@ -442,7 +450,7 @@ describe('applyNormalIfNoStyle', () => {
             nodesBetween: () => {
               return {};
             },
-            nodeAt: () => {},
+            nodeAt: () => { },
           },
           setSelection: setSelection,
           selection: {
@@ -582,7 +590,7 @@ describe('onUpdateAppendTransaction', () => {
         isTextblock: true,
       } as unknown as Node;
     };
-    mockdoc.nodesBetween = () => {};
+    mockdoc.nodesBetween = () => { };
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -615,7 +623,7 @@ describe('onUpdateAppendTransaction', () => {
               max: () => 1,
             }) as unknown as ResolvedPos,
           nodesBetween: () => ({}),
-          nodeAt: () => {},
+          nodeAt: () => { },
         },
         setSelection: setSelection,
         scrollIntoView: () => {
@@ -1931,7 +1939,7 @@ describe('Custom Style Plugin pass', () => {
 
   it('Test 1 ', () => {
     const props = {
-      dispatch: () => {},
+      dispatch: () => { },
       editorState: state,
       editorView: editor.view,
     };
@@ -5438,7 +5446,7 @@ describe('applyStyleForNextParagraph', () => {
     const paragraph1 = {
       type: { name: 'paragraph' },
       isBlock: true,
-      child() {},
+      child() { },
       childCount: 0,
       attrs: {
         styleName: 'Bold',
@@ -5449,7 +5457,7 @@ describe('applyStyleForNextParagraph', () => {
     const paragraph2 = {
       type: { name: 'paragraph' },
       isBlock: true,
-      child() {},
+      child() { },
       childCount: 0,
       attrs: {
         styleName: 'Bold',
@@ -5487,7 +5495,7 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
-            child() {},
+            child() { },
             childCount: 0,
             attrs: {
               styleName: 'Bold',
@@ -5504,7 +5512,7 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
-            child() {},
+            child() { },
             childCount: 0,
             attrs: {
               styleName: 'Bold',
@@ -5529,7 +5537,7 @@ describe('applyStyleForNextParagraph', () => {
         return {
           type: { name: 'paragraph' },
           isBlock: true,
-          child() {},
+          child() { },
           childCount: 0,
           attrs: {
             styleName: 'Bold',
@@ -5551,7 +5559,7 @@ describe('applyStyleForNextParagraph', () => {
         return {
           type: { name: 'paragraph' },
           isBlock: true,
-          child() {},
+          child() { },
           childCount: 0,
           attrs: {
             styleName: 'Bold',
@@ -5596,7 +5604,7 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
-            child() {},
+            child() { },
             childCount: 0,
             attrs: {
               styleName: 'Bold',
@@ -5613,7 +5621,7 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
-            child() {},
+            child() { },
             childCount: 0,
             attrs: {
               styleName: 'Bold',
@@ -5629,5 +5637,86 @@ describe('applyStyleForNextParagraph', () => {
     expect(
       applyStyleForNextParagraph(prevstate, nextstate, tr, view)
     ).toBeDefined();
+  });
+});
+
+function createState(node) {
+  return EditorState.create({
+    doc: mockSchema.node('doc', null, [node]),
+    schema: mockSchema,
+  });
+}
+describe('applyHangingIndentTransform', () => {
+  it('returns tr unchanged if node is null', () => {
+    const state = createState(mockSchema.node('paragraph'));
+    const tr = state.tr;
+    const result = applyHangingIndentTransform(tr, state, null, 0, false);
+    expect(result).toBe(tr); // unchanged
+  });
+
+  it('returns tr unchanged if no spacer mark found', () => {
+    const textNode = mockSchema.text('hello');
+    const para = mockSchema.node('paragraph', null, [textNode]);
+    const state = createState(para);
+    const tr = state.tr;
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
+    expect(result).toBe(tr);
+  });
+
+  it('wraps first spacer with prefix:0 and text after with prefix:1', () => {
+    const spacer = mockSchema.text(' ', [mockSchema.mark('spacer')]);
+    const textNode = mockSchema.text('after');
+    const para = mockSchema.node('paragraph', null, [spacer, textNode]);
+    const state = createState(para);
+    const tr = state.tr;
+
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
+
+    expect(result.doc.toString()).toContain('paragraph'); // structure updated
+    const newPara = result.doc.firstChild;
+    expect(newPara.textContent).toContain('after');
+    // first child got prefix:0 mark removed spacer
+    expect(newPara.firstChild.marks.some(m => m.type.name === 'mark-hanging-indent')).toBe(true);
+  });
+
+  it('flushes queued children before spacer with prefix:0', () => {
+    const textBefore = mockSchema.text('before');
+    const spacer = mockSchema.text(' ', [mockSchema.mark('spacer')]);
+    const textAfter = mockSchema.text('after');
+    const para = mockSchema.node('paragraph', null, [textBefore, spacer, textAfter]);
+    const state = createState(para);
+    const tr = state.tr;
+
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
+
+    const newPara = result.doc.firstChild;
+    expect(newPara.childCount).toBe(2);
+    expect(newPara.firstChild.text).toBe('before');
+    expect(newPara.lastChild.text).toBe('after');
+  });
+
+  it('special case: only spacer replaced → dummy0 + dummy1', () => {
+    const spacer = mockSchema.text(' ', [mockSchema.mark('spacer')]);
+    const para = mockSchema.node('paragraph', null, [spacer]);
+    const state = createState(para);
+    const tr = state.tr;
+
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
+    const newPara = result.doc.firstChild;
+
+    // new paragraph should contain 2 dummy nodes
+    expect(newPara.childCount).toBeGreaterThan(0);
+    expect(newPara.textContent.trim()).toBe(''); // only dummy spaces
+  });
+
+  it('special case: only spacer but no hanging mark → dummy1 only', () => {
+    // Case where hasdummy = false
+    const plain = mockSchema.text(' ', [mockSchema.mark('spacer')]);
+    const para = mockSchema.node('paragraph', null, [plain]);
+    const state = createState(para);
+    const tr = state.tr;
+
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
+    expect(result.doc.firstChild.childCount).toBeGreaterThan(0);
   });
 });

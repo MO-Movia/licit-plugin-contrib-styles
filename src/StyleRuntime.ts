@@ -30,6 +30,8 @@ export type HTMLStyles = {
   selectedStyleMode?: string;
   hideNumbering?: boolean;
   resetValue?: boolean;
+  indentPosition?: string;
+  isHangingIndentapplied?: boolean;
 };
 
 export type Style = {

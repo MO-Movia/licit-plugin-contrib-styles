@@ -451,7 +451,7 @@ describe('Custom Menu UI   ', () => {
     commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
     staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
     disabled: false,
-    dispatch: () => {},
+    dispatch: () => { },
     editorState: state,
     editorView: editor.view,
     icon: 'button',
@@ -488,7 +488,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: () => {},
+      dispatch: () => { },
       editorState: state,
       editorView: { disabled: true },
       icon: 'button',
@@ -509,7 +509,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: () => {},
+      dispatch: () => { },
       editorState: state,
       editorView: { disabled: true },
       icon: 'button',
@@ -675,7 +675,7 @@ describe('Custom Menu UI   ', () => {
     ).toBeUndefined();
   });
   it('should handle showsubmenu when popup not null', () => {
-    custommenuui._stylePopup = { close: () => {} } as unknown as null;
+    custommenuui._stylePopup = { close: () => { } } as unknown as null;
     // custommenuui._stylePopup = {close:()=>{}};
     const ui = {
       _customStyleName: 'Normal',
@@ -718,7 +718,7 @@ describe('Custom Menu UI   ', () => {
     jest.spyOn(custommenuui, 'removeTextAlignAndLineSpacing').mockReturnValue({
       key: 'tr',
       docChanged: true,
-      doc:mockdoc,
+      doc: mockdoc,
       setNodeMarkup: () => {
         return { key: 'tr', docChanged: true };
       },
@@ -763,8 +763,8 @@ describe('Custom Menu UI   ', () => {
     };
     const el = {
       parent: { inlineContent: {} },
-      min: () => {},
-      max: () => {},
+      min: () => { },
+      max: () => { },
     } as unknown as HTMLDivElement;
     const removeMarkChain = {
       setNodeMarkup: () => {
@@ -1091,7 +1091,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: () => {},
+      dispatch: () => { },
       editorState: state,
       editorView: editor.view,
       icon: 'button',
@@ -1105,7 +1105,7 @@ describe('Custom Menu UI   ', () => {
       doc: doc,
       selection: { from: 0, to: 1 },
     } as unknown as EditorState;
-    const trmock = { setNodeMarkup: () => {} } as unknown as Transform;
+    const trmock = { setNodeMarkup: () => { } } as unknown as Transform;
 
     expect(
       custommenuui.renameStyleInDocument(statemock, trmock, 'Normal', 'test')
@@ -1151,7 +1151,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: () => {},
+      dispatch: () => { },
       editorState: state,
       editorView: view,
       icon: 'button',
@@ -1189,7 +1189,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: () => {},
+      dispatch: () => { },
       editorState: state,
       editorView: view,
       icon: 'button',
@@ -1203,7 +1203,7 @@ describe('Custom Menu UI   ', () => {
       _customStyleName: 'test',
       _customStyle: { description: 'description', styles: {} },
     };
-    custommenuui._stylePopup = { close: () => {} } as unknown as null;
+    custommenuui._stylePopup = { close: () => { } } as unknown as null;
     expect(
       custommenuui.showStyleWindow(
         uicommands,

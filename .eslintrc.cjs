@@ -57,6 +57,7 @@ module.exports = {
     HTMLInputElement: false,
     HTMLDivElement: false,
     HTMLTableCellElement: false,
+    HTMLTextAreaElement: false,
     HTMLButtonElement: false,
     HTMLLIElement: false,
     Image: false,
@@ -86,7 +87,7 @@ module.exports = {
     requestAnimationFrame: false,
     setTimeout: false,
     window: false,
-    HTMLCollectionOf:false
+    HTMLCollectionOf: false
   },
 
   overrides: [

@@ -774,6 +774,10 @@ function applyStyleEx(
     }
 
     newattrs.styleName = styleName;
+    if (styleProp.styles.indentPosition) {
+      newattrs.indentPosition = styleProp.styles.indentPosition;
+      newattrs.hangingIndent = true;
+    }
 
     _commands.forEach((element) => {
       if (styleProp?.styles) {
@@ -1278,7 +1282,8 @@ export function removeAllMarksExceptLink(
         if (
           !mark.attrs[ATTR_OVERRIDDEN] &&
           'link' !== mark.type.name &&
-          'override' !== mark.type.name
+          'override' !== mark.type.name &&
+          'spacer' !== mark.type.name
         ) {
           tasks.push({
             node,

@@ -352,6 +352,17 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     }));
   }
 
+  onHangingIndentChange(e) {
+    const checked = e.target.checked;
+    this.setState(prevState => ({
+      styles: {
+        ...prevState.styles,
+        isHangingIndent: checked,
+        indentPosition: checked ? prevState.styles.indentPosition : ''
+      }
+    }));
+  }
+
   // handles scentece bold event
   onScentenceRadioChanged(e) {
     this.setState((prevState) => ({
@@ -432,6 +443,15 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       styles: {
         ...prevState.styles,
         indent: 'None' === e.target.value ? 0 : e.target.value,
+      },
+    }));
+  }
+
+  onIndentPositionChange(e) {
+    this.setState((prevState) => ({
+      styles: {
+        ...prevState.styles,
+        indentPosition: e.target.value,
       },
     }));
   }
@@ -518,7 +538,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
             mp2.style.maxHeight = null;
           } else {
             acc2.classList.add('molsp-accactive');
-            mp2.style.maxHeight = '320px';
+            mp2.style.maxHeight = '374px';
           }
 
           (
@@ -790,7 +810,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         'molsp-panel2'
       )[0] as HTMLElement;
       setTimeout(() => {
-        mp2.style.maxHeight = '320px';
+        mp2.style.maxHeight = '374px';
       }, 0);
     }
 
@@ -1476,60 +1496,60 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     </div>
                   </div>
                 ) : (
-                    <div
-                      className="molsp-hierarchydiv"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginLeft: '-1px',
-                      }}
-                    >
-                      <div className="molsp-hierarchydiv">
-                        <label>
-                          <input
-                            checked={this.state.selectedStyle === 'userDefined'}
-                            disabled={
-                              this.state.styleName === RESERVED_STYLE_NONE
-                            }
-                            onChange={(e) => this.handleList(e)}
-                            type="radio"
-                            value="userDefined"
-                          />
-                          <span
-                            style={{
-                              marginLeft: '2px',
-                              position: 'relative',
-                              top: '-2px',
-                            }}
-                          >
-                            User-defined Numbering/Bullets
+                  <div
+                    className="molsp-hierarchydiv"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginLeft: '-1px',
+                    }}
+                  >
+                    <div className="molsp-hierarchydiv">
+                      <label>
+                        <input
+                          checked={this.state.selectedStyle === 'userDefined'}
+                          disabled={
+                            this.state.styleName === RESERVED_STYLE_NONE
+                          }
+                          onChange={(e) => this.handleList(e)}
+                          type="radio"
+                          value="userDefined"
+                        />
+                        <span
+                          style={{
+                            marginLeft: '2px',
+                            position: 'relative',
+                            top: '-2px',
+                          }}
+                        >
+                          User-defined Numbering/Bullets
                         </span>
-                        </label>
-                        <br />
-                        <label>
-                          <input
-                            checked={this.state.selectedStyle === 'listStyle'}
-                            disabled={
-                              this.state.styleName === RESERVED_STYLE_NONE
-                            }
-                            onChange={this.handleList.bind(this)}
-                            type="radio"
-                            value="listStyle"
-                          />
-                          <span
-                            style={{
-                              marginLeft: '2px',
-                              position: 'relative',
-                              top: '-2px',
-                            }}
-                          >
-                            List-style (Auto Numbering)
+                      </label>
+                      <br />
+                      <label>
+                        <input
+                          checked={this.state.selectedStyle === 'listStyle'}
+                          disabled={
+                            this.state.styleName === RESERVED_STYLE_NONE
+                          }
+                          onChange={this.handleList.bind(this)}
+                          type="radio"
+                          value="listStyle"
+                        />
+                        <span
+                          style={{
+                            marginLeft: '2px',
+                            position: 'relative',
+                            top: '-2px',
+                          }}
+                        >
+                          List-style (Auto Numbering)
                         </span>
-                        </label>
-                      </div>
+                      </label>
                     </div>
-                  )}
+                  </div>
+                )}
                 <div
                   className="molsp-hierarchydiv"
                   style={{
@@ -1815,6 +1835,30 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         ))}
                       </select>
                     </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <input
+                      checked={this.state.styles.isHangingIndent}
+                      id='hanging-indent-checkbox'
+                      onChange={this.onHangingIndentChange.bind(this)}
+                      type="checkbox"
+                    />
+                    <label htmlFor='hanging-indent-checkbox' style={{ marginLeft: '4px' }}>Hanging Indent</label>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', marginLeft: '34px' }}>
+                    <label htmlFor='indent-position-input' style={{ marginRight: '8px' }}>Indent position: </label>
+                    <input
+                      disabled={
+                        !this.state.styles.isHangingIndent
+                      }
+                      id='indent-position-input'
+                      onChange={this.onIndentPositionChange.bind(this)}
+                      style={{ width: '34px', marginRight: '6px' }}
+                      type="text"
+                      value={this.state.styles.indentPosition ?? ''}
+                    />
+                    <span>inches</span>
                   </div>
                 </div>
               </div>

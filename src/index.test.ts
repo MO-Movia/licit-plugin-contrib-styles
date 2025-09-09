@@ -5650,7 +5650,7 @@ describe('applyHangingIndentTransform', () => {
   it('returns tr unchanged if node is null', () => {
     const state = createState(mockSchema.node('paragraph'));
     const tr = state.tr;
-    const result = applyHangingIndentTransform(tr, state, null, 0);
+    const result = applyHangingIndentTransform(tr, state, null, 0, false);
     expect(result).toBe(tr); // unchanged
   });
 
@@ -5659,7 +5659,7 @@ describe('applyHangingIndentTransform', () => {
     const para = mockSchema.node('paragraph', null, [textNode]);
     const state = createState(para);
     const tr = state.tr;
-    const result = applyHangingIndentTransform(tr, state, para, 0);
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
     expect(result).toBe(tr);
   });
 
@@ -5670,7 +5670,7 @@ describe('applyHangingIndentTransform', () => {
     const state = createState(para);
     const tr = state.tr;
 
-    const result = applyHangingIndentTransform(tr, state, para, 0);
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
 
     expect(result.doc.toString()).toContain('paragraph'); // structure updated
     const newPara = result.doc.firstChild;
@@ -5687,7 +5687,7 @@ describe('applyHangingIndentTransform', () => {
     const state = createState(para);
     const tr = state.tr;
 
-    const result = applyHangingIndentTransform(tr, state, para, 0);
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
 
     const newPara = result.doc.firstChild;
     expect(newPara.childCount).toBe(2);
@@ -5701,7 +5701,7 @@ describe('applyHangingIndentTransform', () => {
     const state = createState(para);
     const tr = state.tr;
 
-    const result = applyHangingIndentTransform(tr, state, para, 0);
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
     const newPara = result.doc.firstChild;
 
     // new paragraph should contain 2 dummy nodes
@@ -5716,7 +5716,7 @@ describe('applyHangingIndentTransform', () => {
     const state = createState(para);
     const tr = state.tr;
 
-    const result = applyHangingIndentTransform(tr, state, para, 0);
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
     expect(result.doc.firstChild.childCount).toBeGreaterThan(0);
   });
 });

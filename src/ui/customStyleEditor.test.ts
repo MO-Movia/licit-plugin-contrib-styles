@@ -236,6 +236,19 @@ describe('CustomStyleEditor', () => {
       customstyleeditor.onOtherStyleSelectionChanged(event)
     ).toBeUndefined();
   });
+  it('should handle onIndentPositionChange', () => {
+    const event = { target: { value: '1.5' } };
+    expect(
+      customstyleeditor.onIndentPositionChange(event)
+    ).toBeUndefined();
+  });
+    it('should handle onHangingIndentChange', () => {
+    const event = { target: { value: '', checked: true } };
+    expect(
+      customstyleeditor.onHangingIndentChange(event)
+    ).toBeUndefined();
+  });
+
   it('should handle onOtherStyleSelectionChanged when this.state.otherStyleSelected', () => {
     const event = { target: { value: '', checked: true } };
     customstyleeditor.state = {
@@ -676,7 +689,7 @@ describe('CustomStyleEditor', () => {
         hasBullet: true,
       },
       mode: 0,
-      close: () => {},
+      close: () => { },
     };
     expect(customstyleeditor.buildStyle()).toStrictEqual({
       backgroundColor: true,
@@ -895,7 +908,7 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 0,
-      close: () => {},
+      close: () => { },
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
     jest.spyOn(customstyle, 'isCustomStyleExists').mockReturnValue(true);
@@ -936,10 +949,10 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 3,
-      close: () => {},
+      close: () => { },
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
-    CustomStyleEditors.modifyCustomStyle = () => {};
+    CustomStyleEditors.modifyCustomStyle = () => { };
     const spy = jest.spyOn(CustomStyleEditors, 'modifyCustomStyle');
     CustomStyleEditors._save();
     expect(spy).toHaveBeenCalled();
@@ -947,7 +960,7 @@ describe('CustomStyleEditor', () => {
 
   it('should handle handleKeyDown ', () => {
     const dom1 = document.createElement('div');
-    dom1.focus = () => {};
+    dom1.focus = () => { };
     jest.spyOn(document, 'getElementById').mockReturnValue(dom1);
     const spy = jest.spyOn(dom1, 'focus');
     customstyleeditor.handleKeyDown();
@@ -986,7 +999,7 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 1,
-      close: () => {},
+      close: () => { },
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
 
@@ -1025,7 +1038,7 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 1,
-      close: () => {},
+      close: () => { },
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
 
@@ -1066,7 +1079,7 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 1,
-      close: () => {},
+      close: () => { },
     };
     // customstyleeditor.props.mode = 1;
     const CustomStyleEditors = new CustomStyleEditor(props);
@@ -1338,7 +1351,7 @@ describe('CustomStyleEditor', () => {
   });
   it('should handle onSelectCustomStyle', () => {
     customstyleeditor.getCustomStyles();
-    expect(customstyleeditor.onSelectCustomStyle(() => {})).toBeUndefined();
+    expect(customstyleeditor.onSelectCustomStyle(() => { })).toBeUndefined();
   });
   it('should handle onSelectCustomStyle', () => {
     jest
@@ -1368,7 +1381,7 @@ describe('CustomStyleEditor', () => {
         fontSize: 11,
       },
       mode: 1,
-      close: () => {},
+      close: () => { },
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
     CustomStyleEditors.state = {
@@ -1388,7 +1401,7 @@ describe('CustomStyleEditor', () => {
       styleName: 'Normal',
       otherStyleSelected: '',
       customStyles: '',
-      editorView: { state: { doc: { nodesBetween: () => {} } } },
+      editorView: { state: { doc: { nodesBetween: () => { } } } },
     };
     expect(CustomStyleEditors.componentDidMount()).toBeUndefined();
   });

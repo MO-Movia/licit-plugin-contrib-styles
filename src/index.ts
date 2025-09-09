@@ -703,7 +703,7 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
       foundSpacer = true;
     }
     if (child.marks.some(m => m?.type.name === 'mark-hanging-indent')) {
-      foundHangingIndent = isPaste ? false : true;
+      foundHangingIndent = !isPaste;
     }
   });
 

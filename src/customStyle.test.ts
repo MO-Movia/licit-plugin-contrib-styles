@@ -11,6 +11,7 @@ import {
   removeStyle,
   addStyleToList,
   setView,
+  saveStyleSet
 } from './customStyle';
 import type { Style } from './StyleRuntime';
 
@@ -71,6 +72,15 @@ describe('customstyle', () => {
     });
     expect(removeStyle('newStyle')).toBeDefined();
   });
+  it('should handle saveStyleSet', () => {
+    setStyleRuntime({
+      saveStyleSet: () => {
+        return null;
+      },
+    });
+    expect(saveStyleSet([{ styleName: 'Heading11', description: 'Bold heading' } as unknown as Style])).toBeDefined();
+  });
+
   it('should handle addStyleToList', () => {
     setStyleRuntime({
       removeStyle: () => {
@@ -84,12 +94,12 @@ describe('customstyle', () => {
   });
   it('should handle setStyles', () => {
     setView({
-      dispatch: () => {},
-      state: { tr: { scrollIntoView: () => {} } },
+      dispatch: () => { },
+      state: { tr: { scrollIntoView: () => { } } },
     } as unknown as EditorView);
     expect(
       setStyles([
-        { styleName: 'Normal', styles: { strong: true, styleLevel: 2 } },
+        { styleName: 'Normal', docType: 'asd', styles: { strong: true, styleLevel: 2 } },
       ])
     ).toBeUndefined();
   });

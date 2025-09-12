@@ -242,13 +242,18 @@ describe('CustomStyleEditor', () => {
       customstyleeditor.onIndentPositionChange(event)
     ).toBeUndefined();
   });
-    it('should handle onHangingIndentChange', () => {
+  it('should handle onHangingIndentChange', () => {
     const event = { target: { value: '', checked: true } };
     expect(
       customstyleeditor.onHangingIndentChange(event)
     ).toBeUndefined();
   });
-
+  it('should handle onHangingIndentChange', () => {
+    const event = { target: { value: '', checked: false } };
+    expect(
+      customstyleeditor.onHangingIndentChange(event)
+    ).toBeUndefined();
+  });
   it('should handle onOtherStyleSelectionChanged when this.state.otherStyleSelected', () => {
     const event = { target: { value: '', checked: true } };
     customstyleeditor.state = {
@@ -291,6 +296,25 @@ describe('CustomStyleEditor', () => {
   it('should handle handleTOC', () => {
     const event = { target: { value: '', checked: true } };
     expect(customstyleeditor.handleTOC(event)).toBeUndefined();
+  });
+  it('should handle handleTOT', () => {
+    const event = { target: { value: '', checked: true } };
+    expect(customstyleeditor.handleTOT(event)).toBeUndefined();
+  });
+    it('should handle handleTOT', () => {
+    const event = { target: { value: '', checked: false } };
+    expect(customstyleeditor.handleTOT(event)).toBeUndefined();
+  });
+    it('should handle handleTOF', () => {
+    const event = { target: { value: '', checked: true } };
+    expect(customstyleeditor.handleTOF(event)).toBeUndefined();
+  });
+    it('should handle handleTOF', () => {
+    const event = { target: { value: '', checked: false } };
+    expect(customstyleeditor.handleTOF(event)).toBeUndefined();
+  });
+  it('should handle handleNone', () => {
+    expect(customstyleeditor.handleNone()).toBeUndefined();
   });
   it('should handle selectStyleCheckboxState', () => {
     expect(customstyleeditor.selectStyleCheckboxState()).toBe(false);
@@ -468,6 +492,7 @@ describe('CustomStyleEditor', () => {
         paragraphSpacingBefore: 10,
         paragraphSpacingAfter: 10,
         indent: 10,
+        isLevelUpdated: true,
       },
       mode: 0,
       close: () => undefined,
@@ -831,9 +856,7 @@ describe('CustomStyleEditor', () => {
     };
     const CustomStyleEditors = new CustomStyleEditor(props);
 
-    console.log('jifi', CustomStyleEditors.state.mode);
     const spy = jest.spyOn(CustomStyleEditors.props, 'close');
-
     CustomStyleEditors._cancel();
     expect(spy).toHaveBeenCalled();
   });

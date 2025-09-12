@@ -47,6 +47,10 @@ describe('toCustomStyleDOM', () => {
         isList: true,
         indentPosition: '1.5',
         isHangingIndentapplied: true,
+        prefixValue:'ab',
+        tot:true,
+        tof:false,
+        hideNumbering:false,
       },
       styleName: '',
     });
@@ -60,10 +64,15 @@ describe('toCustomStyleDOM', () => {
         id: null,
         indent: null,
         lineSpacing: '16pt',
+        overriddenIndent:true,
+        overriddenIndentValue:1,
+        prefix:true,
+        tot:true,
+        tof:false,
         paddingBottom: null,
         paddingTop: null,
         capco: null,
-        styleName: 'FS_B01',
+        styleName: 'test-level1',
       },
       content: [
         {
@@ -88,14 +97,16 @@ describe('toCustomStyleDOM', () => {
       {
         'data-bullet-color': '#000000',
         'data-bullet-symbol': '● ',
-        'data-indent': '10',
+        'data-indent': '1',
         'data-show-bullet': true,
         'indentPosition': '1.5',
         'list-style-level': 1,
+        'prefix':'ab',
         // 'hide-style-level': false,
         style:
           'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;counter-increment: L1 ;',
-        styleName: 'FS_B01',
+        styleName: 'test-level1',
+        'tot':true,
       },
     ]);
   });

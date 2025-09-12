@@ -457,6 +457,12 @@ describe('customstyledropdowncommand', () => {
       customstyledropdowncommand.isAllowedNode(node as unknown as Node)
     ).toBe(true);
   });
+    it('should handle isAllowedNode', () => {
+    const node = { type: { name: 'enhanced_table_figure_notes' } };
+    expect(
+      customstyledropdowncommand.isAllowedNode(node as unknown as Node)
+    ).toBe(true);
+  });
   it('should handle render when styleName null', () => {
     const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([
       {

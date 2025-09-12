@@ -536,6 +536,10 @@ describe('Custom Menu UI   ', () => {
     const node = { type: { name: 'ordered_list' } } as unknown as Node;
     expect(custommenuui.isAllowedNode(node)).toBe(true);
   });
+    it('should handle isAllowedNode', () => {
+    const node = { type: { name: 'enhanced_table_figure_notes' } } as unknown as Node;
+    expect(custommenuui.isAllowedNode(node)).toBe(true);
+  });
   it('should handle _onUIEnter ', () => {
     const parent = document.createElement('div');
     parent.setAttribute('data-test', 'test-value');

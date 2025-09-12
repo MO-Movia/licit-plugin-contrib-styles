@@ -47,6 +47,45 @@ describe('customstyleitem', () => {
   it('should handle render', () => {
     expect(customstyleitem.render()).toBeDefined();
   });
+   it('should be defined', () => {
+    const props = {
+    command: {
+      _customStyleName: 'Normal',
+      _customStyle: {
+        styleName: 'Normal',
+        mode: 1,
+        description: 'Normal',
+        styles: {
+          align: 'right',
+          boldNumbering: true,
+          boldSentence: true,
+          fontName: 'Tahoma',
+          fontSize: '12',
+          nextLineStyleName: 'Normal',
+          paragraphSpacingAfter: '3',
+          toc: false,
+          hasNumbering: false,
+          isList:true,
+          hasText: true,
+          hasBullet: true,
+          styleLevel: 2,
+          prefixValue:'A'
+        },
+        toc: false,
+        isHidden: false,
+      },
+      _popUp: null,
+    } as unknown as CustomStyleCommand,
+    disabled: true,
+    dispatch: () => undefined,
+    editorState: ed,
+    editorView: undefined,
+    label: 'Normal',
+    hasText: true,
+  };
+   const customstyleitemtest = new CustomStyleItem(props);
+    expect(customstyleitemtest.render()).toBeDefined();
+  });
   it('should handle render when label is not defined branch coverage', () => {
     jest.spyOn(cusstyle, 'getCustomStyleByName').mockReturnValue({
       styles: undefined,
@@ -72,7 +111,7 @@ describe('customstyleitem', () => {
             toc: false,
             hasNumbering: true,
             hasText: true,
-            hasBullet: false,
+            hasBullet: true,
             styleLevel: 2,
             bulletLevel: true,
           },

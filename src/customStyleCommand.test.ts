@@ -5888,14 +5888,6 @@ describe('resetNodeAttrs', () => {
   });
 });
 
-// const schema1 = new Schema({
-//   nodes: {
-//     doc: { content: "block+" },
-//     paragraph: { content: "text*" },
-//     text: { inline: true },
-//   },
-// });
-
 describe('applyStyleToEachNode', () => {
   let state : EditorState;
   let tr: Transform;
@@ -6033,10 +6025,6 @@ describe('applyStyleToEachNode', () => {
     };
 
     const result = applyStyleToEachNode(state, 0, tr.doc.nodeSize - 2, tr, mockval, 'styleName', [pos]);
-
-    // expect(findParagraphsInNode).toHaveBeenCalled();
-    // expect(applyStyleForTableColumnCell).toHaveBeenCalled();
-    // expect(applyLineStyle).toHaveBeenCalled();
     expect(result).toBe(tr);
   });
 
@@ -6136,9 +6124,6 @@ describe('applyStyleToEachNode', () => {
       editorView: {},
     };
     const result = applyStyleToEachNode(state, 0, tr.doc.nodeSize - 2, tr,mockval, 'styleName', []);
-
-    // expect(applyStyleEx).toHaveBeenCalled();
-    // expect(applyLineStyle).toHaveBeenCalled();
     expect(result).toBe(tr);
   });
 
@@ -6176,9 +6161,6 @@ describe('applyStyleToEachNode', () => {
     };
 
     const result = applyStyleToEachNode(state, 0, tr2.doc.nodeSize - 2, tr2, mockval, 'styleName', []);
-
-    // expect(applyStyleEx).not.toHaveBeenCalled();
-    // expect(applyLineStyle).toHaveBeenCalled();
     expect(result).toBe(tr2);
   });
 
@@ -6202,7 +6184,11 @@ describe('applyStyleToEachNode', () => {
       styleName: 'test',
       editorView: {},
     };
+    const spy = jest
+      .spyOn(cusstylecommand, 'applyStyleForTableColumnCell')
+      .mockReturnValue(tr);
+
     applyStyleToEachNode(state, 0, tr.doc.nodeSize - 2, tr, mockval, 'styleName');
-    // expect(applyLineStyle).toHaveBeenCalledWith(state, expect.any(Transform), null, 0);
+    expect(spy).not.toHaveBeenCalled();
   });
 });

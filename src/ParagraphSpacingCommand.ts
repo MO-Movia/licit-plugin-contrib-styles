@@ -104,6 +104,9 @@ export class ParagraphSpacingCommand extends UICommand {
   executeCustom(state: EditorState, tr: Transform): Transform {
     return tr;
   }
+   executeCustomStyleForTable(state: EditorState, tr: Transform): Transform {
+    return tr;
+  }
   _paragraphSpacing?: string;
   _isAfter?: boolean;
 

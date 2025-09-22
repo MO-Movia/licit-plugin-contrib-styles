@@ -194,10 +194,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       style.color = this.state.styles.color;
     }
     if (this.state.styles.underline) {
-      style.textDecoration =
-        undefined !== style.textDecoration
-          ? `${style.textDecoration}${' underline'}`
-          : 'underline';
+      style.textDecoration = 'underline';
     }
     if (this.state.styles.strike) {
       style.textDecoration =

@@ -184,6 +184,15 @@ describe('ParagraphSpacingCommand ', () => {
     );
     expect(psc).toBeDefined();
   });
+    it('should return the same transform', () => {
+    const initialState = {} as EditorState;
+    const initialTransform = {} as Transform;
+    const resultingTransform = new ParagraphSpacingCommand('', true).executeCustomStyleForTable(
+      initialState,
+      initialTransform
+    );
+    expect(resultingTransform).toBe(initialTransform);
+  });
   it('should handle execute when tr.docChanged is true', () => {
     //const spy = jest.spyOn(paragraphspacingcommand,'setParagraphSpacing').mockReturnValue({docChanged:true})
     const doc = schema.node('doc', null, [

@@ -1,21 +1,15 @@
-@import './styles0.css';
-@import './ui/czi-loading-indicator.css';
-@import './ui/czi-math-view.css';
-@import '@modusoperandi/licit-ui-commands/ui/czi-pop-up.css';
-@import './ui/czi-selection-placeholder.css';
-@import './ui/czi-table-cell-menu.css';
-@import './ui/czi-table-grid-size-editor.css';
-@import '@modusoperandi/licit-ui-commands/ui/czi-tooltip-surface.css';
-@import './ui/mathquill-editor/czi-mathquill-editor.css';
-@import './ui/mathquill-editor/czi-mathquill-editor-symbols-panel.css';
-@import './client/licit.css';
+@import '@modusoperandi/licit-ui-commands/ui/czi-vars.css';
+@import './ui/czi-cust-style-numbered.css';
+@import '@modusoperandi/licit-ui-commands/ui/czi-custom-button.css';
+@import '@modusoperandi/licit-ui-commands/ui/czi-animations.css';
+@import '@modusoperandi/licit-ui-commands/ui/czi-color-editor.css';
+@import './ui/czi-custom-menu-item.css';
+@import './ui/czi-icon.css';
 
-/* [FS] IRAD-1061 2020-09-19 */
+@import '@modusoperandi/licit-ui-commands/ui/czi-pop-up.css';
+@import '@modusoperandi/licit-ui-commands/ui/czi-tooltip-surface.css';
 
 /* Now loaded locally, so that it work in closed network as well. */
-@import './ui/fonts.css';
 @import './ui/custom-style-edit.css';
 @import './ui/custom-dropdown.css';
 @import './ui/icon-font.css';
-@import '~node-mathquill/build/mathquill.css';
-@import '~katex/dist/katex.min.css';

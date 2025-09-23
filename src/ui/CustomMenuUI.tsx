@@ -3,33 +3,30 @@ import { EditorState } from 'prosemirror-state';
 import { Schema, Node } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
-import { uuid } from './Uuid.js';
-import './listType.css';
-import { CustomStyleItem } from './CustomStyleItem.js';
-import { AlertInfo } from './AlertInfo.js';
-import { CustomStyleSubMenu } from './CustomStyleSubMenu.js';
-import { CustomStyleEditor } from './CustomStyleEditor.js';
-import {
-  applyLatestStyle,
-  updateDocument,
-  isCustomStyleAlreadyApplied,
-  isLevelUpdated,
-} from '../CustomStyleCommand.js';
+import { uuid } from './Uuid';
+import { CustomStyleItem } from './CustomStyleItem';
+import { CustomStyleSubMenu } from './CustomStyleSubMenu';
+import { CustomStyleEditor } from './CustomStyleEditor';
+import { applyLatestStyle, CustomStyleCommand, updateDocument } from '../CustomStyleCommand';
 import {
   setStyles,
   saveStyle,
   renameStyle,
   removeStyle,
   addStyleToList,
-} from '../customStyle.js';
+} from '../customStyle';
 import {
   setTextAlign,
   setTextLineSpacing,
   atViewportCenter,
   createPopUp,
+  HeadingCommand,
 } from '@modusoperandi/licit-ui-commands';
-import { setParagraphSpacing } from '../ParagraphSpacingCommand.js';
-import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec.js';
+import { setParagraphSpacing } from '../ParagraphSpacingCommand';
+import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
+let HEADING_COMMANDS = {
+  [RESERVED_STYLE_NONE]: new HeadingCommand(0),
+};
 
 // [FS] IRAD-1039 2020-09-24
 // UI to show the list buttons
@@ -43,6 +40,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
   _id = uuid();
   _selectedIndex = 0;
+
 
   state = {
     expanded: false,
@@ -68,7 +66,8 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     let selecteClassName = '';
     const theme = this.props.theme;
     const selectedName = this.getTheSelectedCustomStyle(this.props.editorState);
-    commandGroups.forEach((group) => {
+   let commandGroups_nw = this.getCommandGroups();
+   commandGroups_nw.forEach((group) => {
       Object.keys(group).forEach((label) => {
         const command = group[label];
         counter++;
@@ -127,7 +126,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
           <div className="molsp-stylenames">{children}</div>
 
           <hr className="molsp-stylenames-hr"></hr>
-          {children1}
+          <div className="molsp-stylenames">{children1}</div>
         </div>
         </span>
       </div>
@@ -141,7 +140,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   }
 
   isAllowedNode(node: Node) {
-    return node.type.name === 'paragraph' || node.type.name === 'ordered_list';
+    return node.type.name === 'paragraph' || node.type.name === 'ordered_list' || node.type.name === 'enhanced_table_figure_notes';
   }
 
   _onUIEnter = (command: UICommand, event: SyntheticEvent<Element>) => {
@@ -189,26 +188,15 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
             if (undefined !== val && val.command._customStyle) {
               // do edit,remove,rename code here
               if ('remove' === val.type) {
-                // [FS] IRAD-1223 2021-03-01
-                // Not allow user to remove already in used custom style with numbering, which shall break the heirarchy.
-                if (
-                  !isCustomStyleAlreadyApplied(
+                removeStyle(val.command._customStyleName).then(() => {
+                  // [FS] IRAD-1099 2020-11-17
+                  // Issue fix: Even the applied style is removed the style name is showing in the editor
+                  this.removeCustomStyleName(
+                    this.props.editorState,
                     val.command._customStyleName,
-                    this.props.editorState
-                  )
-                ) {
-                  removeStyle(val.command._customStyleName).then(() => {
-                    // [FS] IRAD-1099 2020-11-17
-                    // Issue fix: Even the applied style is removed the style name is showing in the editor
-                    this.removeCustomStyleName(
-                      this.props.editorState,
-                      val.command._customStyleName,
-                      this.props.editorView.dispatch
-                    );
-                  });
-                } else {
-                  this.showAlert();
-                }
+                    this.props.editorView.dispatch
+                  );
+                });
               } else if ('rename' === val.type) {
                 this.showStyleWindow(command, event, 2);
               } else {
@@ -253,8 +241,9 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
     if (!tasks.length) {
       textAlignNode.forEach((eachnode) => {
-        const { node } = eachnode;
-        node.attrs.styleName = customStyleName;
+        const { node, pos } = eachnode;
+        const newattrs = { ...node.attrs, styleName: customStyleName };
+        tr = tr?.setNodeMarkup(pos, undefined, newattrs);
       });
       // to remove both text align format and line spacing
       tr = this.removeTextAlignAndLineSpacing(tr, editorState.schema);
@@ -264,15 +253,17 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
       const { node, mark, pos } = job;
       tr = tr.removeMark(pos, pos + node.nodeSize, mark.type);
       // reset the custom style name to NONE after remove the styles
-      node.attrs.styleName = customStyleName;
+      const newattrs = { ...node.attrs, styleName: customStyleName };
+      tr = tr.setNodeMarkup(pos, undefined, newattrs);
+      const newNode = tr.doc.nodeAt(pos);
       // FIX: Rest to Normal not working for font size.
       tr = applyLatestStyle(
-        node.attrs.styleName,
+        newNode?.attrs?.styleName,
         editorState,
         tr,
-        node,
+        newNode,
         pos,
-        pos + node.nodeSize,
+        pos + node.nodeSize - 1,
         null,
         1
       );
@@ -280,7 +271,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
     // to remove both text align format and line spacing
     tr = this.removeTextAlignAndLineSpacing(tr, editorState.schema);
-    editorState.doc.nodesBetween(from, to, (node, startPos) => {
+    tr.doc.nodesBetween(from, to, (node, startPos) => {
       if (node.type.name === 'paragraph') {
         tr = tr.setNodeMarkup(startPos, undefined, node.attrs);
       }
@@ -299,27 +290,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     tr = setParagraphSpacing(tr, schema, '0', true);
     tr = setParagraphSpacing(tr, schema, '0', false);
     return tr;
-  }
-
-  showAlert() {
-    const anchor = null;
-    this._popUp = createPopUp(
-      AlertInfo,
-      {
-        content:
-          'This custom style already in use, by removing this style breaks the heirarchy ',
-        title: 'Style Error!!!',
-      },
-      {
-        anchor,
-        position: atViewportCenter,
-        onClose: () => {
-          if (this._popUp) {
-            this._popUp = null;
-          }
-        },
-      }
-    );
   }
 
   //shows the alignment and line spacing option
@@ -355,41 +325,32 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                 // update
                 delete val.editorView;
                 let tr;
-
-                // [FS] IRAD-1350 2021-05-19
-                // blocks edit if the style is already applied in editor
-                if (
-                  !isLevelUpdated(this.props.editorState, val.styleName, val)
-                ) {
-                  saveStyle(val).then((result) => {
-                    if (result) {
-                      //in bladelicitruntime, the response of the saveStyle() changed from list to a object
-                      //so need to add that style object to the current style list
-                      if (!Array.isArray(result)) {
-                        result = addStyleToList(result);
-                      }
-                      setStyles(result);
-                      result.forEach((obj) => {
-                        if (val.styleName === obj.styleName) {
-                          tr = updateDocument(
-                            this.props.editorState,
-                            this.props.editorState.tr,
-                            val.styleName,
-                            obj
-                          );
-                        }
-                      });
-                      if (tr) {
-                        dispatch(tr);
-                      }
+                saveStyle(val).then((result) => {
+                  if (result) {
+                    //in bladelicitruntime, the response of the saveStyle() changed from list to a object
+                    //so need to add that style object to the current style list
+                    if (!Array.isArray(result)) {
+                      result = addStyleToList(result);
                     }
-                    this.props.editorView.focus();
-                    this._stylePopup.close();
-                    this._stylePopup = null;
-                  });
-                } else {
-                  this.showAlert();
-                }
+                    setStyles(result);
+                    result.forEach((obj) => {
+                      if (val.styleName === obj.styleName) {
+                        tr = updateDocument(
+                          this.props.editorState,
+                          this.props.editorState.tr,
+                          val.styleName,
+                          obj
+                        );
+                      }
+                    });
+                    if (tr) {
+                      dispatch(tr);
+                    }
+                  }
+                  this.props.editorView.focus();
+                  this._stylePopup.close();
+                  this._stylePopup = null;
+                });
               } else {
                 // rename
                 renameStyle(this._styleName, val.styleName).then((result) => {
@@ -448,8 +409,8 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
     doc.descendants(function (child, pos) {
       if (oldStyleName === child.attrs.styleName) {
-        (child.attrs as { styleName: string }).styleName = styleName;
-        tr = tr.setNodeMarkup(pos, undefined, child.attrs);
+        const newAttrs = { ...child.attrs, styleName };
+        tr = tr.setNodeMarkup(pos, undefined, newAttrs);
       }
     });
     return tr;
@@ -470,4 +431,47 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     });
     return customStyleName;
   }
+
+    //[FS] IRAD-1085 2020-10-09
+    //method to build commands for list buttons
+    getCommandGroups() {
+      HEADING_COMMANDS = {
+        // [FS] IRAD-1074 2020-12-09
+        // When apply 'None' from style menu, not clearing the applied custom style.
+        [RESERVED_STYLE_NONE]: new CustomStyleCommand(
+          RESERVED_STYLE_NONE,
+          RESERVED_STYLE_NONE
+        ),
+      };
+      const result = addStyleToList(undefined);
+      let HEADING_NAMES = null;
+      
+          if (result) {
+            setStyles(result);
+            HEADING_NAMES = result;
+            if (null != HEADING_NAMES) {
+              const foundNormal = result.find(
+                (obj) => obj.styleName === RESERVED_STYLE_NONE
+              );
+              if (foundNormal) {
+                HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
+                  foundNormal,
+                  foundNormal.styleName
+                );
+              }
+  
+              HEADING_NAMES.forEach((obj) => {
+                if (RESERVED_STYLE_NONE != obj.styleName)
+                  HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
+                    obj,
+                    obj.styleName
+                  );
+              });
+            }
+          return [HEADING_COMMANDS];
+
+          }
+      return [HEADING_COMMANDS];
+    }
+  
 }

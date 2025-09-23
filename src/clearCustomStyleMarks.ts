@@ -4,8 +4,8 @@ import {
   setTextAlign,
   setTextLineSpacing,
 } from '@modusoperandi/licit-ui-commands';
-import { setParagraphSpacing } from './ParagraphSpacingCommand.js';
-import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec.js';
+import { setParagraphSpacing } from './ParagraphSpacingCommand';
+import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 
 // [FS] IRAD-1053 2020-11-13
 // Issue fix: Line spacing and paragraph spacing not removed when select Remove style.
@@ -25,12 +25,13 @@ export function removeTextAlignAndLineSpacing(
 
 export function clearCustomStyleAttribute(node: Node) {
   if (node.attrs) {
+    // FIX: cannot assign to readonly property styleName of object.
+    const newAttrs = { ...node.attrs };
     if (node.attrs.styleName) {
-      ((node.attrs as { styleName: string }).styleName) = RESERVED_STYLE_NONE;
+      newAttrs['styleName'] = RESERVED_STYLE_NONE;
     }
     //SL-3
-
-    ((node.attrs as { indent: string }).indent) = null;
-
+    newAttrs['indent'] = null;
+    node?.type?.create(newAttrs, node.content, node.marks);
   }
 }

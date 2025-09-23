@@ -1,12 +1,11 @@
 import cx from 'classnames';
-import '@modusoperandi/licit-ui-commands/ui/czi-custom-button.css';
+
 import React from 'react';
-import './custom-dropdown.css';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { CustomStyleCommand } from '../CustomStyleCommand';
 import {
   RESERVED_STYLE_NONE
-} from '../CustomStyleNodeSpec.js';
+} from '../CustomStyleNodeSpec';
 
 export class CustomStyleSubMenu extends React.PureComponent<
   {

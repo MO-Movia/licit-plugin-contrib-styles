@@ -1,10 +1,7 @@
 import { Schema } from 'prosemirror-model';
-import {
-  toCustomStyleDOM,
-  getCustomStyleAttrs,
-} from './CustomStyleNodeSpec.js';
-import { toMarkDOM, getMarkAttrs } from './CustomStyleMarkSpec.js';
-import { STYLEKEY, PARAGRAPH } from './Constants.js';
+import { toCustomStyleDOM, getCustomStyleAttrs } from './CustomStyleNodeSpec';
+import { toMarkDOM, getMarkAttrs } from './CustomStyleMarkSpec';
+import { STYLEKEY, PARAGRAPH } from './Constants';
 
 import {
   MARKSTRONG,
@@ -17,7 +14,7 @@ import {
   MARKSUB,
   MARKTEXTHIGHLIGHT,
   MARKUNDERLINE,
-} from './MarkNames.js';
+} from './MarkNames';
 
 const ALLOWED_MARKS = [
   MARKSTRONG,
@@ -51,7 +48,7 @@ export function effectiveSchema(schema: Schema) {
 function createAttribute(content, key, value) {
   if (content) {
     const attr = content.attrs && Object.keys(content.attrs)[0];
-    let styleAttrSpec = content.attrs[key];
+    let styleAttrSpec = content.attrs?.[key];
     if (attr && content.attrs && !styleAttrSpec) {
       const contentAttr = content.attrs[attr];
       styleAttrSpec = Object.assign(

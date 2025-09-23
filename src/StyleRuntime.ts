@@ -21,10 +21,17 @@ export type HTMLStyles = {
   indent?: string; // Text indent
   nextLineStyleName?: string;
   toc?: boolean;
+  tot?: boolean;
+  tof?: boolean;
   isHidden?: boolean;
   strike?: string;
   isList?: boolean;
   prefixValue?: string;
+  selectedStyleMode?: string;
+  hideNumbering?: boolean;
+  resetValue?: boolean;
+  indentPosition?: string;
+  isHangingIndentapplied?: boolean;
 };
 
 export type Style = {
@@ -35,7 +42,7 @@ export type Style = {
   mode?: number; // For Style Editor UI behaviour //0 = new , 1- modify, 2- rename, 3- editall
   description?: string; // style description
   styles?: HTMLStyles;
-  docType?: string
+  docType?: string;
 };
 
 /**
@@ -56,9 +63,13 @@ export type CSSStyle = {
   lineHeight?: string; //css line-height property
   isList?: boolean;
   prefixValue?: string;
+  hideNumbering?: boolean;
+  resetValue?: boolean;
 };
 
 export type StyleRuntime = {
+
+  canEditStyle?: boolean; // true= User has permission to edit styles
   /**
    * Gets array of styles asynchronously from the service
    */

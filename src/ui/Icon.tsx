@@ -1,13 +1,6 @@
 import React from 'react';
 
-import { canUseCSSFont } from './canUseCSSFont.js';
-
-import './czi-icon.css';
-
-// [FS] IRAD-1061 2020-09-19
-// Now loaded locally, so that it work in closed network as well.
-//import injectStyleSheet from './injectStyleSheet';
-import './icon-font.css';
+import { canUseCSSFont } from './canUseCSSFont';
 
 const cached = {};
 
@@ -25,7 +18,7 @@ const CSS_FONT = 'Material Icons';
   }
 })();
 
-class SuperscriptIcon extends React.PureComponent {
+export class SuperscriptIcon extends React.PureComponent {
   render(): React.ReactElement {
     return (
       <span className="superscript-wrap">
@@ -35,7 +28,7 @@ class SuperscriptIcon extends React.PureComponent {
     );
   }
 }
-class SubscriptIcon extends React.PureComponent {
+export class SubscriptIcon extends React.PureComponent {
   render(): React.ReactElement {
     return (
       <span className="subscript-wrap">

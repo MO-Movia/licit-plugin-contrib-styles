@@ -1,12 +1,14 @@
 import { Node, DOMOutputSpec } from 'prosemirror-model';
-import type { KeyValuePair } from './Constants.js';
+import type { KeyValuePair } from './Constants';
 import { toCSSLineSpacing } from '@modusoperandi/licit-ui-commands';
 
-import { getCustomStyleByName, getHidenumberingFlag } from './customStyle.js';
-import './ui/czi-cust-style-numbered.css';
+import { getCustomStyleByName, getHidenumberingFlag } from './customStyle';
 
 // This assumes that every 36pt maps to one indent level.
 export const ATTRIBUTE_PREFIX = 'prefix';
+export const ATTRIBUTE_TOT = 'tot';
+export const ATTRIBUTE_TOF = 'tof';
+export const ATTRIBUTE_HIDENUMBERING = 'hideNumbering';
 export const INDENT_MARGIN_PT_SIZE = 36;
 export const MIN_INDENT_LEVEL = 0;
 export const MAX_INDENT_LEVEL = 7;
@@ -55,9 +57,13 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
     style,
     styleLevel,
     indentOverriden,
+    indentPosition,
     bulletDetails,
     isListStyle,
     prefix,
+    hideNumbering,
+    tot,
+    tof,
   } = getStyle(node.attrs);
   if (style) {
     output[1].style = style;
@@ -65,7 +71,6 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
   if (styleLevel) {
     if (isListStyle) {
       if (node.attrs.indent !== null) {
-        console.log('Indent value is', node.attrs.indent);
         output[1][ATTRIBUTE_LIST_STYLE_LEVEL] = node.attrs.indent + 1;
       } else {
         output[1][ATTRIBUTE_LIST_STYLE_LEVEL] = styleLevel;
@@ -75,12 +80,28 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
       output[1][HIDE_STYLE_LEVEL] = getHidenumberingFlag();
     }
   }
-  if ('' !== indentOverriden) {
+  if (indentPosition) {
+    output[1]['indentPosition'] = indentPosition;
+  }
+  if (node.attrs.overriddenIndent) {
+    output[1][ATTRIBUTE_INDENT] = String(node.attrs.overriddenIndentValue);
+  }
+  else if ('' !== indentOverriden) {
     output[1][ATTRIBUTE_INDENT] = String(indentOverriden);
   }
 
   if (prefix) {
     output[1][ATTRIBUTE_PREFIX] = prefix;
+  }
+  if (tot) {
+    output[1][ATTRIBUTE_TOT] = tot;
+  }
+  if (tof) {
+    output[1][ATTRIBUTE_TOF] = tof;
+  }
+
+  if (hideNumbering) {
+    output[1][ATTRIBUTE_HIDENUMBERING] = hideNumbering;
   }
 
   if (bulletDetails?.symbol?.length > 0) {
@@ -157,8 +178,12 @@ function getStyleEx(align, lineSpacing, styleName) {
   let style = '';
   let styleLevel = 0;
   let indentOverriden = '';
+  let indentPosition = '';
   let isListStyle = false;
   let prefix = '';
+  let tot = false;
+  let tof = false;
+  let hideNumbering = false;
   let bulletDetails: {
     symbol: string;
     color: string;
@@ -183,6 +208,10 @@ function getStyleEx(align, lineSpacing, styleName) {
       if (styleProps.styles.hasBullet) {
         bulletDetails = getBulletDetails(styleProps.styles.bulletLevel);
         styleLevel = styleProps.styles.styleLevel;
+      }
+
+      if (styleProps.styles.indentPosition) {
+        indentPosition = styleProps.styles.indentPosition;
       }
 
       if (null === align && styleProps.styles.align) {
@@ -226,7 +255,10 @@ function getStyleEx(align, lineSpacing, styleName) {
             ? styleProps.styles.styleLevel
             : 0;
         isListStyle = styleProps.styles.isList;
+        tot = styleProps.styles.tot;
+        tof = styleProps.styles.tof;
         prefix = styleProps.styles.prefixValue;
+        hideNumbering = styleProps.styles.hideNumbering;
         style += refreshCounters(styleLevel, isListStyle);
       }
     } else if (styleName?.includes(RESERVED_STYLE_NONE_NUMBERING)) {
@@ -243,9 +275,13 @@ function getStyleEx(align, lineSpacing, styleName) {
     style,
     styleLevel,
     indentOverriden,
+    indentPosition,
     bulletDetails,
     isListStyle,
     prefix,
+    tot,
+    tof,
+    hideNumbering,
   };
 }
 
@@ -253,4 +289,3 @@ export const toCustomStyleDOM = toDOM;
 export const getCustomStyleAttrs = getAttrs;
 export const getDetailsBullet = getBulletDetails;
 export const countersRefresh = refreshCounters;
-

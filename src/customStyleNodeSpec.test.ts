@@ -2,7 +2,7 @@ import {
   toCustomStyleDOM,
   getCustomStyleAttrs,
   countersRefresh,
-} from './CustomStyleNodeSpec.js';
+} from './CustomStyleNodeSpec';
 import * as customstyle from './customStyle';
 import { Node, DOMOutputSpec } from 'prosemirror-model';
 
@@ -44,6 +44,9 @@ describe('toCustomStyleDOM', () => {
         fontName: 'Tahoma',
         indent: '10',
         hasNumbering: true,
+        isList: true,
+        indentPosition: '1.5',
+        isHangingIndentapplied: true,
       },
       styleName: '',
     });
@@ -87,10 +90,11 @@ describe('toCustomStyleDOM', () => {
         'data-bullet-symbol': '● ',
         'data-indent': '10',
         'data-show-bullet': true,
-        'data-style-level': '1',
-        'hide-style-level': false,
+        'indentPosition': '1.5',
+        'list-style-level': 1,
+        // 'hide-style-level': false,
         style:
-          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;counter-increment: C1 ;',
+          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;counter-increment: L1 ;',
         styleName: 'FS_B01',
       },
     ]);
@@ -210,6 +214,71 @@ describe('toCustomStyleDOM', () => {
       styles: {
         hasBullet: false,
         bulletLevel: '25CF',
+        styleLevel: 1,
+        paragraphSpacingBefore: 'null',
+        paragraphSpacingAfter: 'null',
+        strong: true,
+        boldNumbering: true,
+        em: true,
+        color: 'null',
+        fontSize: 'null',
+        fontName: 'null',
+        indent: 'null',
+        hasNumbering: true,
+        align: 'null',
+      },
+      styleName: '',
+    });
+    //const base = undefined;
+    const node = {
+      type: 'paragraph',
+      attrs: {
+        align: null,
+        color: null,
+        id: null,
+        indent: null,
+        lineSpacing: '16pt',
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: 'FS_B01',
+      },
+      content: [
+        {
+          type: 'text',
+          marks: [
+            { type: 'mark-font-size', attrs: { pt: 11, overridden: false } },
+            {
+              type: 'mark-font-type',
+              attrs: { name: 'Arial', overridden: false },
+            },
+            {
+              type: 'mark-text-color',
+              attrs: { color: '#3b0df2', overridden: false },
+            },
+          ],
+          text: 'g',
+        },
+      ],
+    };
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
+      'span',
+      {
+        'data-indent': 'null',
+        'data-style-level': '1',
+        'hide-style-level': false,
+        style:
+          'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;counter-increment: C1 ;',
+        styleName: 'FS_B01',
+      },
+    ]);
+  });
+
+  it('should handle toCustomStyleDOM when  hasBullet: false', () => {
+    jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF1',
         styleLevel: 1,
         paragraphSpacingBefore: 'null',
         paragraphSpacingAfter: 'null',
@@ -663,8 +732,6 @@ describe('toCustomStyleDOM', () => {
     ]);
   });
 
-
-
   it('should reset list style counters in window variables', () => {
     const styleLevel = 3;
     const isListStyle = true;
@@ -675,6 +742,4 @@ describe('toCustomStyleDOM', () => {
     expect(window['set-cust-list-style-counter-1']).toBe(true);
     expect(window['set-cust-list-style-counter-2']).toBe(true);
   });
-
-
 });

@@ -1,8 +1,130 @@
 html {
   counter-reset: C1 C2 C3 C4 C5 C6 C7 C8 C9 C10;
   counter-reset: L1 L2 L3 L4 L5 L6 L7 L8 L9 L10;
-
+  counter-reset: D1;
+  counter-reset: F1;
   --czi-counter-bold: 100;
+}
+
+.ProseMirror p[list-style-level='1'][reset='true'] {
+  counter-set: L1 1;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: L2 L3 L4 L5 L6 L7 L8 L9 L10;
+}
+
+.ProseMirror p[list-style-level='2'][reset='true'] {
+  counter-set: L1 1 L2 1;
+  counter-reset: L3 L4 L5 L6 L7 L8 L9 L10;
+}
+
+.ProseMirror p[list-style-level='3'][reset='true'] {
+  counter-set: L1 1 L2 1 L3 1;
+  counter-reset: L4 L5 L6 L7 L8 L9 L10;
+}
+
+.ProseMirror p[list-style-level='4'][reset='true'] {
+  counter-set: L1 1 L2 1 L3 1 L4 1;
+  counter-reset: L5 L6 L7 L8 L9 L10;
+}
+
+.ProseMirror p[list-style-level='5'][reset='true'] {
+  counter-set: L1 1 L2 1 L3 1 L4 1 L5 1;
+  counter-increment: L5;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: L6 L7 L8 L9 L10;
+}
+
+.ProseMirror p[list-style-level='6'][reset='true'] {
+  counter-set: L1 1 L2 1 L3 1 L4 1 L5 1 L6 1;
+  counter-reset: L7 L8 L9 L10;
+}
+
+.ProseMirror p[list-style-level='7'][reset='true'] {
+  counter-set: L1 1 L2 1 L3 1 L4 1 L5 1 L6 1 L7 1;
+  counter-reset: L8 L9 L10;
+}
+
+.ProseMirror p[list-style-level='8'][reset='true'] {
+  counter-set: L1 1 L2 1 L3 1 L4 1 L5 1 L6 1 L7 1 L8 1;
+  counter-reset: L9 L10;
+}
+
+.ProseMirror p[list-style-level='9'][reset='true'] {
+  counter-set: L1 1 L2 1 L3 1 L4 1 L5 1 L6 1 L7 1 L8 1 L9 1;
+  counter-reset: L10;
+}
+
+.ProseMirror p[list-style-level='10'][reset='true'] {
+  counter-set: L1 1 L2 1 L3 1 L4 1 L5 1 L6 1 L7 1 L8 1 L9 1 L10 1;
+}
+
+.ProseMirror p[data-style-level='1'][reset='true'] {
+  counter-set: C1 1;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: C2 C3 C4 C5 C6 C7 C8 C9 C10;
+}
+
+.ProseMirror p[data-style-level='2'][reset='true'] {
+  counter-set: C1 1 C2 1;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: C3 C4 C5 C6 C7 C8 C9 C10;
+}
+
+.ProseMirror p[data-style-level='3'][reset='true'] {
+  counter-set: C1 1 C2 1 C3 1;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: C4 C5 C6 C7 C8 C9 C10;
+}
+
+.ProseMirror p[data-style-level='4'][reset='true'] {
+  counter-set: C1 1 C2 1 C3 1 C4 1;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: C5 C6 C7 C8 C9 C10;
+}
+
+.ProseMirror p[data-style-level='5'][reset='true'] {
+  counter-set: C1 1 C2 1 C3 1 C4 1 C5 1;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: C6 C7 C8 C9 C10;
+}
+
+.ProseMirror p[data-style-level='6'][reset='true'] {
+  counter-set: C1 1 C2 1 C3 1 C4 1 C5 1 C6 1;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: C7 C8 C9 C10;
+}
+
+.ProseMirror p[data-style-level='7'][reset='true'] {
+  counter-set: C1 1 C2 1 C3 1 C4 1 C5 1 C6 1 C7 1;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: C8 C9 C10;
+}
+
+.ProseMirror p[data-style-level='8'][reset='true'] {
+  counter-set: C1 1 C2 1 C3 1 C4 1 C5 1 C6 1 C7 1 C8 1;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: C9 C10;
+}
+
+.ProseMirror p[data-style-level='9'][reset='true'] {
+  counter-set: C1 1 C2 1 C3 1 C4 1 C5 1 C6 1 C7 1 C8 1 C9 1;
+
+  /* Reset all other variables under the current one. */
+  counter-reset: C10;
+}
+
+.ProseMirror p[data-style-level='10'][reset='true'] {
+  counter-set: C1 1 C2 1 C3 1 C4 1 C5 1 C6 1 C7 1 C8 1 C9 1 C10 1;
 }
 
 /* List style counter */
@@ -10,8 +132,7 @@ html {
   counter-increment: L1;
 
   /* Reset all other variables under the current one. */
-  counter-reset: L2 L3 L4 L5 L6 L7 L8 L9 L10;
-  margin-left: 12pt;
+  counter-reset: L2 L3 L4 L5 L6 L7 L8 L9 L10 F1 D1;
 }
 
 .ProseMirror p[list-style-level='2'] {
@@ -19,7 +140,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: L3 L4 L5 L6 L7 L8 L9 L10;
-  margin-left: 16pt;
 }
 
 .ProseMirror p[list-style-level='3'] {
@@ -27,7 +147,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: L4 L5 L6 L7 L8 L9 L10;
-  margin-left: 25pt;
 }
 
 .ProseMirror p[list-style-level='4'] {
@@ -35,7 +154,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: L5 L6 L7 L8 L9 L10;
-  margin-left: 37pt;
 }
 
 .ProseMirror p[list-style-level='5'] {
@@ -43,7 +161,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: L6 L7 L8 L9 L10;
-  margin-left: 46pt;
 }
 
 .ProseMirror p[list-style-level='6'] {
@@ -51,7 +168,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: L7 L8 L9 L10;
-  margin-left: 56pt;
 }
 
 .ProseMirror p[list-style-level='7'] {
@@ -59,7 +175,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: L8 L9 L10;
-  margin-left: 65pt;
 }
 
 .ProseMirror p[list-style-level='8'] {
@@ -67,7 +182,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: L9 L10;
-  margin-left: 73pt;
 }
 
 .ProseMirror p[list-style-level='9'] {
@@ -75,25 +189,21 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: L10;
-  margin-left: 85pt;
 }
 
 .ProseMirror p[list-style-level='10'] {
   counter-increment: L10;
-  margin-left: 92pt;
 }
 
 .ProseMirror p[list-style-level='1']::before {
   content: attr(prefix) counter(L1, decimal) '. ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -12pt;
   font-size: var(--czi-content-font-size);
 }
 
 .ProseMirror p[list-style-level='2']::before {
   content: attr(prefix) counter(L1, decimal) '.' counter(L2, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -16pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -101,7 +211,6 @@ html {
   content: attr(prefix) counter(L1, decimal) '.' counter(L2, decimal) '.'
     counter(L3, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -25pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -109,7 +218,6 @@ html {
   content: attr(prefix) counter(L1, decimal) '.' counter(L2, decimal) '.'
     counter(L3, decimal) '.' counter(L4, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -37pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -117,7 +225,6 @@ html {
   content: attr(prefix) counter(L1, decimal) '.' counter(L2, decimal) '.'
     counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -46pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -126,7 +233,6 @@ html {
     counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) '.'
     counter(L6, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -56pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -135,7 +241,6 @@ html {
     counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) '.'
     counter(L6, decimal) '.' counter(L7, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -65pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -144,7 +249,6 @@ html {
     counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) '.'
     counter(L6, decimal) '.' counter(L7, decimal) '.' counter(L8, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -73pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -155,7 +259,6 @@ html {
     counter(L9, decimal) ' ';
   font-weight: var(--czi-counter-bold);
   font-size: var(--czi-content-font-size);
-  margin-left: -85pt;
 }
 
 .ProseMirror p[list-style-level='10']::before {
@@ -164,7 +267,6 @@ html {
     counter(L6, decimal) '.' counter(L7, decimal) '.' counter(L8, decimal) '.'
     counter(L9, decimal) '.' counter(L10, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -92pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -174,8 +276,7 @@ html {
   counter-increment: C1;
 
   /* Reset all other variables under the current one. */
-  counter-reset: C2 C3 C4 C5 C6 C7 C8 C9 C10;
-  margin-left: 12pt;
+  counter-reset: C2 C3 C4 C5 C6 C7 C8 C9 C10 F1 D1;
 }
 
 .ProseMirror p[data-style-level='2'] {
@@ -183,7 +284,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: C3 C4 C5 C6 C7 C8 C9 C10;
-  margin-left: 16pt;
 }
 
 .ProseMirror p[data-style-level='3'] {
@@ -191,7 +291,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: C4 C5 C6 C7 C8 C9 C10;
-  margin-left: 25pt;
 }
 
 .ProseMirror p[data-style-level='4'] {
@@ -199,7 +298,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: C5 C6 C7 C8 C9 C10;
-  margin-left: 37pt;
 }
 
 .ProseMirror p[data-style-level='5'] {
@@ -207,7 +305,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: C6 C7 C8 C9 C10;
-  margin-left: 46pt;
 }
 
 .ProseMirror p[data-style-level='6'] {
@@ -215,7 +312,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: C7 C8 C9 C10;
-  margin-left: 56pt;
 }
 
 .ProseMirror p[data-style-level='7'] {
@@ -223,7 +319,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: C8 C9 C10;
-  margin-left: 65pt;
 }
 
 .ProseMirror p[data-style-level='8'] {
@@ -231,7 +326,6 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: C9 C10;
-  margin-left: 73pt;
 }
 
 .ProseMirror p[data-style-level='9'] {
@@ -239,12 +333,10 @@ html {
 
   /* Reset all other variables under the current one. */
   counter-reset: C10;
-  margin-left: 85pt;
 }
 
 .ProseMirror p[data-style-level='10'] {
   counter-increment: C10;
-  margin-left: 92pt;
 }
 
 .ProseMirror p[data-bullet-color='#0000FF']::before {
@@ -258,12 +350,7 @@ html {
 .ProseMirror p[data-show-bullet='true']::before {
   content: attr(data-bullet-symbol) !important;
   font-weight: normal !important;
-  margin-left: -12pt;
   font-size: var(--czi-content-font-size);
-}
-
-.ProseMirror p[data-show-bullet='true'] {
-  margin-left: 12pt;
 }
 
 .ProseMirror p[data-style-level='1'][hide-style-level='true']::before {
@@ -275,7 +362,6 @@ html {
 .ProseMirror p[data-style-level='1'][hide-style-level='false']::before {
   content: attr(prefix) counter(C1, decimal) '. ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -12pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -288,7 +374,6 @@ html {
 .ProseMirror p[data-style-level='2'][hide-style-level='false']::before {
   content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -16pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -303,7 +388,6 @@ html {
   content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -25pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -318,7 +402,6 @@ html {
   content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) '.' counter(C4, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -37pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -333,7 +416,6 @@ html {
   content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -46pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -350,7 +432,6 @@ html {
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
     counter(C6, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -56pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -367,7 +448,6 @@ html {
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
     counter(C6, decimal) '.' counter(C7, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -65pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -384,7 +464,6 @@ html {
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
     counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -73pt;
   font-size: var(--czi-content-font-size);
 }
 
@@ -404,7 +483,6 @@ html {
     counter(C9, decimal) ' ';
   font-weight: var(--czi-counter-bold);
   font-size: var(--czi-content-font-size);
-  margin-left: -85pt;
 }
 
 .ProseMirror p[data-style-level='10'][hide-style-level='true']::before {
@@ -422,10 +500,35 @@ html {
     counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) '.'
     counter(C9, decimal) '.' counter(C10, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  margin-left: -92pt;
   font-size: var(--czi-content-font-size);
 }
 
-.ProseMirror p[data-bullet-symbol='✪✪ ']::before {
-  margin-left: -20pt;
+.ProseMirror p[hideNumbering='true'] {
+  margin-left: 0 !important;
+}
+
+.ProseMirror p[hideNumbering='true']::before {
+  content: none !important;
+}
+
+.ProseMirror p[data-style-level='2'][tof='true'] {
+  counter-increment: F1;
+  counter-reset: none;
+}
+
+.ProseMirror p[data-style-level='2'][tot='true'] {
+  counter-increment: D1;
+  counter-reset: none;
+}
+
+.ProseMirror p[data-style-level='2'][tof='true']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(F1, decimal) ' ';
+  font-weight: var(--czi-counter-bold);
+  font-size: var(--czi-content-font-size);
+}
+
+.ProseMirror p[data-style-level='2'][tot='true']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(D1, decimal) ' ';
+  font-weight: var(--czi-counter-bold); 
+  font-size: var(--czi-content-font-size);
 }

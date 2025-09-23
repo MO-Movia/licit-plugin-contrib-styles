@@ -8,7 +8,6 @@ import {
   setNodeAttrs,
   applyStyleForNextParagraph,
   nodeAssignment,
-  manageHierarchyOnDelete,
   onInitAppendTransaction,
   onUpdateAppendTransaction,
   applyNormalIfNoStyle,
@@ -17,6 +16,7 @@ import {
   applyStyles,
   applyStyleForEmptyParagraph,
   isDocChanged,
+  applyHangingIndentTransform,
 } from './index';
 import { builders } from 'prosemirror-test-builder';
 import {
@@ -41,8 +41,8 @@ import { EditorView } from 'prosemirror-view';
 import * as DOMfunc from './CustomStyleNodeSpec';
 
 import { CustomStyleCommand } from './CustomStyleCommand';
-import * as ccommand from './CustomStyleCommand.js';
-import { Style } from './StyleRuntime.js';
+import * as ccommand from './CustomStyleCommand';
+import { Style } from './StyleRuntime';
 
 const attrs = {
   align: { default: null },
@@ -271,6 +271,13 @@ const mockSchema = new Schema({
         return ['span', mark_type_attr, 0];
       },
     },
+
+    'mark-hanging-indent': {
+      attrs: { prefix: { default: 0 } },
+      parseDOM: [{ tag: 'span.hanging' }],
+      toDOM(mark) { return ['span', { class: 'hanging', 'data-prefix': mark.attrs.prefix }, 0]; }
+    },
+    spacer: { attrs: {} }
   },
 });
 
@@ -329,6 +336,7 @@ describe('applyNormalIfNoStyle', () => {
     });
     expect(applyNormalIfNoStyle({}, null, mockdoc, true)).toBe(undefined);
   });
+
   it('should handle applyNormalIfNoStyle when tr is present', () => {
     const linkmark = new Mark();
     const mockschema = new Schema({
@@ -414,6 +422,7 @@ describe('applyNormalIfNoStyle', () => {
           nodesBetween: () => {
             return {};
           },
+          nodeAt: () => { },
         },
         setSelection: setSelection,
       };
@@ -441,6 +450,7 @@ describe('applyNormalIfNoStyle', () => {
             nodesBetween: () => {
               return {};
             },
+            nodeAt: () => { },
           },
           setSelection: setSelection,
           selection: {
@@ -580,6 +590,7 @@ describe('onUpdateAppendTransaction', () => {
         isTextblock: true,
       } as unknown as Node;
     };
+    mockdoc.nodesBetween = () => { };
     const mockSlice1 = {
       content: {
         childCount: 3,
@@ -612,6 +623,7 @@ describe('onUpdateAppendTransaction', () => {
               max: () => 1,
             }) as unknown as ResolvedPos,
           nodesBetween: () => ({}),
+          nodeAt: () => { },
         },
         setSelection: setSelection,
         scrollIntoView: () => {
@@ -671,12 +683,15 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-              $end: () => {
+              end: () => {
                 return 1;
               },
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
               pos: 0,
@@ -922,12 +937,15 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-              $end: () => {
+              end: () => {
                 return 1;
               },
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
             },
@@ -1172,12 +1190,12 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-              $end: () => {
-                return 1;
-              },
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
             },
@@ -1234,6 +1252,9 @@ describe('onUpdateAppendTransaction', () => {
               $to: {
                 after() {
                   return 10;
+                },
+                end: () => {
+                  return 1;
                 },
               },
             },
@@ -1334,6 +1355,9 @@ describe('Style Plugin', () => {
       }
     );
     expect(setStyles(customStyleList)).toBeUndefined();
+  });
+  it('should handle getEffectiveSchema ', () => {
+    expect(plugin.getEffectiveSchema(mockSchema)).toBeDefined();
   });
   it('SHOULD HANDLE paste', () => {
     const boundHandlePaste = plugin?.props?.handlePaste?.bind(plugin);
@@ -1915,7 +1939,7 @@ describe('Custom Style Plugin pass', () => {
 
   it('Test 1 ', () => {
     const props = {
-      dispatch: () => {},
+      dispatch: () => { },
       editorState: state,
       editorView: editor.view,
     };
@@ -2535,7 +2559,7 @@ describe('Cus Style Plugin-Pass', () => {
       color: null,
       id: '',
       indent: null,
-      lineSpacing: null,
+      lineSpacing: '125%',
       paddingBottom: null,
       paddingTop: null,
       capco: null,
@@ -2546,11 +2570,17 @@ describe('Cus Style Plugin-Pass', () => {
       capco: null,
       color: null,
       id: '',
-      indent: null,
-      lineSpacing: null,
+      indent: undefined,
+      lineSpacing: '125%',
       paddingBottom: null,
       paddingTop: null,
       styleName: 'Normal',
+      overriddenAlign: null,
+      overriddenAlignValue: null,
+      overriddenIndent: null,
+      overriddenIndentValue: null,
+      overriddenLineSpacing: null,
+      overriddenLineSpacingValue: null,
     });
   });
   it('should return newAttrs when RESERVED_STYLE_NONE  is not nextLineStyle  ', () => {
@@ -2579,6 +2609,12 @@ describe('Cus Style Plugin-Pass', () => {
       paddingBottom: null,
       paddingTop: null,
       styleName: 'test',
+      overriddenAlign: null,
+      overriddenAlignValue: null,
+      overriddenIndent: null,
+      overriddenIndentValue: null,
+      overriddenLineSpacing: null,
+      overriddenLineSpacingValue: null,
     });
   });
   it('should return newAttrs when RESERVED_STYLE_NONE  is not nextLineStyle branch coverage  ', () => {
@@ -2609,6 +2645,12 @@ describe('Cus Style Plugin-Pass', () => {
       paddingTop: null,
       styleName: 'test',
       innerLink: null,
+      overriddenAlign: null,
+      overriddenAlignValue: null,
+      overriddenIndent: null,
+      overriddenIndentValue: null,
+      overriddenLineSpacing: null,
+      overriddenLineSpacingValue: null,
     });
   });
   it('should handle setNodeAttrs when nextLineStyleName is null ', () => {
@@ -2628,6 +2670,23 @@ describe('Cus Style Plugin-Pass', () => {
       styleName: 'A11-Rename',
     };
     expect(setNodeAttrs(null, newattrs)).toStrictEqual(newattrs);
+  });
+  it('should handle setNodeAttrs when nextLineStyleName is Normal ', () => {
+    jest
+      .spyOn(CustStyl, 'getCustomStyleByName')
+      .mockReturnValue('Normal' as unknown as Style);
+    const newattrs = {
+      align: 'left',
+      color: null,
+      id: '',
+      indent: null,
+      lineSpacing: null,
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'A11-Rename',
+    };
+    expect(setNodeAttrs('Normal', newattrs)).toStrictEqual(newattrs);
   });
 
   it('should handle applyStyleForNextParagraph', () => {
@@ -2725,6 +2784,19 @@ describe('Cus Style Plugin-Pass', () => {
               },
             ],
           },
+          // {
+          //   type: 'paragraph',
+          //   attrs: {
+
+          //   },
+          //   content: [
+          //     {
+          //       type: 'text',
+          //       marks: [],
+          //       text: 'Your text here previous',
+          //     },
+          //   ],
+          // },
         ],
       }),
       selection: { from: 2, to: 4 },
@@ -3244,177 +3316,6 @@ describe('Cus Style Plugin-Pass', () => {
       applyStyleForNextParagraph({}, {}, {}, { input: { lastKeyCode: 10 } })
     ).toBeDefined();
     expect(nodeAssignment(prevstate)).toBeDefined();
-    const schemamhod = new Schema({
-      nodes: {
-        doc: {
-          attrs: {
-            layout: { default: null },
-            padding: { default: null },
-            width: { default: null },
-            counterFlags: { default: null },
-            capcoMode: { default: 0 },
-          },
-          content: 'paragraph+',
-        },
-        paragraph: {
-          attrs: {
-            align: { default: 'left' },
-            color: { default: null },
-            id: { default: null },
-            indent: { default: null },
-            lineSpacing: { default: null },
-            paddingBottom: { default: null },
-            paddingTop: { default: null },
-            capco: { default: null },
-            styleName: { default: 'AFDP Bullet' },
-          },
-          content: 'inline*',
-          parseDOM: [{ tag: 'p' }],
-          toDOM() {
-            return ['p', 0];
-          },
-        },
-        image: {
-          attrs: {
-            src: {},
-            alt: { default: '' },
-            title: { default: null },
-            styleName: { default: null },
-          },
-          inline: true,
-          group: 'inline',
-          draggable: true,
-          parseDOM: [
-            {
-              tag: 'img[src]',
-              getAttrs(dom) {
-                return {
-                  src: (dom as unknown as HTMLElement).getAttribute('src'),
-                  alt: (dom as unknown as HTMLElement).getAttribute('alt'),
-                  title: (dom as unknown as HTMLElement).getAttribute('title'),
-                  styleName: (dom as unknown as HTMLElement).getAttribute(
-                    'styleName'
-                  ),
-                };
-              },
-            },
-          ],
-          toDOM(node) {
-            const { src, alt, title, styleName } = node.attrs;
-            return ['img', { src, alt, title, styleName }];
-          },
-        },
-        text: {
-          marks: 'mark-font-size mark-font-type',
-        },
-      },
-      marks: {
-        'mark-font-size': {
-          attrs: {
-            pt: { default: 11 },
-            overridden: { default: false },
-          },
-        },
-        'mark-font-type': {
-          attrs: {
-            name: { default: 'Arial' },
-            overridden: { default: false },
-          },
-        },
-      },
-    });
-    const prevstatemhod = {
-      schema: schemamhod,
-      doc: schemamhod.nodeFromJSON({
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-        ],
-      }),
-      selection: { from: 2, to: 4 },
-    };
-
     const spymhod = jest.spyOn(ccommand, 'getStyleLevel').mockReturnValue(2);
     jest.spyOn(CustStyl, 'getCustomStyleByLevel').mockReturnValue({
       styles: {
@@ -3424,105 +3325,7 @@ describe('Cus Style Plugin-Pass', () => {
         nextLineStyleName: 'Normal',
       },
     } as unknown as null);
-    // expect(
-    //   manageHierarchyOnDelete(prevstatemhod, nextstate, null, mockview1)
-    // ).toBeDefined();
     spymhod.mockClear();
-    const mockview2 = {
-      state: mockState,
-      input: { lastKeyCode: 8 },
-    };
-    // expect(
-    //   manageHierarchyOnDelete(prevstatemhod, nextstate, null, mockview2)
-    // ).toBeDefined();
-    const nextstatemhod = {
-      schema: schema2,
-      doc: schema2.nodeFromJSON({
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-        ],
-      }),
-      selection: { from: 2, to: 8 },
-    };
-    expect(
-      manageHierarchyOnDelete(
-        prevstatemhod,
-        nextstatemhod,
-        transaction1,
-        mockview2
-      )
-    ).toBeDefined();
-    //expect(manageHierarchyOnDelete({doc:{key:'value'}},{selection:{from:0},doc:{key:'value'}},transaction1,mockview2)).toBeDefined();
   });
   it('should handle function manageHierarchyOnDelete nodesBeforeSelection.length > 0', () => {
     jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
@@ -4137,177 +3940,6 @@ describe('Cus Style Plugin-Pass', () => {
       applyStyleForNextParagraph({}, {}, {}, { input: { lastKeyCode: 10 } })
     ).toBeDefined();
     expect(nodeAssignment(prevstate)).toBeDefined();
-    const schemamhod = new Schema({
-      nodes: {
-        doc: {
-          attrs: {
-            layout: { default: null },
-            padding: { default: null },
-            width: { default: null },
-            counterFlags: { default: null },
-            capcoMode: { default: 0 },
-          },
-          content: 'paragraph+',
-        },
-        paragraph: {
-          attrs: {
-            align: { default: 'left' },
-            color: { default: null },
-            id: { default: null },
-            indent: { default: null },
-            lineSpacing: { default: null },
-            paddingBottom: { default: null },
-            paddingTop: { default: null },
-            capco: { default: null },
-            styleName: { default: 'AFDP Bullet' },
-          },
-          content: 'inline*',
-          parseDOM: [{ tag: 'p' }],
-          toDOM() {
-            return ['p', 0];
-          },
-        },
-        image: {
-          attrs: {
-            src: {},
-            alt: { default: '' },
-            title: { default: null },
-            styleName: { default: null },
-          },
-          inline: true,
-          group: 'inline',
-          draggable: true,
-          parseDOM: [
-            {
-              tag: 'img[src]',
-              getAttrs(dom) {
-                return {
-                  src: (dom as unknown as HTMLElement).getAttribute('src'),
-                  alt: (dom as unknown as HTMLElement).getAttribute('alt'),
-                  title: (dom as unknown as HTMLElement).getAttribute('title'),
-                  styleName: (dom as unknown as HTMLElement).getAttribute(
-                    'styleName'
-                  ),
-                };
-              },
-            },
-          ],
-          toDOM(node) {
-            const { src, alt, title, styleName } = node.attrs;
-            return ['img', { src, alt, title, styleName }];
-          },
-        },
-        text: {
-          marks: 'mark-font-size mark-font-type',
-        },
-      },
-      marks: {
-        'mark-font-size': {
-          attrs: {
-            pt: { default: 11 },
-            overridden: { default: false },
-          },
-        },
-        'mark-font-type': {
-          attrs: {
-            name: { default: 'Arial' },
-            overridden: { default: false },
-          },
-        },
-      },
-    });
-    const prevstatemhod = {
-      schema: schemamhod,
-      doc: schemamhod.nodeFromJSON({
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-        ],
-      }),
-      selection: { from: 2, to: 4 },
-    };
-
     const spymhod = jest.spyOn(ccommand, 'getStyleLevel').mockReturnValue(2);
     jest.spyOn(CustStyl, 'getCustomStyleByLevel').mockReturnValue({
       styles: {
@@ -4319,97 +3951,6 @@ describe('Cus Style Plugin-Pass', () => {
     } as unknown as null);
 
     spymhod.mockClear();
-    const mockview2 = {
-      state: mockState,
-      input: { lastKeyCode: 46 },
-    };
-    const nextstatemhod = {
-      schema: schema2,
-      doc: schema2.nodeFromJSON({
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-        ],
-      }),
-      selection: { from: 2, to: 8 },
-    };
-    expect(
-      manageHierarchyOnDelete(
-        prevstatemhod,
-        nextstatemhod,
-        transaction1,
-        mockview2
-      )
-    ).toBeDefined();
   });
   it('should handle applyStyleForNextParagraph', () => {
     jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
@@ -4643,7 +4184,20 @@ describe('Cus Style Plugin-Pass', () => {
           },
         ],
       }),
-      selection: { from: 4, to: 8 },
+      selection: {
+        $from: {
+          start: () => {
+            return 1;
+          },
+        },
+        $to: {
+          end: () => {
+            return 2;
+          },
+        },
+        from: 4,
+        to: 8,
+      },
     };
 
     const schema3 = new Schema({
@@ -5024,177 +4578,6 @@ describe('Cus Style Plugin-Pass', () => {
       applyStyleForNextParagraph({}, {}, {}, { input: { lastKeyCode: 10 } })
     ).toBeDefined();
     expect(nodeAssignment(prevstate)).toBeDefined();
-    const schemamhod = new Schema({
-      nodes: {
-        doc: {
-          attrs: {
-            layout: { default: null },
-            padding: { default: null },
-            width: { default: null },
-            counterFlags: { default: null },
-            capcoMode: { default: 0 },
-          },
-          content: 'paragraph+',
-        },
-        paragraph: {
-          attrs: {
-            align: { default: 'left' },
-            color: { default: null },
-            id: { default: null },
-            indent: { default: null },
-            lineSpacing: { default: null },
-            paddingBottom: { default: null },
-            paddingTop: { default: null },
-            capco: { default: null },
-            styleName: { default: 'AFDP Bullet' },
-          },
-          content: 'inline*',
-          parseDOM: [{ tag: 'p' }],
-          toDOM() {
-            return ['p', 0];
-          },
-        },
-        image: {
-          attrs: {
-            src: {},
-            alt: { default: '' },
-            title: { default: null },
-            styleName: { default: null },
-          },
-          inline: true,
-          group: 'inline',
-          draggable: true,
-          parseDOM: [
-            {
-              tag: 'img[src]',
-              getAttrs(dom) {
-                return {
-                  src: (dom as unknown as HTMLElement).getAttribute('src'),
-                  alt: (dom as unknown as HTMLElement).getAttribute('alt'),
-                  title: (dom as unknown as HTMLElement).getAttribute('title'),
-                  styleName: (dom as unknown as HTMLElement).getAttribute(
-                    'styleName'
-                  ),
-                };
-              },
-            },
-          ],
-          toDOM(node) {
-            const { src, alt, title, styleName } = node.attrs;
-            return ['img', { src, alt, title, styleName }];
-          },
-        },
-        text: {
-          marks: 'mark-font-size mark-font-type',
-        },
-      },
-      marks: {
-        'mark-font-size': {
-          attrs: {
-            pt: { default: 11 },
-            overridden: { default: false },
-          },
-        },
-        'mark-font-type': {
-          attrs: {
-            name: { default: 'Arial' },
-            overridden: { default: false },
-          },
-        },
-      },
-    });
-    const prevstatemhod = {
-      schema: schemamhod,
-      doc: schemamhod.nodeFromJSON({
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'image',
-                attrs: {
-                  src: 'path/to/image.jpg',
-                  alt: 'Image Alt Text',
-                  title: 'Image Title',
-                  styleName: '2',
-                },
-              },
-            ],
-          },
-        ],
-      }),
-      selection: { from: 2, to: 4 },
-    };
-
     const spymhod = jest.spyOn(ccommand, 'getStyleLevel').mockReturnValue(2);
     jest.spyOn(CustStyl, 'getCustomStyleByLevel').mockReturnValue({
       styles: {
@@ -5206,107 +4589,6 @@ describe('Cus Style Plugin-Pass', () => {
     } as unknown as null);
 
     spymhod.mockClear();
-    const mockview2 = {
-      state: mockState,
-      input: { lastKeyCode: 8 },
-    };
-    const nextstatemhod = {
-      schema: schema2,
-      doc: schema2.nodeFromJSON({
-        type: 'doc',
-        attrs: {
-          layout: null,
-          padding: null,
-          width: null,
-          counterFlags: null,
-          capcoMode: 0,
-        },
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            attrs: {
-              align: 'left',
-              color: null,
-              id: null,
-              indent: null,
-              lineSpacing: null,
-              paddingBottom: null,
-              paddingTop: null,
-              capco: null,
-              styleName: 'AFDP Bullet',
-            },
-            content: [
-              {
-                type: 'text',
-                marks: [],
-                text: 'N',
-              },
-            ],
-          },
-        ],
-      }),
-      selection: { from: 0, to: 8 },
-    };
-    expect(
-      manageHierarchyOnDelete(
-        prevstatemhod,
-        nextstatemhod,
-        transaction1,
-        mockview2
-      )
-    ).toBeDefined();
-  });
-  it('should handle manageHierarchyOnDelete when prevState.doc === nextState.doc', () => {
-    expect(
-      manageHierarchyOnDelete(
-        { doc: 1 },
-        { selection: { from: 0 }, doc: 1 },
-        {},
-        {}
-      )
-    ).toBeDefined();
   });
 });
 
@@ -5403,6 +4685,7 @@ describe('onInitAppendTransaction', () => {
       onInitAppendTransaction(
         { loaded: true, firstTime: false },
         {
+          setNodeMarkup: () => new Transaction(mockdoc),
           setSelection: setSelection,
           curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } },
           doc: mockdoc,
@@ -5513,6 +4796,9 @@ describe('onUpdateAppendTransaction', () => {
               after: () => {
                 return 1;
               },
+              end: () => {
+                return 1;
+              },
               nodeSize: 1,
             },
           },
@@ -5537,6 +4823,9 @@ describe('onUpdateAppendTransaction', () => {
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
             },
@@ -5624,6 +4913,11 @@ describe('onUpdateAppendTransaction', () => {
                 return 1;
               },
             },
+            $to: {
+              end: () => {
+                return 1;
+              },
+            },
           },
         },
         {
@@ -5636,12 +4930,12 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-              $end: () => {
-                return 1;
-              },
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
               nodeSize: 1,
@@ -5661,9 +4955,15 @@ describe('onUpdateAppendTransaction', () => {
                 start: () => {
                   return 1;
                 },
+              },
+              $to: {
+                after: () => {
+                  return 1;
+                },
                 end: () => {
                   return 2;
                 },
+                nodeSize: 1,
               },
             },
           },
@@ -5679,6 +4979,9 @@ describe('onUpdateAppendTransaction', () => {
             $to: {
               after: () => {
                 return 1;
+              },
+              end: () => {
+                return 2;
               },
               nodeSize: 1,
             },
@@ -5766,6 +5069,14 @@ describe('onUpdateAppendTransaction', () => {
                 return 1;
               },
             },
+            $to: {
+              after: () => {
+                return 1;
+              },
+              end: () => {
+                return 1;
+              },
+            },
           },
         },
         {
@@ -5778,12 +5089,12 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-              $end: () => {
-                return 1;
-              },
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
               nodeSize: 1,
@@ -5807,6 +5118,15 @@ describe('onUpdateAppendTransaction', () => {
                   return 2;
                 },
               },
+              $to: {
+                after: () => {
+                  return 1;
+                },
+                end: () => {
+                  return 1;
+                },
+                nodeSize: 1,
+              },
             },
           },
           doc: mockdoc,
@@ -5820,6 +5140,9 @@ describe('onUpdateAppendTransaction', () => {
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
               nodeSize: 1,
@@ -5904,7 +5227,15 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-              $end: () => {
+              end: () => {
+                return 1;
+              },
+            },
+            $to: {
+              after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
             },
@@ -5921,12 +5252,12 @@ describe('onUpdateAppendTransaction', () => {
               $start: () => {
                 return 1;
               },
-              $end: () => {
-                return 1;
-              },
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
               nodeSize: 1,
@@ -5964,6 +5295,9 @@ describe('onUpdateAppendTransaction', () => {
             },
             $to: {
               after: () => {
+                return 1;
+              },
+              end: () => {
                 return 1;
               },
               nodeSize: 1,
@@ -6093,7 +5427,7 @@ describe('applyStyleForPreviousEmptyParagraph', () => {
 });
 describe('applyStyles', () => {
   it('should handle applyStyles', () => {
-    expect(applyStyles({ tr: {} }, null)).toStrictEqual({});
+    expect(applyStyles({ tr: {} } as EditorState)).toStrictEqual({});
   });
 });
 describe('applyStyleForEmptyParagraph', () => {
@@ -6104,5 +5438,285 @@ describe('applyStyleForEmptyParagraph', () => {
 describe('isDocChanged', () => {
   it('should handle isDocChanged', () => {
     expect(isDocChanged([{ docChanged: {} }])).toBeTruthy();
+  });
+});
+
+describe('applyStyleForNextParagraph', () => {
+  it('should handle applyStyleForNextParagraph', () => {
+    const paragraph1 = {
+      type: { name: 'paragraph' },
+      isBlock: true,
+      child() { },
+      childCount: 0,
+      attrs: {
+        styleName: 'Bold',
+        id: 'para-1',
+      },
+    };
+
+    const paragraph2 = {
+      type: { name: 'paragraph' },
+      isBlock: true,
+      child() { },
+      childCount: 0,
+      attrs: {
+        styleName: 'Bold',
+        id: 'para-1',
+      },
+    };
+
+    const doc = {
+      type: { name: 'doc' },
+      isBlock: true,
+      child(j) {
+        return j === 0 ? paragraph1 : paragraph2;
+      },
+      childCount: 2,
+    };
+
+    const mockFrom = {
+      depth: 2,
+      node(depth) {
+        if (depth === 0) return doc;
+        if (depth === 1) return paragraph2;
+        if (depth === 2) return { type: { name: 'text' }, isBlock: false };
+        return null;
+      },
+
+      index(depth) {
+        if (depth === 0) return 1;
+        if (depth === 1) return 0;
+        return 0;
+      },
+    };
+    const prevstate = {
+      doc: {
+        nodeAt: () => {
+          return {
+            type: { name: 'paragraph' },
+            isBlock: true,
+            child() { },
+            childCount: 0,
+            attrs: {
+              styleName: 'Bold',
+              id: 'para-1',
+            },
+          };
+        },
+      },
+      selection: { $from: mockFrom, from: 1 },
+    };
+    const nextstate = {
+      doc: {
+        nodeAt: () => {
+          return {
+            type: { name: 'paragraph' },
+            isBlock: true,
+            child() { },
+            childCount: 0,
+            attrs: {
+              styleName: 'Bold',
+              id: 'para-1',
+            },
+          };
+        },
+      },
+      selection: { $from: mockFrom, from: 3 },
+    };
+    const view = { input: { lastKeyCode: 13 } };
+    const tr = {};
+    expect(
+      applyStyleForNextParagraph(prevstate, nextstate, tr, view)
+    ).toBeDefined();
+  });
+  it('should handle applyStyleForNextParagraph', () => {
+    const paragraph1 = {
+      type: { name: 'header' },
+      isBlock: true,
+      child() {
+        return {
+          type: { name: 'paragraph' },
+          isBlock: true,
+          child() { },
+          childCount: 0,
+          attrs: {
+            styleName: 'Bold',
+            id: 'para-1',
+          },
+        };
+      },
+      childCount: 2,
+      attrs: {
+        styleName: 'Bold',
+        id: 'para-1',
+      },
+    };
+
+    const paragraph2 = {
+      type: { name: 'header' },
+      isBlock: true,
+      child() {
+        return {
+          type: { name: 'paragraph' },
+          isBlock: true,
+          child() { },
+          childCount: 0,
+          attrs: {
+            styleName: 'Bold',
+            id: 'para-1',
+          },
+        };
+      },
+      childCount: 2,
+      attrs: {
+        styleName: 'Bold',
+        id: 'para-1',
+      },
+    };
+
+    const doc = {
+      type: { name: 'doc' },
+      isBlock: true,
+      child(j) {
+        return j === 0 ? paragraph1 : paragraph2;
+      },
+      childCount: 2,
+    };
+
+    const mockFrom = {
+      depth: 2,
+      node(depth) {
+        if (depth === 0) return doc;
+        if (depth === 1) return paragraph2;
+        if (depth === 2) return { type: { name: 'text' }, isBlock: false };
+        return null;
+      },
+
+      index(depth) {
+        if (depth === 0) return 1;
+        if (depth === 1) return 0;
+        return 0;
+      },
+    };
+    const prevstate = {
+      doc: {
+        nodeAt: () => {
+          return {
+            type: { name: 'paragraph' },
+            isBlock: true,
+            child() { },
+            childCount: 0,
+            attrs: {
+              styleName: 'Bold',
+              id: 'para-1',
+            },
+          };
+        },
+      },
+      selection: { $from: mockFrom, from: 1 },
+    };
+    const nextstate = {
+      doc: {
+        nodeAt: () => {
+          return {
+            type: { name: 'paragraph' },
+            isBlock: true,
+            child() { },
+            childCount: 0,
+            attrs: {
+              styleName: 'Bold',
+              id: 'para-1',
+            },
+          };
+        },
+      },
+      selection: { $from: mockFrom, from: 3 },
+    };
+    const view = { input: { lastKeyCode: 13 } };
+    const tr = {};
+    expect(
+      applyStyleForNextParagraph(prevstate, nextstate, tr, view)
+    ).toBeDefined();
+  });
+});
+
+function createState(node) {
+  return EditorState.create({
+    doc: mockSchema.node('doc', null, [node]),
+    schema: mockSchema,
+  });
+}
+describe('applyHangingIndentTransform', () => {
+  it('returns tr unchanged if node is null', () => {
+    const state = createState(mockSchema.node('paragraph'));
+    const tr = state.tr;
+    const result = applyHangingIndentTransform(tr, state, null, 0, false);
+    expect(result).toBe(tr); // unchanged
+  });
+
+  it('returns tr unchanged if no spacer mark found', () => {
+    const textNode = mockSchema.text('hello');
+    const para = mockSchema.node('paragraph', null, [textNode]);
+    const state = createState(para);
+    const tr = state.tr;
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
+    expect(result).toBe(tr);
+  });
+
+  it('wraps first spacer with prefix:0 and text after with prefix:1', () => {
+    const spacer = mockSchema.text(' ', [mockSchema.mark('spacer')]);
+    const textNode = mockSchema.text('after');
+    const para = mockSchema.node('paragraph', null, [spacer, textNode]);
+    const state = createState(para);
+    const tr = state.tr;
+
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
+
+    expect(result.doc.toString()).toContain('paragraph'); // structure updated
+    const newPara = result.doc.firstChild;
+    expect(newPara.textContent).toContain('after');
+    // first child got prefix:0 mark removed spacer
+    expect(newPara.firstChild.marks.some(m => m.type.name === 'mark-hanging-indent')).toBe(true);
+  });
+
+  it('flushes queued children before spacer with prefix:0', () => {
+    const textBefore = mockSchema.text('before');
+    const spacer = mockSchema.text(' ', [mockSchema.mark('spacer')]);
+    const textAfter = mockSchema.text('after');
+    const para = mockSchema.node('paragraph', null, [textBefore, spacer, textAfter]);
+    const state = createState(para);
+    const tr = state.tr;
+
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
+
+    const newPara = result.doc.firstChild;
+    expect(newPara.childCount).toBe(2);
+    expect(newPara.firstChild.text).toBe('before');
+    expect(newPara.lastChild.text).toBe('after');
+  });
+
+  it('special case: only spacer replaced → dummy0 + dummy1', () => {
+    const spacer = mockSchema.text(' ', [mockSchema.mark('spacer')]);
+    const para = mockSchema.node('paragraph', null, [spacer]);
+    const state = createState(para);
+    const tr = state.tr;
+
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
+    const newPara = result.doc.firstChild;
+
+    // new paragraph should contain 2 dummy nodes
+    expect(newPara.childCount).toBeGreaterThan(0);
+    expect(newPara.textContent.trim()).toBe(''); // only dummy spaces
+  });
+
+  it('special case: only spacer but no hanging mark → dummy1 only', () => {
+    // Case where hasdummy = false
+    const plain = mockSchema.text(' ', [mockSchema.mark('spacer')]);
+    const para = mockSchema.node('paragraph', null, [plain]);
+    const state = createState(para);
+    const tr = state.tr;
+
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
+    expect(result.doc.firstChild.childCount).toBeGreaterThan(0);
   });
 });

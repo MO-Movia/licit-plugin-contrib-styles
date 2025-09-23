@@ -5,6 +5,7 @@ import {
   Transaction,
 } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
+import { CellSelection } from 'prosemirror-tables';
 import { EditorView } from 'prosemirror-view';
 import { Node, Fragment, Schema } from 'prosemirror-model';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
@@ -18,17 +19,16 @@ import {
   FontSizeCommand,
   TextLineSpacingCommand,
   TextAlignCommand,
-  setTextAlign,
   IndentCommand,
   getLineSpacingValue,
 } from '@modusoperandi/licit-ui-commands';
-import { AlertInfo } from './ui/AlertInfo.js';
-import { CustomStyleEditor } from './ui/CustomStyleEditor.js';
-import { ParagraphSpacingCommand } from './ParagraphSpacingCommand.js';
+import { AlertInfo } from './ui/AlertInfo';
+import { CustomStyleEditor } from './ui/CustomStyleEditor';
+import { ParagraphSpacingCommand } from './ParagraphSpacingCommand';
 import {
   removeTextAlignAndLineSpacing,
   clearCustomStyleAttribute,
-} from './clearCustomStyleMarks.js';
+} from './clearCustomStyleMarks';
 import {
   getCustomStyleByName,
   getCustomStyleByLevel,
@@ -37,8 +37,8 @@ import {
   saveStyle,
   getStylesAsync,
   addStyleToList,
-} from './customStyle.js';
-import type { Style } from './StyleRuntime.js';
+} from './customStyle';
+import type { Style } from './StyleRuntime';
 import {
   MARKSTRONG,
   MARKEM,
@@ -50,13 +50,13 @@ import {
   MARKSUB,
   MARKTEXTHIGHLIGHT,
   MARKUNDERLINE,
-} from './MarkNames.js';
-import { PARAGRAPH } from './NodeNames.js';
+} from './MarkNames';
+import { PARAGRAPH } from './NodeNames';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
-} from './CustomStyleNodeSpec.js';
-
+} from './CustomStyleNodeSpec';
+import JSONEditor from './ui/JSONEditor';
 export const STRONG = 'strong';
 export const EM = 'em';
 export const COLOR = 'color';
@@ -166,7 +166,7 @@ function getCustomStyleCommandsEx(
     case LEVELBASEDINDENT:
       // [FS] IRAD-1162 2021-1-25
       // Bug fix: indent not working along with level
-      if (customStyle[LEVEL] && Number(customStyle[LEVEL]) > 0) {
+      if (customStyle[property] && customStyle[LEVEL] && Number(customStyle[LEVEL]) > 0) {
         commands.push(new IndentCommand(customStyle[LEVEL]));
       }
       break;
@@ -184,6 +184,21 @@ export function getCustomStyleCommands(customStyle) {
   for (const property in customStyle) {
     commands = getCustomStyleCommandsEx(customStyle, property, commands);
   }
+  commands.sort((a, b) => {
+    if (
+      a.constructor.name === 'MarkToggleCommand' &&
+      b.constructor.name !== 'MarkToggleCommand'
+    ) {
+      return 1; // Move `a` to the end.
+    }
+    if (
+      a.constructor.name !== 'MarkToggleCommand' &&
+      b.constructor.name === 'MarkToggleCommand'
+    ) {
+      return -1; // Keep `b` at the end.
+    }
+    return 0; // Keep relative order if both are the same type.
+  });
   return commands;
 }
 
@@ -207,13 +222,19 @@ export class CustomStyleCommand extends UICommand {
 
   _customStyleName: string;
   _customStyle;
+  _styleNameToCreate;
   _popUp = null;
   _level = 0;
 
-  constructor(customStyle, customStyleName: string) {
+  constructor(
+    customStyle,
+    customStyleName: string,
+    styleNameToCreate?: string
+  ) {
     super();
     this._customStyle = customStyle;
     this._customStyleName = customStyleName;
+    this._styleNameToCreate = styleNameToCreate;
   }
 
   renderLabel = () => {
@@ -271,18 +292,23 @@ export class CustomStyleCommand extends UICommand {
     hasMismatchHeirarchy(state, tr, node, startPos, endPos);
     // [FS] IRAD-1480 2021-06-25
     // Indenting not remove when clear style is applied
-    newattrs = node.attrs;
-    if (newattrs) {
-      newattrs['styleName'] = RESERVED_STYLE_NONE;
-      newattrs['id'] = '';
+    // FIX: cannot assign to readonly property styleName of object.
+    const newAttrs = { ...node.attrs };
+    if (newAttrs) {
+      newAttrs['styleName'] = RESERVED_STYLE_NONE;
+      newAttrs['id'] = '';
       // [FS] IRAD-1414 2021-07-12
       // FIX: Applied number/bullet list removes when 'Clear Style'
-      newattrs['indent'] = 0;
-      tr = tr.setNodeMarkup(startPos, undefined, newattrs);
+      const isOverriddenIndent = newAttrs.overriddenIndent ?? null;
+      newAttrs['indent'] = isOverriddenIndent ? newAttrs.indent : 0;
+      newAttrs['overriddenIndent'] = isOverriddenIndent;
+      newAttrs['overriddenIndentValue'] = isOverriddenIndent
+        ? newAttrs.overriddenIndentValue
+        : null;
+      tr = tr.setNodeMarkup(startPos, undefined, newAttrs);
     }
 
     tr = removeTextAlignAndLineSpacing(tr, state.schema);
-    tr = createEmptyElement(state, tr, node, startPos);
     if (dispatch && tr.docChanged) {
       dispatch(tr);
       done = true;
@@ -293,12 +319,15 @@ export class CustomStyleCommand extends UICommand {
   execute = (
     state: EditorState,
     dispatch?: (tr: Transform) => void,
-    view?: EditorView
+    view?: EditorView,
+    event?: KeyboardEvent | MouseEvent
   ): boolean => {
     let tr = state.tr;
     const { selection } = state;
-    const startPos = selection.$from.before(1);
-    const endPos = selection.$to.after(1) - 1;
+    const startPos = selection.$from.before(
+      selection.$from.depth === 0 ? 1 : selection.$from.depth
+    );
+    const endPos = selection.$to?.end();
     const node = getNode(state, startPos, endPos, tr);
     const newattrs = { ...(node ? node.attrs : {}) };
     let isValidated = true;
@@ -306,7 +335,11 @@ export class CustomStyleCommand extends UICommand {
       this.editWindow(state, view, 0);
       return false;
     } else if ('editall' === this._customStyle) {
-      this.editWindow(state, view, 3);
+      if (event && event.ctrlKey) {
+        this.jsonEditor(view);
+      } else {
+        this.editWindow(state, view, 3);
+      }
       return false;
     }
     // [FS] IRAD-1053 2020-10-08
@@ -324,6 +357,9 @@ export class CustomStyleCommand extends UICommand {
         newattrs,
         selection
       );
+    } else if ('reset' === this._customStyle) {
+      this.resetNumber(state, dispatch, startPos, newattrs);
+      return false;
     }
 
     // [FS] IRAD-1213 2020-02-23
@@ -347,12 +383,17 @@ export class CustomStyleCommand extends UICommand {
       tr = applyStyle(
         this._customStyle,
         'Default' === this._customStyle.styleName
-          ? 'None'
+          ? 'Normal'
           : this._customStyle.styleName,
         state,
         tr
       ) as Transaction;
       if (tr.docChanged || tr.storedMarksSet) {
+        const event = new KeyboardEvent('keydown', {
+          keyCode: 0,
+          bubbles: true,
+        });
+        view.dom?.dispatchEvent(event);
         dispatch?.(tr);
         return true;
       }
@@ -390,37 +431,43 @@ export class CustomStyleCommand extends UICommand {
     const { selection, doc } = editorState;
     // [FS] IRAD-1495 2021-06-25
     // FIX: Clear style not working on multi select paragraph
-    const from = selection.$from.before(1);
-    const to = selection.$to.after(1) - 1;
-    let customStyleName = RESERVED_STYLE_NONE;
+    const from = selection.$from.before(
+      selection.$from.depth === 0 ? 1 : selection.$from.depth
+    );
+    const to = selection.$to?.end();
+    let _from = from;
+    let _to = to;
     doc.nodesBetween(from, to, (node) => {
       if (
         node.attrs.styleName &&
-        RESERVED_STYLE_NONE !== node.attrs.styleName
+        node.attrs.styleName !== RESERVED_STYLE_NONE
       ) {
-        customStyleName = node.attrs.styleName;
-        const storedmarks = getMarkByStyleName(
-          customStyleName,
-          editorState.schema
-        );
-        tr = this.removeMarks(storedmarks, tr, node);
+        // Check for overridden marks in text nodes inside the paragraph
+        node.forEach((child) => {
+          if (child.isText && child.marks.length > 0) {
+            const marksToRemove = child.marks.filter(
+              (mark) => mark.attrs.overridden !== true
+            );
+            _to = _from + child.nodeSize;
+            if (marksToRemove.length > 0) {
+              marksToRemove.forEach((mark) => {
+                if ('link' !== mark.type.name) {
+                  tr = this.removeMarks(mark, tr, node, _from, _to);
+                }
+              });
+            }
+            _from = _to;
+          }
+        });
       }
     });
     return tr;
   }
 
-  removeMarks(marks, tr: Transform, node: Node) {
-    const { selection } = tr as Transaction;
-    // [FS] IRAD-1495 2021-06-25
-    // FIX: Clear style not working on multi select paragraph
-    const from = selection.$from.before(1);
-    const to = selection.$to.after(1);
-
+  removeMarks(mark, tr: Transform, node: Node, from: number, to: number) {
     // reset the custom style name to NONE after remove the styles
     clearCustomStyleAttribute(node);
-    marks.forEach((mark) => {
-      tr = tr.removeMark(from, to, mark.type);
-    });
+    tr = tr.removeMark(from, to, mark.type);
     return tr;
   }
 
@@ -455,6 +502,25 @@ export class CustomStyleCommand extends UICommand {
             }
           }
           view.focus();
+        },
+      }
+    );
+  }
+  jsonEditor(view: EditorView) {
+    this._popUp = createPopUp(
+      JSONEditor,
+      {
+        editorView: view,
+      },
+      {
+        autoDismiss: false,
+        modal: true,
+        position: atViewportCenter,
+        onClose: () => {
+          if (this._popUp) {
+            this._popUp = null;
+            view.focus();
+          }
         },
       }
     );
@@ -509,6 +575,22 @@ export class CustomStyleCommand extends UICommand {
     }
   }
 
+  resetNumber(
+    state: EditorState,
+    dispatch?: (tr: Transform | Transaction) => void,
+    startPos?: number,
+    newattrs?
+  ) {
+    let tr = state.tr;
+    if (newattrs) {
+      newattrs['reset'] = 'true';
+      tr = tr.setNodeMarkup(startPos, undefined, newattrs);
+    }
+    if (dispatch) {
+      dispatch(tr);
+    }
+  }
+
   // [FS] IRAD-1231 2021-03-02
   // update the document with the edited styles list.
   getCustomStyles(styleName: string, editorView: EditorView) {
@@ -531,7 +613,7 @@ export class CustomStyleCommand extends UICommand {
   // creates a sample style object
   createCustomObject(editorView: EditorView, mode: number) {
     return {
-      styleName: '',
+      styleName: this._styleNameToCreate,
       mode: mode, //0 = new , 1- modify, 2- rename, 3- editall
       styles: {},
       // runtime: runtime,
@@ -552,11 +634,11 @@ export const compareAttributes = (mark, style): boolean => {
     case MARKTEXTCOLOR:
       return mark.attrs['color'] === style[COLOR];
     case MARKFONTSIZE:
-      return mark.attrs['pt'] == style[FONTSIZE];
+      return mark.attrs['pt'] == Number(style[FONTSIZE]);
     case MARKFONTTYPE:
       return mark.attrs['name'] === style[FONTNAME];
+    // FIX: strike through formatting not being respected on re-entry into doc editor mode.
     case MARKSTRIKE:
-      return mark.attrs['strike'] === style['strike'];
     case MARKSUPER:
     case MARKSUB:
       return false;
@@ -573,7 +655,7 @@ export function compareMarkWithStyle(
   mark,
   style,
   tr,
-  _startPos,
+  startPos,
   _endPos,
   retObj
 ) {
@@ -588,40 +670,7 @@ export function compareMarkWithStyle(
     mark.attrs[ATTR_OVERRIDDEN] = overridden;
     retObj.modified = true;
   }
-  /*
-    case SUPER:
-    case TEXTHL:
-    case ALIGN:
-    case LHEIGHT:*/
 
-  return tr;
-}
-
-export function updateOverrideFlag(
-  styleName: string,
-  tr: Transform,
-  node: Node,
-  startPos: number,
-  endPos: number,
-  retObj: { modified: boolean }
-) {
-  const styleProp = getCustomStyleByName(styleName);
-  if (styleProp?.styles) {
-    node.descendants(function (child: Node) {
-      if (child instanceof Node) {
-        child.marks.forEach(function (mark) {
-          tr = compareMarkWithStyle(
-            mark,
-            styleProp.styles,
-            tr,
-            startPos,
-            endPos,
-            retObj
-          );
-        });
-      }
-    });
-  }
   return tr;
 }
 
@@ -702,10 +751,14 @@ function applyStyleEx(
   opt?: number
 ) {
   const loading = !styleProp;
+  // Custom style is applied from menu the endpos is correct ie nodesize is calculating correct
+  // when loading the document with a node having custom style the nodesize is one point less
+  // to fix that added +1 to endpos
+  const lastChild = tr.doc.nodeAt(endPos);
+  endPos = null === lastChild ? endPos : endPos + 1;
 
-  // [FS] IRAD-1087 2020-11-02
   // Issue fix: applied link is missing after applying a custom style.
-  tr = removeAllMarksExceptLink(startPos, endPos, tr, state.schema);
+  tr = removeAllMarksExceptLink(startPos, endPos, tr);
 
   if (loading || !opt) {
     styleProp = getCustomStyleByName(styleName);
@@ -713,34 +766,43 @@ function applyStyleEx(
 
   if (styleProp?.styles) {
     const _commands = getCustomStyleCommands(styleProp.styles);
-    // eslint-disable-next-line
-    const newattrs = { ...(node.attrs as any) };
-    //   const newattrs = node.attrs as { [key: string]: any };
-    // [FS] IRAD-1074 2020-10-22
-    // Issue fix on not removing center alignment when switch style with center
-    // alignment to style with left alignment
-    newattrs.align = null;
-    newattrs.lineSpacing = null;
+    const newattrs = { ...node.attrs };
 
-    // [FS] IRAD-1131 2021-01-12
     // Indent overriding not working on a paragraph where custom style is applied
-    //newattrs.indent = null;
+    if (!node?.attrs?.overriddenIndent) {
+      newattrs.indent = null;
+    }
+
     newattrs.styleName = styleName;
+    if (styleProp.styles.indentPosition) {
+      newattrs.indentPosition = styleProp.styles.indentPosition;
+      newattrs.hangingIndent = true;
+    }
 
     _commands.forEach((element) => {
       if (styleProp?.styles) {
         // to set the node attribute for text-align
         if (element instanceof TextAlignCommand) {
-          newattrs.align = styleProp.styles.align;
+          // if user override the align style then retian that align style
+          // using the overridenAlign property we can find align style overrided or not
+          if (node?.attrs?.overriddenAlign) {
+            newattrs.align = node.attrs.overriddenAlignValue;
+          } else {
+            newattrs.align = styleProp.styles.align;
+          }
           // to set the node attribute for line-height
         } else if (element instanceof TextLineSpacingCommand) {
-          // [FS] IRAD-1104 2020-11-13
           // Issue fix : Linespacing Double and Single not applied in the sample text paragraph
-          newattrs.lineSpacing = getLineSpacingValue(
-            styleProp.styles.lineHeight || ''
-          );
+          // if user override the lineSpacing style then retian that lineSpacing style
+          // using the overriddenLineSpacing property we can find lineSpacing style overrided or not
+          if (node?.attrs?.overriddenLineSpacing) {
+            newattrs.lineSpacing = node?.attrs?.overriddenLineSpacingValue;
+          } else {
+            newattrs.lineSpacing = getLineSpacingValue(
+              styleProp.styles.lineHeight || ''
+            );
+          }
         } else if (element instanceof ParagraphSpacingCommand) {
-          // [FS] IRAD-1100 2020-11-05
           // Add in leading and trailing spacing (before and after a paragraph)
           newattrs.paragraphSpacingAfter =
             styleProp.styles.paragraphSpacingAfter || null;
@@ -749,9 +811,15 @@ function applyStyleEx(
         } else if (element instanceof IndentCommand) {
           // [FS] IRAD-1162 2021-1-25
           // Bug fix: indent not working along with level
-          newattrs.indent = styleProp.styles.isLevelbased
-            ? styleProp.styles.styleLevel
-            : styleProp.styles.indent;
+          // if user override the indent style then retian that indent style
+          // using the overriddenIndent property we can find indent style overrided or not
+          if (node?.attrs?.overriddenIndent) {
+            newattrs.indent = node.attrs.overriddenIndentValue;
+          } else {
+            newattrs.indent = styleProp.styles.isLevelbased
+              ? styleProp.styles.styleLevel
+              : styleProp.styles.indent;
+          }
         }
       }
 
@@ -766,10 +834,15 @@ function applyStyleEx(
         }
       }
     });
+    const originalSelectionPos = state.selection?.from;
     const storedmarks = getMarkByStyleName(styleName, state.schema);
     newattrs.id = null === newattrs.id ? '' : null;
+
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     (tr as Transaction).storedMarks = storedmarks;
+    if (originalSelectionPos) {
+      (tr as Transaction).setSelection(TextSelection.create(tr.doc, originalSelectionPos));
+    }
   }
   return tr;
 }
@@ -916,129 +989,6 @@ function hasMismatchHeirarchy(
     });
   }
   return hasHeirarchyBroken;
-}
-
-// add new blank element and apply curresponding styles
-function createEmptyElement(
-  state: EditorState,
-  tr: Transform,
-  _node: Node /* The current node */,
-  startPos: number
-) {
-  /* Validate the missed heirachy object details are availale */
-  if (undefined !== MISSED_HEIRACHY_ELEMENT.attrs) {
-    if (!MISSED_HEIRACHY_ELEMENT.isAfter) {
-      const appliedLevel = Number(
-        getStyleLevel(MISSED_HEIRACHY_ELEMENT.attrs.styleName)
-      );
-      let hasNodeAfter = false;
-      let subsequantLevel = 0;
-      let posArray = [];
-      let counter = 0;
-      let newattrs = null;
-
-      if (nodesBeforeSelection.length > 0) {
-        nodesBeforeSelection.forEach((item) => {
-          subsequantLevel = Number(getStyleLevel(item.node.attrs.styleName));
-          if (0 === startPos && 0 === counter) {
-            if (subsequantLevel !== appliedLevel) {
-              newattrs = { ...item.node.attrs };
-              posArray.push({
-                pos: startPos,
-                appliedLevel: appliedLevel,
-                currentLevel: subsequantLevel,
-              });
-            }
-          } else if (startPos >= item.pos) {
-            if (
-              startPos !== 0 &&
-              RESERVED_STYLE_NONE !== item.node.attrs.styleName &&
-              Number(getStyleLevel(item.node.attrs.styleName)) > 0
-            ) {
-              if (appliedLevel - subsequantLevel > 1) {
-                newattrs = { ...item.node.attrs };
-                posArray = [];
-                posArray.push({
-                  pos: startPos,
-                  appliedLevel: appliedLevel,
-                  currentLevel: subsequantLevel,
-                });
-              } else if (1 === appliedLevel - subsequantLevel) {
-                posArray = [];
-                hasNodeAfter = true;
-              }
-            } else if (
-              startPos !== 0 &&
-              RESERVED_STYLE_NONE === item.node.attrs.styleName
-            ) {
-              newattrs = { ...item.node.attrs };
-              posArray.push({
-                pos: startPos,
-                appliedLevel: appliedLevel,
-                currentLevel: subsequantLevel,
-              });
-            }
-          }
-          counter++;
-        });
-      }
-      if (nodesAfterSelection.length > 0 && !hasNodeAfter) {
-        nodesAfterSelection.forEach((item) => {
-          if (startPos > item.pos) {
-            posArray.push({
-              pos: startPos,
-              appliedLevel: appliedLevel,
-              currentLevel: 0,
-            });
-          } else {
-            newattrs = MISSED_HEIRACHY_ELEMENT.attrs;
-            posArray.push({
-              pos: startPos,
-              appliedLevel: appliedLevel,
-              currentLevel: 0,
-            });
-          }
-        });
-      }
-      // }
-      if (
-        nodesBeforeSelection.length === 0 &&
-        nodesAfterSelection.length === 0
-      ) {
-        newattrs = MISSED_HEIRACHY_ELEMENT.attrs;
-        posArray.push({
-          pos: startPos,
-          appliedLevel: appliedLevel,
-          currentLevel: 0,
-        });
-      }
-
-      if (posArray.length > 0) {
-        tr = addElement(
-          newattrs,
-          state,
-          tr,
-          posArray[0].pos,
-          false,
-          posArray[0].appliedLevel,
-          posArray[0].currentLevel
-        );
-      }
-    } else {
-      tr = manageElementsAfterSelection(
-        nodesAfterSelection.length > 0
-          ? nodesAfterSelection
-          : nodesBeforeSelection,
-        state,
-        tr
-      );
-    }
-  }
-
-  nodesAfterSelection.splice(0);
-  nodesBeforeSelection.splice(0);
-  setNewElementObject(undefined, 0, null, false);
-  return tr;
 }
 
 // [FS] IRAD-1387 2021-05-25
@@ -1269,23 +1219,6 @@ export function getStyleLevel(styleName: string) {
   return styleLevel;
 }
 
-export function executeCommands(
-  state: EditorState,
-  tr: Transform,
-  styleName: string,
-  startPos: number,
-  endPos: number
-) {
-  const style = getCustomStyleByName(styleName);
-  const _commands = getCustomStyleCommands(style);
-  _commands.forEach((element) => {
-    if (typeof element.executeCustom == 'function') {
-      tr = element.executeCustom(state, tr, startPos, endPos);
-    }
-  });
-  return tr;
-}
-
 // Need to change this function code duplicates with applyStyle()
 export function applyLatestStyle(
   styleName: string,
@@ -1315,7 +1248,7 @@ export function applyLatestStyle(
 }
 
 function isAllowedNode(node) {
-  return node.type.name === 'paragraph';
+  return node.type.name === 'paragraph' || node.type.name === 'enhanced_table_figure_notes';
 }
 
 // [FS] IRAD-1088 2020-10-05
@@ -1340,17 +1273,18 @@ function _setNodeAttribute(
 export function removeAllMarksExceptLink(
   from: number,
   to: number,
-  tr: Transform,
-  schema: Schema
+  tr: Transform
 ) {
-  const { doc } = tr;
   const tasks = [];
-  // const posFrom = (tr as Transaction).selection.$from.start(1);
-  // const posTo = (tr as Transaction).selection.$to.end(1) - 1;
-  doc.nodesBetween(from, to, (node, pos) => {
+  tr?.doc.nodesBetween(from, to, (node, pos) => {
     if (node.marks?.length > 0) {
       node.marks.some((mark) => {
-        if (!mark.attrs[ATTR_OVERRIDDEN] && 'link' !== mark.type.name) {
+        if (
+          !mark.attrs[ATTR_OVERRIDDEN] &&
+          'link' !== mark.type.name &&
+          'override' !== mark.type.name &&
+          'spacer' !== mark.type.name
+        ) {
           tasks.push({
             node,
             pos,
@@ -1362,16 +1296,10 @@ export function removeAllMarksExceptLink(
     }
     return true;
   });
-  return handleRemoveMarks(tr, tasks, from, to, schema);
+  return handleRemoveMarks(tr, tasks);
 }
 
-export function handleRemoveMarks(
-  tr: Transform,
-  tasks,
-  from: number,
-  to: number,
-  schema: Schema
-) {
+export function handleRemoveMarks(tr: Transform, tasks) {
   tasks.forEach((job) => {
     const { mark } = job;
     if (!mark.attrs[ATTR_OVERRIDDEN]) {
@@ -1379,7 +1307,6 @@ export function handleRemoveMarks(
       tr = tr.removeMark(job.pos, to, mark.type);
     }
   });
-  tr = setTextAlign(tr, schema, null);
   return tr;
 }
 
@@ -1391,15 +1318,25 @@ export function applyStyle(
   state: EditorState,
   tr: Transform
 ) {
-  let endPos: number;
   const { selection } = state;
-  let startPos = selection.$from.before(1);
-  if (state.doc.nodeAt(startPos).type.name == 'table') {
-    startPos = selection.from - selection.$from.parentOffset - 1;
-    endPos = selection.$to?.parent?.nodeSize + startPos - 1;
+  let startPos, endPos;
+  if (selection instanceof CellSelection) {
+    // When selecting multiple cells
+    const $anchor = selection.$anchorCell;
+    const $head = selection.$headCell;
+
+    const firstCell = $anchor.pos < $head.pos ? $anchor : $head;
+    const lastCell = $anchor.pos < $head.pos ? $head : $anchor;
+    startPos = firstCell.pos;
+    endPos = lastCell.pos + lastCell.nodeAfter.nodeSize;
   } else {
-    endPos = selection.$to.after(1) - 1;
+    startPos = selection.$from.before(
+      selection.$from.depth === 0 ? 1 : selection.$from.depth
+    );
+    endPos = selection.$to?.end();
   }
+
+
   return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
 }
 
@@ -1413,22 +1350,15 @@ export function applyStyleToEachNode(
   styleName: string
 ) {
   const way = 0;
-  let _node = null;
   tr.doc.nodesBetween(from, to, (node, startPos) => {
     if (node.type.name === 'paragraph') {
-      // [FS] IRAD-1182 2021-02-11
       // Issue fix: When style applied to multiple paragraphs, some of the paragraph's objectId found in deletedObjectId's
       tr = applyStyleEx(style, styleName, state, tr, node, startPos, to, way);
-      _node = node;
     }
   });
-  const newattrs = { ...(_node ? _node.attrs : {}) };
-  newattrs['styleName'] = styleName;
-  tr = createEmptyElement(state, tr, _node, from);
   tr = applyLineStyle(state, tr, null, 0);
   return tr;
 }
-// [FS] IRAD-1468 2021-06-18
 // Fix: bold first sentence custom style not showing after reload editor.
 export function applyLineStyle(
   state: EditorState,
@@ -1454,18 +1384,30 @@ export function applyLineStyle(
     }
   } else {
     const { selection } = state;
-    const from = selection.$from.before(1);
-    const to = selection.$to.after(1);
+    let from, to;
+    if (selection instanceof CellSelection) {
+      // When selecting multiple cells
+      const $anchor = selection.$anchorCell;
+      const $head = selection.$headCell;
+
+      const firstCell = $anchor.pos < $head.pos ? $anchor : $head;
+      const lastCell = $anchor.pos < $head.pos ? $head : $anchor;
+      from = firstCell.pos;
+      to = lastCell.pos + lastCell.nodeAfter.nodeSize;
+    } else {
+      from = selection.$from.before(
+        selection.$from.depth === 0 ? 1 : selection.$from.depth
+      );
+      to = selection.$to?.end();
+    }
+
     // [FS] IRAD-1168 2021-06-21
     // FIX: multi-select paragraphs and apply a style with the bold the first sentence,
     // only the last selected paragraph have bold first sentence.
     tr.doc.nodesBetween(from, to, (node, pos) => {
       if (node.content && node.content.size > 0) {
         // Check styleName is available for node
-        if (
-          node.attrs?.styleName
-          // && RESERVED_STYLE_NONE !== node.attrs.styleName
-        ) {
+        if (node.attrs?.styleName) {
           const styleProp = getCustomStyleByName(node.attrs.styleName);
           if (styleProp?.styles?.boldPartial) {
             if (!tr) {
@@ -1488,39 +1430,95 @@ export function applyLineStyle(
 // add bold marks to node
 export function addMarksToLine(tr, state, node, pos, boldSentence) {
   const markType = state.schema.marks[MARKSTRONG];
-  let textContent = getNodeText(node);
-  const endPos = textContent.length;
-  let content: string[] = [];
-  let counter: number = 0;
+  if (!markType) return tr;
+
+  const textContent = getNodeText(node);
+  if (!textContent) return tr;
+  let endIndex = -1;
   if (boldSentence) {
-    content = textContent.split('.');
+    // Get the index of the first sentence-ending character
+    const sentenceEndChars = ['.', '!', '?', '\n'];
+    endIndex = Math.min(
+      ...sentenceEndChars
+        .map((char) => textContent.indexOf(char))
+        .filter((index) => index !== -1)
+    );
   } else {
-    content = textContent.split(' ');
-  }
-  if ('' !== content[0]) {
-    textContent = content[0];
-  } else if (content.length > 1) {
-    for (let index = 0; index < content.length; index++) {
-      if ('' === content[index]) {
-        counter++;
-      } else {
-        textContent = content[index];
-        index = content.length;
-      }
+    // Get the index of the first space or sentence-ending character
+    endIndex = textContent.indexOf(' ');
+    if (endIndex === -1) {
+      endIndex = textContent.length;
     }
   }
-  tr = tr.addMark(
-    pos,
-    pos + textContent.length + 1 + counter,
-    markType.create(null)
-  );
-  if (content.length > 1) {
+
+  // No valid sentence or word found
+  if (endIndex === -1 || endIndex === Infinity) return tr;
+  const firstSentence = textContent.slice(0, endIndex + (boldSentence ? 1 : 0));
+  let childSize = 0;
+  let boldSentenceEnd = 0;
+  let childNodePos = pos;
+  let stopTraversal = false;
+  node.descendants((child) => {
+    if (stopTraversal || !child.isText) {
+      return !stopTraversal; // Stop if already traversed or not text
+    }
+
+    if (boldSentenceEnd > firstSentence.length) {
+      stopTraversal = true;
+      return false;
+    }
+
+    boldSentenceEnd += child.nodeSize;
+    const mark = child.marks.find((mark) => mark.type === markType);
+
+    if (!mark || mark.attrs.overridden) {
+      childNodePos = pos + boldSentenceEnd;
+      return true;
+    }
+
     tr = tr.removeMark(
-      pos + textContent.length + 1 + counter,
-      pos + endPos + 1,
+      childNodePos,
+      childNodePos + child.nodeSize + 1,
       markType
     );
-  }
+    childNodePos = pos + boldSentenceEnd;
+    return true;
+  });
+
+  let stopTraversal_1 = false;
+  node.descendants((child) => {
+    if (stopTraversal_1 || !child.isText) {
+      return !stopTraversal_1; // Stop if already traversed or not text
+    }
+
+    const attrs = { boldSentence: true };
+    childSize += child.nodeSize;
+
+    if (firstSentence.length > childSize) {
+      return true; // Continue if sentence length not yet reached
+    }
+
+    const mark = child.marks.find((mark) => mark.type === markType);
+
+    if (!mark) {
+      tr = tr.addMark(pos, pos + firstSentence.length + 1, markType.create());
+      stopTraversal_1 = true;
+      return false;
+    }
+
+    if (mark.attrs.overridden) {
+      return false; // Skip if mark is overridden
+    }
+
+    tr = tr.addMark(
+      pos,
+      pos + firstSentence.length + 1,
+      markType.create(attrs)
+    );
+    stopTraversal_1 = true;
+    return false;
+  });
+
   return tr;
 }
 // get text content from selected node
@@ -1544,7 +1542,7 @@ export function getNode(
   let selectedNode = null;
   selectedNodes.splice(0);
   tr.doc.nodesBetween(from, to, (node, startPos) => {
-    if (node.type.name === 'paragraph') {
+    if (node.type.name === 'paragraph' || node.type.name === 'enhanced_table_figure_notes') {
       if (null == selectedNode) {
         selectedNode = node;
       }

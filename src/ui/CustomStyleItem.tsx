@@ -1,14 +1,12 @@
-import '@modusoperandi/licit-ui-commands/ui/czi-custom-button.css';
 import React from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
-import './custom-dropdown.css';
-import { getCustomStyleByName, getCustomStyle } from '../customStyle.js';
-import { getDetailsBullet } from '../CustomStyleNodeSpec.js';
+import { getCustomStyleByName, getCustomStyle, getStyleRuntime } from '../customStyle';
+import { getDetailsBullet } from '../CustomStyleNodeSpec';
 import { PointerSurface } from '@modusoperandi/licit-ui-commands';
 import type { PointerSurfaceProps } from '@modusoperandi/licit-ui-commands';
-import { Icon } from './Icon.js';
+import { Icon } from './Icon';
 import cx from 'classnames';
 import { HTMLStyles } from '../StyleRuntime';
 import { CustomStyleCommand } from '../CustomStyleCommand';
@@ -26,7 +24,7 @@ export class CustomStyleItem extends React.PureComponent<
     onCommand?: () => void; //Function changed to ()=>void
     selectionClassName?: string;
   }
-> {
+  > {
   render(): React.ReactElement {
     const { label, hasText, ...pointerProps } = this.props;
     let text = '';
@@ -94,8 +92,8 @@ export class CustomStyleItem extends React.PureComponent<
               : 'none',
             color: pointerProps.command._customStyle.styles?.bulletLevel
               ? getDetailsBullet(
-                  pointerProps.command._customStyle.styles.bulletLevel
-                ).color
+                pointerProps.command._customStyle.styles.bulletLevel
+              ).color
               : '',
             marginTop: '-4px',
           }}
@@ -103,8 +101,8 @@ export class CustomStyleItem extends React.PureComponent<
           <PointerSurface {...pointerProps} className={klass}>
             {pointerProps.command._customStyle.styles?.bulletLevel
               ? getDetailsBullet(
-                  pointerProps.command._customStyle.styles.bulletLevel
-                ).symbol
+                pointerProps.command._customStyle.styles.bulletLevel
+              ).symbol
               : ''}
           </PointerSurface>
         </div>
@@ -125,19 +123,21 @@ export class CustomStyleItem extends React.PureComponent<
             {hasBoldPartial && hasBoldSentence ? BOLD_SENTENCE : BOLD_WORD}
           </PointerSurface>
         </div>
-        <div className="molsp-style-sampletext" style={customStyle}>
-          <PointerSurface
-            {...pointerProps}
-            className={klass}
-            style={customStyle}
-          >
-            {text}
-          </PointerSurface>
-        </div>
+        {hasText && (
+          <div className="molsp-style-sampletext" style={customStyle}>
+            <PointerSurface
+              {...pointerProps}
+              className={klass}
+              style={customStyle}
+            >
+              {text}
+            </PointerSurface>
+          </div>
+        )}
         <div
           className="molsp-arrow-right"
           data-cy="cyStyleEdit"
-          style={{ width: '50px', display: hasText ? 'block' : 'none' }}
+          style={{ width: '50px', display: (hasText && getStyleRuntime()?.canEditStyle) ? 'block' : 'none' }}
         >
           {/* Need to change the below icon to downarroe */}
           <PointerSurface {...pointerProps} className={klass + ' edit-icon'}>

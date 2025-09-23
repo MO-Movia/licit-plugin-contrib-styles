@@ -1,21 +1,21 @@
 // [FS] IRAD-1085 2020-10-09
-import type { Style, CSSStyle } from './StyleRuntime.js';
+import type { Style, CSSStyle, StyleRuntime } from './StyleRuntime';
 import { EditorView } from 'prosemirror-view';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
-} from './CustomStyleNodeSpec.js';
-import { DEFAULT_NORMAL_STYLE } from './Constants.js';
+} from './CustomStyleNodeSpec';
+import { DEFAULT_NORMAL_STYLE } from './Constants';
+import { setCustomStyles } from '@modusoperandi/licit-ui-commands';
 let customStyles = new Array(0);
 let styleRuntime;
 let hideNumbering = false;
 let _view: EditorView;
 let hasdocTypechanged = false;
 let docType = null;
-// [FS] IRAD-1202 2021-02-15
 // None & None-@#$- have same effect of None.
 // None-@#$-<styleLevel> is used for numbering to set style level for None, based on the cursor level style level.
-function isValidStyleName(styleName) {
+function isValidStyleName(styleName?: string) {
   return (
     styleName &&
     !styleName.includes(RESERVED_STYLE_NONE_NUMBERING) &&
@@ -24,27 +24,26 @@ function isValidStyleName(styleName) {
 }
 
 export function addStyleToList(style: Style) {
-  if (0 < customStyles.length) {
-    const index = customStyles.findIndex(item => item.styleName === style.styleName);
+  if (0 < customStyles.length && style?.styleName) {
+    const index = customStyles.findIndex(
+      (item) => item?.styleName === style?.styleName
+    );
     if (index !== -1) {
       customStyles[index] = style;
-    }
-    else {
+    } else {
       customStyles.push(style);
     }
   }
   return customStyles;
 }
 
-// [FS] IRAD-1137 2021-01-15
 // check if the entered style name already exist
 export function isCustomStyleExists(styleName: string) {
   let bOK = false;
   if (isValidStyleName(styleName)) {
     for (const style of customStyles) {
-      // [FS] IRAD-1432 2021-07-08
-      // FIX: Able to add same style name
-      if (styleName.toUpperCase() === style.styleName.toUpperCase()) {
+      // Able to add same style name
+      if (styleName.toUpperCase() === style?.styleName?.toUpperCase()) {
         bOK = true;
         return bOK;
       }
@@ -53,7 +52,6 @@ export function isCustomStyleExists(styleName: string) {
   return bOK;
 }
 
-// [FS] IRAD-1128 2020-12-30
 // get a style by styleName
 export function getCustomStyleByName(name: string): Style {
   let style: Style = { styleName: name };
@@ -65,6 +63,10 @@ export function getCustomStyleByName(name: string): Style {
         style = customStyles[i];
         has = true;
       }
+      // Marks are not getting applied to an undefined style.
+      else {
+        style = DEFAULT_NORMAL_STYLE;
+      }
     }
   } else {
     style = DEFAULT_NORMAL_STYLE;
@@ -72,17 +74,17 @@ export function getCustomStyleByName(name: string): Style {
   return style;
 }
 
-export function setView(csview : EditorView) {
+export function setView(csview: EditorView) {
   _view = csview;
 }
 
 // store styles in cache
 export function setStyles(style: Style[]) {
   customStyles = style;
+  setCustomStyles(style);
   let documentType;
   if (style && Array.isArray(style)) {
-    documentType =
-      style.length > 0 && style[0].docType ? style[0].docType : null;
+    documentType = style?.[0]?.docType;
   }
   hasdocTypechanged = docType !== documentType;
   docType = documentType;
@@ -96,7 +98,8 @@ export function setStyles(style: Style[]) {
   if (style[0] === undefined || !Object.hasOwn(style[0], 'docType')) {
     hasdocTypechanged = true;
   }
-  if (style && 0 === style.length) {
+  // if the styles doesn't have default style Normal then add that style.
+  if (style && !isCustomStyleExists(RESERVED_STYLE_NONE)) {
     saveDefaultStyle();
   }
 }
@@ -112,12 +115,19 @@ export function setStyleRuntime(runtime) {
   styleRuntime = runtime;
 }
 
+export function getStyleRuntime(): StyleRuntime {
+  return styleRuntime;
+}
+export function setCustomStylesOnLoad() {
+  getStylesAsync().then((result) => {
+    if (result) {
+      setStyles(result);
+    }
+  });
+}
+
 function saveDefaultStyle() {
-  if (!isCustomStyleExists(RESERVED_STYLE_NONE)) {
-    saveStyle(DEFAULT_NORMAL_STYLE)?.then(() => {
-      /* This is intentional */
-    });
-  }
+  saveStyle(DEFAULT_NORMAL_STYLE)?.catch(console.error);
 }
 
 export function isStylesLoaded() {
@@ -147,7 +157,6 @@ export function getCustomStyleByLevel(level: number) {
   return style;
 }
 
-// [FS] IRAD-1238 2021-03-08
 // To find the custom style exists with the given  level.
 export function isPreviousLevelExists(previousLevel: number) {
   let isLevelExists = true;
@@ -172,7 +181,6 @@ export function getCustomStyle(customStyle) {
   for (const property in customStyle) {
     switch (property) {
       case 'strong':
-        // [FS] IRAD-1137 2021-1-22
         // Deselected Bold, Italics and Underline are not removed from the example style near style name
         if (!customStyle.boldPartial && customStyle[property]) {
           style.fontWeight = 'bold';
@@ -180,7 +188,6 @@ export function getCustomStyle(customStyle) {
         break;
 
       case 'em':
-        // [FS] IRAD-1137 2021-1-22
         // Deselected Bold, Italics and Underline are not removed from the example style near style name
         if (customStyle[property]) {
           style.fontStyle = 'italic';
@@ -202,7 +209,6 @@ export function getCustomStyle(customStyle) {
       case 'fontName':
         style.fontName = customStyle[property];
         break;
-      // [FS] IRAD-1042 2020-09-29
       // Fix:icluded strike through in custom styles.
       case 'strike':
         if (customStyle[property]) {
@@ -215,7 +221,6 @@ export function getCustomStyle(customStyle) {
         break;
 
       case 'underline':
-        // [FS] IRAD-1137 2021-1-22
         // Deselected Bold, Italics and Underline are not removed from the example style near style name
         if (customStyle[property]) {
           style.textDecoration = 'underline';
@@ -236,7 +241,6 @@ export function getCustomStyle(customStyle) {
   }
   return style;
 }
-// [FS] IRAD-1539 2021-08-02
 // method to save,retrive,rename and remove style from the style server.
 export function saveStyle(styleProps: Style): Promise<Style[]> {
   return styleRuntime?.saveStyle(styleProps);
@@ -252,4 +256,7 @@ export function renameStyle(
 }
 export function removeStyle(styleName: string): Promise<Style[]> {
   return styleRuntime.removeStyle(styleName);
+}
+export function saveStyleSet(styles: Style[]): Promise<Style[]> {
+  return styleRuntime?.saveStyleSet(styles);
 }

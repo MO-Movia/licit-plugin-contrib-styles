@@ -1,6 +1,6 @@
-import { CustomMenuButton } from './CustomMenuButton.js';
+import { CustomMenuButton } from './CustomMenuButton';
 import { HeadingCommand } from '@modusoperandi/licit-ui-commands';
-import { CustomStyleCommand } from '../CustomStyleCommand.js';
+import { CustomStyleCommand } from '../CustomStyleCommand';
 
 import React from 'react';
 import { EditorState } from 'prosemirror-state';
@@ -10,14 +10,14 @@ import { Node } from 'prosemirror-model';
 import {
   RESERVED_STYLE_NONE,
   RESERVED_STYLE_NONE_NUMBERING,
-} from '../CustomStyleNodeSpec.js';
+} from '../CustomStyleNodeSpec';
 import {
   setStyles,
   getStylesAsync,
   hasStyleRuntime,
   isCustomStyleExists,
-} from '../customStyle.js';
-import './custom-dropdown.css';
+  getStyleRuntime
+} from '../customStyle';
 
 // [FS] IRAD-1042 2020-09-09
 // To include custom styles in the toolbar
@@ -52,7 +52,9 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
           setStyles(result);
           HEADING_NAMES = result;
           if (null != HEADING_NAMES) {
-            const foundNormal = result.find(obj => obj.styleName === RESERVED_STYLE_NONE);
+            const foundNormal = result.find(
+              (obj) => obj.styleName === RESERVED_STYLE_NONE
+            );
             if (foundNormal) {
               HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
                 foundNormal,
@@ -75,21 +77,37 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     return [HEADING_COMMANDS];
   }
 
-  staticCommands() {
-    const MENU_COMMANDS = {
-      ['newstyle']: new CustomStyleCommand('newstyle', 'New Style..'),
-    };
-    // [FS] IRAD-1176 2021-02-08
-    // Added a menu "Edit All" for Edit All custom styles
-    MENU_COMMANDS['editall'] = new CustomStyleCommand('editall', 'Edit All');
+  staticCommands(customStyleName) {
+    const MENU_COMMANDS = {};
+
+    // Only include these if the user has the canEditStyle permission
+    if (getStyleRuntime()?.canEditStyle) {
+      MENU_COMMANDS['newstyle'] = new CustomStyleCommand(
+        'newstyle',
+        'New Style..',
+        customStyleName
+      );
+
+      MENU_COMMANDS['editall'] = new CustomStyleCommand(
+        'editall',
+        'Edit All'
+      );
+    }
+
     MENU_COMMANDS['clearstyle'] = new CustomStyleCommand(
       'clearstyle',
       'Clear Style'
     );
+
+    MENU_COMMANDS['reset'] = new CustomStyleCommand(
+      'reset',
+      'Restart Numbering'
+    );
+
     return [MENU_COMMANDS];
   }
   isAllowedNode(node: Node) {
-    return node.type.name === 'paragraph' || node.type.name === 'ordered_list';
+    return node.type.name === 'paragraph' || node.type.name === 'ordered_list' || node.type.name === 'enhanced_table_figure_notes';
   }
 
   render(): React.ReactElement {
@@ -127,32 +145,39 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
         // [FS] IRAD-1231 2021-03-02
         // Show the custom style as None for paste paragraph from outside.
         else {
-          const updatedAttrs = { ...node.attrs, styleName: RESERVED_STYLE_NONE };
+          const updatedAttrs = {
+            ...node.attrs,
+            styleName: RESERVED_STYLE_NONE,
+          };
           node = { ...node, attrs: updatedAttrs } as unknown as Node;
           customStyleName = RESERVED_STYLE_NONE;
         }
-
       }
     });
     let backgroundColorClass = 'width-100';
+    let toCreateStyle = false;
     if (!isCustomStyleExists(customStyleName)) {
       backgroundColorClass = 'width-100 stylemenu-backgroundcolor';
+      toCreateStyle = true;
     }
 
     return (
-      <span data-cy="cyStyleBtn">
+      <span className="tooltip-wrapper">
         <CustomMenuButton
           className={backgroundColorClass}
-          // [FS] IRAD-1008 2020-07-16
-          // Disable font type menu on editor disable state
           commandGroups={this.getCommandGroups()}
           disabled={!this.hasRuntime}
           dispatch={dispatch}
           editorState={editorState}
           editorView={editorView}
           label={customStyleName}
-          staticCommand={this.staticCommands()}
+          staticCommand={this.staticCommands(
+            toCreateStyle ? customStyleName : ''
+          )}
         />
+        <span className="custom-tooltip">
+          <span className="tooltip-text">{customStyleName}</span>
+        </span>
       </span>
     );
   }

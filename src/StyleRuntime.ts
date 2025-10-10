@@ -1,8 +1,6 @@
 export type HTMLStyles = {
   align?: string; // Text align
   boldNumbering?: boolean; // true= Bold the Numbering part
-  boldPartial?: boolean; // true = Bold first word
-  boldSentence?: boolean; // true = Bold first sentence
   fontName?: string; // Font Name
   fontSize?: string; // Font size
   strong?: boolean; // Bold

@@ -33,18 +33,6 @@ export class CustomStyleItem extends React.PureComponent<
     // The numbering in custom style drop menu not showing properly
     text = ' AaBbCcDd';
     const level = this.sampleLevel(pointerProps.command._customStyle.styles);
-    const hasBoldPartial = this.hasBoldPartial(
-      pointerProps.command._customStyle.styles
-    );
-    // [FS] IRAD-1505 2021-07-07
-    // Style menu not showing properly for First Word Bold
-    const hasBoldSentence = this.hasBoldSentence(
-      pointerProps.command._customStyle.styles
-    );
-    // [FS] IRAD-1394 2021-05-25
-    // Added two divs to display Numbering and bold first word/sentece.
-    const BOLD_WORD = 'AaBb  ';
-    const BOLD_SENTENCE = 'AaBbCc. ';
     const styleProps = getCustomStyleByName(label);
     const className = 'czi-custom-menu-item';
     if (styleProps?.styles) {
@@ -106,23 +94,6 @@ export class CustomStyleItem extends React.PureComponent<
               : ''}
           </PointerSurface>
         </div>
-        <div
-          style={{
-            display: hasBoldPartial ? '' : 'none',
-            // [FS] IRAD-1410 2021-06-03
-            // Issue: Number example along with Bold first word in custom style menu box not showing properly
-            marginTop: '-4px',
-            fontWeight: hasBoldPartial ? 'bold' : 'normal',
-          }}
-        >
-          <PointerSurface
-            {...pointerProps}
-            className={klass}
-            style={customStyle}
-          >
-            {hasBoldPartial && hasBoldSentence ? BOLD_SENTENCE : BOLD_WORD}
-          </PointerSurface>
-        </div>
         {hasText && (
           <div className="molsp-style-sampletext" style={customStyle}>
             <PointerSurface
@@ -172,13 +143,5 @@ export class CustomStyleItem extends React.PureComponent<
     }
 
     return level;
-  }
-
-  hasBoldPartial(styles: HTMLStyles) {
-    return !!styles?.boldPartial;
-  }
-
-  hasBoldSentence(styles: HTMLStyles) {
-    return !!styles?.boldSentence;
   }
 }

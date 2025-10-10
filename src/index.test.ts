@@ -72,7 +72,6 @@ const styl = {
     boldNumbering: true,
     toc: false,
     isHidden: false,
-    boldSentence: true,
     nextLineStyleName: 'A_12',
     fontName: 'Aclonica',
     fontSize: '14',
@@ -93,7 +92,6 @@ const styl2 = {
     boldNumbering: true,
     toc: false,
     isHidden: false,
-    boldSentence: true,
     nextLineStyleName: 'A_12',
     fontName: 'Aclonica',
     fontSize: '14',
@@ -1309,7 +1307,6 @@ describe('Style Plugin', () => {
       styles: {
         align: 'left',
         boldNumbering: true,
-        boldSentence: true,
         fontName: 'Arial',
         fontSize: '14',
         isHidden: false,
@@ -1328,7 +1325,6 @@ describe('Style Plugin', () => {
         styles: {
           align: 'left',
           boldNumbering: true,
-          boldSentence: true,
           fontName: 'Arial',
           fontSize: '11',
           nextLineStyleName: 'None',
@@ -1343,7 +1339,6 @@ describe('Style Plugin', () => {
         styles: {
           align: 'left',
           boldNumbering: true,
-          boldSentence: true,
           em: true,
           fontName: 'Arial',
           fontSize: '11',
@@ -1378,7 +1373,6 @@ describe('Style Plugin', () => {
       styles: {
         align: 'left',
         boldNumbering: true,
-        boldSentence: true,
         fontName: 'Arial',
         fontSize: '14',
         isHidden: false,
@@ -1398,7 +1392,6 @@ describe('Style Plugin', () => {
       styles: {
         align: 'left',
         boldNumbering: true,
-        boldSentence: true,
         fontName: 'Arial',
         fontSize: '14',
         isHidden: false,
@@ -1458,7 +1451,6 @@ describe('Style Plugin', () => {
       styles: {
         align: 'left',
         boldNumbering: true,
-        boldSentence: true,
         fontName: 'Arial',
         fontSize: '14',
         isHidden: false,
@@ -1476,7 +1468,6 @@ describe('Style Plugin', () => {
         styles: {
           align: 'left',
           boldNumbering: true,
-          boldSentence: true,
           fontName: 'Arial',
           fontSize: '11',
           hasNumbering: true,
@@ -1493,7 +1484,6 @@ describe('Style Plugin', () => {
         styles: {
           align: 'left',
           boldNumbering: true,
-          boldSentence: true,
           em: true,
           fontName: 'Arial',
           fontSize: '11',
@@ -1514,7 +1504,6 @@ describe('Style Plugin', () => {
       styles: {
         align: 'left',
         boldNumbering: true,
-        boldSentence: true,
         fontName: 'Arial',
         fontSize: '11',
         hasNumbering: true,
@@ -1541,7 +1530,6 @@ describe('Style Plugin', () => {
       styles: {
         align: 'left',
         boldNumbering: true,
-        boldSentence: true,
         fontName: 'Arial',
         fontSize: '14',
         isHidden: false,
@@ -1559,7 +1547,6 @@ describe('Style Plugin', () => {
         styles: {
           align: 'left',
           boldNumbering: true,
-          boldSentence: true,
           fontName: 'Arial',
           fontSize: '11',
           nextLineStyleName: 'None',
@@ -1574,7 +1561,6 @@ describe('Style Plugin', () => {
         styles: {
           align: 'left',
           boldNumbering: true,
-          boldSentence: true,
           em: true,
           fontName: 'Arial',
           fontSize: '11',
@@ -1601,7 +1587,6 @@ describe('Style Plugin', () => {
       styles: {
         align: 'left',
         boldNumbering: true,
-        boldSentence: true,
         fontName: 'Arial',
         fontSize: '14',
         isHidden: false,
@@ -1619,7 +1604,6 @@ describe('Style Plugin', () => {
         styles: {
           align: 'left',
           boldNumbering: true,
-          boldSentence: true,
           fontName: 'Arial',
           fontSize: '11',
           nextLineStyleName: 'None',
@@ -1634,7 +1618,6 @@ describe('Style Plugin', () => {
         styles: {
           align: 'left',
           boldNumbering: true,
-          boldSentence: true,
           fontName: 'Tahoma',
           fontSize: '12',
           nextLineStyleName: 'Normal',
@@ -1653,7 +1636,6 @@ describe('Style Plugin', () => {
       styles: {
         align: 'left',
         boldNumbering: true,
-        boldSentence: true,
         fontName: 'Tahoma',
         fontSize: '12',
         nextLineStyleName: 'Normal',
@@ -1675,7 +1657,6 @@ describe('Style Plugin', () => {
       styles: {
         align: 'left',
         boldNumbering: true,
-        boldSentence: true,
         fontName: 'Arial',
         fontSize: '14',
         isHidden: false,
@@ -1693,7 +1674,6 @@ describe('Style Plugin', () => {
         styles: {
           align: 'left',
           boldNumbering: true,
-          boldSentence: true,
           fontName: 'Arial',
           fontSize: '11',
           nextLineStyleName: 'None',
@@ -1708,7 +1688,6 @@ describe('Style Plugin', () => {
         styles: {
           align: 'left',
           boldNumbering: true,
-          boldSentence: true,
           em: true,
           fontName: 'Arial',
           fontSize: '11',
@@ -1737,7 +1716,6 @@ describe('Style Plugin', () => {
     const styleprops = {
       align: 'left',
       boldNumbering: true,
-      boldSentence: true,
       em: true,
       fontName: 'Arial',
       fontSize: 11,
@@ -1761,7 +1739,6 @@ describe('Style Plugin', () => {
     const styleprops1 = {
       align: 'left',
       boldNumbering: true,
-      boldSentence: true,
       em: false,
       fontName: 'Arial',
       fontSize: 11,
@@ -1808,7 +1785,6 @@ describe('UI', () => {
       isHidden: false,
       align: 'left',
       boldNumbering: true,
-      boldSentence: true,
       em: true,
       fontName: 'Arial',
       fontSize: '11',
@@ -1960,7 +1936,6 @@ describe('Cus Style Plugin-Pass', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'A_12',
       fontName: 'Aclonica',
       fontSize: '14',
@@ -1981,7 +1956,6 @@ describe('Cus Style Plugin-Pass', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'A_12',
       fontName: 'Aclonica',
       fontSize: '14',

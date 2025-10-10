@@ -78,7 +78,6 @@ export const INDENT = 'indent';
 export const NUMBERING = 'hasNumbering';
 export const LEVELBASEDINDENT = 'isLevelbased';
 export const LEVEL = 'styleLevel';
-export const BOLDPARTIAL = 'boldPartial';
 const MISSED_HEIRACHY_ELEMENT = {
   isAfter: '',
   attrs: { styleName: '', styleLevel: 0 },
@@ -690,7 +689,6 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
     for (const property in styleProp.styles) {
       switch (property) {
         case STRONG:
-        case BOLDPARTIAL:
           if (styleProp.styles[property]) {
             markType = schema.marks[MARKSTRONG];
             marks.push(markType.create(attrs));
@@ -1346,8 +1344,6 @@ export function applyLatestStyle(
     way,
     opt
   );
-  // apply bold first word/sentence custom style
-  tr = applyLineStyle(state, tr, node, startPos);
   return tr;
 }
 
@@ -1514,181 +1510,7 @@ export function applyStyleToEachNode(
       }
     });
   }
-
-  tr = applyLineStyle(state, tr, null, 0);
   return tr;
-}
-// Fix: bold first sentence custom style not showing after reload editor.
-export function applyLineStyle(
-  state: EditorState,
-  tr: Transform,
-  node: Node,
-  startPos: number
-) {
-  if (node) {
-    if (node.attrs?.styleName) {
-      const styleProp = getCustomStyleByName(node.attrs.styleName);
-      if (styleProp?.styles?.boldPartial) {
-        if (!tr) {
-          tr = state.tr;
-        }
-        tr = addMarksToLine(
-          tr,
-          state,
-          node,
-          startPos,
-          styleProp.styles.boldSentence
-        );
-      }
-    }
-  } else {
-    const { selection } = state;
-    let from, to;
-    if (selection instanceof CellSelection) {
-      // When selecting multiple cells
-      const $anchor = selection.$anchorCell;
-      const $head = selection.$headCell;
-
-      const firstCell = $anchor.pos < $head.pos ? $anchor : $head;
-      const lastCell = $anchor.pos < $head.pos ? $head : $anchor;
-      from = firstCell.pos;
-      to = lastCell.pos + lastCell.nodeAfter.nodeSize;
-    } else {
-      from = selection?.$from.before(
-        selection.$from.depth === 0 ? 1 : selection.$from.depth
-      );
-      to = selection?.$to?.end();
-    }
-
-    // [FS] IRAD-1168 2021-06-21
-    // FIX: multi-select paragraphs and apply a style with the bold the first sentence,
-    // only the last selected paragraph have bold first sentence.
-    tr.doc.nodesBetween(from, to, (node, pos) => {
-      if (node.content && node.content.size > 0) {
-        // Check styleName is available for node
-        if (node.attrs?.styleName) {
-          const styleProp = getCustomStyleByName(node.attrs.styleName);
-          if (styleProp?.styles?.boldPartial) {
-            if (!tr) {
-              tr = state.tr;
-            }
-            tr = addMarksToLine(
-              tr,
-              state,
-              node,
-              pos,
-              styleProp.styles.boldSentence
-            );
-          }
-        }
-      }
-    });
-  }
-  return tr;
-}
-// add bold marks to node
-export function addMarksToLine(tr, state, node, pos, boldSentence) {
-  const markType = state.schema.marks[MARKSTRONG];
-  if (!markType) return tr;
-
-  const textContent = getNodeText(node);
-  if (!textContent) return tr;
-  let endIndex = -1;
-  if (boldSentence) {
-    // Get the index of the first sentence-ending character
-    const sentenceEndChars = ['.', '!', '?', '\n'];
-    endIndex = Math.min(
-      ...sentenceEndChars
-        .map((char) => textContent.indexOf(char))
-        .filter((index) => index !== -1)
-    );
-  } else {
-    // Get the index of the first space or sentence-ending character
-    endIndex = textContent.indexOf(' ');
-    if (endIndex === -1) {
-      endIndex = textContent.length;
-    }
-  }
-
-  // No valid sentence or word found
-  if (endIndex === -1 || endIndex === Infinity) return tr;
-  const firstSentence = textContent.slice(0, endIndex + (boldSentence ? 1 : 0));
-  let childSize = 0;
-  let boldSentenceEnd = 0;
-  let childNodePos = pos;
-  let stopTraversal = false;
-  node.descendants((child) => {
-    if (stopTraversal || !child.isText) {
-      return !stopTraversal; // Stop if already traversed or not text
-    }
-
-    if (boldSentenceEnd > firstSentence.length) {
-      stopTraversal = true;
-      return false;
-    }
-
-    boldSentenceEnd += child.nodeSize;
-    const mark = child.marks.find((mark) => mark.type === markType);
-
-    if (!mark || mark.attrs.overridden) {
-      childNodePos = pos + boldSentenceEnd;
-      return true;
-    }
-
-    tr = tr.removeMark(
-      childNodePos,
-      childNodePos + child.nodeSize + 1,
-      markType
-    );
-    childNodePos = pos + boldSentenceEnd;
-    return true;
-  });
-
-  let stopTraversal_1 = false;
-  node.descendants((child) => {
-    if (stopTraversal_1 || !child.isText) {
-      return !stopTraversal_1; // Stop if already traversed or not text
-    }
-
-    const attrs = { boldSentence: true };
-    childSize += child.nodeSize;
-
-    if (firstSentence.length > childSize) {
-      return true; // Continue if sentence length not yet reached
-    }
-
-    const mark = child.marks.find((mark) => mark.type === markType);
-
-    if (!mark) {
-      tr = tr.addMark(pos, pos + firstSentence.length + 1, markType.create());
-      stopTraversal_1 = true;
-      return false;
-    }
-
-    if (mark.attrs.overridden) {
-      return false; // Skip if mark is overridden
-    }
-
-    tr = tr.addMark(
-      pos,
-      pos + firstSentence.length + 1,
-      markType.create(attrs)
-    );
-    stopTraversal_1 = true;
-    return false;
-  });
-
-  return tr;
-}
-// get text content from selected node
-function getNodeText(node: Node) {
-  let textContent = '';
-  node.descendants(function (child: Node) {
-    if ('text' === child.type.name) {
-      textContent = `${textContent}${child.text}`;
-    }
-  });
-  return textContent;
 }
 
 //to get the selected node

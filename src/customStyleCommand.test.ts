@@ -2,7 +2,6 @@ import {
   CustomStyleCommand,
   getMarkByStyleName,
   getStyleLevel,
-  addMarksToLine,
   updateDocument,
   isCustomStyleAlreadyApplied,
   manageElementsAfterSelection,
@@ -12,7 +11,6 @@ import {
   compareMarkWithStyle,
   applyLatestStyle,
   allowCustomLevelIndent,
-  applyLineStyle,
   removeAllMarksExceptLink,
   removeAllMarksExceptLinkForTableColumnCell,
   handleRemoveMarks,
@@ -41,7 +39,6 @@ describe('CustomStyleCommand', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'A_12',
       fontName: 'Aclonica',
       fontSize: '14',
@@ -797,7 +794,6 @@ describe('CustomStyleCommand', () => {
           boldNumbering: true,
           toc: false,
           isHidden: false,
-          boldSentence: true,
           nextLineStyleName: 'Normal',
           fontName: 'Arial',
           fontSize: '11',
@@ -949,7 +945,6 @@ describe('CustomStyleCommand', () => {
           boldNumbering: true,
           toc: false,
           isHidden: false,
-          boldSentence: true,
           nextLineStyleName: 'Normal',
           fontName: 'Arial',
           fontSize: '11',
@@ -1209,7 +1204,6 @@ describe('CustomStyleCommand', () => {
           boldNumbering: true,
           toc: false,
           isHidden: false,
-          boldSentence: true,
           nextLineStyleName: 'Normal',
           fontName: 'Arial',
           fontSize: '11',
@@ -2004,7 +1998,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'A_12',
       fontName: 'Aclonica',
       fontSize: '14',
@@ -2991,65 +2984,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
 
   const nodemock = schema1.nodeFromJSON(json);
 
-  it('should handle addMarksToLine', () => {
-    const result = addMarksToLine(trmock, statemock, nodemock, 0, true);
-    expect(result).toBeDefined();
-  });
-  it('should handle addMarksToLine if boldsentance false', () => {
-    const result = addMarksToLine(trmock, statemock, nodemock, 0, false);
-    expect(result).toBeDefined();
-  });
-
-  it('should handle addMarksToLine when boldSentence is false', () => {
-    const json = {
-      type: 'paragraph',
-      attrs: {
-        align: 'left',
-        color: null,
-        id: null,
-        indent: 0,
-        lineSpacing: null,
-        paddingBottom: null,
-        paddingTop: null,
-        capco: null,
-        styleName: 'FM_chpara',
-      },
-      content: [
-        {
-          type: 'text',
-          marks: [
-            {
-              type: 'mark-font-size',
-              attrs: { pt: 18, overridden: false },
-            },
-            {
-              type: 'mark-font-type',
-              attrs: { name: 'Times New Roman', overridden: false },
-            },
-            {
-              type: 'mark-text-color',
-              attrs: { color: '#0d69f2', overridden: false },
-            },
-          ],
-          text: 'fggf dfgfgh fghfgh',
-        },
-      ],
-    };
-    const nodemock = schema1.nodeFromJSON(json);
-    expect(addMarksToLine(trmock, statemock, nodemock, 0, true)).toBeDefined();
-  });
-  it('should handle addMarksToLine when markstrong is not present', () => {
-    const trmock = {};
-    const statemock = { schema: { marks: { strong: true } } };
-    const nodemock = { descendants: () => { } };
-    expect(addMarksToLine(trmock, statemock, nodemock, 0, true)).toBeDefined();
-  });
-  it('should handle addMarksToLine when markstrong is not present', () => {
-    const trmock = {};
-    const statemock = { schema: { marks: {} } };
-    const nodemock = { descendants: () => { } };
-    expect(addMarksToLine(trmock, statemock, nodemock, 0, true)).toBeDefined();
-  });
   it('should handle manageElementsAfterSelection', () => {
     expect(
       manageElementsAfterSelection([{ node: nodemock }], statemock, trmock)
@@ -3300,7 +3234,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         boldNumbering: true,
         toc: false,
         isHidden: false,
-        boldSentence: true,
         nextLineStyleName: 'A_12',
         fontName: 'Aclonica',
         fontSize: '14',
@@ -3356,7 +3289,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
         boldNumbering: true,
         toc: false,
         isHidden: false,
-        boldSentence: true,
         nextLineStyleName: 'A_12',
         fontName: 'Aclonica',
         fontSize: '14',
@@ -3399,7 +3331,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'Normal',
       fontName: 'Arial',
       fontSize: 11,
@@ -3420,7 +3351,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'Normal',
       fontName: 'Arial',
       fontSize: 11,
@@ -3441,7 +3371,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'Normal',
       fontName: 'Arial',
       fontSize: 11,
@@ -3465,7 +3394,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'Normal',
       fontName: 'Arial',
       fontSize: 11,
@@ -3489,7 +3417,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'FS_36',
       fontName: 'Arial',
       fontSize: 11,
@@ -3513,7 +3440,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'FS_36',
       fontName: 'Arial',
       fontSize: 11,
@@ -3537,7 +3463,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'Normal',
       fontName: 'Arial',
       fontSize: 11,
@@ -3564,7 +3489,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'Normal',
       fontName: 'Arial',
       fontSize: 11,
@@ -3585,7 +3509,6 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'Normal',
       fontName: 'Arial',
       fontSize: 11,
@@ -3616,7 +3539,6 @@ describe('updateDocument', () => {
       boldNumbering: true,
       toc: false,
       isHidden: false,
-      boldSentence: true,
       nextLineStyleName: 'A_12',
       fontName: 'Aclonica',
       fontSize: '14',
@@ -4626,7 +4548,6 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
         boldNumbering: true,
         toc: false,
         isHidden: false,
-        boldSentence: true,
         nextLineStyleName: 'A_12',
         fontName: 'Aclonica',
         fontSize: '14',
@@ -4656,7 +4577,6 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
         boldNumbering: true,
         toc: false,
         isHidden: false,
-        boldSentence: true,
         nextLineStyleName: 'A_12',
         fontName: 'Aclonica',
         fontSize: '14',
@@ -4686,7 +4606,6 @@ describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
         boldNumbering: true,
         toc: false,
         isHidden: false,
-        boldSentence: true,
         nextLineStyleName: 'A_12',
         fontName: 'Aclonica',
         fontSize: '14',
@@ -5191,180 +5110,7 @@ describe('insertParagraph', () => {
     expect(insertParagraph([], 1, {}, 1, null)).toStrictEqual({});
   });
 });
-describe('applyLineStyle', () => {
-  it('should handle applyLineStyle ', () => {
-    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
-      styles: { boldPartial: true },
-      styleName: '',
-    });
-    expect(
-      applyLineStyle(
-        {
-          schema: {
-            marks: {
-              strong: {
-                create: () => {
-                  return 1;
-                },
-              },
-            },
-          },
-        } as unknown as EditorState,
-        {
-          selection: {
-            $from: {
-              before: (x) => {
-                return x - 1;
-              },
-              pos: 0,
-            },
-            $to: {
-              after: (x) => {
-                return x + 1;
-              },
-              end: () => {
-                return 2;
-              },
-              pos: 1,
-            },
-          },
-          doc: {
-            nodeAt: () => {
-              return { type: { name: 'table' } };
-            },
-          } as unknown as Node,
-          addMark: () => {
-            return {
-              removeMark: () => {
-                return {};
-              },
-            };
-          },
-        } as unknown as Transform,
-        {
-          attrs: { styleName: 'test' },
-          descendants: () => {
-            return 'text';
-          },
-        } as unknown as Node,
-        0
-      )
-    ).toBeDefined();
-  });
-  it('should handle applyLineStyle when tr is null', () => {
-    const mockNode = {
-      type: {
-        name: 'doc', // Type of the node
-      },
-      content: [
-        // Children of the node
-        {
-          type: {
-            name: 'paragraph',
-          },
-          content: [
-            {
-              type: {
-                name: 'text',
-              },
-              text: 'Hello',
-            },
-            {
-              type: {
-                name: 'text',
-              },
-              text: ' world',
-            },
-          ],
-        },
-        {
-          type: {
-            name: 'heading',
-          },
-          attrs: {
-            level: 2,
-          },
-          content: [
-            {
-              type: {
-                name: 'text',
-              },
-              text: 'ProseMirror',
-            },
-          ],
-        },
-      ],
-      // Mocking the descendants method
-      descendants: function (callback) {
-        // Helper function to recursively traverse the node tree
-        function traverse(node, parentPos) {
-          let pos = parentPos + 1;
-          for (const child of node.content || []) {
-            if (child.isText) {
-              callback(child, pos, node);
-              pos += child.nodeSize;
-            } else {
-              pos = traverse(child, pos);
-            }
-          }
-          return pos;
-        }
 
-        // Start traversal from the document node
-        traverse(this, 0);
-      },
-    };
-    expect(
-      applyLineStyle(
-        {
-          schema: {
-            marks: {
-              strong: {
-                create: () => {
-                  return 1;
-                },
-              },
-            },
-          },
-          tr: {
-            selection: {
-              $from: {
-                before: (x) => {
-                  return x - 1;
-                },
-                pos: 0,
-              },
-              $to: {
-                after: (x) => {
-                  return x + 1;
-                },
-                end: () => {
-                  return 2;
-                },
-                pos: 1,
-              },
-            },
-            doc: {
-              nodeAt: () => {
-                return { type: { name: 'table' } };
-              },
-            },
-            addMark: () => {
-              return {
-                removeMark: () => {
-                  return {};
-                },
-              };
-            },
-          },
-        } as unknown as EditorState,
-        null as unknown as Transform,
-        mockNode as unknown as Node,
-        0
-      )
-    ).toBeDefined();
-  });
-});
 describe('isLevelUpdated', () => {
   it('should handle isLevelUpdated when isCustomStyleAlreadyApplied is false', () => {
     const mockschema = new Schema({
@@ -5844,7 +5590,6 @@ describe('handleRemoveMarks', () => {
         boldNumbering: true,
         toc: false,
         isHidden: false,
-        boldSentence: true,
         nextLineStyleName: 'A_12',
         fontName: 'Aclonica',
         fontSize: '14',

@@ -16,7 +16,6 @@ export const DEFAULT_NORMAL_STYLE = {
   styles: {
     align: 'left',
     boldNumbering: true,
-    boldSentence: true,
     fontName: 'Tahoma',
     fontSize: '12',
     nextLineStyleName: 'Normal',

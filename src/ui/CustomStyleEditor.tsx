@@ -92,7 +92,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       this.state.styles.tof = false;
       this.state.styles.tot = false;
       this.state.styles.isHidden = false;
-      this.state.styles.boldSentence = true;
       this.state.styles.nextLineStyleName = RESERVED_STYLE_NONE;
     }
     if (!this.state.styles.selectedStyleMode) {
@@ -247,44 +246,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     if (sampleDiv) {
       // [FS] IRAD-1394 2021-06-02
       // Issue: numbering sample not working when select Bold first sentence
-      let textSample = SAMPLE_TEXT;
-      if (this.state.styles.boldPartial) {
-        const fragment = document.createDocumentFragment();
-        if (this.state.styles.boldSentence) {
-          const [firstSentence, ...rest] = SAMPLE_TEXT.split('.');
-          const boldElement = document.createElement('strong');
-          boldElement.innerText = `${firstSentence}.`;
-          fragment.appendChild(boldElement);
-          fragment.appendChild(document.createTextNode(rest.join('.')));
-        } else {
-          const [firstWord, ...rest] = SAMPLE_TEXT.split(' ');
-          const boldElement = document.createElement('strong');
-          boldElement.innerText = firstWord;
-          fragment.appendChild(boldElement);
-          fragment.appendChild(document.createTextNode(` ${rest.join(' ')}`));
-        }
-        // Clear previous content using a loop
-        while (sampleDiv.firstChild) {
-          sampleDiv.removeChild(sampleDiv.firstChild);
-        }
-        const newContentContainer = document.createElement('div');
-
-        // Populate the fragment dynamically
-        fragment.childNodes.forEach((child) => {
-          newContentContainer.appendChild(child.cloneNode(true));
-        });
-
-        // Append the fragment or new content to the sampleDiv
-        sampleDiv.appendChild(newContentContainer);
-        textSample = sampleDiv.innerText;
-
-        // [FS] IRAD-1473 2021-06-30
-        // Style Example not showing properly when select Bold and Bold First Sentence
-        style.fontWeight = 'normal';
-      } else {
-        sampleDiv.innerText = SAMPLE_TEXT;
-      }
-
+      const textSample = SAMPLE_TEXT;
+      sampleDiv.innerText = SAMPLE_TEXT;
       if (
         this.state.styles.styleLevel &&
         (this.state.styles.hasNumbering || this.state.styles.isList)
@@ -357,13 +320,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         isHangingIndent: checked,
         indentPosition: checked ? prevState.styles.indentPosition : ''
       }
-    }));
-  }
-
-  // handles scentece bold event
-  onScentenceRadioChanged(e) {
-    this.setState((prevState) => ({
-      styles: { ...prevState.styles, boldSentence: e.target.value === '0' },
     }));
   }
 
@@ -613,13 +569,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   handleBoldNumbering(val) {
     this.setState((prevState) => ({
       styles: { ...prevState.styles, boldNumbering: val.target.checked },
-    }));
-  }
-
-  // handles the boldNumbering checkbox actions
-  handleBoldPartial(val) {
-    this.setState((prevState) => ({
-      styles: { ...prevState.styles, boldPartial: val.target.checked },
     }));
   }
 
@@ -1131,72 +1080,17 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     </button>
                   </span>
                 </div>
-
-                <div className="molsp-formp molsp-hierarchydiv">
-                  <span style={{ float: 'left' }}>
-                    <label>
-                      <input
-                        checked={this.state.styles.boldPartial}
-                        onChange={this.handleBoldPartial.bind(this)}
-                        type="checkbox"
-                      />
-                      <span
-                        style={{
-                          marginLeft: '2px',
-                          position: 'relative',
-                          top: '-2px',
-                        }}
-                      >
-                        Bold the
-                      </span>
-                    </label>
-                  </span>
-                  <span>
-                    <input
-                      checked={this.state.styles.boldSentence}
-                      disabled={!this.state.styles.boldPartial}
-                      name="boldscentence"
-                      onChange={this.onScentenceRadioChanged.bind(this)}
-                      style={{ marginLeft: '21px' }}
-                      type="radio"
-                      value="0"
-                    />
-                    <span
-                      style={{
-                        marginLeft: '4px',
-                        marginTop: '3px',
-                        marginBottom: '0',
-                      }}
-                    >
-                      First Sentence
-                    </span>
-                    <input
-                      checked={!this.state.styles.boldSentence}
-                      disabled={!this.state.styles.boldPartial}
-                      name="boldscentence"
-                      onChange={this.onScentenceRadioChanged.bind(this)}
-                      style={{ marginLeft: '21px' }}
-                      type="radio"
-                      value="1"
-                    />
-                    <span
-                      style={{
-                        marginLeft: '4px',
-                        marginTop: '3px',
-                        marginBottom: '0',
-                      }}
-                    >
-                      First Word
-                    </span>
-                  </span>
-                </div>
                 <div
                   style={{
+                    borderColor: 'gray',
+                    borderStyle: 'solid',
+                    borderWidth: '1px',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     gap: '9px',
-                    padding: '8px 0',
+                    marginLeft: '-4px',
+                    padding: '7px 0',
                   }}
                 >
                   {[

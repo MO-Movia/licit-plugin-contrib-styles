@@ -10,7 +10,6 @@ import { Transform } from 'prosemirror-transform';
 import {
   applyLatestStyle,
   getMarkByStyleName,
-  applyLineStyle,
   applyStyleToEachNode,
 } from './CustomStyleCommand';
 import {
@@ -217,7 +216,7 @@ export function onUpdateAppendTransaction(
       }
     }
   }
-  tr = applyLineStyleForBoldPartial(nextState, tr, transactions.length && transactions[0].getMeta('paste'));
+  tr = applyHangingIndent(nextState, tr, transactions.length && transactions[0].getMeta('paste'));
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
     let _startPos = 0;
     let _endPos = 0;
@@ -400,8 +399,7 @@ export function nodeAssignment(state) {
   return nodes;
 }
 
-// FIX: Style with First Word Bold and Continue is not showing properly when entering text in a new paragraph
-function applyLineStyleForBoldPartial(nextState, tr, isPaste) {
+function applyHangingIndent(nextState, tr, isPaste) {
   const { selection, schema } = nextState;
   const currentPos = selection.$cursor
     ? selection.$cursor.pos
@@ -420,9 +418,6 @@ function applyLineStyleForBoldPartial(nextState, tr, isPaste) {
     // Check styleName is available for node
     if (validateStyleName(node)) {
       const style = getCustomStyleByName(node.attrs.styleName);
-      if (style?.styles?.boldPartial) {
-        tr = applyLineStyle(nextState, tr, node, pos);
-      }
       if (style?.styles?.indentPosition) {
         tr = applyHangingIndentTransform(tr, nextState, node, pos, isPaste);
       }

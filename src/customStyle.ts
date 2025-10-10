@@ -182,7 +182,7 @@ export function getCustomStyle(customStyle) {
     switch (property) {
       case 'strong':
         // Deselected Bold, Italics and Underline are not removed from the example style near style name
-        if (!customStyle.boldPartial && customStyle[property]) {
+        if (customStyle[property]) {
           style.fontWeight = 'bold';
         }
         break;

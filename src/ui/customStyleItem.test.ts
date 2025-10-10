@@ -16,7 +16,6 @@ describe('customstyleitem', () => {
         styles: {
           align: 'right',
           boldNumbering: true,
-          boldSentence: true,
           fontName: 'Tahoma',
           fontSize: '12',
           nextLineStyleName: 'Normal',
@@ -58,7 +57,6 @@ describe('customstyleitem', () => {
         styles: {
           align: 'right',
           boldNumbering: true,
-          boldSentence: true,
           fontName: 'Tahoma',
           fontSize: '12',
           nextLineStyleName: 'Normal',
@@ -102,8 +100,6 @@ describe('customstyleitem', () => {
           styles: {
             align: 'right',
             boldNumbering: false,
-            boldSentence: false,
-            boldPartial: true,
             fontName: 'Tahoma',
             fontSize: '12',
             nextLineStyleName: 'Normal',
@@ -129,8 +125,6 @@ describe('customstyleitem', () => {
     };
     const customstyleitem = new CustomStyleItem(props);
     jest.spyOn(customstyleitem, 'sampleLevel').mockReturnValue('');
-    jest.spyOn(customstyleitem, 'hasBoldSentence').mockReturnValue(true);
-
     expect(customstyleitem.render()).toBeDefined();
   });
   it('should handle render when label is not defined when hasBoldPartial and hasBoldSentance true and false respectively', () => {

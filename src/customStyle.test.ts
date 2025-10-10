@@ -39,7 +39,6 @@ describe('customstyle', () => {
   it('should handle getCustomStyle', () => {
     const cstyle = {
       strong: {},
-      boldPartial: true,
       em: null,
       strike: null,
       textAlign: {},

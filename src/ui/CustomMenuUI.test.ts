@@ -15,15 +15,18 @@ import { Node } from 'prosemirror-model';
 // Enzyme.configure({ adapter: new Adapter() });
 
 describe('Custom Menu UI   ', () => {
-  const TestCustomStyleRuntime = {
+  const mockCustomStylesService = {
     saveStyle: jest.fn().mockReturnValue(Promise.resolve([])),
     getStylesAsync: jest.fn().mockReturnValue(Promise.resolve([])),
     renameStyle: jest.fn().mockReturnValue(Promise.resolve([])),
     removeStyle: jest.fn().mockReturnValue(Promise.resolve([])),
     fetchStyles: jest.fn().mockReturnValue(Promise.resolve([])),
     buildRoute: jest.fn().mockReturnValue(Promise.resolve([])),
+    openCustomStyleDialog: jest.fn().mockReturnValue(Promise.resolve([])),
+    saveStyleSet: jest.fn().mockReturnValue(Promise.resolve([])),
+    openJSONEditorDialog: jest.fn().mockReturnValue(Promise.resolve([]))
   };
-  const plugin = new CustomstylePlugin(TestCustomStyleRuntime);
+  const plugin = new CustomstylePlugin(mockCustomStylesService);
   const editor = createEditor(doc(p('<cursor>')), {
     plugins: [plugin],
   });
@@ -442,7 +445,7 @@ describe('Custom Menu UI   ', () => {
     doc: mockdoc,
     schema: schema,
     selection: editor.selection,
-    plugins: [new CustomstylePlugin(TestCustomStyleRuntime)],
+    plugins: [new CustomstylePlugin(mockCustomStylesService)],
   });
   const cmdGrp1 = new CustomStyleCommand('Edit All', 'AFDP_Bullet');
   const cmdGrp2 = new CustomStyleCommand('Clear', 'AFDP_Bullet1');
@@ -712,7 +715,7 @@ describe('Custom Menu UI   ', () => {
       doc: mockdoc,
       schema: schema,
       selection: { from: 0, to: 1 },
-      plugins: [new CustomstylePlugin(TestCustomStyleRuntime)],
+      plugins: [new CustomstylePlugin(mockCustomStylesService)],
       empty: null,
     };
     jest.spyOn(custommenuui, 'removeTextAlignAndLineSpacing').mockReturnValue({

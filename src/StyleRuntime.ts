@@ -66,29 +66,3 @@ export type CSSStyle = {
   hideNumbering?: boolean;
   resetValue?: boolean;
 };
-
-export type StyleRuntime = {
-
-  canEditStyle?: boolean; // true= User has permission to edit styles
-  /**
-   * Gets array of styles asynchronously from the service
-   */
-  getStylesAsync: () => Promise<Style[]>;
-
-  // Adds / Replaces supplied style on service.
-  // Resolves to server-processed style on success.
-  // Rejects with Error('reason') on network or other failure.
-  saveStyle(style: Style): Promise<Style>;
-  /**
-   * Renames an existing style from the service.
-   * @param oldStyleName
-   * @param newStyleName
-   */
-  renameStyle: (oldStyleName: string, newStyleName: string) => Promise<Style[]>;
-
-  /**
-   * Remove an existing style from the service.
-   * @param name
-   */
-  removeStyle: (name: string) => Promise<Style[]>;
-};

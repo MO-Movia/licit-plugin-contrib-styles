@@ -2,7 +2,7 @@ import React from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Transform } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
-import { getCustomStyleByName, getCustomStyle, getStyleRuntime } from '../customStyle';
+import { getCustomStyleByName, getCustomStyle,  getStylesRuntime } from '../customStyle';
 import { getDetailsBullet } from '../CustomStyleNodeSpec';
 import { PointerSurface } from '@modusoperandi/licit-ui-commands';
 import type { PointerSurfaceProps } from '@modusoperandi/licit-ui-commands';
@@ -137,7 +137,7 @@ export class CustomStyleItem extends React.PureComponent<
         <div
           className="molsp-arrow-right"
           data-cy="cyStyleEdit"
-          style={{ width: '50px', display: (hasText && getStyleRuntime()?.canEditStyle) ? 'block' : 'none' }}
+          style={{ width: '50px', display: (hasText && getStylesRuntime()?.canEditStyle) ? 'block' : 'none' }}
         >
           {/* Need to change the below icon to downarroe */}
           <PointerSurface {...pointerProps} className={klass + ' edit-icon'}>

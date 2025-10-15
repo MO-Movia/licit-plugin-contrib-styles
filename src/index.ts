@@ -15,11 +15,11 @@ import {
 } from './CustomStyleCommand';
 import {
   getCustomStyleByName,
-  setStyleRuntime,
   setHidenumberingFlag,
   isStylesLoaded,
   setView,
   setCustomStylesOnLoad,
+  setStylesRuntime,
 } from './customStyle';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
@@ -27,7 +27,7 @@ import { findParentNodeClosestToPos } from 'prosemirror-utils';
 import { Node, Schema, Slice } from 'prosemirror-model';
 import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand';
 import { applyEffectiveSchema } from './EditorSchema';
-import type { StyleRuntime } from './StyleRuntime';
+import { CustomStylesService } from './ui/types';
 
 const ENTERKEYCODE = 13;
 const BACKSPACEKEYCODE = 8;
@@ -46,7 +46,7 @@ const requiredAddAttr = (node) => {
 };
 
 export class CustomstylePlugin extends Plugin {
-  constructor(runtime: StyleRuntime, hideNumbering?: boolean) {
+  constructor( styleRuntime: CustomStylesService, hideNumbering?: boolean) {
     let csview = null;
     let firstTime = true;
     let loaded = false;
@@ -56,7 +56,7 @@ export class CustomstylePlugin extends Plugin {
         init() {
           loaded = false;
           firstTime = true;
-          setStyleRuntime(runtime);
+          setStylesRuntime(styleRuntime);
           setCustomStylesOnLoad();
         },
         apply(tr) {
@@ -758,4 +758,6 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
 
   return tr;
 }
+
+export * from './ui/types';
 

@@ -106,13 +106,16 @@ const styl2 = {
   toc: false,
   isHidden: false,
 };
-const TestCustomStyleRuntime = {
+const mockCustomStylesService = {
   saveStyle: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
   getStylesAsync: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
   renameStyle: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
   removeStyle: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
   fetchStyles: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
   buildRoute: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
+  openCustomStyleDialog: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
+  saveStyleSet: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
+  openJSONEditorDialog: jest.fn().mockReturnValue(Promise.resolve([styl, styl2]))
 };
 
 const mockSchema = new Schema({
@@ -1288,7 +1291,7 @@ describe('Style Plugin', () => {
     paddingBottom: { default: null },
     paddingTop: { default: null },
   };
-  const plugin = new CustomstylePlugin(TestCustomStyleRuntime, true);
+  const plugin = new CustomstylePlugin(mockCustomStylesService, true);
   const toDOMMock = jest.spyOn(DOMfunc, 'toCustomStyleDOM');
   toDOMMock.mockImplementation(() => {
     return ['p', attrs, 0];
@@ -1849,7 +1852,7 @@ describe('Style Plugin Execute', () => {
   const testData = ['none', 'newstyle', 'editall', 'clearstyle'];
   test.each(testData)('myFunc work correctly for %s', (val) => {
     jest.spyOn(DOMfunc, 'toCustomStyleDOM').mockReturnValue(['p', attrs, 0]);
-    const plugin = new CustomstylePlugin(TestCustomStyleRuntime, false);
+    const plugin = new CustomstylePlugin(mockCustomStylesService, false);
     const effSchema = mockSchema;
     const { doc, p } = builders(effSchema, { p: { nodeType: 'paragraph' } });
     const state = EditorState.create({
@@ -1914,7 +1917,7 @@ describe('Custom Style Plugin pass', () => {
       },
     };
   });
-  const plugin = new CustomstylePlugin(TestCustomStyleRuntime);
+  const plugin = new CustomstylePlugin(mockCustomStylesService);
   const editor = createEditor(doc(p('<cursor>')), {
     plugins: [plugin],
   });
@@ -1928,7 +1931,7 @@ describe('Custom Style Plugin pass', () => {
     doc: doc(p('Hello World!!!')),
     schema: mockSchema,
     selection: editor.selection,
-    plugins: [new CustomstylePlugin(TestCustomStyleRuntime)],
+    plugins: [new CustomstylePlugin(mockCustomStylesService)],
   });
 
   const selection = TextSelection.create(editor.view.state.doc, 0, 0);
@@ -2002,6 +2005,9 @@ describe('Cus Style Plugin-Pass', () => {
     removeStyle: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
     fetchStyles: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
     buildRoute: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
+    openCustomStyleDialog: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
+    saveStyleSet: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
+    openJSONEditorDialog: jest.fn().mockReturnValue(Promise.resolve([styl, styl2]))
   };
   const plugin = new CustomstylePlugin(styleruntime, true);
 

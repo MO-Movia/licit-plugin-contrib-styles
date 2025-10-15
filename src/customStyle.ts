@@ -1,5 +1,5 @@
 // [FS] IRAD-1085 2020-10-09
-import type { Style, CSSStyle, StyleRuntime } from './StyleRuntime';
+import type { Style, CSSStyle } from './StyleRuntime';
 import { EditorView } from 'prosemirror-view';
 import {
   RESERVED_STYLE_NONE,
@@ -7,8 +7,9 @@ import {
 } from './CustomStyleNodeSpec';
 import { DEFAULT_NORMAL_STYLE } from './Constants';
 import { setCustomStyles } from '@modusoperandi/licit-ui-commands';
+import { CustomStylesService } from './ui/types';
 let customStyles = new Array(0);
-let styleRuntime;
+let stylesRuntime;
 let hideNumbering = false;
 let _view: EditorView;
 let hasdocTypechanged = false;
@@ -111,12 +112,12 @@ export function getHidenumberingFlag(): boolean {
   return hideNumbering;
 }
 
-export function setStyleRuntime(runtime) {
-  styleRuntime = runtime;
+export function setStylesRuntime(runtime){ 
+  stylesRuntime = runtime;
 }
 
-export function getStyleRuntime(): StyleRuntime {
-  return styleRuntime;
+export function getStylesRuntime() : CustomStylesService{
+  return stylesRuntime;
 }
 export function setCustomStylesOnLoad() {
   getStylesAsync().then((result) => {
@@ -135,7 +136,7 @@ export function isStylesLoaded() {
 }
 
 export function hasStyleRuntime() {
-  return !!styleRuntime;
+  return !!stylesRuntime;
 }
 // get a style by Level
 export function getCustomStyleByLevel(level: number) {
@@ -242,21 +243,21 @@ export function getCustomStyle(customStyle) {
   return style;
 }
 // method to save,retrive,rename and remove style from the style server.
-export function saveStyle(styleProps: Style): Promise<Style[]> {
-  return styleRuntime?.saveStyle(styleProps);
+export function saveStyle(styleProps: Style): Promise<Style> {
+  return getStylesRuntime()?.saveStyle(styleProps);
 }
 export function getStylesAsync(): Promise<Style[]> {
-  return styleRuntime.getStylesAsync();
+  return getStylesRuntime().getStylesAsync();
 }
 export function renameStyle(
   oldName: string,
   newName: string
 ): Promise<Style[]> {
-  return styleRuntime.renameStyle(oldName, newName);
+  return getStylesRuntime().renameStyle(oldName, newName);
 }
 export function removeStyle(styleName: string): Promise<Style[]> {
-  return styleRuntime.removeStyle(styleName);
+  return getStylesRuntime().removeStyle(styleName);
 }
 export function saveStyleSet(styles: Style[]): Promise<Style[]> {
-  return styleRuntime?.saveStyleSet(styles);
+  return getStylesRuntime()?.saveStyleSet(styles);
 }

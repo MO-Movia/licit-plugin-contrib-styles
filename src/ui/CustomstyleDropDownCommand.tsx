@@ -16,7 +16,7 @@ import {
   getStylesAsync,
   hasStyleRuntime,
   isCustomStyleExists,
-  getStyleRuntime
+  getStylesRuntime
 } from '../customStyle';
 
 // [FS] IRAD-1042 2020-09-09
@@ -81,7 +81,7 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     const MENU_COMMANDS = {};
 
     // Only include these if the user has the canEditStyle permission
-    if (getStyleRuntime()?.canEditStyle) {
+    if (getStylesRuntime()?.canEditStyle) {
       MENU_COMMANDS['newstyle'] = new CustomStyleCommand(
         'newstyle',
         'New Style..',

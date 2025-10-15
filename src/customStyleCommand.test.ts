@@ -777,7 +777,7 @@ describe('CustomStyleCommand', () => {
 
   it('should handle createNewStyle', () => {
     const spy2 = jest.spyOn(customstylecommand, 'showAlert');
-    jest.spyOn(customstyles, 'saveStyle').mockResolvedValue([
+    jest.spyOn(customstyles, 'saveStyle').mockResolvedValue(
       {
         styleName: 'A Apply Stylefff',
         mode: 1,
@@ -798,7 +798,7 @@ describe('CustomStyleCommand', () => {
         toc: false,
         isHidden: false,
       } as unknown as Style,
-    ]);
+    );
     jest.spyOn(customstyles, 'isCustomStyleExists').mockReturnValue(true);
     jest.spyOn(customstyles, 'isPreviousLevelExists').mockReturnValue(false);
     const mocktr = {
@@ -927,7 +927,7 @@ describe('CustomStyleCommand', () => {
   });
   it('should handle createNewStyle', () => {
     const spy2 = jest.spyOn(customstylecommand, 'showAlert');
-    jest.spyOn(customstyles, 'saveStyle').mockResolvedValue([
+    jest.spyOn(customstyles, 'saveStyle').mockResolvedValue(
       {
         styleName: 'A Apply Stylefff',
         mode: 1,
@@ -948,7 +948,7 @@ describe('CustomStyleCommand', () => {
         toc: false,
         isHidden: false,
       } as unknown as Style,
-    ]);
+    );
     jest.spyOn(customstyles, 'isCustomStyleExists').mockReturnValue(true);
     jest.spyOn(customstyles, 'isPreviousLevelExists').mockReturnValue(false);
     const mocktr = {

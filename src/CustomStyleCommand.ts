@@ -23,7 +23,6 @@ import {
   getLineSpacingValue,
 } from '@modusoperandi/licit-ui-commands';
 import { AlertInfo } from './ui/AlertInfo';
-import { CustomStyleEditor } from './ui/CustomStyleEditor';
 import { ParagraphSpacingCommand } from './ParagraphSpacingCommand';
 import {
   removeTextAlignAndLineSpacing,
@@ -37,6 +36,7 @@ import {
   saveStyle,
   getStylesAsync,
   addStyleToList,
+  getStylesRuntime,
 } from './customStyle';
 import type { Style } from './StyleRuntime';
 import {
@@ -476,39 +476,29 @@ export class CustomStyleCommand extends UICommand {
     const { dispatch } = view;
     const tr = state.tr;
     const doc = state.doc;
-
-    this._popUp = createPopUp(
-      CustomStyleEditor,
-      this.createCustomObject(view, mode),
-      {
-        autoDismiss: false,
-        position: atViewportCenter,
-        onClose: (val) => {
-          if (this._popUp) {
-            this._popUp = null;
-            //handle save style object part here
-            if (undefined !== val) {
-              // [FS] IRAD-1231 2021-03-02
-              // Issue fix: The edited styles are not affected the document
-              if (3 === mode) {
-                // edit All
-                val.forEach((style) => {
-                  this.getCustomStyles(style, view);
-                });
-              } else {
-                // new style
-                this.createNewStyle(val, tr, state, dispatch, doc);
-              }
-            }
+    // Angular UI dialog is calling to create a new style
+    getStylesRuntime().openCustomStyleDialog(this.createCustomObject(view, mode))
+      .then((val: Style | Style[]) => {
+        if (val !== undefined) {
+          if (mode === 3 && Array.isArray(val)) {
+            val.forEach((style) => {
+              this.getCustomStyles(style.styleName, view);
+            });
+          } else {
+            this.createNewStyle(val, tr, state, dispatch, doc);
           }
-          view.focus();
-        },
-      }
-    );
+        }
+        view.focus();
+      })
+      .catch((err) => {
+        console.error('Error handling custom style:', err);
+        view.focus();
+      });
   }
+
   jsonEditor(view: EditorView) {
     this._popUp = createPopUp(
-      JSONEditor,
+      getStylesRuntime().openJSONEditorDialog(),
       {
         editorView: view,
       },
@@ -542,12 +532,13 @@ export class CustomStyleCommand extends UICommand {
       this.showAlert();
     } else {
       saveStyle(val).then((result) => {
+        let styleList = [];
         //in bladelicitruntime, the response of the saveStyle() changed from list to a object
         //so need to add that style object to the current style list
         if (!Array.isArray(result)) {
-          result = addStyleToList(result);
+          styleList = addStyleToList(result);
         }
-        setStyles(result);
+        setStyles(styleList);
         // Issue fix: Created custom style Numbering not applied to paragraph.
         tr = tr.setSelection(TextSelection.create(doc, 0, 0));
         // Apply created styles to document

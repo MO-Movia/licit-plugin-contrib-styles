@@ -6,7 +6,7 @@ import {
   hasStyleRuntime,
   getCustomStyle,
   saveStyle,
-  setStyleRuntime,
+  setStylesRuntime,
   renameStyle,
   removeStyle,
   addStyleToList,
@@ -48,7 +48,7 @@ describe('customstyle', () => {
     expect(test).toBeDefined();
   });
   it('should handle saveStyle', () => {
-    setStyleRuntime({
+    setStylesRuntime({
       saveStyle: () => {
         return null;
       },
@@ -56,7 +56,7 @@ describe('customstyle', () => {
     expect(saveStyle({} as unknown as Style)).toBeDefined();
   });
   it('should handle saveStyle', () => {
-    setStyleRuntime({
+    setStylesRuntime({
       renameStyle: () => {
         return null;
       },
@@ -64,7 +64,7 @@ describe('customstyle', () => {
     expect(renameStyle('old', 'new')).toBeDefined();
   });
   it('should handle saveStyle', () => {
-    setStyleRuntime({
+    setStylesRuntime({
       removeStyle: () => {
         return null;
       },
@@ -72,7 +72,7 @@ describe('customstyle', () => {
     expect(removeStyle('newStyle')).toBeDefined();
   });
   it('should handle addStyleToList', () => {
-    setStyleRuntime({
+    setStylesRuntime({
       removeStyle: () => {
         return null;
       },

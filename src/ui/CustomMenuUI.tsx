@@ -6,7 +6,6 @@ import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import { uuid } from './Uuid';
 import { CustomStyleItem } from './CustomStyleItem';
 import { CustomStyleSubMenu } from './CustomStyleSubMenu';
-import { CustomStyleEditor } from './CustomStyleEditor';
 import { applyLatestStyle, CustomStyleCommand, updateDocument } from '../CustomStyleCommand';
 import {
   setStyles,
@@ -24,6 +23,8 @@ import {
 } from '@modusoperandi/licit-ui-commands';
 import { setParagraphSpacing } from '../ParagraphSpacingCommand';
 import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
+import { CustomStylesRuntime } from './types';
+import { getStylesRuntime } from '../customStyle';
 let HEADING_COMMANDS = {
   [RESERVED_STYLE_NONE]: new HeadingCommand(0),
 };
@@ -66,8 +67,8 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     let selecteClassName = '';
     const theme = this.props.theme;
     const selectedName = this.getTheSelectedCustomStyle(this.props.editorState);
-   let commandGroups_nw = this.getCommandGroups();
-   commandGroups_nw.forEach((group) => {
+    let commandGroups_nw = this.getCommandGroups();
+    commandGroups_nw.forEach((group) => {
       Object.keys(group).forEach((label) => {
         const command = group[label];
         counter++;
@@ -122,12 +123,12 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     return (
       <div>
         <span data-cy="cyStyleDropdown">
-        <div className={className} id={this._id}>
-          <div className="molsp-stylenames">{children}</div>
+          <div className={className} id={this._id}>
+            <div className="molsp-stylenames">{children}</div>
 
-          <hr className="molsp-stylenames-hr"></hr>
-          <div className="molsp-stylenames">{children1}</div>
-        </div>
+            <hr className="molsp-stylenames-hr"></hr>
+            <div className="molsp-stylenames">{children1}</div>
+          </div>
         </span>
       </div>
     );
@@ -300,46 +301,65 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
       this._stylePopup = null;
     }
     this._styleName = command._customStyleName;
-    this._stylePopup = createPopUp(
-      CustomStyleEditor,
-      {
-        styleName: command._customStyleName,
-        mode: mode, //edit
-        description: command._customStyle.description,
-        styles: command._customStyle.styles,
-        editorView: this.props.editorView,
-      },
-      {
-        position: atViewportCenter,
-        autoDismiss: false,
-        IsChildDialog: false,
-        onClose: (val) => {
-          if (this._stylePopup) {
-            //handle save style object part here
-            if (undefined !== val) {
-              const { dispatch } = this.props.editorView;
-              // [FS] IRAD-1112 2020-12-14
-              // Issue fix: Duplicate style created while modified the style name.
-              delete val.runtime;
-              if (1 === mode) {
-                // update
-                delete val.editorView;
+    const styleObj = {
+      styleName: this._styleName,
+      mode: mode,
+      description: command._customStyle.description,
+      styles: command._customStyle.styles,
+    };
+    // Angular UI calling for modifying the style
+    getStylesRuntime()
+      .openCustomStyleDialog(styleObj)
+      .then((val: any) => {
+        if (undefined !== val) {
+          const { dispatch } = this.props.editorView;
+
+          delete val.runtime;
+          delete val.editorView;
+
+          if (1 === mode) {
+            let tr;
+            saveStyle(val).then((result) => {
+              let styleList = [];
+              if (result) {
+                if (!Array.isArray(result)) {
+                  styleList = addStyleToList(result);
+                }
+                setStyles(styleList);
+                styleList.forEach((obj) => {
+                  if (val.styleName === obj.styleName) {
+                    tr = updateDocument(
+                      this.props.editorState,
+                      this.props.editorState.tr,
+                      val.styleName,
+                      obj
+                    );
+                  }
+                });
+                if (tr) {
+                  dispatch(tr);
+                }
+              }
+              this.props.editorView.focus();
+            });
+          } else {
+            renameStyle(this._styleName, val.styleName).then((result) => {
+              let styleList = [];
+              if (result) {
                 let tr;
                 saveStyle(val).then((result) => {
                   if (result) {
-                    //in bladelicitruntime, the response of the saveStyle() changed from list to a object
-                    //so need to add that style object to the current style list
                     if (!Array.isArray(result)) {
-                      result = addStyleToList(result);
+                      styleList = addStyleToList(result);
                     }
-                    setStyles(result);
-                    result.forEach((obj) => {
+                    setStyles(styleList);
+                    styleList.forEach((obj) => {
                       if (val.styleName === obj.styleName) {
-                        tr = updateDocument(
+                        tr = this.renameStyleInDocument(
                           this.props.editorState,
                           this.props.editorState.tr,
-                          val.styleName,
-                          obj
+                          this._styleName,
+                          val.styleName
                         );
                       }
                     });
@@ -348,53 +368,12 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                     }
                   }
                   this.props.editorView.focus();
-                  this._stylePopup.close();
-                  this._stylePopup = null;
-                });
-              } else {
-                // rename
-                renameStyle(this._styleName, val.styleName).then((result) => {
-                  // [FS] IRAD-1133 2021-01-06
-                  // Issue fix: After modify a custom style, the modified style not applied to the paragraph.
-
-                  if (null != result) {
-                    let tr;
-                    delete val.editorView;
-                    saveStyle(val).then((result) => {
-                      if (result) {
-                        //in bladelicitruntime, the response of the saveStyle() changed from list to a object
-                        //so need to add that style object to the current style list
-                        if (!Array.isArray(result)) {
-                          result = addStyleToList(result);
-                        }
-                        setStyles(result);
-                        result.forEach((obj) => {
-                          if (val.styleName === obj.styleName) {
-                            tr = this.renameStyleInDocument(
-                              this.props.editorState,
-                              this.props.editorState.tr,
-                              this._styleName,
-                              val.styleName
-                            );
-                          }
-                        });
-                        if (tr) {
-                          dispatch(tr);
-                        }
-                      }
-                      this.props.editorView.focus();
-                      this._stylePopup.close();
-                      this._stylePopup = null;
-                    });
-                  }
                 });
               }
-            }
+            });
           }
-          this.props.editorView.focus();
-        },
-      }
-    );
+        }
+      });
   }
 
   // [FS] IRAD-1237 2021-05-05
@@ -432,46 +411,46 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     return customStyleName;
   }
 
-    //[FS] IRAD-1085 2020-10-09
-    //method to build commands for list buttons
-    getCommandGroups() {
-      HEADING_COMMANDS = {
-        // [FS] IRAD-1074 2020-12-09
-        // When apply 'None' from style menu, not clearing the applied custom style.
-        [RESERVED_STYLE_NONE]: new CustomStyleCommand(
-          RESERVED_STYLE_NONE,
-          RESERVED_STYLE_NONE
-        ),
-      };
-      const result = addStyleToList(undefined);
-      let HEADING_NAMES = null;
-      
-          if (result) {
-            setStyles(result);
-            HEADING_NAMES = result;
-            if (null != HEADING_NAMES) {
-              const foundNormal = result.find(
-                (obj) => obj.styleName === RESERVED_STYLE_NONE
-              );
-              if (foundNormal) {
-                HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
-                  foundNormal,
-                  foundNormal.styleName
-                );
-              }
-  
-              HEADING_NAMES.forEach((obj) => {
-                if (RESERVED_STYLE_NONE != obj.styleName)
-                  HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
-                    obj,
-                    obj.styleName
-                  );
-              });
-            }
-          return [HEADING_COMMANDS];
+  //[FS] IRAD-1085 2020-10-09
+  //method to build commands for list buttons
+  getCommandGroups() {
+    HEADING_COMMANDS = {
+      // [FS] IRAD-1074 2020-12-09
+      // When apply 'None' from style menu, not clearing the applied custom style.
+      [RESERVED_STYLE_NONE]: new CustomStyleCommand(
+        RESERVED_STYLE_NONE,
+        RESERVED_STYLE_NONE
+      ),
+    };
+    const result = addStyleToList(undefined);
+    let HEADING_NAMES = null;
 
-          }
+    if (result) {
+      setStyles(result);
+      HEADING_NAMES = result;
+      if (null != HEADING_NAMES) {
+        const foundNormal = result.find(
+          (obj) => obj.styleName === RESERVED_STYLE_NONE
+        );
+        if (foundNormal) {
+          HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
+            foundNormal,
+            foundNormal.styleName
+          );
+        }
+
+        HEADING_NAMES.forEach((obj) => {
+          if (RESERVED_STYLE_NONE != obj.styleName)
+            HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
+              obj,
+              obj.styleName
+            );
+        });
+      }
       return [HEADING_COMMANDS];
+
     }
-  
+    return [HEADING_COMMANDS];
+  }
+
 }

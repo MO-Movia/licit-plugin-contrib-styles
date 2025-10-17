@@ -209,9 +209,11 @@ function getStyleEx(align, lineSpacing, styleName) {
         bulletDetails = getBulletDetails(styleProps.styles.bulletLevel);
         styleLevel = styleProps.styles.styleLevel;
       }
-
+      //handle hanging indent position for each paragraph
       if (styleProps.styles.indentPosition) {
         indentPosition = styleProps.styles.indentPosition;
+        const hIndentpx = Number(indentPosition) * 96;
+        style += `--hangingIndentMargin: ${hIndentpx}px;`;
       }
 
       if (null === align && styleProps.styles.align) {

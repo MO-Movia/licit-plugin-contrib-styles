@@ -889,7 +889,7 @@ function applyStyleEx(
         if (element instanceof TextAlignCommand) {
           // if user override the align style then retian that align style
           // using the overridenAlign property we can find align style overrided or not
-          if (node?.attrs?.overriddenAlign) {
+          if (String(node?.attrs?.overriddenAlign) === 'true') {
             newattrs.align = node.attrs.overriddenAlignValue;
           } else {
             newattrs.align = styleProp.styles.align;
@@ -899,7 +899,7 @@ function applyStyleEx(
           // Issue fix : Linespacing Double and Single not applied in the sample text paragraph
           // if user override the lineSpacing style then retian that lineSpacing style
           // using the overriddenLineSpacing property we can find lineSpacing style overrided or not
-          if (node?.attrs?.overriddenLineSpacing) {
+          if (String(node?.attrs?.overriddenLineSpacing) === 'true') {
             newattrs.lineSpacing = node?.attrs?.overriddenLineSpacingValue;
           } else {
             newattrs.lineSpacing = getLineSpacingValue(
@@ -917,7 +917,8 @@ function applyStyleEx(
           // Bug fix: indent not working along with level
           // if user override the indent style then retian that indent style
           // using the overriddenIndent property we can find indent style overrided or not
-          if (node?.attrs?.overriddenIndent) {
+
+          if (String(node?.attrs?.overriddenIndent) === 'true') {
             newattrs.indent = node.attrs.overriddenIndentValue;
           } else {
             newattrs.indent = styleProp.styles.isLevelbased
@@ -1420,6 +1421,7 @@ export function removeAllMarksExceptLink(
         if (
           !mark.attrs[ATTR_OVERRIDDEN] &&
           'link' !== mark.type.name &&
+          'mark-hanging-indent' !== mark.type.name &&
           'override' !== mark.type.name &&
           'spacer' !== mark.type.name
         ) {

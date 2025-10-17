@@ -301,15 +301,15 @@ describe('CustomStyleEditor', () => {
     const event = { target: { value: '', checked: true } };
     expect(customstyleeditor.handleTOT(event)).toBeUndefined();
   });
-    it('should handle handleTOT', () => {
+  it('should handle handleTOT', () => {
     const event = { target: { value: '', checked: false } };
     expect(customstyleeditor.handleTOT(event)).toBeUndefined();
   });
-    it('should handle handleTOF', () => {
+  it('should handle handleTOF', () => {
     const event = { target: { value: '', checked: true } };
     expect(customstyleeditor.handleTOF(event)).toBeUndefined();
   });
-    it('should handle handleTOF', () => {
+  it('should handle handleTOF', () => {
     const event = { target: { value: '', checked: false } };
     expect(customstyleeditor.handleTOF(event)).toBeUndefined();
   });

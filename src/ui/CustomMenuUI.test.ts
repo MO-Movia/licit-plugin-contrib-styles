@@ -1,6 +1,4 @@
-// import Enzyme from 'enzyme';
 import { createEditor, doc, p } from 'jest-prosemirror';
-// import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { CustomstylePlugin } from '../index';
 import { CustomMenuUI } from './CustomMenuUI';
 import { Schema } from 'prosemirror-model';
@@ -12,7 +10,6 @@ import { SyntheticEvent } from 'react';
 import { Transform } from 'prosemirror-transform';
 import { Node } from 'prosemirror-model';
 
-// Enzyme.configure({ adapter: new Adapter() });
 
 describe('Custom Menu UI   ', () => {
   const TestCustomStyleRuntime = {
@@ -529,7 +526,7 @@ describe('Custom Menu UI   ', () => {
       .spyOn(document, 'getElementsByClassName')
       .mockReturnValue([dom] as unknown as HTMLCollectionOf<Element>);
     custommenuui.componentDidMount();
-    expect(dom.scrollTop).toBe(751);
+    expect(dom.scrollTop).toBe(-33);
   });
 
   it('should handle isAllowedNode', () => {

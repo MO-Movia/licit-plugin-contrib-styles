@@ -53,7 +53,7 @@ export class CustomMenuButton extends React.PureComponent<
         id={this._id}
         label={label}
         onClick={this._onClick}
-        theme={theme_1.toString()}
+        theme={theme_1?.toString()}
         title={title}
       />
     );

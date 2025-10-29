@@ -357,7 +357,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     this.setState(prevState => ({
       styles: {
         ...prevState.styles,
-        isHangingIndent: checked,
+        isHangingIndentapplied: checked,
         indentPosition: checked ? prevState.styles.indentPosition : ''
       }
     }));
@@ -1838,7 +1838,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <input
-                      checked={this.state.styles.isHangingIndent}
+                      checked={this.state.styles.isHangingIndentapplied}
                       id='hanging-indent-checkbox'
                       onChange={this.onHangingIndentChange.bind(this)}
                       type="checkbox"
@@ -1850,7 +1850,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     <label htmlFor='indent-position-input' style={{ marginRight: '8px' }}>Indent position: </label>
                     <input
                       disabled={
-                        !this.state.styles.isHangingIndent
+                        !this.state.styles.isHangingIndentapplied
                       }
                       id='indent-position-input'
                       onChange={this.onIndentPositionChange.bind(this)}

@@ -10,7 +10,6 @@ import { SyntheticEvent } from 'react';
 import { Transform } from 'prosemirror-transform';
 import { Node } from 'prosemirror-model';
 
-
 describe('Custom Menu UI   ', () => {
   const TestCustomStyleRuntime = {
     saveStyle: jest.fn().mockReturnValue(Promise.resolve([])),
@@ -448,7 +447,7 @@ describe('Custom Menu UI   ', () => {
     commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
     staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
     disabled: false,
-    dispatch: () => { },
+    dispatch: () => {},
     editorState: state,
     editorView: editor.view,
     icon: 'button',
@@ -485,7 +484,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: () => { },
+      dispatch: () => {},
       editorState: state,
       editorView: { disabled: true },
       icon: 'button',
@@ -506,7 +505,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: () => { },
+      dispatch: () => {},
       editorState: state,
       editorView: { disabled: true },
       icon: 'button',
@@ -672,7 +671,7 @@ describe('Custom Menu UI   ', () => {
     ).toBeUndefined();
   });
   it('should handle showsubmenu when popup not null', () => {
-    custommenuui._stylePopup = { close: () => { } } as unknown as null;
+    custommenuui._stylePopup = { close: () => {} } as unknown as null;
     // custommenuui._stylePopup = {close:()=>{}};
     const ui = {
       _customStyleName: 'Normal',
@@ -760,8 +759,8 @@ describe('Custom Menu UI   ', () => {
     };
     const el = {
       parent: { inlineContent: {} },
-      min: () => { },
-      max: () => { },
+      min: () => {},
+      max: () => {},
     } as unknown as HTMLDivElement;
     const removeMarkChain = {
       setNodeMarkup: () => {
@@ -1088,7 +1087,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: () => { },
+      dispatch: () => {},
       editorState: state,
       editorView: editor.view,
       icon: 'button',
@@ -1102,7 +1101,7 @@ describe('Custom Menu UI   ', () => {
       doc: doc,
       selection: { from: 0, to: 1 },
     } as unknown as EditorState;
-    const trmock = { setNodeMarkup: () => { } } as unknown as Transform;
+    const trmock = { setNodeMarkup: () => {} } as unknown as Transform;
 
     expect(
       custommenuui.renameStyleInDocument(statemock, trmock, 'Normal', 'test')
@@ -1148,7 +1147,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: () => { },
+      dispatch: () => {},
       editorState: state,
       editorView: view,
       icon: 'button',
@@ -1186,7 +1185,7 @@ describe('Custom Menu UI   ', () => {
       commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
       staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
       disabled: false,
-      dispatch: () => { },
+      dispatch: () => {},
       editorState: state,
       editorView: view,
       icon: 'button',
@@ -1200,7 +1199,7 @@ describe('Custom Menu UI   ', () => {
       _customStyleName: 'test',
       _customStyle: { description: 'description', styles: {} },
     };
-    custommenuui._stylePopup = { close: () => { } } as unknown as null;
+    custommenuui._stylePopup = { close: () => {} } as unknown as null;
     expect(
       custommenuui.showStyleWindow(
         uicommands,
@@ -1215,5 +1214,91 @@ describe('Custom Menu UI   ', () => {
         0
       )
     ).toBeUndefined();
+  });
+
+  xit('should execute command when command is defined', () => {
+    const mockExecute = jest.fn();
+    const command = {
+      execute: mockExecute,
+    } as unknown as UICommand;
+
+    const event = new Event('click') as unknown as SyntheticEvent;
+    const mockOnCommand = jest.fn();
+
+    const testProps = {
+      className: 'molcs-menu-button',
+      commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
+      staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
+      disabled: false,
+      dispatch: () => {},
+      editorState: state,
+      editorView: editor.view,
+      icon: 'button',
+      label: 'Normal',
+      title: 'styles',
+      _style: '',
+      onCommand: mockOnCommand,
+    };
+
+    const custommenuui = new CustomMenuUI(testProps);
+    custommenuui._execute(command, event);
+
+    expect(mockExecute).toHaveBeenCalledWith(
+      testProps.editorState,
+      testProps.dispatch,
+      testProps.editorView,
+      event
+    );
+    expect(mockOnCommand).toHaveBeenCalled();
+  });
+
+  it('should return RESERVED_STYLE_NONE for non-allowed nodes', () => {
+    const testProps = {
+      className: 'molcs-menu-button',
+      commandGroups: [cmdGrp1, cmdGrp2, { Normal: true }],
+      staticCommand: [{ Normal: true, _customStyleName: 'customstylename' }],
+      disabled: false,
+      dispatch: () => {},
+      editorState: state,
+      editorView: editor.view,
+      icon: 'button',
+      label: 'Normal',
+      title: 'styles',
+      _style: '',
+    };
+
+    const custommenuui = new CustomMenuUI(testProps);
+
+    const mockDoc = {
+      nodesBetween: jest.fn((from, to, callback) => {
+        const node = {
+          type: { name: 'image' },
+          attrs: { styleName: 'TestStyle' },
+        };
+        callback(node, 0);
+      }),
+    };
+
+    const testState = {
+      doc: mockDoc,
+      selection: { from: 0, to: 1 },
+    };
+
+    const result = custommenuui.getTheSelectedCustomStyle(
+      testState as unknown as EditorState
+    );
+
+    expect(result).toBe('Normal');
+  });
+
+  it('should handle selectedName matching label', () => {
+    jest
+      .spyOn(custommenuui, 'getTheSelectedCustomStyle')
+      .mockReturnValue('AFDP_Bullet');
+
+    const result = custommenuui.render();
+
+    expect(result).toBeDefined();
+    expect(custommenuui._selectedIndex).toBeGreaterThan(0);
   });
 });

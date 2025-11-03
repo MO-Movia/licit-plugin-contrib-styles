@@ -7,7 +7,11 @@ import { uuid } from './Uuid';
 import { CustomStyleItem } from './CustomStyleItem';
 import { CustomStyleSubMenu } from './CustomStyleSubMenu';
 import { CustomStyleEditor } from './CustomStyleEditor';
-import { applyLatestStyle, CustomStyleCommand, updateDocument } from '../CustomStyleCommand';
+import {
+  applyLatestStyle,
+  CustomStyleCommand,
+  updateDocument,
+} from '../CustomStyleCommand';
 import {
   setStyles,
   saveStyle,
@@ -28,11 +32,8 @@ let HEADING_COMMANDS = {
   [RESERVED_STYLE_NONE]: new HeadingCommand(0),
 };
 
-// [FS] IRAD-1039 2020-09-24
-// UI to show the list buttons
 // eslint-disable-next-line
 export class CustomMenuUI extends React.PureComponent<any, any> {
-  _activeCommand?: UICommand = null;
   _popUp = null;
   _stylePopup = null;
   _styleName = null;
@@ -40,7 +41,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
   _id = uuid();
   _selectedIndex = 0;
-
 
   state = {
     expanded: false,
@@ -52,22 +52,16 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   };
 
   render() {
-    const {
-      dispatch,
-      editorState,
-      editorView,
-      commandGroups,
-      staticCommand,
-      onCommand,
-    } = this.props;
+    const { dispatch, editorState, editorView, staticCommand, onCommand } =
+      this.props;
     const children = [];
     const children1 = [];
     let counter = 0;
     let selecteClassName = '';
     const theme = this.props.theme;
     const selectedName = this.getTheSelectedCustomStyle(this.props.editorState);
-   let commandGroups_nw = this.getCommandGroups();
-   commandGroups_nw.forEach((group) => {
+    const commandGroups_nw = this.getCommandGroups();
+    commandGroups_nw.forEach((group) => {
       Object.keys(group).forEach((label) => {
         const command = group[label];
         counter++;
@@ -122,12 +116,12 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     return (
       <div>
         <span data-cy="cyStyleDropdown">
-        <div className={className} id={this._id}>
-          <div className="molsp-stylenames">{children}</div>
+          <div className={className} id={this._id}>
+            <div className="molsp-stylenames">{children}</div>
 
-          <hr className="molsp-stylenames-hr"></hr>
-          <div className="molsp-stylenames">{children1}</div>
-        </div>
+            <hr className="molsp-stylenames-hr"></hr>
+            <div className="molsp-stylenames">{children1}</div>
+          </div>
         </span>
       </div>
     );
@@ -140,7 +134,11 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   }
 
   isAllowedNode(node: Node) {
-    return node.type.name === 'paragraph' || node.type.name === 'ordered_list' || node.type.name === 'enhanced_table_figure_notes';
+    return (
+      node.type.name === 'paragraph' ||
+      node.type.name === 'ordered_list' ||
+      node.type.name === 'enhanced_table_figure_notes'
+    );
   }
 
   _onUIEnter = (command: UICommand, event: SyntheticEvent<Element>) => {
@@ -176,7 +174,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
       CustomStyleSubMenu,
       {
         command: command,
-        theme: this.props.theme
+        theme: this.props.theme,
       },
       {
         anchor,
@@ -432,46 +430,44 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     return customStyleName;
   }
 
-    //[FS] IRAD-1085 2020-10-09
-    //method to build commands for list buttons
-    getCommandGroups() {
-      HEADING_COMMANDS = {
-        // [FS] IRAD-1074 2020-12-09
-        // When apply 'None' from style menu, not clearing the applied custom style.
-        [RESERVED_STYLE_NONE]: new CustomStyleCommand(
-          RESERVED_STYLE_NONE,
-          RESERVED_STYLE_NONE
-        ),
-      };
-      const result = addStyleToList(undefined);
-      let HEADING_NAMES = null;
-      
-          if (result) {
-            setStyles(result);
-            HEADING_NAMES = result;
-            if (null != HEADING_NAMES) {
-              const foundNormal = result.find(
-                (obj) => obj.styleName === RESERVED_STYLE_NONE
-              );
-              if (foundNormal) {
-                HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
-                  foundNormal,
-                  foundNormal.styleName
-                );
-              }
-  
-              HEADING_NAMES.forEach((obj) => {
-                if (RESERVED_STYLE_NONE != obj.styleName)
-                  HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
-                    obj,
-                    obj.styleName
-                  );
-              });
-            }
-          return [HEADING_COMMANDS];
+  //[FS] IRAD-1085 2020-10-09
+  //method to build commands for list buttons
+  getCommandGroups() {
+    HEADING_COMMANDS = {
+      // [FS] IRAD-1074 2020-12-09
+      // When apply 'None' from style menu, not clearing the applied custom style.
+      [RESERVED_STYLE_NONE]: new CustomStyleCommand(
+        RESERVED_STYLE_NONE,
+        RESERVED_STYLE_NONE
+      ),
+    };
+    const result = addStyleToList(undefined);
+    let HEADING_NAMES = null;
 
-          }
+    if (result) {
+      setStyles(result);
+      HEADING_NAMES = result;
+      if (null != HEADING_NAMES) {
+        const foundNormal = result.find(
+          (obj) => obj.styleName === RESERVED_STYLE_NONE
+        );
+        if (foundNormal) {
+          HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
+            foundNormal,
+            foundNormal.styleName
+          );
+        }
+
+        HEADING_NAMES.forEach((obj) => {
+          if (RESERVED_STYLE_NONE != obj.styleName)
+            HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
+              obj,
+              obj.styleName
+            );
+        });
+      }
       return [HEADING_COMMANDS];
     }
-  
+    return [HEADING_COMMANDS];
+  }
 }

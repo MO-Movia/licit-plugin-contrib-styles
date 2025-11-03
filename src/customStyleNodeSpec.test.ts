@@ -2,6 +2,7 @@ import {
   toCustomStyleDOM,
   getCustomStyleAttrs,
   countersRefresh,
+  getDetailsBullet,
 } from './CustomStyleNodeSpec';
 import * as customstyle from './customStyle';
 import { Node, DOMOutputSpec } from 'prosemirror-model';
@@ -90,11 +91,11 @@ describe('toCustomStyleDOM', () => {
         'data-bullet-symbol': '● ',
         'data-indent': '10',
         'data-show-bullet': true,
-        'indentPosition': '1.5',
+        indentPosition: '1.5',
         'list-style-level': 1,
         // 'hide-style-level': false,
         style:
-          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;counter-increment: L1 ;',
+          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;--hangingIndentMargin: 144px;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;counter-increment: L1 ;',
         styleName: 'FS_B01',
       },
     ]);
@@ -743,3 +744,274 @@ describe('toCustomStyleDOM', () => {
     expect(window['set-cust-list-style-counter-2']).toBe(true);
   });
 });
+
+  const base = () => {
+    return ['span', { styleName: '' }] as unknown as DOMOutputSpec;
+  };
+
+  describe('toCustomStyleDOM - overriddenIndent branch', () => {
+    it('should handle overriddenIndent when attrs.overriddenIndent is true', () => {
+      jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue(null);
+
+      const node = {
+        type: 'paragraph',
+        attrs: {
+          align: null,
+          lineSpacing: null,
+          styleName: 'test',
+          overriddenIndent: true,
+          overriddenIndentValue: 25,
+          indent: null,
+        },
+        content: [],
+      };
+
+      const result = toCustomStyleDOM(base, node as unknown as Node);
+      expect(result[1]['data-indent']).toBe('25');
+    });
+
+    it('should handle indentOverriden when overriddenIndent is false and indentOverriden is not empty', () => {
+      jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+        styles: {
+          indent: '15',
+          styleLevel: 0,
+        },
+        styleName: 'test',
+      });
+
+      const node = {
+        type: 'paragraph',
+        attrs: {
+          align: null,
+          lineSpacing: null,
+          styleName: 'test',
+          overriddenIndent: false,
+          indent: null,
+        },
+        content: [],
+      };
+
+      const result = toCustomStyleDOM(base, node as unknown as Node);
+      expect(result[1]['data-indent']).toBe(undefined);
+    });
+
+    it('should not add indent attribute when both conditions are false', () => {
+      jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+        styles: {
+          indent: '',
+          styleLevel: 0,
+        },
+        styleName: 'test',
+      });
+
+      const node = {
+        type: 'paragraph',
+        attrs: {
+          align: null,
+          lineSpacing: null,
+          styleName: 'test',
+          overriddenIndent: false,
+          indent: null,
+        },
+        content: [],
+      };
+
+      const result = toCustomStyleDOM(base, node as unknown as Node);
+      expect(result[1]['data-indent']).toBeUndefined();
+    });
+  });
+
+  describe('toCustomStyleDOM - prefix, tot, tof, hideNumbering branches', () => {
+    it('should handle prefix attribute', () => {
+      jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+        styles: {
+          prefixValue: 'Chapter ',
+          styleLevel: 1,
+          hasNumbering: true,
+        },
+        styleName: 'test',
+      });
+
+      const node = {
+        type: 'paragraph',
+        attrs: {
+          align: null,
+          lineSpacing: null,
+          styleName: 'test',
+          indent: null,
+        },
+        content: [],
+      };
+
+      const result = toCustomStyleDOM(base, node as unknown as Node);
+      expect(result[1]['prefix']).toBe('Chapter ');
+    });
+
+    it('should handle tot attribute', () => {
+      jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+        styles: {
+          tot: true,
+          styleLevel: 1,
+          hasNumbering: true,
+        },
+        styleName: 'test',
+      });
+
+      const node = {
+        type: 'paragraph',
+        attrs: {
+          align: null,
+          lineSpacing: null,
+          styleName: 'test',
+          indent: null,
+        },
+        content: [],
+      };
+
+      const result = toCustomStyleDOM(base, node as unknown as Node);
+      expect(result[1]['tot']).toBe(true);
+    });
+
+    it('should handle tof attribute', () => {
+      jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+        styles: {
+          tof: true,
+          styleLevel: 1,
+          hasNumbering: true,
+        },
+        styleName: 'test',
+      });
+
+      const node = {
+        type: 'paragraph',
+        attrs: {
+          align: null,
+          lineSpacing: null,
+          styleName: 'test',
+          indent: null,
+        },
+        content: [],
+      };
+
+      const result = toCustomStyleDOM(base, node as unknown as Node);
+      expect(result[1]['tof']).toBe(true);
+    });
+
+    it('should handle hideNumbering attribute', () => {
+      jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+        styles: {
+          hideNumbering: true,
+          styleLevel: 1,
+          hasNumbering: true,
+        },
+        styleName: 'test',
+      });
+
+      const node = {
+        type: 'paragraph',
+        attrs: {
+          align: null,
+          lineSpacing: null,
+          styleName: 'test',
+          indent: null,
+        },
+        content: [],
+      };
+
+      const result = toCustomStyleDOM(base, node as unknown as Node);
+      expect(result[1]['hideNumbering']).toBe(true);
+    });
+  });
+
+  describe('toCustomStyleDOM - list-style-level with node.attrs.indent', () => {
+    it('should use node.attrs.indent when available for list styles', () => {
+      jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+        styles: {
+          styleLevel: 2,
+          isList: true,
+          hasNumbering: true,
+        },
+        styleName: 'test',
+      });
+
+      const node = {
+        type: 'paragraph',
+        attrs: {
+          align: null,
+          lineSpacing: null,
+          styleName: 'test',
+          indent: 3, // This should be used
+        },
+        content: [],
+      };
+
+      const result = toCustomStyleDOM(base, node as unknown as Node);
+      expect(result[1]['list-style-level']).toBe(4); // indent + 1
+    });
+  });
+
+  describe('toCustomStyleDOM - bulletDetails without symbol', () => {
+    it('should not add bullet attributes when symbol is empty', () => {
+      jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+        styles: {
+          hasBullet: true,
+          bulletLevel: 'INVALID_CODE', // This won't match any bullet
+          styleLevel: 1,
+          hasNumbering: true,
+        },
+        styleName: 'test',
+      });
+
+      const node = {
+        type: 'paragraph',
+        attrs: {
+          align: null,
+          lineSpacing: null,
+          styleName: 'test',
+          indent: null,
+        },
+        content: [],
+      };
+
+      const result = toCustomStyleDOM(base, node as unknown as Node);
+      expect(result[1]['data-bullet-symbol']).toBeUndefined();
+      expect(result[1]['data-show-bullet']).toBeUndefined();
+    });
+  });
+
+  describe('getDetailsBullet', () => {
+    it('should return bullet details for valid code 25CF', () => {
+      const result = getDetailsBullet('25CF');
+      expect(result).toEqual({ symbol: '● ', color: '#000000' });
+    });
+
+    it('should return bullet details for valid code 25CB', () => {
+      const result = getDetailsBullet('25CB');
+      expect(result).toEqual({ symbol: '○ ', color: '#000000' });
+    });
+
+    it('should return bullet details for valid code 2B9A', () => {
+      const result = getDetailsBullet('2B9A');
+      expect(result).toEqual({ symbol: '⮚ ', color: '#000000' });
+    });
+
+    it('should return bullet details for valid code 2713', () => {
+      const result = getDetailsBullet('2713');
+      expect(result).toEqual({ symbol: '✓ ', color: '#000000' });
+    });
+
+    it('should return bullet details for valid code 272A', () => {
+      const result = getDetailsBullet('272A');
+      expect(result).toEqual({ symbol: '✪ ', color: '#0000FF' });
+    });
+
+    it('should return bullet details for valid code 272A272A', () => {
+      const result = getDetailsBullet('272A272A');
+      expect(result).toEqual({ symbol: '✪✪ ', color: '#0000FF' });
+    });
+
+    it('should return empty bullet details for invalid code', () => {
+      const result = getDetailsBullet('INVALID');
+      expect(result).toEqual({ symbol: '', color: '' });
+    });
+  });

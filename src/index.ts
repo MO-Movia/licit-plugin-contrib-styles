@@ -752,9 +752,16 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
     const dummy1 = state.schema.text(' ', [...existingMarks, prefix1]);
     newContent.push(dummy1);
   }
+  if (newContent?.length === 1 && spacerRemoved) {
+    const existingMarks = emptyChild.marks.filter(m => m.type.name !== 'spacer');
+    const prefix1 = state.schema.marks['mark-hanging-indent'].create({ prefix: 1 });
+    const dummy1 = state.schema.text(' ', [...existingMarks, prefix1]);
+    newContent.push(dummy1);
+  }
   // Recreate updated paragraph
   const newParagraph = node.type.create(node.attrs, newContent);
   tr.replaceWith(pos, pos + node.nodeSize, newParagraph);
+   (tr as Transaction).setSelection(TextSelection.create(tr.doc, state.selection?.from));
 
   return tr;
 }

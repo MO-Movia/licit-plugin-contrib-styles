@@ -14,9 +14,12 @@ import {
   allowCustomLevelIndent,
   applyLineStyle,
   removeAllMarksExceptLink,
+  removeAllMarksExceptLinkForTableColumnCell,
   handleRemoveMarks,
   compareAttributes,
   resetNodeAttrs,
+  applyStyleToEachNode,
+  applyStyleForTableColumnCell,
 } from './CustomStyleCommand';
 import * as cusstylecommand from './CustomStyleCommand';
 import { EditorState, Selection, Transaction } from 'prosemirror-state';
@@ -29,6 +32,7 @@ import * as customstyles from './customStyle';
 import { Transform } from 'prosemirror-transform';
 import type { Style } from './StyleRuntime';
 import { doc, p } from 'jest-prosemirror';
+import { CellSelection, tableNodes } from 'prosemirror-tables';
 
 describe('CustomStyleCommand', () => {
   const styl = {
@@ -123,6 +127,15 @@ describe('CustomStyleCommand', () => {
     const initialState = {} as EditorState;
     const initialTransform = {} as Transform;
     const resultingTransform = customstylecommand.executeCustom(
+      initialState,
+      initialTransform
+    );
+    expect(resultingTransform).toBe(initialTransform);
+  });
+  it('should return the same transform', () => {
+    const initialState = {} as EditorState;
+    const initialTransform = {} as Transform;
+    const resultingTransform = customstylecommand.executeCustomStyleForTable(
       initialState,
       initialTransform
     );
@@ -775,7 +788,7 @@ describe('CustomStyleCommand', () => {
     ).toBeDefined();
   });
 
-  it('should handle createNewStyle', () => {
+  it('should handle createNewStyle2', () => {
     const spy2 = jest.spyOn(customstylecommand, 'showAlert');
     jest.spyOn(customstyles, 'saveStyle').mockResolvedValue([
       {
@@ -925,7 +938,267 @@ describe('CustomStyleCommand', () => {
     );
     expect(spy2).toHaveBeenCalled();
   });
-  it('should handle createNewStyle', () => {
+
+  it('should handle createNewStyle3', () => {
+    const spy2 = jest.spyOn(customstylecommand, 'showAlert');
+
+    jest.spyOn(customstyles, 'saveStyle').mockResolvedValue([
+      {
+        styleName: 'A Apply Stylefff',
+        mode: 1,
+        styles: {
+          align: 'justify',
+          boldNumbering: true,
+          toc: false,
+          isHidden: false,
+          boldSentence: true,
+          nextLineStyleName: 'Normal',
+          fontName: 'Arial',
+          fontSize: '11',
+          strong: true,
+          em: true,
+          underline: true,
+          color: '#c40df2',
+        },
+        toc: false,
+        isHidden: false,
+      } as unknown as Style,
+    ]);
+    jest.spyOn(customstyles, 'isCustomStyleExists').mockReturnValue(true);
+    jest.spyOn(customstyles, 'isPreviousLevelExists').mockReturnValue(false);
+    const mySchema = new Schema({
+      nodes: {
+        doc: { content: 'block+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'custom-style' } }, // styleName set
+          group: 'block',
+          parseDOM: [
+            {
+              tag: 'p',
+              getAttrs: (dom) => ({
+                styleName: dom.getAttribute('data-style-name'),
+              }),
+            },
+          ],
+          toDOM(node) {
+            return ['p', { 'data-style-name': node.attrs.styleName }, 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+      marks: {
+        bold: {
+          attrs: { overridden: { default: false } }, // Override attribute
+          toDOM() {
+            return ['strong', 0];
+          },
+          parseDOM: [
+            {
+              tag: 'strong',
+              getAttrs: (dom) => ({
+                overridden: dom.getAttribute('data-overridden') === 'true',
+              }),
+            },
+          ],
+        },
+        italic: {
+          attrs: { overridden: { default: false } }, // Another mark
+          toDOM() {
+            return ['em', 0];
+          },
+          parseDOM: [
+            {
+              tag: 'em',
+              getAttrs: (dom) => ({
+                overridden: dom.getAttribute('data-overridden') === 'true',
+              }),
+            },
+          ],
+        },
+        link: {
+          attrs: { href: {}, overridden: { default: false } },
+          toDOM(mark) {
+            return ['a', { href: mark.attrs.href }, 0];
+          },
+          parseDOM: [
+            {
+              tag: 'a',
+              getAttrs: (dom) => ({
+                href: dom.getAttribute('href'),
+                overridden: dom.getAttribute('data-overridden') === 'true',
+              }),
+            },
+          ],
+        },
+      },
+    });
+    const para1 = mySchema.nodes.paragraph.create(null, mySchema.text('One'));
+    const para2 = mySchema.nodes.paragraph.create(null, mySchema.text('Two'));
+    const doc1 = mySchema.nodes.doc.create(null, [para1, para2]);
+
+    const mocktr = {
+      doc: {
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        nodeAt: () => {
+          return { doc1 };
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: null,
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'Normal',
+            },
+          },
+        ],
+      },
+      steps: [],
+      docs: [],
+      mapping: { maps: [], from: 0, to: 0 },
+      curSelectionFor: 0,
+      updated: 0,
+      meta: {},
+      time: 1684831731977,
+      curSelection: { type: 'text', anchor: 1, head: 1 },
+      storedMarks: null,
+      setSelection() {
+        return true;
+      },
+    } as unknown as Transaction;
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'block+' },
+        text: {},
+        paragraph: {
+          content: 'text*',
+          group: 'block',
+          toDOM: () => ['p', 0],
+          parseDOM: [{ tag: 'p' }],
+        },
+        ...tableNodes({
+          tableGroup: 'block',
+          cellContent: 'paragraph',
+          cellAttributes: {},
+        }),
+      },
+    });
+
+    const doc = schema.node('doc', null, [
+      schema.node('table', null, [
+        schema.node('table_row', null, [
+          schema.node('table_cell', null, [
+            schema.node('paragraph', null, [schema.text('A')]),
+          ]),
+          schema.node('table_cell', null, [
+            schema.node('paragraph', null, [schema.text('B')]),
+          ]),
+        ]),
+      ]),
+    ]);
+
+    const mockstate = {
+      doc: {
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: null,
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'Normal',
+            },
+          },
+        ],
+      },
+      // selection: { type: 'text', anchor: 1, head: 1 },
+      selection: CellSelection.create(doc, 2, 2),
+    } as unknown as EditorState;
+    const mockdoc = {
+      type: 'doc',
+      attrs: {
+        layout: null,
+        padding: null,
+        width: null,
+        counterFlags: null,
+        capcoMode: 0,
+      },
+      content: [
+        {
+          type: 'paragraph',
+          attrs: {
+            align: null,
+            color: null,
+            id: null,
+            indent: null,
+            lineSpacing: null,
+            paddingBottom: null,
+            paddingTop: null,
+            capco: null,
+            styleName: 'Normal',
+          },
+        },
+      ],
+    } as unknown as Node;
+    const mockdispatch = () => {};
+    const mockval = {
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: 1,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: false,
+        color: 'blue',
+        fontSize: '10',
+        fontName: 'Tahoma',
+        indent: '10',
+        hasNumbering: true,
+      },
+      styleName: 'test',
+      editorView: {},
+    };
+    customstylecommand.createNewStyle(
+      mockval,
+      mocktr,
+      mockstate,
+      mockdispatch,
+      mockdoc
+    );
+    // applyStyle(mockval, mockval.styleName, mockstate, mocktr);
+    expect(spy2).toHaveBeenCalled();
+  });
+
+  it('should handle createNewStyle1', () => {
     const spy2 = jest.spyOn(customstylecommand, 'showAlert');
     jest.spyOn(customstyles, 'saveStyle').mockResolvedValue([
       {
@@ -5201,6 +5474,126 @@ describe('removeAllMarksExceptLink', () => {
     } as unknown as Transform;
     expect(removeAllMarksExceptLink(0, 1, tr)).toBeDefined();
   });
+
+  it('removes all marks except link for tables and override', () => {
+    const linkMark = schema.marks.link.create({ href: 'https://test.com' });
+    const boldMark = schema.marks.strong.create();
+    const node = schema.text('Hello', [linkMark, boldMark]);
+    const mySchema = new Schema({
+      nodes: {
+        // Define the document node
+        doc: {
+          content: 'block+',
+        },
+        // Define the paragraph node
+        paragraph: {
+          content: 'text*',
+          group: 'block',
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        // Define the text node
+        text: {
+          group: 'inline',
+        },
+      },
+    });
+    const mockDoc = Node.fromJSON(mySchema, {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Hello, ProseMirror!' }],
+        },
+      ],
+    });
+    const tr = {
+      doc: mockDoc,
+      removeMark: () => {
+        return { doc: mockDoc };
+      },
+      selection: {
+        $from: {
+          start: () => {
+            return 1;
+          },
+        },
+        $to: {
+          end: () => {
+            return 2;
+          },
+        },
+      },
+    } as unknown as Transform;
+    expect(
+      removeAllMarksExceptLinkForTableColumnCell(0, node, tr)
+    ).toBeDefined();
+  });
+
+  it('removes all marks except link for tables and override', () => {
+    const mySchema = new Schema({
+      nodes: {
+        // Define the document node
+        doc: {
+          content: 'block+',
+        },
+        // Define the paragraph node
+        paragraph: {
+          content: 'text*',
+          group: 'block',
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        // Define the text node
+        text: {
+          group: 'inline',
+        },
+      },
+    });
+
+    const bold = schema.marks.strong.create();
+    const link = schema.marks.link.create({ href: 'https://x.com' });
+
+    const para = schema.nodes.paragraph.create(
+      null,
+      schema.text('Hello', [bold, link])
+    );
+    const mockDoc = Node.fromJSON(mySchema, {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Hello, ProseMirror!' }],
+        },
+      ],
+    });
+    const tr = {
+      doc: mockDoc,
+      removeMark: () => {
+        return { doc: mockDoc };
+      },
+      selection: {
+        $from: {
+          start: () => {
+            return 1;
+          },
+        },
+        $to: {
+          end: () => {
+            return 2;
+          },
+        },
+      },
+    } as unknown as Transform;
+    expect(
+      removeAllMarksExceptLinkForTableColumnCell(0, para, tr)
+    ).toBeDefined();
+  });
+
   it('should handle removeAllMarksExceptLink when mark.attrs[ATTR_OVERRIDDEN] && link === mark.type.name', () => {
     const mySchema = new Schema({
       nodes: {
@@ -5496,5 +5889,343 @@ describe('compareAttributes', () => {
 describe('resetNodeAttrs', () => {
   it('should handle resetNodeAttrs', () => {
     expect(resetNodeAttrs({}, {})).toBeDefined();
+  });
+});
+
+describe('applyStyleToEachNode', () => {
+  let state: EditorState;
+  let tr: Transform;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const doc = schema.nodes.doc.create(
+      null,
+      schema.nodes.paragraph.create(null, schema.text('Hello'))
+    );
+    const schema3 = new Schema({
+      nodes: {
+        doc: {
+          attrs: {
+            layout: { default: null },
+            padding: { default: null },
+            width: { default: null },
+            counterFlags: { default: null },
+            capcoMode: { default: 0 },
+          },
+          content: 'paragraph+',
+        },
+        paragraph: {
+          attrs: {
+            align: { default: 'left' },
+            color: { default: null },
+            id: { default: null },
+            indent: { default: null },
+            lineSpacing: { default: null },
+            paddingBottom: { default: null },
+            paddingTop: { default: null },
+            capco: { default: null },
+            styleName: { default: 'AFDP Bullet' },
+          },
+          content: 'text*',
+          marks: '',
+        },
+        text: {
+          marks: 'mark-font-size mark-font-type',
+        },
+      },
+      marks: {
+        'mark-font-size': {
+          attrs: {
+            pt: { default: 11 },
+            overridden: { default: false },
+          },
+        },
+        strong: {
+          attrs: {
+            pt: { default: false },
+            overridden: { default: false },
+          },
+        },
+        em: {
+          attrs: {
+            pt: { default: false },
+            overridden: { default: false },
+          },
+        },
+        'mark-text-color': {
+          attrs: {
+            pt: { default: null },
+            overridden: { default: false },
+          },
+        },
+        'mark-font-type': {
+          attrs: {
+            name: { default: 'Arial' },
+            overridden: { default: false },
+          },
+        },
+      },
+    });
+    const mockState = {
+      schema: schema3,
+      doc: schema3.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
+            },
+            content: [
+              {
+                type: 'text',
+                marks: [],
+                text: 'Your text here',
+              },
+            ],
+          },
+        ],
+      }),
+    };
+    state = mockState as unknown as EditorState;
+    tr = new Transform(doc);
+  });
+
+  it('applies style using positions array', () => {
+    const pos = 1;
+    const mockval = {
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: 1,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: false,
+        color: 'blue',
+        fontSize: '10',
+        fontName: 'Tahoma',
+        indent: '10',
+        hasNumbering: true,
+      },
+      styleName: 'test',
+      editorView: {},
+    };
+
+    const result = applyStyleToEachNode(
+      state,
+      0,
+      tr.doc.nodeSize - 2,
+      tr,
+      mockval,
+      'styleName',
+      [pos]
+    );
+    expect(result).toBe(tr);
+  });
+
+  it('apply customStyle for table', () => {
+    const linkMark = schema.marks.link.create({ href: 'https://test.com' });
+    const boldMark = schema.marks.strong.create();
+    const node = schema.text('Hello', [linkMark, boldMark]);
+    const mySchema = new Schema({
+      nodes: {
+        // Define the document node
+        doc: {
+          content: 'block+',
+        },
+        // Define the paragraph node
+        paragraph: {
+          content: 'text*',
+          group: 'block',
+          parseDOM: [{ tag: 'p' }],
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        // Define the text node
+        text: {
+          group: 'inline',
+        },
+      },
+    });
+    const mockDoc = Node.fromJSON(mySchema, {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Hello, ProseMirror!' }],
+        },
+      ],
+    });
+    const tr = {
+      doc: mockDoc,
+      removeMark: () => {
+        return { doc: mockDoc };
+      },
+      selection: {
+        $from: {
+          start: () => {
+            return 1;
+          },
+        },
+        $to: {
+          end: () => {
+            return 2;
+          },
+        },
+      },
+    } as unknown as Transform;
+    const mockval = {
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: 1,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: false,
+        color: 'blue',
+        fontSize: '10',
+        fontName: 'Tahoma',
+        indent: '10',
+        hasNumbering: true,
+        indentPosition: '1.5',
+      },
+      styleName: 'test',
+      editorView: {},
+    };
+    expect(
+      applyStyleForTableColumnCell(mockval, 'stylename', state, tr, node, 0)
+    ).toBeDefined();
+  });
+
+  it('applies style using nodesBetween when positions is empty', () => {
+    const mockval = {
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: 1,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: false,
+        color: 'blue',
+        fontSize: '10',
+        fontName: 'Tahoma',
+        indent: '10',
+        hasNumbering: true,
+      },
+      styleName: 'test',
+      editorView: {},
+    };
+    const result = applyStyleToEachNode(
+      state,
+      0,
+      tr.doc.nodeSize - 2,
+      tr,
+      mockval,
+      'styleName',
+      []
+    );
+    expect(result).toBe(tr);
+  });
+
+  it('skips non-paragraph nodes in nodesBetween', () => {
+    const customSchema = new Schema({
+      nodes: {
+        doc: { content: 'block+' },
+        heading: { content: 'text*', group: 'block' },
+        text: { inline: true },
+      },
+    });
+    const doc = customSchema.nodes.doc.create(
+      null,
+      customSchema.nodes.heading.create(null, customSchema.text('Title'))
+    );
+    const tr2 = new Transform(doc);
+    const mockval = {
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: 1,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: false,
+        color: 'blue',
+        fontSize: '10',
+        fontName: 'Tahoma',
+        indent: '10',
+        hasNumbering: true,
+      },
+      styleName: 'test',
+      editorView: {},
+    };
+
+    const result = applyStyleToEachNode(
+      state,
+      0,
+      tr2.doc.nodeSize - 2,
+      tr2,
+      mockval,
+      'styleName',
+      []
+    );
+    expect(result).toBe(tr2);
+  });
+
+  it('always calls applyLineStyle at the end', () => {
+    const mockval = {
+      styles: {
+        hasBullet: true,
+        bulletLevel: '25CF',
+        styleLevel: 1,
+        paragraphSpacingBefore: '10',
+        paragraphSpacingAfter: '10',
+        strong: true,
+        boldNumbering: true,
+        em: false,
+        color: 'blue',
+        fontSize: '10',
+        fontName: 'Tahoma',
+        indent: '10',
+        hasNumbering: true,
+      },
+      styleName: 'test',
+      editorView: {},
+    };
+    const spy = jest
+      .spyOn(cusstylecommand, 'applyStyleForTableColumnCell')
+      .mockReturnValue(tr);
+
+    applyStyleToEachNode(
+      state,
+      0,
+      tr.doc.nodeSize - 2,
+      tr,
+      mockval,
+      'styleName'
+    );
+    expect(spy).not.toHaveBeenCalled();
   });
 });

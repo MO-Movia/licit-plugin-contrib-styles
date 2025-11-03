@@ -21,6 +21,9 @@ import {
   TextAlignCommand,
   IndentCommand,
   getLineSpacingValue,
+  isColumnCellSelected,
+  getSelectedCellPositions,
+  findParagraphsInNode
 } from '@modusoperandi/licit-ui-commands';
 import { AlertInfo } from './ui/AlertInfo';
 import { CustomStyleEditor } from './ui/CustomStyleEditor';
@@ -217,6 +220,10 @@ export class CustomStyleCommand extends UICommand {
     //ignore
   }
   executeCustom(state: EditorState, tr: Transform): Transform {
+    return tr;
+  }
+
+  executeCustomStyleForTable(state: EditorState, tr: Transform): Transform {
     return tr;
   }
 
@@ -739,6 +746,103 @@ export function getMarkByStyleName(styleName: string, schema: Schema) {
   }
   return marks;
 }
+
+function getUpdatedAttrs(
+  node: Node,
+  styleProp: Style,
+  styleName: string
+): Record<string, unknown> {
+  const newattrs = { ...node.attrs };
+
+  if (!node?.attrs?.overriddenIndent) {
+    newattrs.indent = null;
+  }
+  newattrs.styleName = styleName;
+  if (styleProp.styles.indentPosition) {
+    newattrs.indentPosition = styleProp.styles.indentPosition;
+    newattrs.hangingIndent = true;
+  }
+
+  return newattrs;
+}
+
+function applyCommandAttrs(
+  element: UICommand,
+  node: Node,
+  styleProp: Style,
+  newattrs: Record<string, unknown>
+): Record<string, unknown> {
+  if (!styleProp?.styles) return newattrs;
+
+  if (element instanceof TextAlignCommand) {
+    newattrs.align = node?.attrs?.overriddenAlign
+      ? node.attrs.overriddenAlignValue
+      : styleProp.styles.align;
+  } else if (element instanceof TextLineSpacingCommand) {
+    newattrs.lineSpacing = node?.attrs?.overriddenLineSpacing
+      ? node.attrs.overriddenLineSpacingValue
+      : getLineSpacingValue(styleProp.styles.lineHeight || '');
+  } else if (element instanceof ParagraphSpacingCommand) {
+    newattrs.paragraphSpacingAfter = styleProp.styles.paragraphSpacingAfter || null;
+    newattrs.paragraphSpacingBefore = styleProp.styles.paragraphSpacingBefore || null;
+  } else if (element instanceof IndentCommand) {
+    if (node?.attrs?.overriddenIndent) {
+      newattrs.indent = node.attrs.overriddenIndentValue;
+    } else if (styleProp.styles.isLevelbased) {
+      newattrs.indent = styleProp.styles.styleLevel;
+    } else {
+      newattrs.indent = styleProp.styles.indent;
+    }
+  }
+  return newattrs;
+}
+
+export function applyStyleForTableColumnCell(
+  styleProp: Style,
+  styleName: string,
+  state: EditorState,
+  tr: Transform,
+  node: Node,
+  startPos: number,
+  opt?: number
+) {
+  const loading = !styleProp;
+  tr = removeAllMarksExceptLinkForTableColumnCell(startPos, node, tr);
+
+  if (loading || !opt) {
+    styleProp = getCustomStyleByName(styleName);
+  }
+
+  if (!styleProp?.styles) return tr;
+  const _commands = getCustomStyleCommands(styleProp.styles);
+  let newattrs = getUpdatedAttrs(node, styleProp, styleName);
+
+  _commands.forEach((element) => {
+    newattrs = applyCommandAttrs(element, node, styleProp, newattrs);
+    if (
+      element.executeCustom &&
+      typeof element.executeCustom === 'function'
+    ) {
+      const returnVal = element.executeCustomStyleForTable(state, tr, startPos, startPos + node.nodeSize);
+      if (typeof returnVal != 'boolean') {
+        tr = returnVal;
+      }
+    }
+  });
+  const originalSelectionPos = state.selection?.from;
+  const storedmarks = getMarkByStyleName(styleName, state.schema);
+  newattrs.id = null === newattrs.id ? '' : null;
+  if (isAllowedNode(node)) {
+    tr = tr.setNodeMarkup(startPos, undefined, newattrs);
+  }
+  (tr as Transaction).storedMarks = storedmarks;
+  if (originalSelectionPos) {
+    (tr as Transaction).setSelection(TextSelection.create(tr.doc, originalSelectionPos));
+  }
+
+  return tr;
+}
+
 function applyStyleEx(
   styleProp: Style,
   styleName: string,
@@ -785,7 +889,7 @@ function applyStyleEx(
         if (element instanceof TextAlignCommand) {
           // if user override the align style then retian that align style
           // using the overridenAlign property we can find align style overrided or not
-          if (node?.attrs?.overriddenAlign) {
+          if (String(node?.attrs?.overriddenAlign) === 'true') {
             newattrs.align = node.attrs.overriddenAlignValue;
           } else {
             newattrs.align = styleProp.styles.align;
@@ -795,7 +899,7 @@ function applyStyleEx(
           // Issue fix : Linespacing Double and Single not applied in the sample text paragraph
           // if user override the lineSpacing style then retian that lineSpacing style
           // using the overriddenLineSpacing property we can find lineSpacing style overrided or not
-          if (node?.attrs?.overriddenLineSpacing) {
+          if (String(node?.attrs?.overriddenLineSpacing) === 'true') {
             newattrs.lineSpacing = node?.attrs?.overriddenLineSpacingValue;
           } else {
             newattrs.lineSpacing = getLineSpacingValue(
@@ -813,7 +917,8 @@ function applyStyleEx(
           // Bug fix: indent not working along with level
           // if user override the indent style then retian that indent style
           // using the overriddenIndent property we can find indent style overrided or not
-          if (node?.attrs?.overriddenIndent) {
+
+          if (String(node?.attrs?.overriddenIndent) === 'true') {
             newattrs.indent = node.attrs.overriddenIndentValue;
           } else {
             newattrs.indent = styleProp.styles.isLevelbased
@@ -1268,6 +1373,40 @@ function _setNodeAttribute(
   return tr;
 }
 
+export function removeAllMarksExceptLinkForTableColumnCell(
+  pos: number,
+  node: Node,
+  tr: Transform
+) {
+
+  if (!node || node.type.name !== 'paragraph') {
+    return tr;
+  }
+  let offset = pos + 1;
+  const tasks = [];
+  node.forEach((child) => {
+    if (child.isText && child.marks?.length > 0) {
+      child.marks.forEach((mark) => {
+        if (
+          !mark.attrs[ATTR_OVERRIDDEN] &&
+          'link' !== mark.type.name &&
+          'override' !== mark.type.name
+        ) {
+          tasks.push({
+            node: child,
+            pos: offset,
+            mark,
+          });
+        }
+      });
+    }
+    offset += child.nodeSize;
+  });
+
+  // });
+  return handleRemoveMarks(tr, tasks);
+}
+
 // [FS] IRAD-1087 2020-11-02
 // Issue fix: Missing the applied link after applying a style
 export function removeAllMarksExceptLink(
@@ -1282,6 +1421,7 @@ export function removeAllMarksExceptLink(
         if (
           !mark.attrs[ATTR_OVERRIDDEN] &&
           'link' !== mark.type.name &&
+          'mark-hanging-indent' !== mark.type.name &&
           'override' !== mark.type.name &&
           'spacer' !== mark.type.name
         ) {
@@ -1320,15 +1460,22 @@ export function applyStyle(
 ) {
   const { selection } = state;
   let startPos, endPos;
+  let positions = [];
   if (selection instanceof CellSelection) {
-    // When selecting multiple cells
-    const $anchor = selection.$anchorCell;
-    const $head = selection.$headCell;
+    if (isColumnCellSelected(selection)) {
+      positions = getSelectedCellPositions(selection);
+    }
+    else {
+      // When selecting multiple cells
+      const $anchor = selection.$anchorCell;
+      const $head = selection.$headCell;
 
-    const firstCell = $anchor.pos < $head.pos ? $anchor : $head;
-    const lastCell = $anchor.pos < $head.pos ? $head : $anchor;
-    startPos = firstCell.pos;
-    endPos = lastCell.pos + lastCell.nodeAfter.nodeSize;
+      const firstCell = $anchor.pos < $head.pos ? $anchor : $head;
+      const lastCell = $anchor.pos < $head.pos ? $head : $anchor;
+      startPos = firstCell.pos;
+      endPos = lastCell.pos + lastCell.nodeAfter.nodeSize;
+    }
+
   } else {
     startPos = selection.$from.before(
       selection.$from.depth === 0 ? 1 : selection.$from.depth
@@ -1337,7 +1484,7 @@ export function applyStyle(
   }
 
 
-  return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName);
+  return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName, positions);
 }
 
 // apply style to each selected node (when style applied to multiple paragraphs)
@@ -1347,15 +1494,29 @@ export function applyStyleToEachNode(
   to: number,
   tr: Transaction | Transform,
   style: Style,
-  styleName: string
+  styleName: string,
+  positions: number[] = []
 ) {
   const way = 0;
-  tr.doc.nodesBetween(from, to, (node, startPos) => {
-    if (node.type.name === 'paragraph') {
-      // Issue fix: When style applied to multiple paragraphs, some of the paragraph's objectId found in deletedObjectId's
-      tr = applyStyleEx(style, styleName, state, tr, node, startPos, to, way);
-    }
-  });
+  if (positions.length > 0) {
+    positions.forEach(pos => {
+      const node = tr.doc.nodeAt(pos);
+      findParagraphsInNode(node, pos, (paraNode, paraPos) => {
+        if (node && (paraNode.type.name === 'paragraph' || paraNode.type.name === 'enhanced_table_figure_notes')) {
+          tr = applyStyleForTableColumnCell(style, styleName, state, tr, paraNode, paraPos);
+        }
+      });
+    });
+  }
+  else {
+    tr.doc.nodesBetween(from, to, (node, startPos) => {
+      if (node.type.name === 'paragraph') {
+        // Issue fix: When style applied to multiple paragraphs, some of the paragraph's objectId found in deletedObjectId's
+        tr = applyStyleEx(style, styleName, state, tr, node, startPos, to, way);
+      }
+    });
+  }
+
   tr = applyLineStyle(state, tr, null, 0);
   return tr;
 }
@@ -1395,10 +1556,10 @@ export function applyLineStyle(
       from = firstCell.pos;
       to = lastCell.pos + lastCell.nodeAfter.nodeSize;
     } else {
-      from = selection.$from.before(
+      from = selection?.$from.before(
         selection.$from.depth === 0 ? 1 : selection.$from.depth
       );
-      to = selection.$to?.end();
+      to = selection?.$to?.end();
     }
 
     // [FS] IRAD-1168 2021-06-21

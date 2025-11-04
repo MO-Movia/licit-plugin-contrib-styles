@@ -814,7 +814,9 @@ export function applyStyleForTableColumnCell(
   if (!styleProp?.styles) return tr;
   const _commands = getCustomStyleCommands(styleProp.styles);
   let newattrs = getUpdatedAttrs(node, styleProp, styleName);
-  tr = removeHangingIndentMark(startPos, startPos + node?.nodeSize, tr);
+  if (!styleProp.styles.isHangingIndentapplied) {
+    tr = removeHangingIndentMark(startPos, startPos + node?.nodeSize, tr);
+  }
 
   _commands.forEach((element) => {
     newattrs = applyCommandAttrs(element, node, styleProp, newattrs);
@@ -879,8 +881,9 @@ function applyStyleEx(
     newattrs.styleName = styleName;
     newattrs.indentPosition = styleProp.styles.indentPosition;
     newattrs.hangingIndent = styleProp.styles.isHangingIndentapplied;
-    tr = removeHangingIndentMark(startPos, endPos, tr);
-
+    if (!newattrs.hangingIndent) {
+      tr = removeHangingIndentMark(startPos, endPos, tr);
+    }
     _commands.forEach((element) => {
       if (styleProp?.styles) {
         // to set the node attribute for text-align

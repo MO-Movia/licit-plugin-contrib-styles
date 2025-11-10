@@ -23,7 +23,7 @@ import {
   getLineSpacingValue,
   isColumnCellSelected,
   getSelectedCellPositions,
-  findParagraphsInNode
+  findParagraphsInNode,
 } from '@modusoperandi/licit-ui-commands';
 import { AlertInfo } from './ui/AlertInfo';
 import { CustomStyleEditor } from './ui/CustomStyleEditor';
@@ -169,7 +169,11 @@ function getCustomStyleCommandsEx(
     case LEVELBASEDINDENT:
       // [FS] IRAD-1162 2021-1-25
       // Bug fix: indent not working along with level
-      if (customStyle[property] && customStyle[LEVEL] && Number(customStyle[LEVEL]) > 0) {
+      if (
+        customStyle[property] &&
+        customStyle[LEVEL] &&
+        Number(customStyle[LEVEL]) > 0
+      ) {
         commands.push(new IndentCommand(customStyle[LEVEL]));
       }
       break;
@@ -783,8 +787,10 @@ function applyCommandAttrs(
       ? node.attrs.overriddenLineSpacingValue
       : getLineSpacingValue(styleProp.styles.lineHeight || '');
   } else if (element instanceof ParagraphSpacingCommand) {
-    newattrs.paragraphSpacingAfter = styleProp.styles.paragraphSpacingAfter || null;
-    newattrs.paragraphSpacingBefore = styleProp.styles.paragraphSpacingBefore || null;
+    newattrs.paragraphSpacingAfter =
+      styleProp.styles.paragraphSpacingAfter || null;
+    newattrs.paragraphSpacingBefore =
+      styleProp.styles.paragraphSpacingBefore || null;
   } else if (element instanceof IndentCommand) {
     if (node?.attrs?.overriddenIndent) {
       newattrs.indent = node.attrs.overriddenIndentValue;
@@ -819,11 +825,13 @@ export function applyStyleForTableColumnCell(
 
   _commands.forEach((element) => {
     newattrs = applyCommandAttrs(element, node, styleProp, newattrs);
-    if (
-      element.executeCustom &&
-      typeof element.executeCustom === 'function'
-    ) {
-      const returnVal = element.executeCustomStyleForTable(state, tr, startPos, startPos + node.nodeSize);
+    if (element.executeCustom && typeof element.executeCustom === 'function') {
+      const returnVal = element.executeCustomStyleForTable(
+        state,
+        tr,
+        startPos,
+        startPos + node.nodeSize
+      );
       if (typeof returnVal != 'boolean') {
         tr = returnVal;
       }
@@ -837,7 +845,9 @@ export function applyStyleForTableColumnCell(
   }
   (tr as Transaction).storedMarks = storedmarks;
   if (originalSelectionPos) {
-    (tr as Transaction).setSelection(TextSelection.create(tr.doc, originalSelectionPos));
+    (tr as Transaction).setSelection(
+      TextSelection.create(tr.doc, originalSelectionPos)
+    );
   }
 
   return tr;
@@ -946,7 +956,9 @@ function applyStyleEx(
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     (tr as Transaction).storedMarks = storedmarks;
     if (originalSelectionPos) {
-      (tr as Transaction).setSelection(TextSelection.create(tr.doc, originalSelectionPos));
+      (tr as Transaction).setSelection(
+        TextSelection.create(tr.doc, originalSelectionPos)
+      );
     }
   }
   return tr;
@@ -1353,7 +1365,10 @@ export function applyLatestStyle(
 }
 
 function isAllowedNode(node) {
-  return node.type.name === 'paragraph' || node.type.name === 'enhanced_table_figure_notes';
+  return (
+    node.type.name === 'paragraph' ||
+    node.type.name === 'enhanced_table_figure_notes'
+  );
 }
 
 // [FS] IRAD-1088 2020-10-05
@@ -1378,7 +1393,6 @@ export function removeAllMarksExceptLinkForTableColumnCell(
   node: Node,
   tr: Transform
 ) {
-
   if (!node || node.type.name !== 'paragraph') {
     return tr;
   }
@@ -1464,8 +1478,7 @@ export function applyStyle(
   if (selection instanceof CellSelection) {
     if (isColumnCellSelected(selection)) {
       positions = getSelectedCellPositions(selection);
-    }
-    else {
+    } else {
       // When selecting multiple cells
       const $anchor = selection.$anchorCell;
       const $head = selection.$headCell;
@@ -1475,7 +1488,6 @@ export function applyStyle(
       startPos = firstCell.pos;
       endPos = lastCell.pos + lastCell.nodeAfter.nodeSize;
     }
-
   } else {
     startPos = selection.$from.before(
       selection.$from.depth === 0 ? 1 : selection.$from.depth
@@ -1483,8 +1495,15 @@ export function applyStyle(
     endPos = selection.$to?.end();
   }
 
-
-  return applyStyleToEachNode(state, startPos, endPos, tr, style, styleName, positions);
+  return applyStyleToEachNode(
+    state,
+    startPos,
+    endPos,
+    tr,
+    style,
+    styleName,
+    positions
+  );
 }
 
 // apply style to each selected node (when style applied to multiple paragraphs)
@@ -1499,16 +1518,26 @@ export function applyStyleToEachNode(
 ) {
   const way = 0;
   if (positions.length > 0) {
-    positions.forEach(pos => {
+    positions.forEach((pos) => {
       const node = tr.doc.nodeAt(pos);
       findParagraphsInNode(node, pos, (paraNode, paraPos) => {
-        if (node && (paraNode.type.name === 'paragraph' || paraNode.type.name === 'enhanced_table_figure_notes')) {
-          tr = applyStyleForTableColumnCell(style, styleName, state, tr, paraNode, paraPos);
+        if (
+          node &&
+          (paraNode.type.name === 'paragraph' ||
+            paraNode.type.name === 'enhanced_table_figure_notes')
+        ) {
+          tr = applyStyleForTableColumnCell(
+            style,
+            styleName,
+            state,
+            tr,
+            paraNode,
+            paraPos
+          );
         }
       });
     });
-  }
-  else {
+  } else {
     tr.doc.nodesBetween(from, to, (node, startPos) => {
       if (node.type.name === 'paragraph') {
         // Issue fix: When style applied to multiple paragraphs, some of the paragraph's objectId found in deletedObjectId's
@@ -1703,7 +1732,10 @@ export function getNode(
   let selectedNode = null;
   selectedNodes.splice(0);
   tr.doc.nodesBetween(from, to, (node, startPos) => {
-    if (node.type.name === 'paragraph' || node.type.name === 'enhanced_table_figure_notes') {
+    if (
+      node.type.name === 'paragraph' ||
+      node.type.name === 'enhanced_table_figure_notes'
+    ) {
       if (null == selectedNode) {
         selectedNode = node;
       }

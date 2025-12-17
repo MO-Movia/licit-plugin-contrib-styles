@@ -11,7 +11,6 @@ import {
   applyLatestStyle,
   getMarkByStyleName,
   applyLineStyle,
-  applyStyleToEachNode,
 } from './CustomStyleCommand';
 import {
   getCustomStyleByName,
@@ -24,7 +23,7 @@ import {
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 import { getLineSpacingValue } from '@modusoperandi/licit-ui-commands';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
-import { Node, Schema, Slice } from 'prosemirror-model';
+import { Node, Schema } from 'prosemirror-model';
 import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand';
 import { applyEffectiveSchema } from './EditorSchema';
 import type { StyleRuntime } from './StyleRuntime';
@@ -33,7 +32,6 @@ const ENTERKEYCODE = 13;
 const BACKSPACEKEYCODE = 8;
 const PARA_POSITION_DIFF = 4;
 const ATTR_STYLE_NAME = 'styleName';
-let slice1;
 
 const isNodeHasAttribute = (node, attrName) => {
   return attrName in (node?.attrs || {});
@@ -80,12 +78,6 @@ export class CustomstylePlugin extends Plugin {
       },
 
       props: {
-        handlePaste(_view, _event, slice) {
-          if ((slice.content as unknown as Slice)?.content[0]?.attrs) {
-            slice1 = slice;
-          }
-          return false;
-        },
         handleDOMEvents: {
           keydown(view) {
             csview = view;
@@ -106,14 +98,10 @@ export class CustomstylePlugin extends Plugin {
             prevState,
             csview,
             transactions,
-            slice1
           );
         }
         firstTime = ref.firstTime;
         loaded = ref.loaded;
-        if (1 === tr?.updated) {
-          slice1 = null;
-        }
         return tr;
       },
     });
@@ -158,7 +146,6 @@ export function onUpdateAppendTransaction(
   prevState,
   csview,
   transactions,
-  slice1
 ) {
   tr = applyStyleForEmptyParagraph(nextState, tr);
   ref.firstTime = false;
@@ -218,116 +205,6 @@ export function onUpdateAppendTransaction(
     }
   }
   tr = applyLineStyleForBoldPartial(nextState, tr, transactions.length && transactions[0].getMeta('paste'));
-  if (0 < transactions.length && transactions[0].getMeta('paste')) {
-    let _startPos = 0;
-    let _endPos = 0;
-    let node2 = null;
-    let demoPos = null;
-    let node1 = null;
-    for (let index = 0; index < slice1.content.childCount; index++) {
-      if (
-        !(
-          slice1.content.content[index].type.name === 'table' ||
-          slice1.content.content[index].type.name === 'doc'
-        )
-      ) {
-        if (index !== 0) {
-          _startPos = _endPos;
-        }
-        demoPos = prevState.selection.from;
-        node1 = prevState.doc.resolve(demoPos).parent;
-        if (index === 0) {
-          _startPos = csview.state.selection.$from.before(
-            csview.state.selection.$from.depth === 0
-              ? 1
-              : csview.state.selection.$from.depth
-          );
-          node2 = csview.state.tr.doc.nodeAt(_startPos);
-        } else {
-          node2 = csview.state.tr.doc.nodeAt(demoPos);
-        }
-
-        if (!node1.content?.content[0]?.attrs) {
-          const opt = 1;
-          if (node2?.type?.name === 'table') {
-            const styleName =
-              slice1.content.content[index].attrs.styleName ?? 'Normal';
-            const node = nextState.tr.doc.nodeAt(_startPos);
-            const len = node.nodeSize;
-            _endPos = _startPos + len;
-            tr = applyLatestStyle(
-              styleName,
-              nextState,
-              tr,
-              node,
-              _startPos,
-              _endPos,
-              null,
-              opt
-            );
-          } else {
-            if (index === 0) {
-              _startPos = csview.state.selection.from - 1;
-            }
-            const node = nextState.tr.doc.nodeAt(_startPos);
-            //FIX: Copied text show Normal style name instead of showing the applied style in the current paragraph.
-            let styleName =
-              null === slice1.content.content[index]?.attrs?.styleName
-                ? node?.attrs?.styleName
-                : slice1.content.content[index]?.attrs?.styleName;
-            styleName = styleName ?? RESERVED_STYLE_NONE;
-            const len = node.nodeSize;
-            _endPos = _startPos + len;
-            tr = applyLatestStyle(
-              styleName ?? '',
-              nextState,
-              tr,
-              node,
-              _startPos,
-              _endPos - 1,
-              null,
-              opt
-            );
-            const newattrs = { ...node.attrs };
-            newattrs.styleName = styleName;
-            tr = tr.setNodeMarkup(_startPos, undefined, newattrs);
-          }
-        } else {
-          if (node2.type.name === 'table') {
-            const styleName = node1.attrs.styleName ?? 'Normal';
-            const node = nextState.tr.doc.nodeAt(_startPos);
-            const len = node.nodeSize;
-            const endPos = _startPos + len;
-            const styleProp = getCustomStyleByName(styleName);
-            tr = applyStyleToEachNode(
-              nextState,
-              _startPos,
-              endPos,
-              tr,
-              styleProp,
-              styleName
-            );
-          } else {
-            const styleName = node1.attrs.styleName ?? 'Normal';
-            const node = nextState.tr.doc.nodeAt(_startPos);
-            const len = node.nodeSize;
-            const endPos = _startPos + len;
-            const styleProp = getCustomStyleByName(styleName);
-            tr = applyStyleToEachNode(
-              nextState,
-              _startPos,
-              endPos,
-              tr,
-              styleProp,
-              styleName
-            );
-          }
-        }
-      }
-    }
-    tr = tr?.scrollIntoView();
-  }
-
   return tr;
 }
 
@@ -761,7 +638,7 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
   // Recreate updated paragraph
   const newParagraph = node.type.create(node.attrs, newContent);
   tr.replaceWith(pos, pos + node.nodeSize, newParagraph);
-   (tr as Transaction).setSelection(TextSelection.create(tr.doc, state.selection?.from));
+  (tr as Transaction).setSelection(TextSelection.create(tr.doc, state.selection?.from));
 
   return tr;
 }

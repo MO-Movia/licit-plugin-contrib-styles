@@ -25,8 +25,8 @@
     "verify": "npm run lint -- --fix && npm run ci:build && npm run test:coverage && echo 'All Tests Passed!'"
   },
   "peerDependencies": {
-    "@modusoperandi/licit-doc-attrs-step": "file:modusoperandi-licit-doc-attrs-step-3.0.0.tgz",
-    "@modusoperandi/licit-ui-commands": "file:modusoperandi-licit-ui-commands-3.0.0.tgz",
+    "@modusoperandi/licit-doc-attrs-step": "^3.0.0",
+    "@modusoperandi/licit-ui-commands": "^3.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

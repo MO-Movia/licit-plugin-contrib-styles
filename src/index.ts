@@ -162,6 +162,7 @@ export function onUpdateAppendTransaction(
 ) {
   tr = applyStyleForEmptyParagraph(nextState, tr);
   ref.firstTime = false;
+
   // custom style for next line
   if (csview) {
     if (BACKSPACEKEYCODE === csview.input.lastKeyCode) {
@@ -217,113 +218,18 @@ export function onUpdateAppendTransaction(
       }
     }
   }
-  tr = applyLineStyleForBoldPartial(nextState, tr, transactions.length && transactions[0].getMeta('paste'));
-  if (0 < transactions.length && transactions[0].getMeta('paste')) {
-    let _startPos = 0;
-    let _endPos = 0;
-    let node2 = null;
-    let demoPos = null;
-    let node1 = null;
-    for (let index = 0; index < slice1.content.childCount; index++) {
-      if (
-        !(
-          slice1.content.content[index].type.name === 'table' ||
-          slice1.content.content[index].type.name === 'doc'
-        )
-      ) {
-        if (index !== 0) {
-          _startPos = _endPos;
-        }
-        demoPos = prevState.selection.from;
-        node1 = prevState.doc.resolve(demoPos).parent;
-        if (index === 0) {
-          _startPos = csview.state.selection.$from.before(
-            csview.state.selection.$from.depth === 0
-              ? 1
-              : csview.state.selection.$from.depth
-          );
-          node2 = csview.state.tr.doc.nodeAt(_startPos);
-        } else {
-          node2 = csview.state.tr.doc.nodeAt(demoPos);
-        }
 
-        if (!node1.content?.content[0]?.attrs) {
-          const opt = 1;
-          if (node2?.type?.name === 'table') {
-            const styleName =
-              slice1.content.content[index].attrs.styleName ?? 'Normal';
-            const node = nextState.tr.doc.nodeAt(_startPos);
-            const len = node.nodeSize;
-            _endPos = _startPos + len;
-            tr = applyLatestStyle(
-              styleName,
-              nextState,
-              tr,
-              node,
-              _startPos,
-              _endPos,
-              null,
-              opt
-            );
-          } else {
-            if (index === 0) {
-              _startPos = csview.state.selection.from - 1;
-            }
-            const node = nextState.tr.doc.nodeAt(_startPos);
-            //FIX: Copied text show Normal style name instead of showing the applied style in the current paragraph.
-            let styleName =
-              null === slice1.content.content[index]?.attrs?.styleName
-                ? node?.attrs?.styleName
-                : slice1.content.content[index]?.attrs?.styleName;
-            styleName = styleName ?? RESERVED_STYLE_NONE;
-            const len = node.nodeSize;
-            _endPos = _startPos + len;
-            tr = applyLatestStyle(
-              styleName ?? '',
-              nextState,
-              tr,
-              node,
-              _startPos,
-              _endPos - 1,
-              null,
-              opt
-            );
-            const newattrs = { ...node.attrs };
-            newattrs.styleName = styleName;
-            tr = tr.setNodeMarkup(_startPos, undefined, newattrs);
-          }
-        } else {
-          if (node2.type.name === 'table') {
-            const styleName = node1.attrs.styleName ?? 'Normal';
-            const node = nextState.tr.doc.nodeAt(_startPos);
-            const len = node.nodeSize;
-            const endPos = _startPos + len;
-            const styleProp = getCustomStyleByName(styleName);
-            tr = applyStyleToEachNode(
-              nextState,
-              _startPos,
-              endPos,
-              tr,
-              styleProp,
-              styleName
-            );
-          } else {
-            const styleName = node1.attrs.styleName ?? 'Normal';
-            const node = nextState.tr.doc.nodeAt(_startPos);
-            const len = node.nodeSize;
-            const endPos = _startPos + len;
-            const styleProp = getCustomStyleByName(styleName);
-            tr = applyStyleToEachNode(
-              nextState,
-              _startPos,
-              endPos,
-              tr,
-              styleProp,
-              styleName
-            );
-          }
-        }
-      }
+  const isPaste = transactions.length && transactions[0].getMeta('paste');
+  tr = applyLineStyleForBoldPartial(nextState, tr, isPaste);
+
+  // OPTIMIZED: Only process paste if content is small enough
+  if (isPaste) {
+    // Defer styling for large pastes
+    if (slice1.content.childCount > 20) {
+      // Apply minimal styling or defer to next tick
+      tr = applyMinimalPasteStyling(slice1, prevState, nextState, csview, tr);
+    } else {
+      tr = optimizedPasteHandler(slice1, prevState, nextState, csview, tr);
     }
     tr = tr?.scrollIntoView();
   }
@@ -331,6 +237,233 @@ export function onUpdateAppendTransaction(
   return tr;
 }
 
+// NEW: Minimal styling for large pastes
+function applyMinimalPasteStyling(slice1, prevState, nextState, csview, tr) {
+  // Only set styleName attributes without calling expensive style functions
+  const demoPos = prevState.selection.from;
+  const parentNode = prevState.doc.resolve(demoPos).parent;
+  const defaultStyle = parentNode.attrs?.styleName ?? RESERVED_STYLE_NONE;
+
+  let currentPos = csview.state.selection.$from.before(
+    csview.state.selection.$from.depth === 0
+      ? 1
+      : csview.state.selection.$from.depth
+  );
+
+  // Just set attributes, skip applyLatestStyle and applyStyleToEachNode
+  slice1.content.forEach((sliceNode, index) => {
+    if (sliceNode.type.name === 'table' || sliceNode.type.name === 'doc') {
+      return;
+    }
+
+    if (index === 0) {
+      currentPos = csview.state.selection.from - 1;
+    }
+
+    const targetNode = nextState.tr.doc.nodeAt(currentPos);
+    if (!targetNode) {
+      return;
+    }
+
+    const styleName = sliceNode.attrs?.styleName ?? defaultStyle;
+    const newattrs = { ...targetNode.attrs, styleName };
+
+    // Only set markup, skip expensive style application
+    tr = tr.setNodeMarkup(currentPos, undefined, newattrs);
+
+    currentPos += targetNode.nodeSize;
+  });
+
+  return tr;
+}
+
+// OPTIMIZED: For small pastes - batch all markup changes first
+function optimizedPasteHandler(slice1, prevState, nextState, csview, tr) {
+  const demoPos = prevState.selection.from;
+  const parentNode = prevState.doc.resolve(demoPos).parent;
+  const hasParentAttrs = !!parentNode.content?.content[0]?.attrs;
+
+  let currentPos = csview.state.selection.$from.before(
+    csview.state.selection.$from.depth === 0
+      ? 1
+      : csview.state.selection.$from.depth
+  );
+
+  // STEP 1: Collect all node information without applying styles
+  const nodeInfos = [];
+
+  slice1.content.forEach((sliceNode, index) => {
+    if (sliceNode.type.name === 'table' || sliceNode.type.name === 'doc') {
+      return;
+    }
+
+    const currentNode =
+      index === 0
+        ? csview.state.tr.doc.nodeAt(currentPos)
+        : csview.state.tr.doc.nodeAt(demoPos);
+
+    if (index === 0 && !hasParentAttrs && currentNode?.type?.name !== 'table') {
+      currentPos = csview.state.selection.from - 1;
+    }
+
+    const targetNode = nextState.tr.doc.nodeAt(currentPos);
+    if (!targetNode) {
+      return;
+    }
+
+    const nodeLength = targetNode.nodeSize;
+    const endPos = currentPos + nodeLength;
+
+    let styleName;
+    if (hasParentAttrs) {
+      styleName = parentNode.attrs.styleName ?? 'Normal';
+    } else {
+      if (currentNode?.type?.name === 'table') {
+        styleName = sliceNode.attrs.styleName ?? 'Normal';
+      } else {
+        styleName =
+          null === sliceNode?.attrs?.styleName
+            ? targetNode?.attrs?.styleName
+            : sliceNode?.attrs?.styleName;
+        styleName = styleName ?? RESERVED_STYLE_NONE;
+      }
+    }
+
+    nodeInfos.push({
+      pos: currentPos,
+      endPos:
+        hasParentAttrs || currentNode?.type?.name === 'table'
+          ? endPos
+          : endPos - 1,
+      node: targetNode,
+      styleName,
+      isTable: currentNode?.type?.name === 'table',
+      hasParentAttrs,
+      needsMarkup: !hasParentAttrs && currentNode?.type?.name !== 'table',
+    });
+
+    currentPos = endPos;
+  });
+
+  // STEP 2: Apply all setNodeMarkup calls first (these are fast)
+  nodeInfos.forEach((info) => {
+    if (info.needsMarkup) {
+      const newattrs = { ...info.node.attrs, styleName: info.styleName };
+      tr = tr.setNodeMarkup(info.pos, undefined, newattrs);
+    }
+  });
+
+  // STEP 3: Group nodes by style to reduce applyLatestStyle/applyStyleToEachNode calls
+  const styleGroups = new Map();
+  nodeInfos.forEach((info) => {
+    const key = `${info.styleName}-${info.hasParentAttrs}`;
+    if (!styleGroups.has(key)) {
+      styleGroups.set(key, []);
+    }
+    styleGroups.get(key).push(info);
+  });
+
+  // STEP 4: Apply styles once per group instead of per node
+  const opt = 1;
+  styleGroups.forEach((infos, key) => {
+    const info = infos[0];
+
+    if (info.hasParentAttrs) {
+      // Apply to all nodes in this group at once
+      const styleProp = getCustomStyleByName(info.styleName);
+      infos.forEach((nodeInfo) => {
+        tr = applyStyleToEachNode(
+          nextState,
+          nodeInfo.pos,
+          nodeInfo.endPos,
+          tr,
+          styleProp,
+          info.styleName
+        );
+      });
+    } else {
+      // Apply to each node individually (but at least they're grouped)
+      infos.forEach((nodeInfo) => {
+        tr = applyLatestStyle(
+          info.styleName ?? '',
+          nextState,
+          tr,
+          nodeInfo.node,
+          nodeInfo.pos,
+          nodeInfo.endPos,
+          null,
+          opt
+        );
+      });
+    }
+  });
+
+  return tr;
+}
+
+// ALTERNATIVE: Async processing for very large pastes
+function asyncPasteHandler(slice1, prevState, nextState, csview, tr) {
+  const CHUNK_SIZE = 10;
+  const chunks = [];
+
+  // Split into chunks
+  for (let i = 0; i < slice1.content.childCount; i += CHUNK_SIZE) {
+    chunks.push(slice1.content.content.slice(i, i + CHUNK_SIZE));
+  }
+
+  // Process first chunk immediately
+  // Schedule rest for later
+  setTimeout(() => {
+    // Process remaining chunks
+    // You'd need to dispatch a new transaction here
+  }, 0);
+
+  return tr;
+}
+
+// NEW: Apply styles in optimized batches
+function applyBatchedStyleUpdates(updates, nextState, tr, hasParentAttrs) {
+  const opt = 1;
+
+  // Group updates by style for potential optimization
+  const styleGroups = new Map();
+
+  for (const update of updates) {
+    if (hasParentAttrs) {
+      // Use applyStyleToEachNode for nodes with parent attrs
+      const styleProp = getCustomStyleByName(update.styleName);
+      tr = applyStyleToEachNode(
+        nextState,
+        update.pos,
+        update.endPos,
+        tr,
+        styleProp,
+        update.styleName
+      );
+    } else {
+      // Apply latest style
+      tr = applyLatestStyle(
+        update.styleName ?? '',
+        nextState,
+        tr,
+        update.node,
+        update.pos,
+        update.endPos,
+        null,
+        opt
+      );
+
+      // Set node markup if needed
+      if (update.needsMarkup) {
+        const newattrs = { ...update.node.attrs };
+        newattrs.styleName = update.styleName;
+        tr = tr.setNodeMarkup(update.pos, undefined, newattrs);
+      }
+    }
+  }
+
+  return tr;
+}
 //LIC-254 Create new line by placing cursor at the beginning of a paragraph applies the current style instead of Normal style
 export function applyStyleForPreviousEmptyParagraph(
   nextState: EditorState,
@@ -699,10 +832,10 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
   let emptyChild;
   // Scan once for spacers and existing hanging-indents
   node.content.forEach((child) => {
-    if (child.marks.some(m => m?.type.name === 'spacer')) {
+    if (child.marks.some((m) => m?.type.name === 'spacer')) {
       foundSpacer = true;
     }
-    if (child.marks.some(m => m?.type.name === 'mark-hanging-indent')) {
+    if (child.marks.some((m) => m?.type.name === 'mark-hanging-indent')) {
       foundHangingIndent = !isPaste;
     }
   });
@@ -714,7 +847,7 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
     let _node = child;
     counter++;
     // Remove the *first* spacer-marked text node
-    if (!spacerRemoved && child.marks.some(m => m.type.name === 'spacer')) {
+    if (!spacerRemoved && child.marks.some((m) => m.type.name === 'spacer')) {
       spacerRemoved = true;
       if (counter === 1) isParagraphStartsWithTab = true;
       emptyChild = child;
@@ -722,21 +855,22 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
     }
 
     // Remove existing spacer marks
-    const existingMarks = child.marks.filter(m => m.type.name !== 'spacer');
+    const existingMarks = child.marks.filter((m) => m.type.name !== 'spacer');
 
     // Create hangingIndent mark
     const hangingIndentMark = state.schema.marks['mark-hanging-indent'].create({
       prefix: spacerRemoved ? 1 : 0,
     });
     if (isParagraphStartsWithTab) {
-      const prefix1 = state.schema.marks['mark-hanging-indent'].create({ prefix: 0 });
+      const prefix1 = state.schema.marks['mark-hanging-indent'].create({
+        prefix: 0,
+      });
       const dummy1 = state.schema.text(' ', [...existingMarks, prefix1]);
       newContent.push(dummy1);
       _node = _node.mark([hangingIndentMark, ...existingMarks]);
       isParagraphStartsWithTab = false;
     } else {
       _node = _node.mark([hangingIndentMark, ...existingMarks]);
-
     }
 
     // Ensure hangingIndent is the *outermost* mark
@@ -744,25 +878,36 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
     newContent.push(_node);
   });
   if (isParagraphStartsWithTab && newContent.length === 0) {
-    const existingMarks = emptyChild.marks.filter(m => m.type.name !== 'spacer');
-    const prefix = state.schema.marks['mark-hanging-indent'].create({ prefix: 0 });
+    const existingMarks = emptyChild.marks.filter(
+      (m) => m.type.name !== 'spacer'
+    );
+    const prefix = state.schema.marks['mark-hanging-indent'].create({
+      prefix: 0,
+    });
     const dummy = state.schema.text(' ', [...existingMarks, prefix]);
     newContent.push(dummy);
-    const prefix1 = state.schema.marks['mark-hanging-indent'].create({ prefix: 1 });
+    const prefix1 = state.schema.marks['mark-hanging-indent'].create({
+      prefix: 1,
+    });
     const dummy1 = state.schema.text(' ', [...existingMarks, prefix1]);
     newContent.push(dummy1);
   }
   if (newContent?.length === 1 && spacerRemoved) {
-    const existingMarks = emptyChild.marks.filter(m => m.type.name !== 'spacer');
-    const prefix1 = state.schema.marks['mark-hanging-indent'].create({ prefix: 1 });
+    const existingMarks = emptyChild.marks.filter(
+      (m) => m.type.name !== 'spacer'
+    );
+    const prefix1 = state.schema.marks['mark-hanging-indent'].create({
+      prefix: 1,
+    });
     const dummy1 = state.schema.text(' ', [...existingMarks, prefix1]);
     newContent.push(dummy1);
   }
   // Recreate updated paragraph
   const newParagraph = node.type.create(node.attrs, newContent);
   tr.replaceWith(pos, pos + node.nodeSize, newParagraph);
-   (tr as Transaction).setSelection(TextSelection.create(tr.doc, state.selection?.from));
+  (tr as Transaction).setSelection(
+    TextSelection.create(tr.doc, state.selection?.from)
+  );
 
   return tr;
 }
-

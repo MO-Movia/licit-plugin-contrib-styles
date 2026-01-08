@@ -28,6 +28,7 @@ import { Node, Schema, Slice } from 'prosemirror-model';
 import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand';
 import { applyEffectiveSchema } from './EditorSchema';
 import type { StyleRuntime } from './StyleRuntime';
+export * from './StyleRuntime';
 
 const ENTERKEYCODE = 13;
 const BACKSPACEKEYCODE = 8;

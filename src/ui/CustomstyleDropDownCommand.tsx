@@ -174,10 +174,8 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
           staticCommand={this.staticCommands(
             toCreateStyle ? customStyleName : ''
           )}
+          title={customStyleName}
         />
-        <span className="custom-tooltip">
-          <span className="tooltip-text">{customStyleName}</span>
-        </span>
       </span>
     );
   }

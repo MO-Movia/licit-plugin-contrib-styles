@@ -284,7 +284,7 @@
   margin-top: -1px;
 }
 
-.czi-editor-frameset .molsp-alignbuttons {
+.czi-editor-frameset .czi-custom-button.molsp-alignbuttons.light {
   background-color: #f0f0f0;
   border-color: #555;
   outline: none;
@@ -292,10 +292,19 @@
   text-align: center;
   width: 50px;
   border-radius: 0px;
+  color:#666
 }
-
-.czi-editor-frameset .molsp-alignbuttons:focus,
-.czi-editor-frameset .molsp-alignbuttons:hover {
+.czi-editor-frameset .czi-custom-button.molsp-alignbuttons.dark {
+  background-color: transparent;
+  border-color: #555;
+  outline: none;
+  padding: 0;
+  text-align: center;
+  width: 50px;
+  border-radius: 0px;
+}
+.czi-editor-frameset .czi-custom-button.molsp-alignbuttons:focus,
+.czi-editor-frameset .czi-custom-button.molsp-alignbuttons:hover {
   background-color: #f0f0f0;
   border-color: #338eec;
   outline: none;
@@ -309,6 +318,12 @@
   width: 50px;
   border-radius: 0px;
 }
+
+.czi-editor-frameset .czi-custom-button.molsp-activealignbuttons:focus,
+.czi-editor-frameset .czi-custom-button.molsp-activealignbuttons:hover {
+  background-color: transparent;
+}
+
 
 .czi-editor-frameset .molsp-panel.hr {
   margin-bottom: 0;

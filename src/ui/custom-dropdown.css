@@ -81,13 +81,11 @@
 }
 
 #container1:hover {
-  background-color: var(--czi-button-hover-background-color);
   border: 1px solid;
   border-radius: 6px;
 }
 
 .selectbackground {
-  background-color: var(--czi-button-hover-background-color);
   border: 1px solid;
   border-radius: 6px;
 }

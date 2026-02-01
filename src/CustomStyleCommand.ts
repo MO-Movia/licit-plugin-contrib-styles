@@ -629,6 +629,7 @@ export class CustomStyleCommand extends UICommand {
       styles: {},
       // runtime: runtime,
       editorView: editorView,
+      theme: UICommand.theme,
     };
   }
 }

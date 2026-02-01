@@ -50,6 +50,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
       left: '',
     },
   };
+  theme = null;
 
   render() {
     const { dispatch, editorState, editorView, staticCommand, onCommand } =
@@ -59,6 +60,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     let counter = 0;
     let selecteClassName = '';
     const theme = this.props.theme;
+    this.theme =  this.props.theme;
     const selectedName = this.getTheSelectedCustomStyle(this.props.editorState);
     const commandGroups_nw = this.getCommandGroups();
     commandGroups_nw.forEach((group) => {
@@ -306,6 +308,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
         description: command._customStyle.description,
         styles: command._customStyle.styles,
         editorView: this.props.editorView,
+        theme:this.theme,
       },
       {
         position: atViewportCenter,

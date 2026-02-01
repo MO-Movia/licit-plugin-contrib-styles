@@ -1232,7 +1232,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       key={item.value}
                       style={{
                         fontSize: '12px',
-                        color: '#464343',
                         display: 'flex',
                         alignItems: 'center',
                         cursor: 'pointer',
@@ -1294,8 +1293,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-pressed="false"
                       className={
                         this.state.styles.align === 'left'
-                          ? 'czi-custom-button use-icon molsp-activealignbuttons'
-                          : 'czi-custom-button molsp-alignbuttons'
+                          ? 'czi-custom-button use-icon molsp-activealignbuttons ' + this.props.theme
+                          : 'czi-custom-button molsp-alignbuttons ' + this.props.theme
                       }
                       onClick={this.onAlignButtonClick.bind(this, 'left')}
                     >
@@ -1316,8 +1315,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-pressed="false"
                       className={
                         this.state.styles.align === 'center'
-                          ? 'czi-custom-button use-icon molsp-activealignbuttons'
-                          : 'czi-custom-button  molsp-alignbuttons'
+                          ? 'czi-custom-button use-icon molsp-activealignbuttons '+ this.props.theme
+                          : 'czi-custom-button  molsp-alignbuttons '+ this.props.theme
                       }
                       onClick={this.onAlignButtonClick.bind(this, 'center')}
                     >
@@ -1338,8 +1337,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-pressed="false"
                       className={
                         this.state.styles.align === 'right'
-                          ? 'czi-custom-button use-icon molsp-activealignbuttons'
-                          : 'czi-custom-button  molsp-alignbuttons'
+                          ? 'czi-custom-button use-icon molsp-activealignbuttons '+ this.props.theme
+                          : 'czi-custom-button  molsp-alignbuttons '+ this.props.theme
                       }
                       onClick={this.onAlignButtonClick.bind(this, 'right')}
                     >
@@ -1360,8 +1359,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                       aria-pressed="false"
                       className={
                         this.state.styles.align === 'justify'
-                          ? 'czi-custom-button use-icon molsp-activealignbuttons'
-                          : 'czi-custom-button  molsp-alignbuttons'
+                          ? 'czi-custom-button use-icon molsp-activealignbuttons '+ this.props.theme
+                          : 'czi-custom-button  molsp-alignbuttons '+ this.props.theme
                       }
                       onClick={this.onAlignButtonClick.bind(this, 'justify')}
                     >
@@ -1475,7 +1474,15 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           type="radio"
                           value="userDefined"
                         />
+                        <span
+                          style={{
+                            marginLeft: '2px',
+                            position: 'relative',
+                            top: '-2px',
+                          }}
+                        >
                         User-defined Numbering/Bullets
+                        </span>
                       </label>
                       <br />
                       <label>
@@ -1491,7 +1498,15 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           type="radio"
                           value="listStyle"
                         />
+                        <span
+                          style={{
+                            marginLeft: '2px',
+                            position: 'relative',
+                            top: '-2px',
+                          }}
+                        >
                         List-style (Auto Numbering)
+                        </span>
                       </label>
                     </div>
                   </div>

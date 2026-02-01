@@ -366,7 +366,7 @@ function optimizedPasteHandler(slice1, prevState, nextState, csview, tr) {
 
   // STEP 4: Apply styles once per group instead of per node
   const opt = 1;
-  styleGroups.forEach((infos, key) => {
+  styleGroups.forEach((infos) => {
     const info = infos[0];
 
     if (info.hasParentAttrs) {
@@ -402,69 +402,6 @@ function optimizedPasteHandler(slice1, prevState, nextState, csview, tr) {
   return tr;
 }
 
-// ALTERNATIVE: Async processing for very large pastes
-function asyncPasteHandler(slice1, prevState, nextState, csview, tr) {
-  const CHUNK_SIZE = 10;
-  const chunks = [];
-
-  // Split into chunks
-  for (let i = 0; i < slice1.content.childCount; i += CHUNK_SIZE) {
-    chunks.push(slice1.content.content.slice(i, i + CHUNK_SIZE));
-  }
-
-  // Process first chunk immediately
-  // Schedule rest for later
-  setTimeout(() => {
-    // Process remaining chunks
-    // You'd need to dispatch a new transaction here
-  }, 0);
-
-  return tr;
-}
-
-// NEW: Apply styles in optimized batches
-function applyBatchedStyleUpdates(updates, nextState, tr, hasParentAttrs) {
-  const opt = 1;
-
-  // Group updates by style for potential optimization
-  const styleGroups = new Map();
-
-  for (const update of updates) {
-    if (hasParentAttrs) {
-      // Use applyStyleToEachNode for nodes with parent attrs
-      const styleProp = getCustomStyleByName(update.styleName);
-      tr = applyStyleToEachNode(
-        nextState,
-        update.pos,
-        update.endPos,
-        tr,
-        styleProp,
-        update.styleName
-      );
-    } else {
-      // Apply latest style
-      tr = applyLatestStyle(
-        update.styleName ?? '',
-        nextState,
-        tr,
-        update.node,
-        update.pos,
-        update.endPos,
-        null,
-        opt
-      );
-
-      // Set node markup if needed
-      if (update.needsMarkup) {
-        const newattrs = { ...update.node.attrs };
-        newattrs.styleName = update.styleName;
-        tr = tr.setNodeMarkup(update.pos, undefined, newattrs);
-      }
-    }
-  }
-
-  return tr;
-}
 //LIC-254 Create new line by placing cursor at the beginning of a paragraph applies the current style instead of Normal style
 export function applyStyleForPreviousEmptyParagraph(
   nextState: EditorState,

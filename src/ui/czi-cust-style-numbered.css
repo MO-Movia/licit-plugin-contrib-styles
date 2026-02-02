@@ -521,6 +521,14 @@ html {
   counter-reset: none;
 }
 
+.ProseMirror p[data-style-level='2'][tot='true'][stylename = 'chTableTitleCont'] {
+  counter-increment: none !important;
+}
+
+.ProseMirror p[data-style-level='2'][tot='true'][stylename = 'attTableTitleCont'] {
+  counter-increment: none !important;
+}
+
 .ProseMirror p[data-style-level='2'][tof='true']::before {
   content: attr(prefix) counter(C1, decimal) '.' counter(F1, decimal) ' ';
   font-weight: var(--czi-counter-bold);

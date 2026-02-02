@@ -5,8 +5,8 @@ import {
 import * as paragraphspacingcommand from './ParagraphSpacingCommand';
 import { schema } from 'prosemirror-schema-basic';
 import { TextSelection, EditorState, Transaction } from 'prosemirror-state';
-import { Node, Schema } from 'prosemirror-model';
-import { Transform, StepResult, Mapping } from 'prosemirror-transform';
+import { Schema } from 'prosemirror-model';
+import { Transform } from 'prosemirror-transform';
 
 describe('paragraphspacingcommand', () => {
   it('should handle setParagraphSpacing', () => {

@@ -521,11 +521,7 @@ html {
   counter-reset: none;
 }
 
-.ProseMirror p[data-style-level='2'][tot='true'][stylename = 'chTableTitleCont'] {
-  counter-increment: none !important;
-}
-
-.ProseMirror p[data-style-level='2'][tot='true'][stylename = 'attTableTitleCont'] {
+.ProseMirror p[data-style-level='2'][tot='true'][stylename$='Cont'] {
   counter-increment: none !important;
 }
 

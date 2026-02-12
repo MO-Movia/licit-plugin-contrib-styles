@@ -522,7 +522,7 @@ html {
 }
 
 .ProseMirror p[data-style-level='2'][tot='true'][stylename$='Cont'] {
-  counter-increment: none !important;
+  counter-increment: none;
 }
 
 .ProseMirror p[data-style-level='2'][tof='true']::before {

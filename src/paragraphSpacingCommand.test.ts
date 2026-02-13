@@ -5,8 +5,8 @@ import {
 import * as paragraphspacingcommand from './ParagraphSpacingCommand';
 import { schema } from 'prosemirror-schema-basic';
 import { TextSelection, EditorState, Transaction } from 'prosemirror-state';
-import { Node, Schema } from 'prosemirror-model';
-import { Transform, StepResult, Mapping } from 'prosemirror-transform';
+import { Schema } from 'prosemirror-model';
+import { Transform } from 'prosemirror-transform';
 
 describe('paragraphspacingcommand', () => {
   it('should handle setParagraphSpacing', () => {
@@ -79,80 +79,12 @@ describe('ParagraphSpacingCommand ', () => {
   it('should handle ParagraphSpacingCommand', () => {
     expect(new ParagraphSpacingCommand('', true)).toBeDefined();
   });
-  it('should handle execute', () => {
-    jest.spyOn(paragraphspacingcommand, 'setParagraphSpacing').mockReturnValue({
-      docChanged: true,
-      doc: new Node(),
-      steps: [],
-      docs: [],
-      mapping: new Mapping(),
-      before: new Node(),
-      step: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      maybeStep: function (): StepResult {
-        throw new Error('Function not implemented.');
-      },
-      replace: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      replaceWith: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      delete: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      insert: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      replaceRange: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      replaceRangeWith: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      deleteRange: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      lift: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      join: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      wrap: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      setBlockType: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      setNodeMarkup: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      setNodeAttribute: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      setDocAttribute: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      addNodeMark: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      removeNodeMark: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      split: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      addMark: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      removeMark: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
-      clearIncompatible: function (): Transform {
-        throw new Error('Function not implemented.');
-      },
+    it('should handle execute', () => {
+    jest
+    .spyOn(paragraphspacingcommand, 'setParagraphSpacing')
+    .mockImplementation((tr) => {
+      const updatedTr = { ...(tr as unknown as object), docChanged: true } as unknown as Transaction;
+      return updatedTr;
     });
     const doc = schema.node('doc', null, [
       schema.node('paragraph'),

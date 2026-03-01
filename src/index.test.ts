@@ -474,6 +474,16 @@ describe('applyNormalIfNoStyle', () => {
 });
 
 describe('onUpdateAppendTransaction', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(ccommand, 'applyLatestStyle')
+      .mockImplementation((_styleName, _nextState, tr) => tr as never);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should handle onUpdateAppendTransaction when ENTERKEYCODE === csview.input.lastKeyCode && tr.selection.$from.start() == tr.selection.$from.end() this condition should pass', () => {
     const linkmark = new Mark();
 
@@ -611,6 +621,9 @@ describe('onUpdateAppendTransaction', () => {
             content: { size: 4 },
           },
         ],
+        forEach(callback) {
+          this.content.forEach(callback);
+        },
       },
     };
     const setSelection = () => {
@@ -702,258 +715,14 @@ describe('onUpdateAppendTransaction', () => {
             scrollIntoView: () => {
               return {};
             },
-            selection: {
-              $from: {
-                start: () => {
-                  return 1;
-                },
-                end: () => {
-                  return 1;
-                },
-              },
+            setSelection: function () {
+              return this;
             },
-            setSelection: setSelection,
-          },
-          doc: mockdoc,
-        },
-        {
-          selection: {
-            from: {
-              before: () => {
-                return 0;
-              },
+            setNodeMarkup: function () {
+              return this;
             },
-            to: {
-              after: () => {
-                return 1;
-              },
-            },
-          },
-          tr: {
-            doc: {
-              nodeAt: () => {
-                return { key: 'tr' };
-              },
-            },
-          },
-          doc: mockdoc,
-        },
-        {
-          input: { lastKeyCode: 13 },
-          state: {
-            selection: {
-              $from: {
-                before() {
-                  return 5;
-                },
-              },
-            },
-            tr: {
-              doc: {
-                nodeAt() {
-                  return { type: { name: 'table' } };
-                },
-              },
-            },
-          },
-        },
-        mockTransactions,
-        mockSlice1
-      )
-    ).toStrictEqual({});
-  });
-
-  it('onUpdateAppendTransaction', () => {
-    const linkmark = new Mark();
-
-    class Transaction {
-      amount;
-      meta;
-      constructor(amount, meta) {
-        this.amount = amount;
-        this.meta = meta;
-      }
-
-      getMeta(key) {
-        return this.meta[key];
-      }
-    }
-
-    const mockTransactions = [
-      new Transaction(100, { type: 'deposit', paste: true }),
-      new Transaction(-50, { type: 'withdrawal', paste: false }),
-    ];
-
-    const mockschema = new Schema({
-      nodes: {
-        doc: {
-          content: 'paragraph+',
-        },
-        paragraph: {
-          content: 'text*',
-          attrs: {
-            styleName: { default: 'test' },
-          },
-          toDOM() {
-            return ['p', 0];
-          },
-        },
-        heading: {
-          attrs: { level: { default: 1 }, styleName: { default: '' } },
-          content: 'inline*',
-          marks: '',
-          toDOM(node) {
-            return [
-              'h' + node.attrs.level,
-              { 'data-style-name': node.attrs.styleName },
-              0,
-            ];
-          },
-        },
-        text: {
-          group: 'inline',
-        },
-      },
-      marks: {
-        link: linkmark,
-      },
-    });
-
-    // Create a sample document
-    const mockdoc = mockschema.nodeFromJSON({
-      type: 'doc',
-      content: [
-        {
-          type: 'heading',
-          attrs: { level: 1, styleName: 'Normal' },
-          content: [
-            {
-              type: 'text',
-              text: 'Hello, ProseMirror!',
-            },
-          ],
-          marks: [
-            // Example mark that satisfies the condition
-            { type: 'link', attrs: { ['overridden']: true } },
-          ],
-        },
-      ],
-    });
-    mockdoc.resolve = () => {
-      return {
-        type: 'paragraph',
-        isTextblock: true,
-        parent: {
-          attrs: { styleName: 'bold' },
-          content: { content: [{ attrs: { styleName: 'bold' } }] },
-        },
-        min: () => {
-          return 0;
-        },
-        max: () => {
-          return 1;
-        },
-        depth: 1,
-        node: () => {
-          return { type: 'paragraph' };
-        },
-        before: () => {
-          return 1;
-        },
-        start: () => {
-          return 1;
-        },
-      } as unknown as ResolvedPos;
-    };
-    mockdoc.nodeAt = () => {
-      return { nodeSize: 10 } as unknown as Node;
-    };
-    const mockSlice1 = {
-      content: {
-        childCount: 3,
-        content: [
-          {
-            type: { name: 'paragraph' },
-            attrs: { styleName: 'paragraph-style' },
-            content: { size: 10 },
-          },
-          {
-            type: { name: 'heading' },
-            attrs: { styleName: 'heading-style' },
-            content: { size: 8 },
-          },
-          {
-            type: { name: 'image' },
-            attrs: { styleName: 'image-style' },
-            content: { size: 4 },
-          },
-        ],
-      },
-    };
-    expect(
-      onUpdateAppendTransaction(
-        { firstTime: false },
-        {
-          doc: mockdoc,
-          selection: {
-            $from: {
-              start: () => {
-                return 1;
-              },
-              end: () => {
-                return 1;
-              },
-            },
-          },
-        },
-        {
-          schema: {
-            nodes: { paragraph: 'paragraph' },
-            marks: {
-              link: linkmark,
-              fontName: {
-                create: () => {
-                  return {};
-                },
-              },
-              'mark-font-type': {
-                create: () => {
-                  return {};
-                },
-              },
-              'mark-font-size': {
-                create: () => {
-                  return {};
-                },
-              },
-            },
-          },
-          selection: {
-            $cursor: { pos: 0 },
-            $from: {
-              before: () => {
-                return 0;
-              },
-              $start: () => {
-                return 1;
-              },
-              end: () => {
-                return 1;
-              },
-            },
-            $to: {
-              after: () => {
-                return 1;
-              },
-              end: () => {
-                return 1;
-              },
-            },
-          },
-          tr: {
-            doc: mockdoc,
-            scrollIntoView: () => {
-              return {};
+            addStoredMark: function () {
+              return this;
             },
             selection: {
               $from: {
@@ -1097,7 +866,271 @@ describe('onUpdateAppendTransaction', () => {
         isTextblock: true,
         parent: {
           attrs: { styleName: 'bold' },
-          content: { content: [{ attrs: { styleName: 'bold' } }] },
+          content: { content: [{ attrs: null }] },
+        },
+        min: () => {
+          return 0;
+        },
+        max: () => {
+          return 1;
+        },
+        depth: 1,
+        node: () => {
+          return { type: 'paragraph' };
+        },
+        before: () => {
+          return 1;
+        },
+        start: () => {
+          return 1;
+        },
+      } as unknown as ResolvedPos;
+    };
+    mockdoc.nodeAt = () => {
+      return { nodeSize: 10 } as unknown as Node;
+    };
+    const mockSlice1 = {
+      content: {
+        childCount: 3,
+        content: [
+          {
+            type: { name: 'paragraph' },
+            attrs: { styleName: 'paragraph-style' },
+            content: { size: 10 },
+          },
+          {
+            type: { name: 'heading' },
+            attrs: { styleName: 'heading-style' },
+            content: { size: 8 },
+          },
+          {
+            type: { name: 'image' },
+            attrs: { styleName: 'image-style' },
+            content: { size: 4 },
+          },
+        ],
+        forEach(callback) {
+          this.content.forEach(callback);
+        },
+      },
+    };
+    expect(
+      onUpdateAppendTransaction(
+        { firstTime: false },
+        {
+          doc: mockdoc,
+          selection: {
+            $from: {
+              start: () => {
+                return 1;
+              },
+              end: () => {
+                return 1;
+              },
+            },
+          },
+        },
+        {
+          schema: {
+            nodes: { paragraph: 'paragraph' },
+            marks: {
+              link: linkmark,
+              fontName: {
+                create: () => {
+                  return {};
+                },
+              },
+              'mark-font-type': {
+                create: () => {
+                  return {};
+                },
+              },
+              'mark-font-size': {
+                create: () => {
+                  return {};
+                },
+              },
+            },
+          },
+          selection: {
+            $cursor: { pos: 0 },
+            $from: {
+              before: () => {
+                return 0;
+              },
+              $start: () => {
+                return 1;
+              },
+              end: () => {
+                return 1;
+              },
+            },
+            $to: {
+              after: () => {
+                return 1;
+              },
+              end: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: mockdoc,
+            scrollIntoView: () => {
+              return {};
+            },
+            setSelection: function () {
+              return this;
+            },
+            setNodeMarkup: function () {
+              return this;
+            },
+            addStoredMark: function () {
+              return this;
+            },
+            selection: {
+              $from: {
+                start: () => {
+                  return 1;
+                },
+                end: () => {
+                  return 1;
+                },
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        {
+          selection: {
+            from: {
+              before: () => {
+                return 0;
+              },
+            },
+            to: {
+              after: () => {
+                return 1;
+              },
+            },
+          },
+          tr: {
+            doc: {
+              nodeAt: () => {
+                return { key: 'tr' };
+              },
+            },
+          },
+          doc: mockdoc,
+        },
+        {
+          input: { lastKeyCode: 13 },
+          state: {
+            selection: {
+              $from: {
+                before() {
+                  return 5;
+                },
+              },
+            },
+            tr: {
+              doc: {
+                nodeAt() {
+                  return { type: { name: 'table' } };
+                },
+              },
+            },
+          },
+        },
+        mockTransactions,
+        mockSlice1
+      )
+    ).toStrictEqual({});
+  });
+
+  it('onUpdateAppendTransaction', () => {
+    const linkmark = new Mark();
+
+    class Transaction {
+      amount;
+      meta;
+      constructor(amount, meta) {
+        this.amount = amount;
+        this.meta = meta;
+      }
+
+      getMeta(key) {
+        return this.meta[key];
+      }
+    }
+
+    const mockTransactions = [
+      new Transaction(100, { type: 'deposit', paste: true }),
+      new Transaction(-50, { type: 'withdrawal', paste: false }),
+    ];
+
+    const mockschema = new Schema({
+      nodes: {
+        doc: {
+          content: 'paragraph+',
+        },
+        paragraph: {
+          content: 'text*',
+          attrs: {
+            styleName: { default: 'test' },
+          },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        heading: {
+          attrs: { level: { default: 1 }, styleName: { default: '' } },
+          content: 'inline*',
+          marks: '',
+          toDOM(node) {
+            return [
+              'h' + node.attrs.level,
+              { 'data-style-name': node.attrs.styleName },
+              0,
+            ];
+          },
+        },
+        text: {
+          group: 'inline',
+        },
+      },
+      marks: {
+        link: linkmark,
+      },
+    });
+
+    // Create a sample document
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1, styleName: 'Normal' },
+          content: [
+            {
+              type: 'text',
+              text: 'Hello, ProseMirror!',
+            },
+          ],
+          marks: [
+            // Example mark that satisfies the condition
+            { type: 'link', attrs: { ['overridden']: true } },
+          ],
+        },
+      ],
+    });
+    mockdoc.resolve = () => {
+      return {
+        type: 'paragraph',
+        isTextblock: true,
+        parent: {
+          attrs: { styleName: 'bold' },
+          content: { content: [{ attrs: null }] },
         },
         min: () => {
           return 0;
@@ -1141,6 +1174,9 @@ describe('onUpdateAppendTransaction', () => {
             content: { size: 4 },
           },
         ],
+        forEach(callback) {
+          this.content.forEach(callback);
+        },
       },
     };
     expect(
@@ -1204,6 +1240,15 @@ describe('onUpdateAppendTransaction', () => {
             doc: mockdoc,
             scrollIntoView: () => {
               return {};
+            },
+            setSelection: function () {
+              return this;
+            },
+            setNodeMarkup: function () {
+              return this;
+            },
+            addStoredMark: function () {
+              return this;
             },
             selection: {
               $from: {

@@ -6,7 +6,7 @@ import {
   TextSelection,
   Transaction,
 } from 'prosemirror-state';
-import { Transform } from 'prosemirror-transform';
+import { Transform, canJoin } from 'prosemirror-transform';
 import {
   applyLatestStyle,
   getMarkByStyleName,
@@ -167,6 +167,16 @@ export function onUpdateAppendTransaction(
   // custom style for next line
   if (csview) {
     if (BACKSPACEKEYCODE === csview.input.lastKeyCode) {
+      const selection = nextState.selection;
+      const $from = selection?.$from;
+      if (selection?.empty && $from?.parentOffset === 0 && $from.depth > 0) {
+        const cut = $from.before();
+        if (canJoin(nextState.doc, cut)) {
+          tr = tr.join(cut).scrollIntoView();
+          return tr;
+        }
+      }
+
       const paraPositionDiff =
         prevState.selection.from - nextState.selection.from;
       if (paraPositionDiff === 2 || paraPositionDiff === 0) {
@@ -252,7 +262,7 @@ function applyMinimalPasteStyling(slice1, prevState, nextState, csview, tr) {
   );
 
   // Just set attributes, skip applyLatestStyle and applyStyleToEachNode
-  slice1.content.forEach((sliceNode, index) => {
+  forEachSliceNode(slice1, (sliceNode, index) => {
     if (sliceNode.type.name === 'table' || sliceNode.type.name === 'doc') {
       return;
     }
@@ -293,7 +303,7 @@ function optimizedPasteHandler(slice1, prevState, nextState, csview, tr) {
   // STEP 1: Collect all node information without applying styles
   const nodeInfos = [];
 
-  slice1.content.forEach((sliceNode, index) => {
+  forEachSliceNode(slice1, (sliceNode, index) => {
     if (sliceNode.type.name === 'table' || sliceNode.type.name === 'doc') {
       return;
     }
@@ -400,6 +410,24 @@ function optimizedPasteHandler(slice1, prevState, nextState, csview, tr) {
   });
 
   return tr;
+}
+
+function forEachSliceNode(slice, callback) {
+  const content = slice?.content;
+  if (!content) {
+    return;
+  }
+  if (typeof content.forEach === 'function') {
+    content.forEach(callback);
+    return;
+  }
+  if (Array.isArray(content?.content)) {
+    content.content.forEach(callback);
+    return;
+  }
+  if (Array.isArray(content)) {
+    content.forEach(callback);
+  }
 }
 
 //LIC-254 Create new line by placing cursor at the beginning of a paragraph applies the current style instead of Normal style

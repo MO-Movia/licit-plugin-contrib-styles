@@ -171,10 +171,10 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
           editorState={editorState}
           editorView={editorView}
           label={customStyleName}
-          title={customStyleName}
           staticCommand={this.staticCommands(
             toCreateStyle ? customStyleName : ''
           )}
+          title={customStyleName}
         />
       </span>
     );

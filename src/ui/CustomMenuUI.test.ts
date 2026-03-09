@@ -738,6 +738,9 @@ describe('Custom Menu UI   ', () => {
     const setSelection = () => {
       return {
         setSelection,
+        mapping: {
+          map: (pos) => pos,
+        },
         doc: {
           nodesBetween(from, to, callback) {
             for (let i = from; i < to; i++) {
@@ -771,6 +774,9 @@ describe('Custom Menu UI   ', () => {
       max: () => { },
     } as unknown as HTMLDivElement;
     const removeMarkChain = {
+      mapping: {
+        map: (pos) => pos,
+      },
       setNodeMarkup: () => {
         return removeMarkChain;
       },

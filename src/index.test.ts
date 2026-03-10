@@ -505,7 +505,10 @@ describe('applyNormalIfNoStyle', () => {
   it('should return a new tr from nextState when tr is null/undefined', () => {
     const state = buildStateWithParagraph(mockStyleName);
     jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
-    const result = applyStoredMarksAfterHardBreak(state, null as any);
+    const result = applyStoredMarksAfterHardBreak(
+      state,
+      null as unknown as Transaction
+    );
     expect(result).toBeDefined();
   });
 
@@ -520,7 +523,7 @@ describe('applyNormalIfNoStyle', () => {
       depth: 0,
       node: () => null,
       parent: mockSchema.nodes.doc.create(),
-    } as any);
+    } as unknown as ResolvedPos);
 
     const result = applyStoredMarksAfterHardBreak(state, tr);
     expect(result).toBe(tr);
@@ -554,7 +557,9 @@ describe('applyNormalIfNoStyle', () => {
   it('should return tr unchanged when getMarkByStyleName returns null', () => {
     const state = buildStateWithParagraph(mockStyleName);
     const tr = state.tr;
-    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue(null as any);
+    jest
+      .spyOn(ccommand, 'getMarkByStyleName')
+      .mockReturnValue(null as unknown as Mark[]);
     const result = applyStoredMarksAfterHardBreak(state, tr);
     expect(result).toBe(tr);
   });

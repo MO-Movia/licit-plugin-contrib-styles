@@ -764,6 +764,9 @@ describe('onUpdateAppendTransaction', () => {
           nodeAt: () => { },
         },
         setSelection: setSelection,
+        mapping: {
+          map: (pos) => pos,
+        },
         scrollIntoView: () => {
           return {};
         },
@@ -789,6 +792,9 @@ describe('onUpdateAppendTransaction', () => {
             return {};
           },
           setSelection: setSelection,
+          mapping: {
+            map: (pos) => pos,
+          },
         },
         {
           schema: {
@@ -851,6 +857,9 @@ describe('onUpdateAppendTransaction', () => {
               },
             },
             setSelection: setSelection,
+            mapping: {
+              map: (pos) => pos,
+            },
           },
           doc: mockdoc,
         },

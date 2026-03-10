@@ -836,7 +836,11 @@ export function applyStyleForTableColumnCell(
     tr = tr.setNodeMarkup(startPos, undefined, newattrs);
   }
   (tr as Transaction).storedMarks = storedmarks;
-  if (originalSelectionPos) {
+  if (state.selection && !state.selection.empty) {
+    const newFrom = tr.mapping.map(state.selection.from);
+    const newTo = tr.mapping.map(state.selection.to);
+    (tr as Transaction).setSelection(TextSelection.create(tr.doc, newFrom, newTo));
+  } else if (originalSelectionPos) {
     (tr as Transaction).setSelection(TextSelection.create(tr.doc, originalSelectionPos));
   }
 
@@ -945,7 +949,11 @@ function applyStyleEx(
 
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
     (tr as Transaction).storedMarks = storedmarks;
-    if (originalSelectionPos) {
+    if (state.selection && !state.selection.empty) {
+      const newFrom = tr.mapping.map(state.selection.from);
+      const newTo = tr.mapping.map(state.selection.to);
+      (tr as Transaction).setSelection(TextSelection.create(tr.doc, newFrom, newTo));
+    } else if (originalSelectionPos) {
       (tr as Transaction).setSelection(TextSelection.create(tr.doc, originalSelectionPos));
     }
   }

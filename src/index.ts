@@ -215,7 +215,13 @@ export function onUpdateAppendTransaction(
       ) {
         tr = tr.setSelection(TextSelection.create(tr.doc, cursourPosition));
       }
-    }
+    }else if (
+  // ? ADD THIS BLOCK RIGHT HERE � after the two existing else-if blocks
+  ENTERKEYCODE === csview.input.lastKeyCode &&
+  prevState.selection.from === nextState.selection.from - 1
+) {
+  tr = applyStoredMarksAfterHardBreak(nextState, tr);
+}
   }
   tr = applyLineStyleForBoldPartial(nextState, tr, transactions.length && transactions[0].getMeta('paste'));
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
@@ -355,6 +361,38 @@ export function applyStyleForPreviousEmptyParagraph(
   return tr;
 }
 
+export function applyStoredMarksAfterHardBreak(
+  nextState: EditorState,
+  tr: Transform
+): Transform {
+  if (!tr) {
+    tr = nextState.tr;
+  }
+  const { selection, schema } = nextState;
+
+  // ? Cast to TextSelection to access $cursor
+  const textSelection = selection as TextSelection;
+  const currentPos = textSelection.$cursor
+    ? textSelection.$cursor.pos
+    : selection.$from.pos;
+
+  // Find the parent paragraph
+  const para = findParentNodeClosestToPos(
+    nextState.doc.resolve(currentPos),
+    (node) => node.type === schema.nodes.paragraph
+  );
+  if (!para) return tr;
+  const styleName = para.node.attrs?.styleName;
+  if (!styleName || styleName === RESERVED_STYLE_NONE) return tr;
+  // Get the marks defined by this custom style
+  const marks = getMarkByStyleName(styleName, schema);
+  if (!marks || marks.length === 0) return tr;
+  // Set them as storedMarks so next typed character inherits them
+  marks.forEach((mark) => {
+    tr = (tr as Transaction).addStoredMark(mark);
+  });
+  return tr;
+}
 export function remapCounterFlags(tr) {
   // Depending on the window variables,
   // set counters for numbering.

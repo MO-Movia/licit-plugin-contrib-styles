@@ -3,6 +3,7 @@ import { TestEditorView, createEditor, doc, p } from 'jest-prosemirror';
 import { EditorState } from 'prosemirror-state';
 import { Schema, Node } from 'prosemirror-model';
 import * as cusstyles from '../customStyle';
+import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 
 describe('customstyledropdowncommand', () => {
   const editor = createEditor(doc(p('<cursor>')), {
@@ -444,6 +445,40 @@ describe('customstyledropdowncommand', () => {
   });
   it('should handle staticCommands', () => {
     expect(customstyledropdowncommand.staticCommands('')).toBeInstanceOf(Array);
+  });
+  it('should include edit commands when style runtime allows edits', () => {
+    const getStyleRuntimeSpy = jest
+      .spyOn(cusstyles, 'getStyleRuntime')
+      .mockReturnValue({
+        canEditStyle: true,
+      } as unknown as ReturnType<typeof cusstyles.getStyleRuntime>);
+
+    const staticCommands = customstyledropdowncommand.staticCommands('A_Test');
+    const menuCommands = staticCommands[0] as Record<string, unknown>;
+
+    expect(menuCommands).toHaveProperty('newstyle');
+    expect(menuCommands).toHaveProperty('editall');
+
+    getStyleRuntimeSpy.mockRestore();
+  });
+  it('should add normal and custom style commands when runtime styles include normal', async () => {
+    const getStylesSpy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([
+      {
+        styleName: RESERVED_STYLE_NONE,
+      },
+      {
+        styleName: 'A_Test',
+      },
+    ] as never);
+
+    const commandGroups = customstyledropdowncommand.getCommandGroups();
+    await Promise.resolve();
+
+    const headingCommands = commandGroups[0] as Record<string, unknown>;
+    expect(headingCommands).toHaveProperty(RESERVED_STYLE_NONE);
+    expect(headingCommands).toHaveProperty('A_Test');
+
+    getStylesSpy.mockRestore();
   });
   it('should handle isAllowedNode', () => {
     const node = { type: { name: 'paragraph' } };

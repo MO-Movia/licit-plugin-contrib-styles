@@ -33,6 +33,8 @@ const ENTERKEYCODE = 13;
 const BACKSPACEKEYCODE = 8;
 const PARA_POSITION_DIFF = 4;
 const ATTR_STYLE_NAME = 'styleName';
+const STYLE_CHUNK_LIMIT = 5000;
+const STYLE_CHUNK_START_POS = 'styleChunkStartPos';
 let slice1;
 
 const isNodeHasAttribute = (node, attrName) => {
@@ -111,10 +113,10 @@ export class CustomstylePlugin extends Plugin {
         }
         firstTime = ref.firstTime;
         loaded = ref.loaded;
-        if (1 === tr?.updated) {
+        if (hasTransactionChanges(tr)) {
           slice1 = null;
         }
-        return tr;
+        return hasTransactionChanges(tr) ? tr : null;
       },
     });
   }
@@ -141,14 +143,43 @@ export class CustomstylePlugin extends Plugin {
   }
 }
 
+
+function hasTransactionChanges(tr) {
+  if (!tr) {
+    return false;
+  }
+  if (Array.isArray(tr.steps) && tr.steps.length > 0) {
+    return true;
+  }
+  return !!(
+    tr.docChanged ||
+    tr.selectionSet ||
+    tr.storedMarksSet ||
+    tr.scrolledIntoView ||
+    tr.updated === 1
+  );
+}
+
 export function onInitAppendTransaction(ref, tr, nextState) {
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
-    // do this only once when the document is loaded.
-    tr = applyStyles(nextState, tr);
+    tr ??= nextState.tr;
+    let chunkStartPos = tr.getMeta(STYLE_CHUNK_START_POS);
+    chunkStartPos = typeof chunkStartPos === 'number' ? chunkStartPos : 0;
+    const result = applyStylesChunked(nextState, chunkStartPos);
+    if (!result.done) {
+      // Schedule next chunk by appending another transaction with next start pos
+      // This returns immediately -- next chunk runs in the next PM cycle
+      const continuationTr = nextState.tr.setMeta(
+        STYLE_CHUNK_START_POS,
+        result.lastPos
+      );
+      result.tr.steps.forEach((step) => continuationTr.step(step)); // carry over changes
+      return continuationTr;
+    }
+    return result.tr.docChanged ? result.tr : null;
   }
-
-  return tr;
+  return hasTransactionChanges(tr) ? tr : null;
 }
 
 export function onUpdateAppendTransaction(
@@ -334,7 +365,7 @@ export function onUpdateAppendTransaction(
     tr = tr?.scrollIntoView();
   }
 
-  return tr;
+  return hasTransactionChanges(tr) ? tr : null;
 }
 
 //LIC-254 Create new line by placing cursor at the beginning of a paragraph applies the current style instead of Normal style
@@ -418,6 +449,39 @@ export function applyStyles(state: EditorState, tr?: Transform) {
     }
   });
   return tr;
+}
+
+
+//  applyStylesChunked
+export function applyStylesChunked(
+  state: EditorState,
+  startPos: number = 0
+): { tr: Transform; lastPos: number; done: boolean } {
+  let tr: Transform = state.tr;
+  let lastPos = startPos;
+  let done = true;
+
+  tr.doc.descendants((child: Node, pos: number) => {
+    // Skip nodes before our start position
+    if (pos > STYLE_CHUNK_LIMIT) return;
+
+    const contentLen = child.content.size;
+    if (haveEligibleChildren(child, contentLen)) {
+      const docLen = tr.doc.content.size;
+      const end = Math.min(pos + contentLen, docLen);
+      const styleName = child.attrs?.styleName ?? RESERVED_STYLE_NONE;
+
+      tr = applyLatestStyle(styleName, state, tr, child, pos, end);
+      lastPos = pos;
+
+      // Stop this chunk here, signal more work remains
+      if (pos - startPos > STYLE_CHUNK_LIMIT) {
+        done = false;
+      }
+    }
+  });
+
+  return { tr, lastPos: lastPos + 1, done };
 }
 
 function validateStyleName(node) {

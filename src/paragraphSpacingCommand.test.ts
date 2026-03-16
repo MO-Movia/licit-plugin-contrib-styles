@@ -74,6 +74,120 @@ describe('paragraphspacingcommand', () => {
 
     expect(setParagraphSpacing(trmock, mockschema)).toBeDefined();
   });
+
+  it('should set paragraphSpacingAfter when spacing value is provided', () => {
+    const doc = schema.node('doc', null, [schema.node('paragraph', null, [schema.text('A')])]);
+    const trmock = {
+      selection: TextSelection.create(doc, 1, 1),
+      doc,
+      setNodeMarkup: jest.fn().mockReturnThis(),
+    } as unknown as Transaction;
+
+    const result = setParagraphSpacing(
+      trmock as unknown as Transform,
+      schema as unknown as Schema,
+      '12pt',
+      true
+    ) as unknown as { setNodeMarkup: jest.Mock };
+
+    expect(result.setNodeMarkup).toHaveBeenCalledWith(
+      0,
+      expect.anything(),
+      expect.objectContaining({ paragraphSpacingAfter: '12pt' }),
+      expect.anything()
+    );
+  });
+
+  it('should set paragraphSpacingBefore when spacing value is provided', () => {
+    const doc = schema.node('doc', null, [schema.node('paragraph', null, [schema.text('A')])]);
+    const trmock = {
+      selection: TextSelection.create(doc, 1, 1),
+      doc,
+      setNodeMarkup: jest.fn().mockReturnThis(),
+    } as unknown as Transaction;
+
+    const result = setParagraphSpacing(
+      trmock as unknown as Transform,
+      schema as unknown as Schema,
+      '8pt',
+      false
+    ) as unknown as { setNodeMarkup: jest.Mock };
+
+    expect(result.setNodeMarkup).toHaveBeenCalledWith(
+      0,
+      expect.anything(),
+      expect.objectContaining({ paragraphSpacingBefore: '8pt' }),
+      expect.anything()
+    );
+  });
+
+  it('should set paragraphSpacingAfter to null when spacing value is not provided', () => {
+    const selectionDoc = schema.node('doc', null, [
+      schema.node('paragraph', null, [schema.text('A')]),
+    ]);
+    const paragraphNode = {
+      type: schema.nodes.paragraph,
+      attrs: { paragraphSpacing: '1.2' },
+      marks: [],
+    };
+    const trmock = {
+      selection: TextSelection.create(selectionDoc, 1, 1),
+      doc: {
+        nodesBetween: (_from: number, _to: number, callback: (node: unknown, pos: number) => void) => {
+          callback(paragraphNode, 0);
+        },
+      },
+      setNodeMarkup: jest.fn().mockReturnThis(),
+    } as unknown as Transaction;
+
+    const result = setParagraphSpacing(
+      trmock as unknown as Transform,
+      schema as unknown as Schema,
+      undefined,
+      true
+    ) as unknown as { setNodeMarkup: jest.Mock };
+
+    expect(result.setNodeMarkup).toHaveBeenCalledWith(
+      0,
+      expect.anything(),
+      expect.objectContaining({ paragraphSpacingAfter: null }),
+      expect.anything()
+    );
+  });
+
+  it('should set paragraphSpacingBefore to null when spacing value is not provided', () => {
+    const selectionDoc = schema.node('doc', null, [
+      schema.node('paragraph', null, [schema.text('A')]),
+    ]);
+    const paragraphNode = {
+      type: schema.nodes.paragraph,
+      attrs: { paragraphSpacing: '1.2' },
+      marks: [],
+    };
+    const trmock = {
+      selection: TextSelection.create(selectionDoc, 1, 1),
+      doc: {
+        nodesBetween: (_from: number, _to: number, callback: (node: unknown, pos: number) => void) => {
+          callback(paragraphNode, 0);
+        },
+      },
+      setNodeMarkup: jest.fn().mockReturnThis(),
+    } as unknown as Transaction;
+
+    const result = setParagraphSpacing(
+      trmock as unknown as Transform,
+      schema as unknown as Schema,
+      undefined,
+      false
+    ) as unknown as { setNodeMarkup: jest.Mock };
+
+    expect(result.setNodeMarkup).toHaveBeenCalledWith(
+      0,
+      expect.anything(),
+      expect.objectContaining({ paragraphSpacingBefore: null }),
+      expect.anything()
+    );
+  });
 });
 describe('ParagraphSpacingCommand ', () => {
   it('should handle ParagraphSpacingCommand', () => {

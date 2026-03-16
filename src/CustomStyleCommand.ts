@@ -296,26 +296,15 @@ export class CustomStyleCommand extends UICommand {
     let done = false;
     let tr = this.clearCustomStyles(state.tr.setSelection(selection), state);
 
-    hasMismatchHeirarchy(state, tr, node, startPos, endPos);
-    // [FS] IRAD-1480 2021-06-25
-    // Indenting not remove when clear style is applied
-    // FIX: cannot assign to readonly property styleName of object.
-    const newAttrs = { ...node.attrs };
-    if (newAttrs) {
-      newAttrs['styleName'] = RESERVED_STYLE_NONE;
-      newAttrs['id'] = '';
-      // [FS] IRAD-1414 2021-07-12
-      // FIX: Applied number/bullet list removes when 'Clear Style'
-      const isOverriddenIndent = newAttrs.overriddenIndent ?? null;
-      newAttrs['indent'] = isOverriddenIndent ? newAttrs.indent : 0;
-      newAttrs['overriddenIndent'] = isOverriddenIndent;
-      newAttrs['overriddenIndentValue'] = isOverriddenIndent
-        ? newAttrs.overriddenIndentValue
-        : null;
-      tr = tr.setNodeMarkup(startPos, undefined, newAttrs);
+    if (node) {
+      hasMismatchHeirarchy(state, tr, node, startPos, endPos);
     }
 
     tr = removeTextAlignAndLineSpacing(tr, state.schema);
+    // Ensure no stale inline marks (e.g. font marks) are carried after clear style.
+    if (typeof (tr as Transaction).setStoredMarks === 'function') {
+      tr = (tr as Transaction).setStoredMarks([]);
+    }
     if (dispatch && tr.docChanged) {
       dispatch(tr);
       done = true;
@@ -435,38 +424,76 @@ export class CustomStyleCommand extends UICommand {
   // [FS] IRAD-1053 2020-12-17
   // to clear the custom styles in the selected paragraph
   clearCustomStyles(tr: Transform, editorState: EditorState) {
-    const { selection, doc } = editorState;
+    const { selection } = editorState;
+    const clearForParagraphNode = (node, pos) => {
+      if (!isAllowedNode(node)) {
+        return;
+      }
+      tr = this.clearNodeStyleAndMarks(tr, node, pos);
+    };
+
+    if (selection instanceof CellSelection) {
+      if (isColumnCellSelected(selection)) {
+        const positions = getSelectedCellPositions(selection);
+        positions.forEach((pos) => {
+          const node = tr.doc.nodeAt(pos);
+          findParagraphsInNode(node, pos, (paraNode, paraPos) => {
+            clearForParagraphNode(paraNode, paraPos);
+          });
+        });
+      } else {
+        const $anchor = selection.$anchorCell;
+        const $head = selection.$headCell;
+        const firstCell = $anchor.pos < $head.pos ? $anchor : $head;
+        const lastCell = $anchor.pos < $head.pos ? $head : $anchor;
+        const from = firstCell.pos;
+        const to = lastCell.pos + (lastCell.nodeAfter?.nodeSize || 0);
+        tr.doc.nodesBetween(from, to, (node, pos) => {
+          clearForParagraphNode(node, pos);
+        });
+      }
+      return tr;
+    }
+
     // [FS] IRAD-1495 2021-06-25
     // FIX: Clear style not working on multi select paragraph
     const from = selection.$from.before(
       selection.$from.depth === 0 ? 1 : selection.$from.depth
     );
     const to = selection.$to?.end();
-    let _from = from;
-    let _to = to;
-    doc.nodesBetween(from, to, (node) => {
-      if (
-        node.attrs.styleName &&
-        node.attrs.styleName !== RESERVED_STYLE_NONE
-      ) {
-        // Check for overridden marks in text nodes inside the paragraph
-        node.forEach((child) => {
-          if (child.isText && child.marks.length > 0) {
-            const marksToRemove = child.marks.filter(
-              (mark) => mark.attrs.overridden !== true
-            );
-            _to = _from + child.nodeSize;
-            if (marksToRemove.length > 0) {
-              marksToRemove.forEach((mark) => {
-                if ('link' !== mark.type.name) {
-                  tr = this.removeMarks(mark, tr, node, _from, _to);
-                }
-              });
-            }
-            _from = _to;
-          }
+    tr.doc.nodesBetween(from, to, (node, pos) => {
+      clearForParagraphNode(node, pos);
+    });
+    return tr;
+  }
+
+  clearNodeStyleAndMarks(tr: Transform, node: Node, startPos: number) {
+    const newAttrs = { ...node.attrs };
+    newAttrs['styleName'] = RESERVED_STYLE_NONE;
+    newAttrs['id'] = '';
+    // [FS] IRAD-1414 2021-07-12
+    // FIX: Applied number/bullet list removes when 'Clear Style'
+    const isOverriddenIndent = newAttrs.overriddenIndent ?? null;
+    newAttrs['indent'] = isOverriddenIndent ? newAttrs.indent : 0;
+    newAttrs['overriddenIndent'] = isOverriddenIndent;
+    newAttrs['overriddenIndentValue'] = isOverriddenIndent
+      ? newAttrs.overriddenIndentValue
+      : null;
+    tr = tr.setNodeMarkup(startPos, undefined, newAttrs);
+
+    let from = startPos + 1;
+    node.forEach((child) => {
+      const to = from + child.nodeSize;
+      if (child.isText && child.marks.length > 0) {
+        // On clear style, keep only links and remove all other inline marks.
+        const marksToRemove = child.marks.filter(
+          (mark) => 'link' !== mark.type.name
+        );
+        marksToRemove.forEach((mark) => {
+          tr = this.removeMarks(mark, tr, node, from, to);
         });
       }
+      from = to;
     });
     return tr;
   }

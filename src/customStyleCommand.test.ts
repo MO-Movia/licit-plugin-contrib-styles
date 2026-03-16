@@ -31,6 +31,7 @@ import { Transform } from 'prosemirror-transform';
 import type { Style } from './StyleRuntime';
 import { doc, p } from 'jest-prosemirror';
 import { CellSelection, tableNodes } from 'prosemirror-tables';
+import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
 
 describe('CustomStyleCommand', () => {
   const styl = {
@@ -692,39 +693,134 @@ describe('CustomStyleCommand', () => {
 
     const doc = mySchema.nodeFromJSON(jsonDoc);
     console.log(doc);
+    const trMock = {
+      doc,
+      setNodeMarkup: jest.fn().mockReturnThis(),
+      removeMark: jest.fn().mockReturnThis(),
+    } as unknown as Transform;
     expect(
-      customstylecommand.clearCustomStyles(
-        {
-          doc: doc,
-          removeMark: () => {
-            return {
-              doc: doc,
-              removeMark: () => {
-                return {};
-              },
-            } as unknown as Transform;
-          },
-        } as unknown as Transform,
-        {
-          doc: doc,
-          selection: {
-            $from: {
-              before: () => {
-                return 1;
-              },
-            },
-            $to: {
-              after: () => {
-                return 12;
-              },
-              end: () => {
-                return 2;
-              },
+      customstylecommand.clearCustomStyles(trMock, {
+        doc: doc,
+        selection: {
+          $from: {
+            before: () => {
+              return 1;
             },
           },
-        } as unknown as EditorState
-      )
+          $to: {
+            after: () => {
+              return 12;
+            },
+            end: () => {
+              return 2;
+            },
+          },
+        },
+      } as unknown as EditorState)
+    ).toBeDefined();
+  });
+  it('should clear custom style for multi-cell table selection', () => {
+    const tableSchema = new Schema({
+      nodes: {
+        doc: { content: 'block+' },
+        text: { group: 'inline' },
+        paragraph: {
+          content: 'text*',
+          group: 'block',
+          attrs: {
+            styleName: { default: 'custom-style' },
+            id: { default: 'p-id' },
+            indent: { default: 2 },
+            overriddenIndent: { default: false },
+            overriddenIndentValue: { default: null },
+          },
+          parseDOM: [{ tag: 'p' }],
+          toDOM: () => ['p', 0],
+        },
+        ...tableNodes({
+          tableGroup: 'block',
+          cellContent: 'paragraph',
+          cellAttributes: {},
+        }),
+      },
+      marks: {
+        strong: {
+          attrs: { overridden: { default: false } },
+          parseDOM: [{ tag: 'strong' }],
+          toDOM: () => ['strong', 0],
+        },
+        link: {
+          attrs: { href: {} },
+          parseDOM: [{ tag: 'a[href]' }],
+          toDOM: (mark) => ['a', { href: mark.attrs.href }, 0],
+        },
+      },
+    });
+
+    const strongMark = tableSchema.marks.strong.create({ overridden: true });
+    const linkMark = tableSchema.marks.link.create({ href: 'https://example.com' });
+
+    const tableDoc = tableSchema.node('doc', null, [
+      tableSchema.node('table', null, [
+        tableSchema.node('table_row', null, [
+          tableSchema.node('table_cell', null, [
+            tableSchema.node(
+              'paragraph',
+              { styleName: 'Heading1', id: 'c1' },
+              [tableSchema.text('A', [strongMark, linkMark])]
+            ),
+          ]),
+          tableSchema.node('table_cell', null, [
+            tableSchema.node(
+              'paragraph',
+              { styleName: 'Heading1', id: 'c2' },
+              [tableSchema.text('B', [strongMark])]
+            ),
+          ]),
+        ]),
+      ]),
+    ]);
+
+    const cellPositions: number[] = [];
+    tableDoc.descendants((node, pos) => {
+      if (node.type.name === 'table_cell') {
+        cellPositions.push(pos);
+      }
+      return true;
+    });
+
+    const selection = CellSelection.create(
+      tableDoc,
+      cellPositions[0],
+      cellPositions[1]
     );
+
+    const editorState = EditorState.create({
+      schema: tableSchema,
+      doc: tableDoc,
+      selection,
+    });
+
+    const tr = customstylecommand.clearCustomStyles(
+      editorState.tr.setSelection(selection),
+      editorState
+    );
+
+    const paragraphStyleNames: string[] = [];
+    tr.doc.descendants((node) => {
+      if (node.type.name === 'paragraph') {
+        paragraphStyleNames.push(node.attrs.styleName);
+      }
+      return true;
+    });
+
+    expect(paragraphStyleNames).toEqual([RESERVED_STYLE_NONE, RESERVED_STYLE_NONE]);
+
+    const firstCellParagraph = tr.doc.nodeAt(cellPositions[0] + 1);
+    const secondCellParagraph = tr.doc.nodeAt(cellPositions[1] + 1);
+
+    expect(firstCellParagraph?.firstChild?.marks.map((mark) => mark.type.name)).toEqual(['link']);
+    expect(secondCellParagraph?.firstChild?.marks).toHaveLength(0);
   });
 
   it('should handle showAlert when popup null', () => {

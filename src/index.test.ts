@@ -4740,12 +4740,6 @@ describe('Cus Style Plugin-Pass', () => {
 });
 
 describe('onInitAppendTransaction', () => {
-  it('should return tr when styles not loaded but transaction has changes', () => {
-    jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(false);
-    const tr = { steps: [{}] } as unknown as Transaction;
-    expect(onInitAppendTransaction({ loaded: false }, tr, {})).toBe(tr);
-  });
-
   it('should return continuationTr when chunk is not done', () => {
     jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(true);
     const schema = new Schema({

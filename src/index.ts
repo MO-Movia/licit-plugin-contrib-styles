@@ -113,7 +113,7 @@ export class CustomstylePlugin extends Plugin {
         }
         firstTime = ref.firstTime;
         loaded = ref.loaded;
-        if (hasTransactionChanges(tr)) {
+        if (1 === tr?.updated) {
           slice1 = null;
         }
         return hasTransactionChanges(tr) ? tr : null;
@@ -148,16 +148,7 @@ function hasTransactionChanges(tr) {
   if (!tr) {
     return false;
   }
-  if (Array.isArray(tr.steps) && tr.steps.length > 0) {
-    return true;
-  }
-  return !!(
-    tr.docChanged ||
-    tr.selectionSet ||
-    tr.storedMarksSet ||
-    tr.scrolledIntoView ||
-    tr.updated === 1
-  );
+  return !!tr.docChanged;
 }
 
 export function onInitAppendTransaction(ref, tr, nextState) {

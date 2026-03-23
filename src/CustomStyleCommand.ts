@@ -487,7 +487,7 @@ export class CustomStyleCommand extends UICommand {
       if (child.isText && child.marks.length > 0) {
         // On clear style, keep only links and remove all other inline marks.
         const marksToRemove = child.marks.filter(
-          (mark) => 'link' !== mark.type.name
+          (mark) => 'link' !== mark.type.name && mark.attrs.overridden !== true
         );
         marksToRemove.forEach((mark) => {
           tr = this.removeMarks(mark, tr, node, from, to);

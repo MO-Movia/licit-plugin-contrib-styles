@@ -907,7 +907,7 @@ describe('onUpdateAppendTransaction', () => {
         mockTransactions,
         mockSlice1
       )
-    ).toStrictEqual({});
+    ).toBeNull();
   });
 
   it('onUpdateAppendTransaction', () => {
@@ -1159,7 +1159,7 @@ describe('onUpdateAppendTransaction', () => {
         mockTransactions,
         mockSlice1
       )
-    ).toStrictEqual({});
+    ).toBeNull();
   });
 
   it('onUpdateAppendTransaction', () => {
@@ -1417,7 +1417,7 @@ describe('onUpdateAppendTransaction', () => {
         mockTransactions,
         mockSlice1
       )
-    ).toStrictEqual({});
+    ).toBeNull();
   });
 });
 
@@ -4740,11 +4740,34 @@ describe('Cus Style Plugin-Pass', () => {
 });
 
 describe('onInitAppendTransaction', () => {
+  it('should return continuationTr when chunk is not done', () => {
+    jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(true);
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'test' } },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', null, schema.text('hello')),
+    ]);
+    const nextState = EditorState.create({ schema, doc });
+    const tr = { getMeta: () => -10000 } as unknown as Transaction;
+    const result = onInitAppendTransaction({ loaded: true }, tr, nextState);
+    expect(result).toBeInstanceOf(Transaction);
+    expect(result.getMeta('styleChunkStartPos')).toBeDefined();
+  });
+
   it('it should handle onInitAppendTransaction when isStylesLoaded = false', () => {
     jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(false);
-    expect(onInitAppendTransaction({ loaded: false }, {}, {})).toStrictEqual(
-      {}
-    );
+    expect(onInitAppendTransaction({ loaded: false }, {}, {})).toBeNull();
   });
   it('it should handle onInitAppendTransaction when isStylesLoaded = true', () => {
     const linkmark = new Mark();
@@ -4835,6 +4858,7 @@ describe('onInitAppendTransaction', () => {
           setNodeMarkup: () => new Transaction(mockdoc),
           setSelection: setSelection,
           curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } },
+          getMeta: () => 0,
           doc: mockdoc,
           selection: {
             $from: {
@@ -4870,6 +4894,35 @@ describe('onInitAppendTransaction', () => {
         }
       )
     ).toBeDefined();
+  });
+
+  it('returns result.tr when applyStylesChunked changes the document', () => {
+    jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(true);
+    const styleSpy = jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styleName: 'Test',
+      styles: { align: 'left', lineHeight: '', indent: '0' },
+    });
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'Test' } },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', null, schema.text('hello')),
+    ]);
+    const nextState = EditorState.create({ schema, doc });
+    const tr = { getMeta: () => 0 } as unknown as Transaction;
+    const result = onInitAppendTransaction({ loaded: true }, tr, nextState);
+    expect(result).toBeInstanceOf(Transaction);
+    styleSpy.mockRestore();
   });
 });
 
@@ -5577,6 +5630,49 @@ describe('applyStyles', () => {
     expect(applyStyles({ tr: {} } as EditorState)).toStrictEqual({});
   });
 });
+
+describe('nodeAssignment', () => {
+  it('returns empty when paragraph has no styleName attr', () => {
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', null, schema.text('hello')),
+    ]);
+    const state = EditorState.create({ schema, doc });
+    expect(nodeAssignment(state)).toEqual([]);
+  });
+
+  it('returns nodes when paragraph has styleName attr', () => {
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'Test' } },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', null, schema.text('hello')),
+    ]);
+    const state = EditorState.create({ schema, doc });
+    expect(nodeAssignment(state).length).toBe(1);
+  });
+});
 describe('applyStyleForEmptyParagraph', () => {
   it('should handle applyStyleForEmptyParagraph', () => {
     expect(applyStyleForEmptyParagraph({ tr: {} }, null)).toStrictEqual({});
@@ -5624,6 +5720,7 @@ describe('applyStyleForNextParagraph', () => {
     const mockFrom = {
       depth: 2,
       node(depth) {
+        if (depth === -1) return { type: { name: 'paragraph' }, isBlock: true };
         if (depth === 0) return doc;
         if (depth === 1) return paragraph2;
         if (depth === 2) return { type: { name: 'text' }, isBlock: false };
@@ -5659,6 +5756,10 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
+            descendants(cb) {
+              cb({ type: { name: 'text' } });
+            },
+            content: { size: 0 },
             child() { },
             childCount: 0,
             attrs: {
@@ -5671,7 +5772,14 @@ describe('applyStyleForNextParagraph', () => {
       selection: { $from: mockFrom, from: 3 },
     };
     const view = { input: { lastKeyCode: 13 } };
-    const tr = {};
+    const tr = {
+      setNodeMarkup() {
+        return this;
+      },
+      addStoredMark() {
+        return this;
+      },
+    };
     expect(
       applyStyleForNextParagraph(prevstate, nextstate, tr, view)
     ).toBeDefined();
@@ -5733,6 +5841,7 @@ describe('applyStyleForNextParagraph', () => {
     const mockFrom = {
       depth: 2,
       node(depth) {
+        if (depth === -1) return { type: { name: 'paragraph' }, isBlock: true };
         if (depth === 0) return doc;
         if (depth === 1) return paragraph2;
         if (depth === 2) return { type: { name: 'text' }, isBlock: false };
@@ -5768,6 +5877,10 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
+            descendants(cb) {
+              cb({ type: { name: 'text' } });
+            },
+            content: { size: 0 },
             child() { },
             childCount: 0,
             attrs: {
@@ -5780,7 +5893,14 @@ describe('applyStyleForNextParagraph', () => {
       selection: { $from: mockFrom, from: 3 },
     };
     const view = { input: { lastKeyCode: 13 } };
-    const tr = {};
+    const tr = {
+      setNodeMarkup() {
+        return this;
+      },
+      addStoredMark() {
+        return this;
+      },
+    };
     expect(
       applyStyleForNextParagraph(prevstate, nextstate, tr, view)
     ).toBeDefined();

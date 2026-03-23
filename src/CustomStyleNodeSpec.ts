@@ -216,7 +216,7 @@ function getStyleEx(align, lineSpacing, styleName) {
         style += `--hangingIndentMargin: ${hIndentpx}px;`;
       }
 
-      if (null === align && styleProps.styles.align) {
+      if ((null === align || 'left' === align) && styleProps.styles.align) {
         style += `text-align: ${styleProps.styles.align};`;
       }
 

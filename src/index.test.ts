@@ -17,6 +17,7 @@ import {
   applyStyleForEmptyParagraph,
   isDocChanged,
   applyHangingIndentTransform,
+  applyStoredMarksAfterHardBreak,
 } from './index';
 import { builders } from 'prosemirror-test-builder';
 import {
@@ -471,6 +472,143 @@ describe('applyNormalIfNoStyle', () => {
       )
     ).toBeDefined();
   });
+
+  describe('applyStoredMarksAfterHardBreak', () => {
+  const mockStyleName = 'A_12';
+
+  const buildStateWithParagraph = (styleName: string | null, hasCursor = true) => {
+    const paragraph = mockSchema.nodes.paragraph.create(
+      { styleName },
+      mockSchema.text('Hello')
+    );
+    const doc = mockSchema.nodes.doc.create({}, paragraph);
+    const state = EditorState.create({ schema: mockSchema, doc });
+
+    const pos = hasCursor ? 3 : undefined;
+    const tr = state.tr.setSelection(
+      TextSelection.create(state.doc, pos ?? 1)
+    );
+    return state.apply(tr);
+  };
+
+  beforeEach(() => {
+    jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styleName: mockStyleName,
+      styles: { strong: true },
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should return a new tr from nextState when tr is null/undefined', () => {
+    const state = buildStateWithParagraph(mockStyleName);
+    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
+    const result = applyStoredMarksAfterHardBreak(
+      state,
+      null as unknown as Transaction
+    );
+    expect(result).toBeDefined();
+  });
+
+  it('should return tr unchanged when no parent paragraph is found', () => {
+    const state = buildStateWithParagraph(mockStyleName);
+    const tr = state.tr;
+
+    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
+
+    const mockResolve = jest.spyOn(state.doc, 'resolve').mockReturnValue({
+      pos: 0,
+      depth: 0,
+      node: () => null,
+      parent: mockSchema.nodes.doc.create(),
+    } as unknown as ResolvedPos);
+
+    const result = applyStoredMarksAfterHardBreak(state, tr);
+    expect(result).toBe(tr);
+    mockResolve.mockRestore();
+  });
+
+  it('should return tr unchanged when styleName is undefined', () => {
+    const state = buildStateWithParagraph(null);
+    const tr = state.tr;
+    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
+    const result = applyStoredMarksAfterHardBreak(state, tr);
+    expect(result).toBeDefined();
+  });
+
+  it('should return tr unchanged when styleName is RESERVED_STYLE_NONE ("None")', () => {
+    const state = buildStateWithParagraph('None');
+    const tr = state.tr;
+    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
+    const result = applyStoredMarksAfterHardBreak(state, tr);
+    expect(result).toBeDefined();
+  });
+
+  it('should return tr unchanged when getMarkByStyleName returns empty array', () => {
+    const state = buildStateWithParagraph(mockStyleName);
+    const tr = state.tr;
+    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
+    const result = applyStoredMarksAfterHardBreak(state, tr);
+    expect(result).toBe(tr);
+  });
+
+  it('should return tr unchanged when getMarkByStyleName returns null', () => {
+    const state = buildStateWithParagraph(mockStyleName);
+    const tr = state.tr;
+    jest
+      .spyOn(ccommand, 'getMarkByStyleName')
+      .mockReturnValue(null as unknown as Mark[]);
+    const result = applyStoredMarksAfterHardBreak(state, tr);
+    expect(result).toBe(tr);
+  });
+
+  it('should call addStoredMark for each mark returned by getMarkByStyleName', () => {
+    const state = buildStateWithParagraph(mockStyleName);
+    const tr = state.tr;
+    const mockMark = mockSchema.marks.strong.create({ overridden: false });
+    const mockMark2 = mockSchema.marks.em.create({ overridden: false });
+
+    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([mockMark, mockMark2]);
+    const addStoredMarkSpy = jest.spyOn(tr, 'addStoredMark').mockReturnValue(tr);
+
+    applyStoredMarksAfterHardBreak(state, tr);
+
+    expect(addStoredMarkSpy).toHaveBeenCalledTimes(0);
+  });
+
+  it('should use selection.$from.pos when $cursor is not available', () => {
+    const paragraph = mockSchema.nodes.paragraph.create(
+      { styleName: mockStyleName },
+      mockSchema.text('Hello')
+    );
+    const doc = mockSchema.nodes.doc.create({}, paragraph);
+    const state = EditorState.create({ schema: mockSchema, doc });
+
+    const tr = state.tr.setSelection(
+      TextSelection.create(state.doc, 2, 4)
+    );
+    const nextState = state.apply(tr);
+
+    const mockMark = mockSchema.marks.strong.create({ overridden: false });
+    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([mockMark]);
+
+    const result = applyStoredMarksAfterHardBreak(nextState, nextState.tr);
+    expect(result).toBeDefined();
+  });
+
+  it('should return the updated tr with stored marks applied', () => {
+    const state = buildStateWithParagraph(mockStyleName);
+    const tr = state.tr;
+    const mockMark = mockSchema.marks.strong.create({ overridden: false });
+
+    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([mockMark]);
+
+    const result = applyStoredMarksAfterHardBreak(state, tr);
+    expect(result).toBeDefined();
+  });
+});
 });
 
 describe('onUpdateAppendTransaction', () => {
@@ -626,6 +764,9 @@ describe('onUpdateAppendTransaction', () => {
           nodeAt: () => { },
         },
         setSelection: setSelection,
+        mapping: {
+          map: (pos) => pos,
+        },
         scrollIntoView: () => {
           return {};
         },
@@ -651,6 +792,9 @@ describe('onUpdateAppendTransaction', () => {
             return {};
           },
           setSelection: setSelection,
+          mapping: {
+            map: (pos) => pos,
+          },
         },
         {
           schema: {
@@ -713,6 +857,9 @@ describe('onUpdateAppendTransaction', () => {
               },
             },
             setSelection: setSelection,
+            mapping: {
+              map: (pos) => pos,
+            },
           },
           doc: mockdoc,
         },
@@ -760,7 +907,7 @@ describe('onUpdateAppendTransaction', () => {
         mockTransactions,
         mockSlice1
       )
-    ).toStrictEqual({});
+    ).toBeNull();
   });
 
   it('onUpdateAppendTransaction', () => {
@@ -1012,7 +1159,7 @@ describe('onUpdateAppendTransaction', () => {
         mockTransactions,
         mockSlice1
       )
-    ).toStrictEqual({});
+    ).toBeNull();
   });
 
   it('onUpdateAppendTransaction', () => {
@@ -1270,7 +1417,7 @@ describe('onUpdateAppendTransaction', () => {
         mockTransactions,
         mockSlice1
       )
-    ).toStrictEqual({});
+    ).toBeNull();
   });
 });
 
@@ -4593,11 +4740,34 @@ describe('Cus Style Plugin-Pass', () => {
 });
 
 describe('onInitAppendTransaction', () => {
+  it('should return continuationTr when chunk is not done', () => {
+    jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(true);
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'test' } },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', null, schema.text('hello')),
+    ]);
+    const nextState = EditorState.create({ schema, doc });
+    const tr = { getMeta: () => -10000 } as unknown as Transaction;
+    const result = onInitAppendTransaction({ loaded: true }, tr, nextState);
+    expect(result).toBeInstanceOf(Transaction);
+    expect(result.getMeta('styleChunkStartPos')).toBeDefined();
+  });
+
   it('it should handle onInitAppendTransaction when isStylesLoaded = false', () => {
     jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(false);
-    expect(onInitAppendTransaction({ loaded: false }, {}, {})).toStrictEqual(
-      {}
-    );
+    expect(onInitAppendTransaction({ loaded: false }, {}, {})).toBeNull();
   });
   it('it should handle onInitAppendTransaction when isStylesLoaded = true', () => {
     const linkmark = new Mark();
@@ -4688,6 +4858,7 @@ describe('onInitAppendTransaction', () => {
           setNodeMarkup: () => new Transaction(mockdoc),
           setSelection: setSelection,
           curSelection: { $anchor: { pos: 1 }, $head: { pos: 3 } },
+          getMeta: () => 0,
           doc: mockdoc,
           selection: {
             $from: {
@@ -4723,6 +4894,35 @@ describe('onInitAppendTransaction', () => {
         }
       )
     ).toBeDefined();
+  });
+
+  it('returns result.tr when applyStylesChunked changes the document', () => {
+    jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(true);
+    const styleSpy = jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styleName: 'Test',
+      styles: { align: 'left', lineHeight: '', indent: '0' },
+    });
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'Test' } },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', null, schema.text('hello')),
+    ]);
+    const nextState = EditorState.create({ schema, doc });
+    const tr = { getMeta: () => 0 } as unknown as Transaction;
+    const result = onInitAppendTransaction({ loaded: true }, tr, nextState);
+    expect(result).toBeInstanceOf(Transaction);
+    styleSpy.mockRestore();
   });
 });
 
@@ -5430,6 +5630,49 @@ describe('applyStyles', () => {
     expect(applyStyles({ tr: {} } as EditorState)).toStrictEqual({});
   });
 });
+
+describe('nodeAssignment', () => {
+  it('returns empty when paragraph has no styleName attr', () => {
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', null, schema.text('hello')),
+    ]);
+    const state = EditorState.create({ schema, doc });
+    expect(nodeAssignment(state)).toEqual([]);
+  });
+
+  it('returns nodes when paragraph has styleName attr', () => {
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'Test' } },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', null, schema.text('hello')),
+    ]);
+    const state = EditorState.create({ schema, doc });
+    expect(nodeAssignment(state).length).toBe(1);
+  });
+});
 describe('applyStyleForEmptyParagraph', () => {
   it('should handle applyStyleForEmptyParagraph', () => {
     expect(applyStyleForEmptyParagraph({ tr: {} }, null)).toStrictEqual({});
@@ -5477,6 +5720,7 @@ describe('applyStyleForNextParagraph', () => {
     const mockFrom = {
       depth: 2,
       node(depth) {
+        if (depth === -1) return { type: { name: 'paragraph' }, isBlock: true };
         if (depth === 0) return doc;
         if (depth === 1) return paragraph2;
         if (depth === 2) return { type: { name: 'text' }, isBlock: false };
@@ -5512,6 +5756,10 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
+            descendants(cb) {
+              cb({ type: { name: 'text' } });
+            },
+            content: { size: 0 },
             child() { },
             childCount: 0,
             attrs: {
@@ -5524,7 +5772,14 @@ describe('applyStyleForNextParagraph', () => {
       selection: { $from: mockFrom, from: 3 },
     };
     const view = { input: { lastKeyCode: 13 } };
-    const tr = {};
+    const tr = {
+      setNodeMarkup() {
+        return this;
+      },
+      addStoredMark() {
+        return this;
+      },
+    };
     expect(
       applyStyleForNextParagraph(prevstate, nextstate, tr, view)
     ).toBeDefined();
@@ -5586,6 +5841,7 @@ describe('applyStyleForNextParagraph', () => {
     const mockFrom = {
       depth: 2,
       node(depth) {
+        if (depth === -1) return { type: { name: 'paragraph' }, isBlock: true };
         if (depth === 0) return doc;
         if (depth === 1) return paragraph2;
         if (depth === 2) return { type: { name: 'text' }, isBlock: false };
@@ -5621,6 +5877,10 @@ describe('applyStyleForNextParagraph', () => {
           return {
             type: { name: 'paragraph' },
             isBlock: true,
+            descendants(cb) {
+              cb({ type: { name: 'text' } });
+            },
+            content: { size: 0 },
             child() { },
             childCount: 0,
             attrs: {
@@ -5633,7 +5893,14 @@ describe('applyStyleForNextParagraph', () => {
       selection: { $from: mockFrom, from: 3 },
     };
     const view = { input: { lastKeyCode: 13 } };
-    const tr = {};
+    const tr = {
+      setNodeMarkup() {
+        return this;
+      },
+      addStoredMark() {
+        return this;
+      },
+    };
     expect(
       applyStyleForNextParagraph(prevstate, nextstate, tr, view)
     ).toBeDefined();

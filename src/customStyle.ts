@@ -13,6 +13,7 @@ let hideNumbering = false;
 let _view: EditorView;
 let hasdocTypechanged = false;
 let docType = null;
+let stylesInitialized = false;
 // None & None-@#$- have same effect of None.
 // None-@#$-<styleLevel> is used for numbering to set style level for None, based on the cursor level style level.
 function isValidStyleName(styleName?: string) {
@@ -81,6 +82,7 @@ export function setView(csview: EditorView) {
 // store styles in cache
 export function setStyles(style: Style[]) {
   customStyles = style;
+  stylesInitialized = true;
   setCustomStyles(style);
   let documentType;
   if (style && Array.isArray(style)) {
@@ -118,12 +120,12 @@ export function setStyleRuntime(runtime) {
 export function getStyleRuntime(): StyleRuntime {
   return styleRuntime;
 }
-export function setCustomStylesOnLoad() {
-  getStylesAsync().then((result) => {
-    if (result) {
-      setStyles(result);
-    }
-  });
+export function setCustomStylesOnLoad(preloadedStyles?: Style[]) {
+  if (preloadedStyles !== undefined) {
+    setStyles(preloadedStyles);
+    return;
+  }
+  setStyles(styleRuntime?.getStyles?.() ?? []);
 }
 
 function saveDefaultStyle() {
@@ -245,8 +247,14 @@ export function getCustomStyle(customStyle) {
 export function saveStyle(styleProps: Style): Promise<Style[]> {
   return styleRuntime?.saveStyle(styleProps);
 }
-export function getStylesAsync(): Promise<Style[]> {
-  return styleRuntime.getStylesAsync();
+export function getStyles(): Style[] {
+  if (stylesInitialized) {
+    return customStyles;
+  }
+  return styleRuntime?.getStyles?.() ?? [];
+}
+export function getStylesAsync(): Style[] {
+  return getStyles();
 }
 export function renameStyle(
   oldName: string,

@@ -3313,7 +3313,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       toc: false,
       isHidden: false,
     } as unknown as Style;
-    jest.spyOn(customstyles, 'getStylesAsync').mockResolvedValue([styl]);
+    jest.spyOn(customstyles, 'getStyles').mockReturnValue([styl]);
     jest
       .spyOn(cusstylecommand, 'updateDocument')
       .mockReturnValue({ key: 'mocktr' } as unknown as Transform);
@@ -3369,7 +3369,7 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
       toc: false,
       isHidden: false,
     } as unknown as Style;
-    jest.spyOn(customstyles, 'getStylesAsync').mockResolvedValue([styl]);
+    jest.spyOn(customstyles, 'getStyles').mockReturnValue([styl]);
     jest
       .spyOn(cusstylecommand, 'updateDocument')
       .mockReturnValue({ key: 'mocktr' } as unknown as Transform);

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import TextEditorBox from './JSONEditor';
 
 jest.mock('../customStyle', () => ({
-    getStylesAsync: jest.fn(() => Promise.resolve([{ name: 'style1' }])),
+    getStyles: jest.fn(() => [{ name: 'style1' }]),
     saveStyleSet: jest.fn(() => Promise.resolve(true)),
 }));
 

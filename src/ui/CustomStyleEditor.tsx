@@ -12,7 +12,7 @@ import {
   isCustomStyleExists,
   setStyles,
   saveStyle,
-  getStylesAsync,
+  getStyles,
   addStyleToList,
 } from '../customStyle';
 import {
@@ -74,12 +74,14 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   constructor(props) {
     super(props);
     editedStyles.splice(0, editedStyles.length);
+    const loadedStyles = getStyles();
+    customStyles = loadedStyles;
     this.state = {
       ...props,
       selectedStyleMode: 'none',
       isHidden: false,
       otherStyleSelected,
-      customStyles,
+      customStyles: loadedStyles,
       selectedStyle: 'userDefined',
     };
     // set default values for text alignment and boldNumbering checkbox.
@@ -104,7 +106,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     if (!this.state.styles.fontSize) {
       this.state.styles.fontSize = '11';
     }
-    this.getCustomStyles();
   }
 
   // To set the selected style values
@@ -2065,15 +2066,13 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   // To fetch the custom styles from server and set to the state.
   getCustomStyles() {
-    getStylesAsync().then((result) => {
-      customStyles = result;
-      // [FS] IRAD-1222 2021-03-01
-      // Issue fix: In edit all, the style list not showing the first time.
-
-      this.setState(() => ({
-        customStyles: result,
-      }));
-    });
+    const result = getStyles();
+    customStyles = result;
+    // [FS] IRAD-1222 2021-03-01
+    // Issue fix: In edit all, the style list not showing the first time.
+    this.setState(() => ({
+      customStyles: result,
+    }));
   }
 
   // [FS] IRAD-1231 2021-03-03

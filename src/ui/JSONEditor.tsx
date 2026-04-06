@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getStylesAsync, saveStyleSet } from '../customStyle';
+import { getStyles, saveStyleSet } from '../customStyle';
 import type { Style } from '../StyleRuntime';
 
 export default function TextEditorBox(props) {
@@ -7,9 +7,7 @@ export default function TextEditorBox(props) {
   const [error, setError] = useState<string | null>(null);
   // Load styles on component mount
   useEffect(() => {
-    getStylesAsync().then((result) => {
-      setText(JSON.stringify(result, null, 2)); // prettified JSON
-    });
+    setText(JSON.stringify(getStyles(), null, 2)); // prettified JSON
   }, []);
 
   const handleSave = () => {

@@ -13,7 +13,7 @@ import {
 } from '../CustomStyleNodeSpec';
 import {
   setStyles,
-  getStylesAsync,
+  getStyles,
   hasStyleRuntime,
   isCustomStyleExists,
   getStyleRuntime
@@ -47,32 +47,30 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     // Get styles form server configured in runtime
     let HEADING_NAMES = null;
     if (this.hasRuntime) {
-      getStylesAsync().then((result) => {
-        if (result) {
-          setStyles(result);
-          HEADING_NAMES = result;
-          if (null != HEADING_NAMES) {
-            const foundNormal = result.find(
-              (obj) => obj.styleName === RESERVED_STYLE_NONE
+      const result = getStyles();
+      if (result) {
+        setStyles(result);
+        HEADING_NAMES = result;
+        if (null != HEADING_NAMES) {
+          const foundNormal = result.find(
+            (obj) => obj.styleName === RESERVED_STYLE_NONE
+          );
+          if (foundNormal) {
+            HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
+              foundNormal,
+              foundNormal.styleName
             );
-            if (foundNormal) {
-              HEADING_COMMANDS[RESERVED_STYLE_NONE] = new CustomStyleCommand(
-                foundNormal,
-                foundNormal.styleName
-              );
-            }
-
-            HEADING_NAMES.forEach((obj) => {
-              if (RESERVED_STYLE_NONE != obj.styleName)
-                HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
-                  obj,
-                  obj.styleName
-                );
-            });
           }
+
+          HEADING_NAMES.forEach((obj) => {
+            if (RESERVED_STYLE_NONE != obj.styleName)
+              HEADING_COMMANDS[obj.styleName] = new CustomStyleCommand(
+                obj,
+                obj.styleName
+              );
+          });
         }
-        return [HEADING_COMMANDS];
-      });
+      }
     }
     return [HEADING_COMMANDS];
   }

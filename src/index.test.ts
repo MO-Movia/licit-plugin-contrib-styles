@@ -109,12 +109,37 @@ const styl2 = {
 };
 const TestCustomStyleRuntime = {
   saveStyle: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
-  getStylesAsync: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
+  getStyles: jest.fn().mockReturnValue([styl, styl2]),
   renameStyle: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
   removeStyle: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
   fetchStyles: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
   buildRoute: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
 };
+
+describe('CustomstylePlugin initialization', () => {
+  it('uses preloaded styles during plugin initiation before first draw', () => {
+    setStyles([]);
+    const runtime = {
+      saveStyle: jest.fn().mockReturnValue(Promise.resolve([styl])),
+      getStyles: jest.fn().mockReturnValue([]),
+      renameStyle: jest.fn().mockReturnValue(Promise.resolve([styl])),
+      removeStyle: jest.fn().mockReturnValue(Promise.resolve([styl])),
+    };
+
+    const plugin = new CustomstylePlugin(runtime, {
+      hideNumbering: true,
+      preloadedStyles: [styl as unknown as Style],
+    });
+
+    createEditor(doc(p('<cursor>')), {
+      plugins: [plugin],
+    });
+
+    expect(runtime.getStyles).not.toHaveBeenCalled();
+    expect(getCustomStyleByName(styl.styleName).styleName).toBe(styl.styleName);
+    expect(getHidenumberingFlag()).toBe(true);
+  });
+});
 
 const mockSchema = new Schema({
   nodes: {
@@ -2144,7 +2169,7 @@ describe('Cus Style Plugin-Pass', () => {
 
   const styleruntime = {
     saveStyle: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
-    getStylesAsync: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
+    getStyles: jest.fn().mockReturnValue([styl, styl2]),
     renameStyle: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
     removeStyle: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),
     fetchStyles: jest.fn().mockReturnValue(Promise.resolve([styl, styl2])),

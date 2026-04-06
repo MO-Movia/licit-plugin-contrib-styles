@@ -436,7 +436,7 @@ describe('customstyledropdowncommand', () => {
   const customstyledropdowncommand = new CustomstyleDropDownCommand(props);
 
   it('should handle getCommandGroups when hasStyleRuntime is true ', async () => {
-    const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([]);
+    const spy = jest.spyOn(cusstyles, 'getStyles').mockReturnValue([]);
     const commandGroups = await customstyledropdowncommand.getCommandGroups();
     const headingCommands = commandGroups[0];
     expect(headingCommands).not.toHaveProperty('A Apply Stylefff');
@@ -462,7 +462,7 @@ describe('customstyledropdowncommand', () => {
     getStyleRuntimeSpy.mockRestore();
   });
   it('should add normal and custom style commands when runtime styles include normal', async () => {
-    const getStylesSpy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([
+    const getStylesSpy = jest.spyOn(cusstyles, 'getStyles').mockReturnValue([
       {
         styleName: RESERVED_STYLE_NONE,
       },
@@ -499,7 +499,7 @@ describe('customstyledropdowncommand', () => {
     ).toBe(true);
   });
   it('should handle render when styleName null', () => {
-    const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([
+    const spy = jest.spyOn(cusstyles, 'getStyles').mockReturnValue([
       {
         styleName: 'A Apply Stylefff',
         mode: 1,
@@ -545,7 +545,7 @@ describe('customstyledropdowncommand', () => {
     spy.mockRestore();
   });
   it('should handle render when styleName not null', () => {
-    const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([
+    const spy = jest.spyOn(cusstyles, 'getStyles').mockReturnValue([
       {
         styleName: 'A Apply Stylefff',
         mode: 1,
@@ -902,13 +902,13 @@ describe('customstyledropdowncommand 1', () => {
   jest.spyOn(cusstyles, 'hasStyleRuntime').mockReturnValue(false);
   const customstyledropdowncommand = new CustomstyleDropDownCommand(props);
   it('should handle getCommandGroups when hasStyleRuntime is false ', async () => {
-    jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([]);
+    jest.spyOn(cusstyles, 'getStyles').mockReturnValue([]);
     const commandGroups = await customstyledropdowncommand.getCommandGroups();
     const headingCommands = commandGroups[0];
     expect(headingCommands).toBeDefined();
   });
   it('should handle render when styleName not null', () => {
-    const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([
+    const spy = jest.spyOn(cusstyles, 'getStyles').mockReturnValue([
       {
         styleName: 'A Apply Stylefff',
         mode: 1,
@@ -1072,7 +1072,7 @@ describe('customstyledropdowncommand 1', () => {
     spy.mockRestore();
   });
   it('should handle render when styleName not null', () => {
-    const spy = jest.spyOn(cusstyles, 'getStylesAsync').mockResolvedValue([
+    const spy = jest.spyOn(cusstyles, 'getStyles').mockReturnValue([
       {
         styleName: 'A Apply Stylefff',
         mode: 1,

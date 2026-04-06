@@ -17,7 +17,7 @@ import { Node } from 'prosemirror-model';
 describe('Custom Menu UI   ', () => {
   const TestCustomStyleRuntime = {
     saveStyle: jest.fn().mockReturnValue(Promise.resolve([])),
-    getStylesAsync: jest.fn().mockReturnValue(Promise.resolve([])),
+    getStyles: jest.fn().mockReturnValue([]),
     renameStyle: jest.fn().mockReturnValue(Promise.resolve([])),
     removeStyle: jest.fn().mockReturnValue(Promise.resolve([])),
     fetchStyles: jest.fn().mockReturnValue(Promise.resolve([])),

@@ -38,7 +38,7 @@ import {
   isPreviousLevelExists,
   setStyles,
   saveStyle,
-  getStylesAsync,
+  getStyles,
   addStyleToList,
 } from './customStyle';
 import type { Style } from './StyleRuntime';
@@ -601,20 +601,19 @@ export class CustomStyleCommand extends UICommand {
   // [FS] IRAD-1231 2021-03-02
   // update the document with the edited styles list.
   getCustomStyles(styleName: string, editorView: EditorView) {
-    getStylesAsync().then((result) => {
-      if (styleName) {
-        const { dispatch, state } = editorView;
-        let tr;
-        result.forEach((obj) => {
-          if (styleName === obj.styleName) {
-            tr = updateDocument(state, state.tr, styleName, obj);
-          }
-        });
-        if (tr) {
-          dispatch(tr);
+    const result = getStyles();
+    if (styleName) {
+      const { dispatch, state } = editorView;
+      let tr;
+      result.forEach((obj) => {
+        if (styleName === obj.styleName) {
+          tr = updateDocument(state, state.tr, styleName, obj);
         }
+      });
+      if (tr) {
+        dispatch(tr);
       }
-    });
+    }
   }
 
   // creates a sample style object

@@ -27,7 +27,7 @@ import { findParentNodeClosestToPos } from 'prosemirror-utils';
 import { Node, Schema, Slice } from 'prosemirror-model';
 import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand';
 import { applyEffectiveSchema } from './EditorSchema';
-import type { StyleRuntime } from './StyleRuntime';
+import type { Style, StyleRuntime } from './StyleRuntime';
 
 const ENTERKEYCODE = 13;
 const BACKSPACEKEYCODE = 8;
@@ -36,6 +36,11 @@ const ATTR_STYLE_NAME = 'styleName';
 const STYLE_CHUNK_LIMIT = 5000;
 const STYLE_CHUNK_START_POS = 'styleChunkStartPos';
 let slice1;
+
+export type CustomstylePluginOptions = {
+  hideNumbering?: boolean;
+  preloadedStyles?: Style[];
+};
 
 const isNodeHasAttribute = (node, attrName) => {
   return attrName in (node?.attrs || {});
@@ -48,10 +53,21 @@ const requiredAddAttr = (node) => {
 };
 
 export class CustomstylePlugin extends Plugin {
-  constructor(runtime: StyleRuntime, hideNumbering?: boolean) {
+  constructor(
+    runtime: StyleRuntime,
+    hideNumberingOrOptions?: boolean | CustomstylePluginOptions,
+    preloadedStyles?: Style[]
+  ) {
     let csview = null;
     let firstTime = true;
     let loaded = false;
+    const options =
+      typeof hideNumberingOrOptions === 'boolean'
+        ? {
+            hideNumbering: hideNumberingOrOptions,
+            preloadedStyles,
+          }
+        : hideNumberingOrOptions ?? {};
     super({
       key: new PluginKey('CustomstylePlugin'),
       state: {
@@ -59,7 +75,7 @@ export class CustomstylePlugin extends Plugin {
           loaded = false;
           firstTime = true;
           setStyleRuntime(runtime);
-          setCustomStylesOnLoad();
+          setCustomStylesOnLoad(options.preloadedStyles);
         },
         apply(tr) {
           remapCounterFlags(tr);
@@ -70,7 +86,7 @@ export class CustomstylePlugin extends Plugin {
         // to apply styles after getting the styles.
         csview = view;
         setView(csview);
-        setHidenumberingFlag(hideNumbering || false);
+        setHidenumberingFlag(options.hideNumbering || false);
         return {
           update: () => {
             /* This is intentional */

@@ -4,7 +4,7 @@ import { SyntheticEvent } from 'react';
 import { Style } from '@modusoperandi/licit-ui-commands';
 
 describe('CustomStyleEditor', () => {
-  jest.spyOn(customstyle, 'getStylesAsync').mockResolvedValue([]);
+  jest.spyOn(customstyle, 'getStyles').mockReturnValue([]);
   const customstyleeditor = new CustomStyleEditor({
     styles: {
       align: 'left',
@@ -1378,8 +1378,8 @@ describe('CustomStyleEditor', () => {
   });
   it('should handle onSelectCustomStyle', () => {
     jest
-      .spyOn(customstyle, 'getStylesAsync')
-      .mockReturnValue(Promise.resolve([{ styleName: 'test', mode: 3 }]));
+      .spyOn(customstyle, 'getStyles')
+      .mockReturnValue([{ styleName: 'test', mode: 3 } as never]);
     customstyleeditor.getCustomStyles();
     customstyleeditor.getCustomStyles();
     expect(

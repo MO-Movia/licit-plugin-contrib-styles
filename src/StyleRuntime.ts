@@ -71,9 +71,9 @@ export type StyleRuntime = {
 
   canEditStyle?: boolean; // true= User has permission to edit styles
   /**
-   * Gets array of styles asynchronously from the service
+   * Gets array of styles from the runtime.
    */
-  getStylesAsync: () => Promise<Style[]>;
+  getStyles: () => Style[];
 
   // Adds / Replaces supplied style on service.
   // Resolves to server-processed style on success.

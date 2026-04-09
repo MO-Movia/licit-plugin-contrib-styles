@@ -1,4 +1,5 @@
 // [FS] IRAD-1085 2020-10-09
+import { PluginKey, type EditorState } from 'prosemirror-state';
 import type { Style, CSSStyle, StyleRuntime } from './StyleRuntime';
 import { EditorView } from 'prosemirror-view';
 import {
@@ -10,10 +11,14 @@ import { setCustomStyles } from '@modusoperandi/licit-ui-commands';
 let customStyles = new Array(0);
 let styleRuntime;
 let hideNumbering = false;
-let _view: EditorView;
-let hasdocTypechanged = false;
-let docType = null;
 let stylesInitialized = false;
+
+export type CustomStylePluginState = {
+  styles: Style[];
+};
+
+export const CUSTOMSTYLE_PLUGIN_KEY =
+  new PluginKey<CustomStylePluginState>('CustomstylePlugin');
 // None & None-@#$- have same effect of None.
 // None-@#$-<styleLevel> is used for numbering to set style level for None, based on the cursor level style level.
 function isValidStyleName(styleName?: string) {
@@ -75,31 +80,11 @@ export function getCustomStyleByName(name: string): Style {
   return style;
 }
 
-export function setView(csview: EditorView) {
-  _view = csview;
-}
-
 // store styles in cache
 export function setStyles(style: Style[]) {
   customStyles = style;
   stylesInitialized = true;
   setCustomStyles(style);
-  let documentType;
-  if (style && Array.isArray(style)) {
-    documentType = style?.[0]?.docType;
-  }
-  hasdocTypechanged = docType !== documentType;
-  docType = documentType;
-  if (docType) {
-    hasdocTypechanged = true;
-    if (_view) {
-      _view.dispatch(_view.state.tr.scrollIntoView());
-      _view = null;
-    }
-  }
-  if (style[0] === undefined || !Object.hasOwn(style[0], 'docType')) {
-    hasdocTypechanged = true;
-  }
   // if the styles doesn't have default style Normal then add that style.
   if (style && !isCustomStyleExists(RESERVED_STYLE_NONE)) {
     saveDefaultStyle();
@@ -121,11 +106,7 @@ export function getStyleRuntime(): StyleRuntime {
   return styleRuntime;
 }
 export function setCustomStylesOnLoad(preloadedStyles?: Style[]) {
-  if (preloadedStyles !== undefined) {
-    setStyles(preloadedStyles);
-    return;
-  }
-  setStyles(styleRuntime?.getStyles?.() ?? []);
+  setStyles(preloadedStyles ?? []);
 }
 
 function saveDefaultStyle() {
@@ -133,7 +114,7 @@ function saveDefaultStyle() {
 }
 
 export function isStylesLoaded() {
-  return customStyles?.length > 0 && hasdocTypechanged;
+  return customStyles?.length > 0;
 }
 
 export function hasStyleRuntime() {
@@ -248,10 +229,26 @@ export function saveStyle(styleProps: Style): Promise<Style[]> {
   return styleRuntime?.saveStyle(styleProps);
 }
 export function getStyles(): Style[] {
-  if (stylesInitialized) {
-    return customStyles;
+  return stylesInitialized ? customStyles : [];
+}
+export function getStylesFromState(state?: EditorState | null): Style[] {
+  if (!state) {
+    return getStyles();
   }
-  return styleRuntime?.getStyles?.() ?? [];
+  try {
+    return CUSTOMSTYLE_PLUGIN_KEY.getState(state)?.styles ?? getStyles();
+  } catch {
+    return getStyles();
+  }
+}
+export function pushStylesToView(
+  view: EditorView | null | undefined,
+  styles: Style[]
+) {
+  if (!view) {
+    return;
+  }
+  view.dispatch(view.state.tr.setMeta(CUSTOMSTYLE_PLUGIN_KEY, { styles }));
 }
 export function getStylesAsync(): Style[] {
   return getStyles();

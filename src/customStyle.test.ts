@@ -10,7 +10,6 @@ import {
   renameStyle,
   removeStyle,
   addStyleToList,
-  setView,
   saveStyleSet
 } from './customStyle';
 import type { Style } from './StyleRuntime';
@@ -91,16 +90,5 @@ describe('customstyle', () => {
       { styleName: '' },
       {},
     ]);
-  });
-  it('should handle setStyles', () => {
-    setView({
-      dispatch: () => { },
-      state: { tr: { scrollIntoView: () => { } } },
-    } as unknown as EditorView);
-    expect(
-      setStyles([
-        { styleName: 'Normal', docType: 'asd', styles: { strong: true, styleLevel: 2 } },
-      ])
-    ).toBeUndefined();
   });
 });

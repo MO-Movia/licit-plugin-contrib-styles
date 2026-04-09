@@ -462,7 +462,7 @@ describe('customstyledropdowncommand', () => {
     getStyleRuntimeSpy.mockRestore();
   });
   it('should add normal and custom style commands when runtime styles include normal', async () => {
-    const getStylesSpy = jest.spyOn(cusstyles, 'getStyles').mockReturnValue([
+    const getStylesSpy = jest.spyOn(cusstyles, 'getStylesFromState').mockReturnValue([
       {
         styleName: RESERVED_STYLE_NONE,
       },

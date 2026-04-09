@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { getStyles, saveStyleSet } from '../customStyle';
+import {
+  getStylesFromState,
+  pushStylesToView,
+  saveStyleSet,
+  setStyles,
+} from '../customStyle';
 import type { Style } from '../StyleRuntime';
 
 export default function TextEditorBox(props) {
@@ -7,14 +12,18 @@ export default function TextEditorBox(props) {
   const [error, setError] = useState<string | null>(null);
   // Load styles on component mount
   useEffect(() => {
-    setText(JSON.stringify(getStyles(), null, 2)); // prettified JSON
-  }, []);
+    setText(
+      JSON.stringify(getStylesFromState(props.editorView?.state), null, 2)
+    ); // prettified JSON
+  }, [props.editorView]);
 
   const handleSave = () => {
     try {
       const styles: Style[] = JSON.parse(text);
       saveStyleSet(styles).then((result) => {
         if (result) {
+          setStyles(styles);
+          pushStylesToView(props.editorView, styles);
           props.close(text);
         }
       });

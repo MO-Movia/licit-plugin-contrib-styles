@@ -12,8 +12,7 @@ import {
   RESERVED_STYLE_NONE_NUMBERING,
 } from '../CustomStyleNodeSpec';
 import {
-  setStyles,
-  getStyles,
+  getStylesFromState,
   hasStyleRuntime,
   isCustomStyleExists,
   getStyleRuntime
@@ -47,9 +46,8 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     // Get styles form server configured in runtime
     let HEADING_NAMES = null;
     if (this.hasRuntime) {
-      const result = getStyles();
+      const result = getStylesFromState(this.props.editorState);
       if (result) {
-        setStyles(result);
         HEADING_NAMES = result;
         if (null != HEADING_NAMES) {
           const foundNormal = result.find(

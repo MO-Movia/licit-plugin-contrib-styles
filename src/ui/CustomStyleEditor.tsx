@@ -12,7 +12,8 @@ import {
   isCustomStyleExists,
   setStyles,
   saveStyle,
-  getStyles,
+  getStylesFromState,
+  pushStylesToView,
   addStyleToList,
 } from '../customStyle';
 import {
@@ -74,7 +75,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   constructor(props) {
     super(props);
     editedStyles.splice(0, editedStyles.length);
-    const loadedStyles = getStyles();
+    const loadedStyles = getStylesFromState(
+      props.editorView?.state ?? props.editorState
+    );
     customStyles = loadedStyles;
     this.state = {
       ...props,
@@ -2061,12 +2064,15 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       }
       customStyles = result;
       setStyles(result);
+      pushStylesToView(this.props.editorView, result);
     });
   }
 
   // To fetch the custom styles from server and set to the state.
   getCustomStyles() {
-    const result = getStyles();
+    const result = getStylesFromState(
+      this.props.editorView?.state ?? this.props.editorState
+    );
     customStyles = result;
     // [FS] IRAD-1222 2021-03-01
     // Issue fix: In edit all, the style list not showing the first time.

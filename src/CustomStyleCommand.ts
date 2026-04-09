@@ -36,9 +36,10 @@ import {
   getCustomStyleByName,
   getCustomStyleByLevel,
   isPreviousLevelExists,
+  CUSTOMSTYLE_PLUGIN_KEY,
   setStyles,
   saveStyle,
-  getStyles,
+  getStylesFromState,
   addStyleToList,
 } from './customStyle';
 import type { Style } from './StyleRuntime';
@@ -557,6 +558,9 @@ export class CustomStyleCommand extends UICommand {
         setStyles(result);
         // Issue fix: Created custom style Numbering not applied to paragraph.
         tr = tr.setSelection(TextSelection.create(doc, 0, 0));
+        if (typeof tr.setMeta === 'function') {
+          tr = tr.setMeta(CUSTOMSTYLE_PLUGIN_KEY, { styles: result });
+        }
         // Apply created styles to document
         const { selection } = state;
         const startPos = selection.$from.before(1);
@@ -601,7 +605,7 @@ export class CustomStyleCommand extends UICommand {
   // [FS] IRAD-1231 2021-03-02
   // update the document with the edited styles list.
   getCustomStyles(styleName: string, editorView: EditorView) {
-    const result = getStyles();
+    const result = getStylesFromState(editorView.state);
     if (styleName) {
       const { dispatch, state } = editorView;
       let tr;

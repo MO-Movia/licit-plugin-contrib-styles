@@ -14,6 +14,7 @@ import {
   renameStyle,
   removeStyle,
   addStyleToList,
+  pushStylesToView,
 } from '../customStyle';
 import {
   setTextAlign,
@@ -323,6 +324,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                       result = addStyleToList(result);
                     }
                     setStyles(result);
+                    pushStylesToView(this.props.editorView, result);
                     result.forEach((obj) => {
                       if (val.styleName === obj.styleName) {
                         tr = updateDocument(
@@ -358,6 +360,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                           result = addStyleToList(result);
                         }
                         setStyles(result);
+                        pushStylesToView(this.props.editorView, result);
                         result.forEach((obj) => {
                           if (val.styleName === obj.styleName) {
                             tr = this.renameStyleInDocument(

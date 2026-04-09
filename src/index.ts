@@ -1,7 +1,6 @@
 // Plugin to handle Styles.
 import {
   Plugin,
-  PluginKey,
   EditorState,
   TextSelection,
   Transaction,
@@ -14,11 +13,11 @@ import {
   applyStyleToEachNode,
 } from './CustomStyleCommand';
 import {
+  CUSTOMSTYLE_PLUGIN_KEY,
   getCustomStyleByName,
   setStyleRuntime,
   setHidenumberingFlag,
   isStylesLoaded,
-  setView,
   setCustomStylesOnLoad,
 } from './customStyle';
 import { RESERVED_STYLE_NONE } from './CustomStyleNodeSpec';
@@ -64,28 +63,38 @@ export class CustomstylePlugin extends Plugin {
     const options =
       typeof hideNumberingOrOptions === 'boolean'
         ? {
-            hideNumbering: hideNumberingOrOptions,
-            preloadedStyles,
-          }
+          hideNumbering: hideNumberingOrOptions,
+          preloadedStyles,
+        }
         : hideNumberingOrOptions ?? {};
     super({
-      key: new PluginKey('CustomstylePlugin'),
+      key: CUSTOMSTYLE_PLUGIN_KEY,
       state: {
         init() {
           loaded = false;
           firstTime = true;
           setStyleRuntime(runtime);
           setCustomStylesOnLoad(options.preloadedStyles);
+          return {
+            styles: options.preloadedStyles ?? [],
+          };
         },
-        apply(tr) {
+        apply(tr, pluginState) {
           remapCounterFlags(tr);
+          const nextStyles = tr.getMeta(CUSTOMSTYLE_PLUGIN_KEY)?.styles;
+          if (nextStyles) {
+            return {
+              ...pluginState,
+              styles: nextStyles,
+            };
+          }
+          return pluginState;
         },
       },
       view: (view) => {
         // dummy plugin view so that EditorView is accessible when refreshing the document
         // to apply styles after getting the styles.
         csview = view;
-        setView(csview);
         setHidenumberingFlag(options.hideNumbering || false);
         return {
           update: () => {
@@ -253,13 +262,13 @@ export function onUpdateAppendTransaction(
       ) {
         tr = tr.setSelection(TextSelection.create(tr.doc, cursourPosition));
       }
-    }else if (
-  // ? ADD THIS BLOCK RIGHT HERE � after the two existing else-if blocks
-  ENTERKEYCODE === csview.input.lastKeyCode &&
-  prevState.selection.from === nextState.selection.from - 1
-) {
-  tr = applyStoredMarksAfterHardBreak(nextState, tr);
-}
+    } else if (
+      // ? ADD THIS BLOCK RIGHT HERE � after the two existing else-if blocks
+      ENTERKEYCODE === csview.input.lastKeyCode &&
+      prevState.selection.from === nextState.selection.from - 1
+    ) {
+      tr = applyStoredMarksAfterHardBreak(nextState, tr);
+    }
   }
   tr = applyLineStyleForBoldPartial(nextState, tr, transactions.length && transactions[0].getMeta('paste'));
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
@@ -870,7 +879,7 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
   // Recreate updated paragraph
   const newParagraph = node.type.create(node.attrs, newContent);
   tr.replaceWith(pos, pos + node.nodeSize, newParagraph);
-   (tr as Transaction).setSelection(TextSelection.create(tr.doc, state.selection?.from));
+  (tr as Transaction).setSelection(TextSelection.create(tr.doc, state.selection?.from));
 
   return tr;
 }

@@ -1713,7 +1713,7 @@ export function getNode(
 ): Node {
   let selectedNode = null;
   selectedNodes.splice(0);
-  tr.doc.nodesBetween(from, to, (node, startPos) => {
+  tr.doc?.nodesBetween(from, to, (node, startPos) => {
     if (node.type.name === 'paragraph' || node.type.name === 'enhanced_table_figure_notes') {
       if (null == selectedNode) {
         selectedNode = node;
@@ -1733,7 +1733,7 @@ export function updateDocument(
   style: Style
 ) {
   const { doc } = state;
-  doc.descendants(function (child, pos) {
+  doc?.descendants(function (child, pos) {
     const contentLen = child.content.size;
     if (haveEligibleChildren(child, styleName)) {
       tr = applyLatestStyle(

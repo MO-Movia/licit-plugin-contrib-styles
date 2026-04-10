@@ -317,6 +317,131 @@ describe('CustomStyleCommand', () => {
     spy.mockReset();
   });
 
+  it('should keep style command enabled for non-clearstyle menu items', () => {
+    const editorState = {
+      selection: { from: 0, to: 0 },
+      doc: { nodesBetween: () => undefined },
+    } as unknown as EditorState;
+
+    expect(
+      customstylecommand.isStyleEnabled(
+        editorState,
+        {} as EditorView,
+        'editall'
+      )
+    ).toBeTruthy();
+  });
+
+  it('should execute newstyle by opening the create style window', () => {
+    const command = new CustomStyleCommand('newstyle', 'New Style..');
+    const editWindowSpy = jest
+      .spyOn(command, 'editWindow')
+      .mockImplementation(() => undefined);
+    const state = {
+      tr: {},
+      selection: {
+        $from: { before: () => 1, depth: 1 },
+        $to: { end: () => 2 },
+      },
+    } as unknown as EditorState;
+    const view = {} as EditorView;
+
+    expect(command.execute(state, undefined, view)).toBeFalsy();
+    expect(editWindowSpy).toHaveBeenCalledWith(state, view, 0);
+  });
+
+  it('should execute editall with ctrlKey by opening the JSON editor', () => {
+    const command = new CustomStyleCommand('editall', 'Edit All');
+    const jsonEditorSpy = jest
+      .spyOn(command, 'jsonEditor')
+      .mockImplementation(() => undefined);
+    const editWindowSpy = jest
+      .spyOn(command, 'editWindow')
+      .mockImplementation(() => undefined);
+    const state = {
+      tr: {},
+      selection: {
+        $from: { before: () => 1, depth: 1 },
+        $to: { end: () => 2 },
+      },
+    } as unknown as EditorState;
+    const view = {} as EditorView;
+
+    expect(
+      command.execute(
+        state,
+        undefined,
+        view,
+        { ctrlKey: true } as unknown as KeyboardEvent
+      )
+    ).toBeFalsy();
+    expect(jsonEditorSpy).toHaveBeenCalledWith(view);
+    expect(editWindowSpy).not.toHaveBeenCalled();
+  });
+
+  it('should execute editall without ctrlKey by opening the edit window', () => {
+    const command = new CustomStyleCommand('editall', 'Edit All');
+    const jsonEditorSpy = jest
+      .spyOn(command, 'jsonEditor')
+      .mockImplementation(() => undefined);
+    const editWindowSpy = jest
+      .spyOn(command, 'editWindow')
+      .mockImplementation(() => undefined);
+    const state = {
+      tr: {},
+      selection: {
+        $from: { before: () => 1, depth: 1 },
+        $to: { end: () => 2 },
+      },
+    } as unknown as EditorState;
+    const view = {} as EditorView;
+
+    expect(
+      command.execute(
+        state,
+        undefined,
+        view,
+        { ctrlKey: false } as unknown as MouseEvent
+      )
+    ).toBeFalsy();
+    expect(editWindowSpy).toHaveBeenCalledWith(state, view, 3);
+    expect(jsonEditorSpy).not.toHaveBeenCalled();
+  });
+
+  it('should execute clearstyle by delegating to executeClearStyle', () => {
+    const command = new CustomStyleCommand('clearstyle', 'Clear Style');
+    const executeClearStyleSpy = jest
+      .spyOn(command, 'executeClearStyle')
+      .mockReturnValue(true);
+    const state = {
+      tr: {},
+      selection: {
+        $from: { before: () => 1, depth: 1 },
+        $to: { end: () => 2 },
+      },
+    } as unknown as EditorState;
+
+    expect(command.execute(state, undefined, {} as EditorView)).toBeTruthy();
+    expect(executeClearStyleSpy).toHaveBeenCalled();
+  });
+
+  it('should execute reset by delegating to resetNumber', () => {
+    const command = new CustomStyleCommand('reset', 'Restart Numbering');
+    const resetNumberSpy = jest
+      .spyOn(command, 'resetNumber')
+      .mockImplementation(() => undefined);
+    const state = {
+      tr: {},
+      selection: {
+        $from: { before: () => 1, depth: 1 },
+        $to: { end: () => 2 },
+      },
+    } as unknown as EditorState;
+
+    expect(command.execute(state, undefined, {} as EditorView)).toBeFalsy();
+    expect(resetNumberSpy).toHaveBeenCalled();
+  });
+
   it('should handle executeClearStyle', () => {
     const mockschema = new Schema({
       nodes: {
@@ -3389,6 +3514,26 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
     ).toBeUndefined();
   });
 
+  it('should not dispatch when getCustomStyles does not produce a transaction', () => {
+    const styl = {
+      styleName: 'Normal',
+      styles: {},
+    } as unknown as Style;
+    const dispatch = jest.fn();
+    jest.spyOn(customstyles, 'getStylesFromState').mockReturnValue([styl]);
+    jest.spyOn(cusstylecommand, 'updateDocument').mockReturnValue(undefined as unknown as Transform);
+
+    customstylecommand.getCustomStyles(
+      'Normal',
+      {
+        state: {} as EditorState,
+        dispatch,
+      } as unknown as EditorView
+    );
+
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
   it('should handle compareMarkWithStyle when type = mark-font-size ', () => {
     const mark = {
       type: { name: 'mark-font-size', create: () => { } },
@@ -3605,6 +3750,25 @@ describe('addMarksToLine and manageElementsAfterSelection', () => {
     expect(
       compareMarkWithStyle(mark, null, trmock, '', '', retobj)
     ).toBeDefined();
+  });
+
+  it('should leave compareMarkWithStyle unchanged when curSelection is missing', () => {
+    const mark = { type: { name: 'underline' }, attrs: { overridden: false } };
+    const retobj = { modified: false };
+    const tr = {};
+
+    expect(
+      compareMarkWithStyle(
+        mark,
+        { underline: true },
+        tr,
+        '',
+        '',
+        retobj
+      )
+    ).toBe(tr);
+    expect(retobj.modified).toBeFalsy();
+    expect(mark.attrs.overridden).toBe(false);
   });
 });
 describe('updateDocument', () => {
@@ -4378,7 +4542,7 @@ describe('updateDocument', () => {
         'Normal',
         styl as unknown as Style
       )
-    ).toBeDefined();
+    ).toBeUndefined();
   });
 });
 describe('isCustomStyleAlreadyApplied and isLevelUpdated', () => {
@@ -5889,7 +6053,7 @@ describe('resetNodeAttrs', () => {
 });
 
 describe('applyStyleToEachNode', () => {
-  let state : EditorState;
+  let state: EditorState;
   let tr: Transform;
 
   beforeEach(() => {
@@ -5898,7 +6062,7 @@ describe('applyStyleToEachNode', () => {
       null,
       schema.nodes.paragraph.create(null, schema.text('Hello'))
     );
-     const schema3 = new Schema({
+    const schema3 = new Schema({
       nodes: {
         doc: {
           attrs: {
@@ -5930,19 +6094,19 @@ describe('applyStyleToEachNode', () => {
         },
       },
       marks: {
-           'mark-font-size': {
+        'mark-font-size': {
           attrs: {
             pt: { default: 11 },
             overridden: { default: false },
           },
         },
-           'strong': {
+        'strong': {
           attrs: {
             pt: { default: false },
             overridden: { default: false },
           },
         },
-           'em': {
+        'em': {
           attrs: {
             pt: { default: false },
             overridden: { default: false },
@@ -5963,48 +6127,48 @@ describe('applyStyleToEachNode', () => {
       },
     });
     const mockState = {
-          schema: schema3,
-          doc: schema3.nodeFromJSON({
-            type: 'doc',
+      schema: schema3,
+      doc: schema3.nodeFromJSON({
+        type: 'doc',
+        attrs: {
+          layout: null,
+          padding: null,
+          width: null,
+          counterFlags: null,
+          capcoMode: 0,
+        },
+        content: [
+          {
+            type: 'paragraph',
             attrs: {
-              layout: null,
-              padding: null,
-              width: null,
-              counterFlags: null,
-              capcoMode: 0,
+              align: 'left',
+              color: null,
+              id: null,
+              indent: null,
+              lineSpacing: null,
+              paddingBottom: null,
+              paddingTop: null,
+              capco: null,
+              styleName: 'AFDP Bullet',
             },
             content: [
               {
-                type: 'paragraph',
-                attrs: {
-                  align: 'left',
-                  color: null,
-                  id: null,
-                  indent: null,
-                  lineSpacing: null,
-                  paddingBottom: null,
-                  paddingTop: null,
-                  capco: null,
-                  styleName: 'AFDP Bullet',
-                },
-                content: [
-                  {
-                    type: 'text',
-                    marks: [],
-                    text: 'Your text here',
-                  },
-                ],
+                type: 'text',
+                marks: [],
+                text: 'Your text here',
               },
             ],
-          }),
-        };
+          },
+        ],
+      }),
+    };
     state = mockState as unknown as EditorState;
     tr = new Transform(doc);
   });
 
   it('applies style using positions array', () => {
     const pos = 1;
-     const mockval = {
+    const mockval = {
       styles: {
         hasBullet: true,
         bulletLevel: '25CF',
@@ -6028,7 +6192,7 @@ describe('applyStyleToEachNode', () => {
     expect(result).toBe(tr);
   });
 
-   it('apply customStyle for table', () => {
+  it('apply customStyle for table', () => {
     const linkMark = schema.marks.link.create({ href: 'https://test.com' });
     const boldMark = schema.marks.strong.create();
     const node = schema.text('Hello', [linkMark, boldMark]);

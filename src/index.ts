@@ -100,6 +100,9 @@ export class CustomstylePlugin extends Plugin {
         const ref = { firstTime, loaded };
         if (!loaded) {
           tr = onInitAppendTransaction(ref, tr, nextState);
+          if (tr?.docChanged) {
+            tr.setMeta('styleInitialLoad', true);
+          }
         } else if (isDocChanged(transactions)) {
           tr = onUpdateAppendTransaction(
             ref,
@@ -237,13 +240,13 @@ export function onUpdateAppendTransaction(
       ) {
         tr = tr.setSelection(TextSelection.create(tr.doc, cursourPosition));
       }
-    }else if (
-  // ? ADD THIS BLOCK RIGHT HERE � after the two existing else-if blocks
-  ENTERKEYCODE === csview.input.lastKeyCode &&
-  prevState.selection.from === nextState.selection.from - 1
-) {
-  tr = applyStoredMarksAfterHardBreak(nextState, tr);
-}
+    } else if (
+      // ? ADD THIS BLOCK RIGHT HERE � after the two existing else-if blocks
+      ENTERKEYCODE === csview.input.lastKeyCode &&
+      prevState.selection.from === nextState.selection.from - 1
+    ) {
+      tr = applyStoredMarksAfterHardBreak(nextState, tr);
+    }
   }
   tr = applyLineStyleForBoldPartial(nextState, tr, transactions.length && transactions[0].getMeta('paste'));
   if (0 < transactions.length && transactions[0].getMeta('paste')) {
@@ -854,7 +857,7 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
   // Recreate updated paragraph
   const newParagraph = node.type.create(node.attrs, newContent);
   tr.replaceWith(pos, pos + node.nodeSize, newParagraph);
-   (tr as Transaction).setSelection(TextSelection.create(tr.doc, state.selection?.from));
+  (tr as Transaction).setSelection(TextSelection.create(tr.doc, state.selection?.from));
 
   return tr;
 }

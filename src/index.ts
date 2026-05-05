@@ -33,9 +33,10 @@ const ENTERKEYCODE = 13;
 const BACKSPACEKEYCODE = 8;
 const PARA_POSITION_DIFF = 4;
 const ATTR_STYLE_NAME = 'styleName';
-const STYLE_CHUNK_LIMIT = 5000;
+const STYLE_CHUNK_LIMIT = 20000;
 const STYLE_CHUNK_START_POS = 'styleChunkStartPos';
 let slice1;
+let styleChunkTimer = null;
 
 const isNodeHasAttribute = (node, attrName) => {
   return attrName in (node?.attrs || {});
@@ -98,8 +99,10 @@ export class CustomstylePlugin extends Plugin {
       appendTransaction: (transactions, prevState, nextState) => {
         let tr = null;
         const ref = { firstTime, loaded };
-        if (!loaded) {
-          tr = onInitAppendTransaction(ref, tr, nextState);
+        const chunkStartPos = getChunkStartPos(transactions);
+        const isChunking = typeof chunkStartPos === 'number';
+        if (!loaded || isChunking) {
+          tr = onInitAppendTransaction(ref, tr, nextState, chunkStartPos ?? 0, csview);
           if (tr?.docChanged) {
             tr.setMeta('styleInitialLoad', true);
           }
@@ -151,25 +154,47 @@ function hasTransactionChanges(tr) {
   if (!tr) {
     return false;
   }
-  return !!tr.docChanged;
+  return !!tr.docChanged || typeof tr.getMeta(STYLE_CHUNK_START_POS) === 'number';
 }
 
-export function onInitAppendTransaction(ref, tr, nextState) {
+function getChunkStartPos(transactions) {
+  for (let i = transactions.length - 1; i >= 0; i--) {
+    const chunkStartPos = transactions[i]?.getMeta?.(STYLE_CHUNK_START_POS);
+    if (typeof chunkStartPos === 'number') {
+      return chunkStartPos;
+    }
+  }
+  return null;
+}
+function scheduleNextStyleChunk(view, chunkStartPos) {
+  if (!view || typeof chunkStartPos !== 'number') {
+    return;
+  }
+  if (styleChunkTimer !== null) {
+    clearTimeout(styleChunkTimer);
+  }
+  styleChunkTimer = setTimeout(() => {
+    styleChunkTimer = null;
+    if (!view?.dispatch || view.isDestroyed) {
+      return;
+    }
+    const continuationTr = view.state.tr
+      .setMeta(STYLE_CHUNK_START_POS, chunkStartPos)
+      .setMeta('addToHistory', false);
+    view.dispatch(continuationTr);
+  }, 0);
+}
+
+export function onInitAppendTransaction(ref, tr, nextState, chunkStartPos = 0, csview = null) {
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
     tr ??= nextState.tr;
-    let chunkStartPos = tr.getMeta(STYLE_CHUNK_START_POS);
-    chunkStartPos = typeof chunkStartPos === 'number' ? chunkStartPos : 0;
+
     const result = applyStylesChunked(nextState, chunkStartPos);
     if (!result.done) {
-      // Schedule next chunk by appending another transaction with next start pos
-      // This returns immediately -- next chunk runs in the next PM cycle
-      const continuationTr = nextState.tr.setMeta(
-        STYLE_CHUNK_START_POS,
-        result.lastPos
-      );
-      result.tr.steps.forEach((step) => continuationTr.step(step)); // carry over changes
-      return continuationTr;
+      // Continue chunking asynchronously so host app focus/update work
+      // does not break the appendTransaction chain.
+      scheduleNextStyleChunk(csview, result.lastPos);
     }
     return result.tr.docChanged ? result.tr : null;
   }
@@ -452,30 +477,30 @@ export function applyStylesChunked(
   startPos: number = 0
 ): { tr: Transform; lastPos: number; done: boolean } {
   let tr: Transform = state.tr;
+  const docSize = tr.doc.content.size;
+  const chunkEndPos = Math.min(startPos + STYLE_CHUNK_LIMIT, docSize);
   let lastPos = startPos;
-  let done = true;
 
-  tr.doc.descendants((child: Node, pos: number) => {
-    // Skip nodes before our start position
-    if (pos > STYLE_CHUNK_LIMIT) return;
+  tr.doc.nodesBetween(startPos, chunkEndPos, (child, pos) => {
+    if (pos < startPos || pos >= chunkEndPos)
+      return;
 
     const contentLen = child.content.size;
     if (haveEligibleChildren(child, contentLen)) {
       const docLen = tr.doc.content.size;
       const end = Math.min(pos + contentLen, docLen);
       const styleName = child.attrs?.styleName ?? RESERVED_STYLE_NONE;
-
       tr = applyLatestStyle(styleName, state, tr, child, pos, end);
-      lastPos = pos;
-
-      // Stop this chunk here, signal more work remains
-      if (pos - startPos > STYLE_CHUNK_LIMIT) {
-        done = false;
-      }
+      lastPos = Math.max(lastPos, pos + child.nodeSize);
     }
   });
 
-  return { tr, lastPos: lastPos + 1, done };
+  const done = chunkEndPos >= docSize;
+  return {
+    tr,
+    lastPos: done ? docSize : Math.max(chunkEndPos, lastPos),
+    done,
+  };
 }
 
 function validateStyleName(node) {

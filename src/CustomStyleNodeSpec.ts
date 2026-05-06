@@ -22,6 +22,7 @@ export const ATTRIBUTE_BULLET_COLOR = 'data-bullet-color';
 export const RESERVED_STYLE_NONE = 'Normal';
 export const RESERVED_STYLE_NONE_NUMBERING = RESERVED_STYLE_NONE + '-@#$-';
 const cssVal = new Set(['', '0%', '0pt', '0px']);
+const EMPTY_STYLE_VALUE = 'null';
 /*
 Symbols are grabbed from
 https://en.wikipedia.org/wiki/List_of_Unicode_characters
@@ -243,9 +244,15 @@ function getStyleEx(align, lineSpacing, styleName) {
         }
         if (styleProps.styles.fontSize) {
           style += `font-size: ${styleProps.styles.fontSize}pt;`;
+          if (styleProps.styles.fontSize !== EMPTY_STYLE_VALUE) {
+            style += `--czi-counter-font-size: ${styleProps.styles.fontSize}pt;`;
+          }
         }
         if (styleProps.styles.fontName) {
           style += `font-family: ${styleProps.styles.fontName};`;
+          if (styleProps.styles.fontName !== EMPTY_STYLE_VALUE) {
+            style += `--czi-counter-font-family: ${styleProps.styles.fontName};`;
+          }
         }
         if (styleProps.styles.indent) {
           indentOverriden = styleProps.styles.indent;

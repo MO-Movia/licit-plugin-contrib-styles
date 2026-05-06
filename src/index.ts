@@ -154,7 +154,9 @@ function hasTransactionChanges(tr) {
   if (!tr) {
     return false;
   }
-  return !!tr.docChanged || typeof tr.getMeta(STYLE_CHUNK_START_POS) === 'number';
+  return (
+    !!tr.docChanged || typeof tr?.getMeta?.(STYLE_CHUNK_START_POS) === 'number'
+  );
 }
 
 function getChunkStartPos(transactions) {
@@ -212,6 +214,7 @@ export function onUpdateAppendTransaction(
 ) {
   tr = applyStyleForEmptyParagraph(nextState, tr);
   ref.firstTime = false;
+  const isPaste = !!transactions?.[0]?.getMeta?.('paste');
   // custom style for next line
   if (csview) {
     if (BACKSPACEKEYCODE === csview.input.lastKeyCode) {
@@ -273,8 +276,8 @@ export function onUpdateAppendTransaction(
       tr = applyStoredMarksAfterHardBreak(nextState, tr);
     }
   }
-  tr = applyLineStyleForBoldPartial(nextState, tr, transactions.length && transactions[0].getMeta('paste'));
-  if (0 < transactions.length && transactions[0].getMeta('paste')) {
+  tr = applyLineStyleForBoldPartial(nextState, tr, isPaste);
+  if (0 < transactions.length && isPaste) {
     let _startPos = 0;
     let _endPos = 0;
     let node2 = null;

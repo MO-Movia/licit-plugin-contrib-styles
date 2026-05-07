@@ -35,9 +35,10 @@ const PARA_POSITION_DIFF = 4;
 const ATTR_STYLE_NAME = 'styleName';
 const STYLE_CHUNK_LIMIT = 20000;
 const STYLE_CHUNK_START_POS = 'styleChunkStartPos';
+const STYLE_CHUNK_IDLE_MS = 600;
 let slice1;
 let styleChunkTimer = null;
-
+let styleChunkLastInteractionAt = 0;
 const isNodeHasAttribute = (node, attrName) => {
   return attrName in (node?.attrs || {});
 };
@@ -91,7 +92,18 @@ export class CustomstylePlugin extends Plugin {
         },
         handleDOMEvents: {
           keydown(view) {
+            styleChunkLastInteractionAt = Date.now();
             csview = view;
+          },
+          mousedown(view) {
+            styleChunkLastInteractionAt = Date.now();
+            csview = view;
+            return false;
+          },
+          focus(view) {
+            styleChunkLastInteractionAt = Date.now();
+            csview = view;
+            return false;
           },
         },
         nodeViews: {},
@@ -175,30 +187,57 @@ function scheduleNextStyleChunk(view, chunkStartPos) {
   if (styleChunkTimer !== null) {
     clearTimeout(styleChunkTimer);
   }
+  const idleFor = Date.now() - styleChunkLastInteractionAt;
+  const waitMs = Math.max(0, STYLE_CHUNK_IDLE_MS - idleFor);
   styleChunkTimer = setTimeout(() => {
     styleChunkTimer = null;
     if (!view?.dispatch || view.isDestroyed) {
       return;
     }
+    const updatedIdleFor = Date.now() - styleChunkLastInteractionAt;
+    if (updatedIdleFor < STYLE_CHUNK_IDLE_MS) {
+      scheduleNextStyleChunk(view, chunkStartPos);
+      return;
+    }
+    const hadFocus = typeof view.hasFocus === 'function' ? view.hasFocus() : false;
     const continuationTr = view.state.tr
       .setMeta(STYLE_CHUNK_START_POS, chunkStartPos)
       .setMeta('addToHistory', false);
     view.dispatch(continuationTr);
-  }, 0);
+    if (hadFocus && typeof view.hasFocus === 'function' && !view.hasFocus()) {
+      view.focus();
+    }
+  }, waitMs);
+}
+
+function preserveSelectionAfterChunk(tr, selection) {
+  if (!tr?.docChanged || !selection) {
+    return tr;
+  }
+  const anchor = tr.mapping.map(selection.anchor);
+  const head = tr.mapping.map(selection.head);
+  try {
+    return tr.setSelection(TextSelection.between(tr.doc.resolve(anchor), tr.doc.resolve(head)));
+  }
+  catch (_error) {
+    console.info(_error);
+    return tr;
+  }
 }
 
 export function onInitAppendTransaction(ref, tr, nextState, chunkStartPos = 0, csview = null) {
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
     tr ??= nextState.tr;
-
     const result = applyStylesChunked(nextState, chunkStartPos);
+    const chunkTr = preserveSelectionAfterChunk(result.tr, nextState.selection);
+
     if (!result.done) {
       // Continue chunking asynchronously so host app focus/update work
       // does not break the appendTransaction chain.
       scheduleNextStyleChunk(csview, result.lastPos);
     }
-    return result.tr.docChanged ? result.tr : null;
+    return chunkTr.docChanged ? chunkTr : null;
   }
   return hasTransactionChanges(tr) ? tr : null;
 }

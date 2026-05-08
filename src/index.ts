@@ -791,6 +791,10 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       newattrs.lineSpacing = getLineSpacingValue(
         nextLineStyle.styles.lineHeight ? nextLineStyle.styles.lineHeight : ''
       );
+      if (nextLineStyle.styles.indentPosition) {
+        newattrs.indentPosition = nextLineStyle.styles.indentPosition;
+        newattrs.hangingIndent = true;
+      }
     } else if (RESERVED_STYLE_NONE === nextLineStyleName) {
       // Next line style None not applied
       newattrs = resetNodeAttrs(newattrs, nextLineStyleName);

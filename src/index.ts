@@ -33,10 +33,12 @@ const ENTERKEYCODE = 13;
 const BACKSPACEKEYCODE = 8;
 const PARA_POSITION_DIFF = 4;
 const ATTR_STYLE_NAME = 'styleName';
-const STYLE_CHUNK_LIMIT = 5000;
+const STYLE_CHUNK_LIMIT = 20000;
 const STYLE_CHUNK_START_POS = 'styleChunkStartPos';
+const STYLE_CHUNK_IDLE_MS = 600;
 let slice1;
-
+let styleChunkTimer = null;
+let styleChunkLastInteractionAt = 0;
 const isNodeHasAttribute = (node, attrName) => {
   return attrName in (node?.attrs || {});
 };
@@ -90,7 +92,18 @@ export class CustomstylePlugin extends Plugin {
         },
         handleDOMEvents: {
           keydown(view) {
+            styleChunkLastInteractionAt = Date.now();
             csview = view;
+          },
+          mousedown(view) {
+            styleChunkLastInteractionAt = Date.now();
+            csview = view;
+            return false;
+          },
+          focus(view) {
+            styleChunkLastInteractionAt = Date.now();
+            csview = view;
+            return false;
           },
         },
         nodeViews: {},
@@ -98,8 +111,10 @@ export class CustomstylePlugin extends Plugin {
       appendTransaction: (transactions, prevState, nextState) => {
         let tr = null;
         const ref = { firstTime, loaded };
-        if (!loaded) {
-          tr = onInitAppendTransaction(ref, tr, nextState);
+        const chunkStartPos = getChunkStartPos(transactions);
+        const isChunking = typeof chunkStartPos === 'number';
+        if (!loaded || isChunking) {
+          tr = onInitAppendTransaction(ref, tr, nextState, chunkStartPos ?? 0, csview);
           if (tr?.docChanged) {
             tr.setMeta('styleInitialLoad', true);
           }
@@ -151,27 +166,78 @@ function hasTransactionChanges(tr) {
   if (!tr) {
     return false;
   }
-  return !!tr.docChanged;
+  return (
+    !!tr.docChanged || typeof tr?.getMeta?.(STYLE_CHUNK_START_POS) === 'number'
+  );
 }
 
-export function onInitAppendTransaction(ref, tr, nextState) {
+function getChunkStartPos(transactions) {
+  for (let i = transactions.length - 1; i >= 0; i--) {
+    const chunkStartPos = transactions[i]?.getMeta?.(STYLE_CHUNK_START_POS);
+    if (typeof chunkStartPos === 'number') {
+      return chunkStartPos;
+    }
+  }
+  return null;
+}
+function scheduleNextStyleChunk(view, chunkStartPos) {
+  if (!view || typeof chunkStartPos !== 'number') {
+    return;
+  }
+  if (styleChunkTimer !== null) {
+    clearTimeout(styleChunkTimer);
+  }
+  const idleFor = Date.now() - styleChunkLastInteractionAt;
+  const waitMs = Math.max(0, STYLE_CHUNK_IDLE_MS - idleFor);
+  styleChunkTimer = setTimeout(() => {
+    styleChunkTimer = null;
+    if (!view?.dispatch || view.isDestroyed) {
+      return;
+    }
+    const updatedIdleFor = Date.now() - styleChunkLastInteractionAt;
+    if (updatedIdleFor < STYLE_CHUNK_IDLE_MS) {
+      scheduleNextStyleChunk(view, chunkStartPos);
+      return;
+    }
+    const hadFocus = typeof view.hasFocus === 'function' ? view.hasFocus() : false;
+    const continuationTr = view.state.tr
+      .setMeta(STYLE_CHUNK_START_POS, chunkStartPos)
+      .setMeta('addToHistory', false);
+    view.dispatch(continuationTr);
+    if (hadFocus && typeof view.hasFocus === 'function' && !view.hasFocus()) {
+      view.focus();
+    }
+  }, waitMs);
+}
+
+function preserveSelectionAfterChunk(tr, selection) {
+  if (!tr?.docChanged || !selection) {
+    return tr;
+  }
+  const anchor = tr.mapping.map(selection.anchor);
+  const head = tr.mapping.map(selection.head);
+  try {
+    return tr.setSelection(TextSelection.between(tr.doc.resolve(anchor), tr.doc.resolve(head)));
+  }
+  catch (_error) {
+    console.info(_error);
+    return tr;
+  }
+}
+
+export function onInitAppendTransaction(ref, tr, nextState, chunkStartPos = 0, csview = null) {
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
     tr ??= nextState.tr;
-    let chunkStartPos = tr.getMeta(STYLE_CHUNK_START_POS);
-    chunkStartPos = typeof chunkStartPos === 'number' ? chunkStartPos : 0;
     const result = applyStylesChunked(nextState, chunkStartPos);
+    const chunkTr = preserveSelectionAfterChunk(result.tr, nextState.selection);
+
     if (!result.done) {
-      // Schedule next chunk by appending another transaction with next start pos
-      // This returns immediately -- next chunk runs in the next PM cycle
-      const continuationTr = nextState.tr.setMeta(
-        STYLE_CHUNK_START_POS,
-        result.lastPos
-      );
-      result.tr.steps.forEach((step) => continuationTr.step(step)); // carry over changes
-      return continuationTr;
+      // Continue chunking asynchronously so host app focus/update work
+      // does not break the appendTransaction chain.
+      scheduleNextStyleChunk(csview, result.lastPos);
     }
-    return result.tr.docChanged ? result.tr : null;
+    return chunkTr.docChanged ? chunkTr : null;
   }
   return hasTransactionChanges(tr) ? tr : null;
 }
@@ -187,6 +253,7 @@ export function onUpdateAppendTransaction(
 ) {
   tr = applyStyleForEmptyParagraph(nextState, tr);
   ref.firstTime = false;
+  const isPaste = !!transactions?.[0]?.getMeta?.('paste');
   // custom style for next line
   if (csview) {
     if (BACKSPACEKEYCODE === csview.input.lastKeyCode) {
@@ -248,8 +315,8 @@ export function onUpdateAppendTransaction(
       tr = applyStoredMarksAfterHardBreak(nextState, tr);
     }
   }
-  tr = applyLineStyleForBoldPartial(nextState, tr, transactions.length && transactions[0].getMeta('paste'));
-  if (0 < transactions.length && transactions[0].getMeta('paste')) {
+  tr = applyLineStyleForBoldPartial(nextState, tr, isPaste);
+  if (0 < transactions.length && isPaste) {
     let _startPos = 0;
     let _endPos = 0;
     let node2 = null;
@@ -452,30 +519,30 @@ export function applyStylesChunked(
   startPos: number = 0
 ): { tr: Transform; lastPos: number; done: boolean } {
   let tr: Transform = state.tr;
+  const docSize = tr.doc.content.size;
+  const chunkEndPos = Math.min(startPos + STYLE_CHUNK_LIMIT, docSize);
   let lastPos = startPos;
-  let done = true;
 
-  tr.doc.descendants((child: Node, pos: number) => {
-    // Skip nodes before our start position
-    if (pos > STYLE_CHUNK_LIMIT) return;
+  tr.doc.nodesBetween(startPos, chunkEndPos, (child, pos) => {
+    if (pos < startPos || pos >= chunkEndPos)
+      return;
 
     const contentLen = child.content.size;
     if (haveEligibleChildren(child, contentLen)) {
       const docLen = tr.doc.content.size;
       const end = Math.min(pos + contentLen, docLen);
       const styleName = child.attrs?.styleName ?? RESERVED_STYLE_NONE;
-
       tr = applyLatestStyle(styleName, state, tr, child, pos, end);
-      lastPos = pos;
-
-      // Stop this chunk here, signal more work remains
-      if (pos - startPos > STYLE_CHUNK_LIMIT) {
-        done = false;
-      }
+      lastPos = Math.max(lastPos, pos + child.nodeSize);
     }
   });
 
-  return { tr, lastPos: lastPos + 1, done };
+  const done = chunkEndPos >= docSize;
+  return {
+    tr,
+    lastPos: done ? docSize : Math.max(chunkEndPos, lastPos),
+    done,
+  };
 }
 
 function validateStyleName(node) {
@@ -724,6 +791,10 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       newattrs.lineSpacing = getLineSpacingValue(
         nextLineStyle.styles.lineHeight ? nextLineStyle.styles.lineHeight : ''
       );
+      if (nextLineStyle.styles.indentPosition) {
+        newattrs.indentPosition = nextLineStyle.styles.indentPosition;
+        newattrs.hangingIndent = true;
+      }
     } else if (RESERVED_STYLE_NONE === nextLineStyleName) {
       // Next line style None not applied
       newattrs = resetNodeAttrs(newattrs, nextLineStyleName);

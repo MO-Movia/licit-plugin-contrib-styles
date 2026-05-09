@@ -14,6 +14,7 @@ import {
   remapCounterFlags,
   applyStyleForPreviousEmptyParagraph,
   applyStyles,
+  applyStylesChunked,
   applyStyleForEmptyParagraph,
   isDocChanged,
   applyHangingIndentTransform,
@@ -27,6 +28,7 @@ import {
   TextSelection,
   Transaction,
 } from 'prosemirror-state';
+import { Transform } from 'prosemirror-transform';
 import {
   setStyles,
   getCustomStyleByName,
@@ -4740,7 +4742,7 @@ describe('Cus Style Plugin-Pass', () => {
 });
 
 describe('onInitAppendTransaction', () => {
-  it('should return continuationTr when chunk is not done', () => {
+  it('returns the updated transaction when the initial chunk changes the document', () => {
     jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(true);
     const schema = new Schema({
       nodes: {
@@ -4761,8 +4763,8 @@ describe('onInitAppendTransaction', () => {
     const nextState = EditorState.create({ schema, doc });
     const tr = { getMeta: () => -10000 } as unknown as Transaction;
     const result = onInitAppendTransaction({ loaded: true }, tr, nextState);
-    expect(result).toBeInstanceOf(Transaction);
-    expect(result.getMeta('styleChunkStartPos')).toBeDefined();
+    expect(result).toBeDefined();
+    expect(result?.docChanged).toBe(true);
   });
 
   it('it should handle onInitAppendTransaction when isStylesLoaded = false', () => {
@@ -4923,6 +4925,71 @@ describe('onInitAppendTransaction', () => {
     const result = onInitAppendTransaction({ loaded: true }, tr, nextState);
     expect(result).toBeInstanceOf(Transaction);
     styleSpy.mockRestore();
+  });
+
+  it('schedules and dispatches the next style chunk when the first pass is incomplete', () => {
+    jest.useFakeTimers();
+    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(9_000_000_000_000_000);
+    const loadedSpy = jest
+      .spyOn(CustStyl, 'isStylesLoaded')
+      .mockReturnValue(true);
+    const styleSpy = jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styleName: 'Large',
+      styles: { align: 'left', lineHeight: '', indent: '0' },
+    });
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'Large' } },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node(
+        'paragraph',
+        { styleName: 'Large' },
+        schema.text('a'.repeat(21000))
+      ),
+    ]);
+    const nextState = EditorState.create({ schema, doc });
+    const dispatch = jest.fn();
+    const focus = jest.fn();
+    const hasFocus = jest.fn().mockReturnValueOnce(true).mockReturnValueOnce(false);
+    const view = {
+      dispatch,
+      focus,
+      hasFocus,
+      isDestroyed: false,
+      state: nextState,
+    };
+
+    const result = onInitAppendTransaction(
+      { loaded: true },
+      { getMeta: () => 0 } as unknown as Transaction,
+      nextState,
+      0,
+      view as unknown as EditorView
+    );
+
+    expect(result).toBeInstanceOf(Transaction);
+    jest.runOnlyPendingTimers();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch.mock.calls[0][0].getMeta('addToHistory')).toBe(false);
+    expect(typeof dispatch.mock.calls[0][0].getMeta('styleChunkStartPos')).toBe(
+      'number'
+    );
+    expect(focus).toHaveBeenCalledTimes(1);
+
+    styleSpy.mockRestore();
+    loadedSpy.mockRestore();
+    nowSpy.mockRestore();
+    jest.useRealTimers();
   });
 });
 
@@ -5528,6 +5595,41 @@ describe('remapCounterFlags', () => {
   });
 });
 describe('applyStyleForPreviousEmptyParagraph', () => {
+  it('returns the existing transform when the selection is not at the paragraph start', () => {
+    const tr = {
+      selection: {
+        $from: { parentOffset: 1 },
+      },
+    } as unknown as Transform;
+
+    expect(
+      applyStyleForPreviousEmptyParagraph(
+        { doc: { resolve: () => ({ nodeBefore: null }) } } as unknown as EditorState,
+        tr
+      )
+    ).toBe(tr);
+  });
+
+  it('returns the existing transform when there is no previous node', () => {
+    const tr = {
+      selection: {
+        $from: { parentOffset: 0 },
+        $anchor: { pos: 1 },
+      },
+    } as unknown as Transform;
+
+    expect(
+      applyStyleForPreviousEmptyParagraph(
+        {
+          doc: {
+            resolve: () => ({ nodeBefore: null }),
+          },
+        } as unknown as EditorState,
+        tr
+      )
+    ).toBe(tr);
+  });
+
   it('should handle applyStyleForPreviousEmptyParagraph', () => {
     const linkmark = new Mark();
     const mockschema = new Schema({
@@ -5631,6 +5733,41 @@ describe('applyStyles', () => {
   });
 });
 
+describe('applyStylesChunked', () => {
+  it('returns done false when the document exceeds the chunk limit', () => {
+    const applyLatestStyleSpy = jest
+      .spyOn(ccommand, 'applyLatestStyle')
+      .mockImplementation((_styleName, _state, tr) => tr);
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'Large' } },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node(
+        'paragraph',
+        { styleName: 'Large' },
+        schema.text('a'.repeat(21000))
+      ),
+    ]);
+    const state = EditorState.create({ schema, doc });
+
+    const result = applyStylesChunked(state);
+
+    expect(result.done).toBe(false);
+    expect(result.lastPos).toBeGreaterThan(0);
+    applyLatestStyleSpy.mockRestore();
+  });
+});
+
 describe('nodeAssignment', () => {
   it('returns empty when paragraph has no styleName attr', () => {
     const schema = new Schema({
@@ -5674,6 +5811,101 @@ describe('nodeAssignment', () => {
   });
 });
 describe('applyStyleForEmptyParagraph', () => {
+  it('returns the current transform for list styles', () => {
+    const listStyle: Style = {
+      styleName: 'List Style',
+      styles: { isList: true },
+    };
+    const styleSpy = jest
+      .spyOn(CustStyl, 'getCustomStyleByName')
+      .mockReturnValue(listStyle);
+    const tr = { key: 'list-tr' };
+    const node = {
+      attrs: { styleName: 'List Style' },
+      content: { content: [{ marks: [] }] },
+    };
+
+    expect(
+      applyStyleForEmptyParagraph(
+        {
+          selection: {
+            $from: { before: () => 1, depth: 1 },
+            $to: { end: () => 2 },
+          },
+          tr: {
+            doc: {
+              nodeAt: () => node,
+            },
+          },
+        },
+        tr
+      )
+    ).toBe(tr);
+    styleSpy.mockRestore();
+  });
+
+  it('returns the current transform when the node has no styleName attribute', () => {
+    const styleSpy = jest
+      .spyOn(CustStyl, 'getCustomStyleByName')
+      .mockReturnValue(null);
+    const tr = { key: 'no-style-name-tr' };
+    const node = {
+      attrs: {},
+      content: { content: [{ marks: [] }] },
+    };
+
+    expect(
+      applyStyleForEmptyParagraph(
+        {
+          selection: {
+            $from: { before: () => 1, depth: 1 },
+            $to: { end: () => 2 },
+          },
+          tr: {
+            doc: {
+              nodeAt: () => node,
+            },
+          },
+        },
+        tr
+      )
+    ).toBe(tr);
+    styleSpy.mockRestore();
+  });
+
+  it('returns the current transform when the first child already has marks', () => {
+    const markedStyle: Style = {
+      styleName: 'Marked Style',
+      styles: { isList: false },
+    };
+    const styleSpy = jest
+      .spyOn(CustStyl, 'getCustomStyleByName')
+      .mockReturnValue(markedStyle);
+    const tr = { key: 'marked-tr' };
+    const node = {
+      attrs: { styleName: 'Marked Style' },
+      content: { content: [{ marks: [{}] }] },
+    };
+
+    expect(
+      applyStyleForEmptyParagraph(
+        {
+          selection: {
+            $from: { before: () => 1, depth: 1 },
+            $to: { end: () => 2 },
+          },
+          tr: {
+            doc: {
+              nodeAt: () => node,
+            },
+          },
+        },
+        tr
+      )
+    ).toBe(tr);
+    styleSpy.mockRestore();
+  });
+
   it('should handle applyStyleForEmptyParagraph', () => {
     expect(applyStyleForEmptyParagraph({ tr: {} }, null)).toStrictEqual({});
   });
@@ -5904,6 +6136,102 @@ describe('applyStyleForNextParagraph', () => {
     expect(
       applyStyleForNextParagraph(prevstate, nextstate, tr, view)
     ).toBeDefined();
+  });
+
+  it('uses the list item branch and preserves list indentation for the next paragraph', () => {
+    const styleSpy = jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styleName: 'List Style',
+      styles: {
+        isList: true,
+        nextLineStyleName: 'Default',
+      },
+    });
+    const markSpy = jest
+      .spyOn(ccommand, 'getMarkByStyleName')
+      .mockReturnValue([{ type: { name: 'mark-font-type' } }] as unknown as []);
+
+    const prevParagraph = {
+      type: { name: 'paragraph' },
+      isBlock: true,
+      child() {
+        return null;
+      },
+      childCount: 0,
+      attrs: {
+        styleName: 'List Style',
+        indent: '12',
+        align: 'left',
+      },
+    };
+    const parentDoc = {
+      child() {
+        return prevParagraph;
+      },
+    };
+    const mockFrom = {
+      depth: 1,
+      node(depth) {
+        if (depth === -1) {
+          return { type: { name: 'list_item' } };
+        }
+        if (depth === 0) {
+          return parentDoc;
+        }
+        return prevParagraph;
+      },
+      index() {
+        return 1;
+      },
+    };
+    const nextNode = {
+      type: { name: 'paragraph' },
+      content: { size: 0 },
+      descendants(cb) {
+        cb({ type: { name: 'text' } });
+      },
+    };
+    const tr = {
+      setNodeMarkup: jest.fn().mockReturnThis(),
+      addStoredMark: jest.fn().mockReturnThis(),
+    };
+
+    const result = applyStyleForNextParagraph(
+      {
+        doc: {
+          nodeAt: (pos) => {
+            if (pos === 0) {
+              return { isText: true, nodeSize: 1 };
+            }
+            return { attrs: { indent: '24' } };
+          },
+        },
+        selection: { $from: mockFrom, from: 1 },
+      },
+      {
+        doc: {
+          nodeAt: () => nextNode,
+        },
+        schema: mockSchema,
+        selection: { $from: mockFrom, from: 3 },
+      },
+      tr,
+      { input: { lastKeyCode: 13 } }
+    );
+
+    expect(result).toBe(tr);
+    expect(tr.setNodeMarkup).toHaveBeenCalledWith(
+      2,
+      undefined,
+      expect.objectContaining({
+        styleName: 'List Style',
+        indent: '24',
+      })
+    );
+    expect(markSpy).toHaveBeenCalledWith('List Style', mockSchema);
+    expect(tr.addStoredMark).toHaveBeenCalledTimes(2);
+
+    markSpy.mockRestore();
+    styleSpy.mockRestore();
   });
 });
 

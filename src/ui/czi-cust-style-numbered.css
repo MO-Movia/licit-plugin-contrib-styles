@@ -521,7 +521,7 @@ html {
   counter-reset: none;
 }
 
-.ProseMirror p[data-style-level='2'][tot='true'][stylename$='Cont'] {
+.ProseMirror p[contNumber ='true'] {
   counter-increment: none;
 }
 
@@ -536,3 +536,8 @@ html {
   font-weight: var(--czi-counter-bold); 
   font-size: var(--czi-content-font-size);
 }
+
+.ProseMirror[contenteditable="false"] [hidecapco="true"] .capco.ProseMirror-widget {
+  display: none !important;
+}
+

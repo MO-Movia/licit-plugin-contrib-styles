@@ -50,6 +50,8 @@ describe('toCustomStyleDOM', () => {
         prefixValue: 'ab',
         tot: true,
         tof: false,
+        hideCapco: false,
+        contNumber: false,
         hideNumbering: false,
       },
       styleName: '',
@@ -100,6 +102,8 @@ describe('toCustomStyleDOM', () => {
         'data-indent': '1',
         'data-show-bullet': true,
         'indentPosition': '1.5',
+        'contNumber': false,
+        'hideCapco': false,
         'list-style-level': 1,
         'prefix': 'ab',
         // 'hide-style-level': false,
@@ -168,6 +172,7 @@ describe('toCustomStyleDOM', () => {
         'data-bullet-symbol': '● ',
         'data-indent': '10',
         'data-show-bullet': true,
+        'hideCapco': false,
         style:
           'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
         styleName: 'FS_B01',
@@ -214,6 +219,7 @@ describe('toCustomStyleDOM', () => {
         'data-bullet-symbol': '● ',
         'data-indent': '10',
         'data-show-bullet': true,
+        'hideCapco': false,
         style:
           'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
         styleName: '10Normal-@#$-10',
@@ -277,6 +283,7 @@ describe('toCustomStyleDOM', () => {
       {
         'data-indent': 'null',
         'data-style-level': '1',
+        'hideCapco': false,
         'hide-style-level': false,
         style:
           'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;counter-increment: C1 ;',
@@ -342,6 +349,7 @@ describe('toCustomStyleDOM', () => {
       {
         'data-indent': 'null',
         'data-style-level': '1',
+        'hideCapco': false,
         'hide-style-level': false,
         style:
           'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
@@ -404,6 +412,7 @@ describe('toCustomStyleDOM', () => {
     expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
       'span',
       {
+        hideCapco: false,
         style: 'line-height: 16pt;--czi-content-line-height: 16pt;',
         styleName: null,
       },
@@ -466,6 +475,7 @@ describe('toCustomStyleDOM', () => {
       {
         'data-indent': 'null',
         'data-style-level': '10',
+        'hideCapco': false,
         'hide-style-level': false,
         style:
           'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;counter-increment: C2 C3 C4 C5 C6 C7 C8 C9 C10 ;',
@@ -511,6 +521,7 @@ describe('toCustomStyleDOM', () => {
       {
         'data-indent': 'null',
         'data-style-level': '10',
+        'hideCapco': false,
         'hide-style-level': false,
         style:
           'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
@@ -556,6 +567,7 @@ describe('toCustomStyleDOM', () => {
       {
         'data-indent': 'null',
         'data-style-level': '10',
+        'hideCapco': false,
         'hide-style-level': false,
         style:
           'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
@@ -601,6 +613,7 @@ describe('toCustomStyleDOM', () => {
       {
         'data-indent': 'null',
         'data-style-level': '10',
+        'hideCapco': false,
         'hide-style-level': false,
         style:
           'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;',
@@ -667,6 +680,7 @@ describe('toCustomStyleDOM', () => {
         'data-indent': '10',
         'data-show-bullet': true,
         'data-style-level': '1',
+        'hideCapco': false,
         'hide-style-level': false,
         style:
           'text-align: right;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
@@ -734,6 +748,7 @@ describe('toCustomStyleDOM', () => {
         'data-indent': '10',
         'data-show-bullet': true,
         'data-style-level': '1',
+        'hideCapco': false,
         'hide-style-level': false,
         style:
           'line-height: 16pt;--czi-content-line-height: 16pt;text-align: left;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
@@ -752,5 +767,46 @@ describe('toCustomStyleDOM', () => {
     expect(result).toBe('counter-increment: L1 L2 L3 ;');
     expect(window['set-cust-list-style-counter-1']).toBe(true);
     expect(window['set-cust-list-style-counter-2']).toBe(true);
+  });
+
+  it('should handle toCustomStyleDOM when hideCapco is true', () => {
+    window['set-cust-style-counter-1'] = false;
+    jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+      styles: {
+        styleLevel: 1,
+        hasNumbering: true,
+        contNumber: true,
+        hideCapco: true,
+      },
+      styleName: '',
+    });
+
+    const node = {
+      type: 'paragraph',
+      attrs: {
+        align: null,
+        color: null,
+        id: null,
+        indent: null,
+        lineSpacing: null,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: 'FS_B01',
+      },
+      content: [],
+    };
+
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
+      'span',
+      {
+        'contNumber': true,
+        'data-style-level': '1',
+        'hideCapco': true,
+        'hide-style-level': false,
+        style: 'counter-increment: C1 ;',
+        styleName: 'FS_B01',
+      },
+    ]);
   });
 });

@@ -23,6 +23,8 @@ export type HTMLStyles = {
   toc?: boolean;
   tot?: boolean;
   tof?: boolean;
+  hideCapco?: boolean;
+  contNumber?: boolean;
   isHidden?: boolean;
   strike?: string;
   isList?: boolean;

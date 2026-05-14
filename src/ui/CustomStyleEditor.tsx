@@ -104,6 +104,12 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     if (!this.state.styles.fontSize) {
       this.state.styles.fontSize = '11';
     }
+    if (this.state.styles.hideCapco === undefined) {
+      this.state.styles.hideCapco = false;
+    }
+    if (this.state.styles.contNumber === undefined) {
+      this.state.styles.contNumber = false;
+    }
     this.getCustomStyles();
   }
 
@@ -397,6 +403,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       styles: {
         ...prevState.styles,
         styleLevel: level,
+        hideCapco: isCheckboxDisabled ? false : prevState.styles.hideCapco,
+        contNumber:
+          isCheckboxDisabled || level !== 2 ? false : prevState.styles.contNumber,
         hasNumbering: isCheckboxDisabled
           ? false
           : prevState.styles?.hasNumbering,
@@ -430,6 +439,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         boldNumbering: val.target.checked
           ? false
           : prevState.styles.boldNumbering,
+        contNumber: val.target.checked
+          ? false
+          : prevState.styles.contNumber,
         hideNumbering: val.target.checked
           ? false
           : prevState.styles.hideNumbering,
@@ -538,18 +550,18 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
             mp2.style.maxHeight = null;
           } else {
             acc2.classList.add('molsp-accactive');
-            mp2.style.maxHeight = '374px';
+            this.setPanelHeightToContent(mp2);
           }
 
-          (
+          this.setPanelHeightToContent(
             document.getElementsByClassName('molsp-panel')[0] as HTMLElement
-          ).style.maxHeight = '100%';
-          (
+          );
+          this.setPanelHeightToContent(
             document.getElementsByClassName('molsp-panel1')[0] as HTMLElement
-          ).style.maxHeight = '100%';
-          (
+          );
+          this.setPanelHeightToContent(
             document.getElementsByClassName('molsp-panel3')[0] as HTMLElement
-          ).style.maxHeight = '100%';
+          );
 
           // Ensure the next line style is set
           this.setNextLineStyle(this.state.styles.nextLineStyleName);
@@ -605,6 +617,10 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         ...prevState.styles,
         hasNumbering: val.target.checked,
         hasBullet: val.target.checked ? false : prevState.styles?.hasBullet,
+        contNumber:
+          val.target.checked && prevState.styles.styleLevel === 2
+            ? prevState.styles.contNumber
+            : false,
         nextLineStyleName: val.target.checked
           ? prevState.styleName
           : RESERVED_STYLE_NONE,
@@ -635,6 +651,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         tot: false,
         tof: false,
         prefixValue: '',
+        hideCapco: false,
+        contNumber: false,
         hasNumbering: false,
         nextLineStyleName: RESERVED_STYLE_NONE,
         styleLevel: 0,
@@ -651,6 +669,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         tot: false,
         tof: false,
         prefixValue: '',
+        hideCapco: false,
+        contNumber: false,
         hasNumbering: false,
         styleLevel: 0,
         nextLineStyleName: RESERVED_STYLE_NONE,
@@ -667,6 +687,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         tot: val.target.checked,
         tof: false,
         prefixValue: val.target.checked ? 'TABLE ' : '',
+        hideCapco: false,
+        contNumber: false,
         hasNumbering: val.target.checked,
         nextLineStyleName: val.target.checked
           ? RESERVED_STYLE_NONE
@@ -685,6 +707,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         tot: false,
         tof: val.target.checked,
         prefixValue: val.target.checked ? 'FIGURE ' : '',
+        hideCapco: false,
+        contNumber: false,
         hasNumbering: val.target.checked,
         nextLineStyleName: val.target.checked
           ? RESERVED_STYLE_NONE
@@ -708,6 +732,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
           ...prevState.styles,
           styleLevel,
           isList,
+          hideCapco: isList ? false : prevState.styles.hideCapco,
+          contNumber: isList ? false : prevState.styles.contNumber,
         },
         isRadioDisabled: styleLevel === 0,
       }));
@@ -727,6 +753,21 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   handleHideNumbering(val) {
     this.setState((prevState) => ({
       styles: { ...prevState.styles, hideNumbering: val.target.checked },
+    }));
+  }
+
+  handleHideCapco(val) {
+    this.setState((prevState) => ({
+      styles: { ...prevState.styles, hideCapco: val.target.checked },
+    }));
+  }
+
+  handleContNumber(val) {
+    this.setState((prevState) => ({
+      styles: {
+        ...prevState.styles,
+        contNumber: this.isContNumberDisabled() ? false : val.target.checked,
+      },
     }));
   }
 
@@ -810,20 +851,20 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         'molsp-panel2'
       )[0] as HTMLElement;
       setTimeout(() => {
-        mp2.style.maxHeight = '374px';
+        this.setPanelHeightToContent(mp2);
       }, 0);
     }
 
     const mp = document.getElementsByClassName('molsp-panel')[0] as HTMLElement;
-    mp.style.maxHeight = mp.scrollHeight + 'px';
+    this.setPanelHeightToContent(mp);
     const mp1 = document.getElementsByClassName(
       'molsp-panel1'
     )[0] as HTMLElement;
-    mp1.style.maxHeight = mp1.scrollHeight + 'px';
+    this.setPanelHeightToContent(mp1);
     const mp3 = document.getElementsByClassName(
       'molsp-panel3'
     )[0] as HTMLElement;
-    mp3.style.maxHeight = mp3.scrollHeight + 'px';
+    this.setPanelHeightToContent(mp3);
 
     this.setNextLineStyle(this.state.styles.nextLineStyleName);
     // [FS] IRAD-1153 2021-02-25
@@ -838,6 +879,10 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   render() {
+    const capcoOptionsDisabled = this.isCapcoOptionDisabled();
+    const numberingOptionsDisabled = this.isNumberingOptionDisabled();
+    const contNumberDisabled = this.isContNumberDisabled();
+
     return (
       <div className="molsp-customedit-div">
         <div className="molsp-customedit-head">
@@ -1259,6 +1304,30 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     </label>
                   ))}
                 </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    paddingBottom: '8px',
+                  }}
+                >
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      fontSize: '12px',
+                      color: '#464343',
+                    }}
+                  >
+                    <input
+                      checked={this.state.styles.hideCapco}
+                      disabled={capcoOptionsDisabled}
+                      onChange={this.handleHideCapco.bind(this)}
+                      type="checkbox"
+                    />
+                    <span style={{ marginLeft: '5px' }}>Hide Capco</span>
+                  </label>
+                </div>
               </div>
               <button className="molsp-licit-accordion molsp-accactive">
                 <div className="molsp-indentdiv">
@@ -1605,6 +1674,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                                 ...prevState.styles,
                                 hasNumbering: false,
                                 boldNumbering: false,
+                                contNumber: false,
                                 hasBullet: false,
                                 hideNumbering: false,
                               },
@@ -1662,14 +1732,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           <input
                             checked={this.state.styles.hideNumbering}
                             className="molsp-chkboldnumbering"
-                            disabled={
-                              this.checkCondition(
-                                this.state.styles.hasNumbering
-                              ) ||
-                              this.state.styleName === RESERVED_STYLE_NONE ||
-                              this.state.styles.tot ||
-                              this.state.styles.tof
-                            }
+                            disabled={numberingOptionsDisabled}
                             onChange={this.handleHideNumbering.bind(this)}
                             type="checkbox"
                             value="HideNumbering"
@@ -1686,13 +1749,26 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           }}
                         >
                           <input
+                            checked={this.state.styles.contNumber}
+                            className="molsp-chkboldnumbering"
+                            data-cy="cyStyleContNumb"
+                            disabled={contNumberDisabled}
+                            onChange={this.handleContNumber.bind(this)}
+                            type="checkbox"
+                          />
+                          <span style={{ marginLeft: '5px' }}>Continue Numbering</span>
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            marginBottom: '5px',
+                          }}
+                        >
+                          <input
                             checked={this.state.styles.boldNumbering}
                             className="molsp-chkboldnumbering"
-                            disabled={
-                              this.checkCondition(
-                                this.state.styles.hasNumbering
-                              ) || this.state.styleName === RESERVED_STYLE_NONE
-                            }
+                            disabled={numberingOptionsDisabled}
                             onChange={this.handleBoldNumbering.bind(this)}
                             type="checkbox"
                           />
@@ -1708,11 +1784,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         >
                           <span style={{ marginRight: '5px' }}>Prefix:</span>
                           <input
-                            disabled={
-                              this.checkCondition(
-                                this.state.styles.hasNumbering
-                              ) || this.state.styleName === RESERVED_STYLE_NONE
-                            }
+                            disabled={numberingOptionsDisabled}
                             onChange={(e) => this.handlePrefix(e)}
                             style={{ width: '62px' }}
                             type="text"
@@ -2131,5 +2203,37 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       this.state.styles.styleLevel === undefined ||
       (this.state.styles.styleLevel === 1 && this.state.styles.isList === true)
     );
+  }
+
+  isCapcoOptionDisabled() {
+    return (
+      this.state.styles.isList === true ||
+      this.state.styleName === RESERVED_STYLE_NONE ||
+      this.state.styles.tot ||
+      this.state.styles.tof ||
+      this.state.styles.styleLevel === 0 ||
+      this.state.styles.styleLevel === undefined
+    );
+  }
+
+  isNumberingOptionDisabled() {
+    return (
+      this.checkCondition(this.state.styles.hasNumbering) ||
+      this.state.styleName === RESERVED_STYLE_NONE ||
+      this.state.styles.tot ||
+      this.state.styles.tof
+    );
+  }
+
+  isContNumberDisabled() {
+    return (
+      this.isNumberingOptionDisabled() || this.state.styles.styleLevel !== 2
+    );
+  }
+
+  setPanelHeightToContent(panel: HTMLElement | null) {
+    if (panel) {
+      panel.style.maxHeight = `${panel.scrollHeight}px`;
+    }
   }
 }

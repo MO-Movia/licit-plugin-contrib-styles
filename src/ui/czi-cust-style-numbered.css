@@ -521,7 +521,11 @@ html {
   counter-reset: none;
 }
 
-.ProseMirror p[contNumber ='true'] {
+.ProseMirror p[data-style-level='2'][tot='true'][contNumber ='true'] {
+  counter-increment: none;
+}
+
+.ProseMirror p[data-style-level='2'][tof='true'][contNumber ='true'] {
   counter-increment: none;
 }
 

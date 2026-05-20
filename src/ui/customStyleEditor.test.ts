@@ -1,5 +1,6 @@
 import { CustomStyleEditor } from './CustomStyleEditor';
 import * as customstyle from '../customStyle';
+import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 import { SyntheticEvent } from 'react';
 import { Style } from '@modusoperandi/licit-ui-commands';
 
@@ -344,7 +345,22 @@ describe('CustomStyleEditor', () => {
     expect(customstyleeditor.isNumberingOptionDisabled()).toBe(true);
     expect(customstyleeditor.isContNumberDisabled()).toBe(true);
   });
-  it('should allow Continue Numbering only for numbering at level 2', () => {
+  it('should allow Hide Capco when style level is none', () => {
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        hideCapco: false,
+        styleLevel: 0,
+        isList: false,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+    };
+
+    expect(customstyleeditor.isCapcoOptionDisabled()).toBe(false);
+  });
+  it('should allow Continue Numbering only for table and figure styles', () => {
     customstyleeditor.state = {
       styles: {
         align: 'left',
@@ -360,13 +376,28 @@ describe('CustomStyleEditor', () => {
       otherStyleSelected: '',
     };
 
-    expect(customstyleeditor.isContNumberDisabled()).toBe(false);
-
-    customstyleeditor.state.styles.styleLevel = 1;
     expect(customstyleeditor.isContNumberDisabled()).toBe(true);
 
+    customstyleeditor.state.styles.tot = true;
+    expect(customstyleeditor.isContNumberDisabled()).toBe(false);
+
+    customstyleeditor.state.styles.tot = false;
+    customstyleeditor.state.styles.tof = true;
+    customstyleeditor.state.styles.styleLevel = 1;
+    expect(customstyleeditor.isContNumberDisabled()).toBe(false);
+
+    customstyleeditor.state.styles.tof = false;
     customstyleeditor.state.styles.styleLevel = 2;
-    customstyleeditor.state.styles.hasNumbering = false;
+    expect(customstyleeditor.isContNumberDisabled()).toBe(true);
+
+    customstyleeditor.state = {
+      ...customstyleeditor.state,
+      styleName: RESERVED_STYLE_NONE,
+      styles: {
+        ...customstyleeditor.state.styles,
+        tot: true,
+      },
+    };
     expect(customstyleeditor.isContNumberDisabled()).toBe(true);
   });
   it('should reset continue numbering when switching to bullet formatting', () => {

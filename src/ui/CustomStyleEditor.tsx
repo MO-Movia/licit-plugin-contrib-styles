@@ -1650,7 +1650,10 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                     ))}
                   </select>
                 </div>
-                <div className="molsp-hierarchydiv" style={{ display: 'flex' }}>
+                <div
+                  className="molsp-hierarchydiv"
+                  style={{ display: 'flex', flexDirection: 'column' }}
+                >
                   <fieldset className="formatting-fieldset">
                     <legend className="formatting-legend">Formatting</legend>
                     <div>
@@ -1749,23 +1752,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           }}
                         >
                           <input
-                            checked={this.state.styles.contNumber}
-                            className="molsp-chkboldnumbering"
-                            data-cy="cyStyleContNumb"
-                            disabled={contNumberDisabled}
-                            onChange={this.handleContNumber.bind(this)}
-                            type="checkbox"
-                          />
-                          <span style={{ marginLeft: '5px' }}>Continue Numbering</span>
-                        </div>
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            marginBottom: '5px',
-                          }}
-                        >
-                          <input
                             checked={this.state.styles.boldNumbering}
                             className="molsp-chkboldnumbering"
                             disabled={numberingOptionsDisabled}
@@ -1784,7 +1770,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         >
                           <span style={{ marginRight: '5px' }}>Prefix:</span>
                           <input
-                            disabled={numberingOptionsDisabled}
                             onChange={(e) => this.handlePrefix(e)}
                             style={{ width: '62px' }}
                             type="text"
@@ -1840,6 +1825,35 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                           </select>
                         </span>
                       </label>
+                    </div>
+                  </fieldset>
+                  <fieldset
+                    className="formatting-fieldset"
+                    style={{
+                      marginTop: '8px',
+                      padding: '6px 10px 8px',
+                    }}
+                  >
+                    <legend className="formatting-legend">
+                      Figure / Table Numbering
+                    </legend>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <input
+                        checked={this.state.styles.contNumber}
+                        className="molsp-chkboldnumbering"
+                        data-cy="cyStyleContNumb"
+                        disabled={contNumberDisabled}
+                        onChange={this.handleContNumber.bind(this)}
+                        type="checkbox"
+                      />
+                      <span style={{ marginLeft: '5px' }}>
+                        Continue Numbering
+                      </span>
                     </div>
                   </fieldset>
                 </div>
@@ -2208,11 +2222,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   isCapcoOptionDisabled() {
     return (
       this.state.styles.isList === true ||
-      this.state.styleName === RESERVED_STYLE_NONE ||
-      this.state.styles.tot ||
-      this.state.styles.tof ||
-      this.state.styles.styleLevel === 0 ||
-      this.state.styles.styleLevel === undefined
+      this.state.styleName === RESERVED_STYLE_NONE
     );
   }
 
@@ -2227,7 +2237,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
 
   isContNumberDisabled() {
     return (
-      this.isNumberingOptionDisabled() || this.state.styles.styleLevel !== 2
+      this.state.styleName === RESERVED_STYLE_NONE ||
+      !(this.state.styles.tot || this.state.styles.tof)
     );
   }
 

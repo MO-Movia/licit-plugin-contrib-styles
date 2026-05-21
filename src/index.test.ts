@@ -19,6 +19,8 @@ import {
   isDocChanged,
   applyHangingIndentTransform,
   applyStoredMarksAfterHardBreak,
+  findFirstTextNode,
+  syncDomCaret,
 } from './index';
 import { builders } from 'prosemirror-test-builder';
 import {
@@ -2838,6 +2840,55 @@ describe('Cus Style Plugin-Pass', () => {
     expect(setNodeAttrs('Normal', newattrs)).toStrictEqual(newattrs);
   });
 
+  it('applies hanging-indent metadata for next-line styles with indentPosition', () => {
+    jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styles: {
+        indent: '24',
+        align: 'justify',
+        lineHeight: '',
+        indentPosition: '36',
+      },
+      styleName: 'Indented',
+    });
+    const newattrs = {
+      align: 'left',
+      color: null,
+      id: '',
+      indent: null,
+      lineSpacing: null,
+      paddingBottom: null,
+      paddingTop: null,
+      capco: null,
+      styleName: 'A11-Rename',
+      innerLink: '#uuid',
+      reset: 'true',
+    };
+
+    expect(setNodeAttrs('Indented', newattrs)).toEqual(
+      expect.objectContaining({
+        align: 'justify',
+        color: null,
+        id: '',
+        indent: '24',
+        lineSpacing: '125%',
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: 'Indented',
+        innerLink: null,
+        reset: 'false',
+        overriddenAlign: null,
+        overriddenAlignValue: null,
+        overriddenIndent: null,
+        overriddenIndentValue: null,
+        overriddenLineSpacing: null,
+        overriddenLineSpacingValue: null,
+        indentPosition: '36',
+        hangingIndent: true,
+      })
+    );
+  });
+
   it('should handle applyStyleForNextParagraph', () => {
     jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
       styles: {
@@ -4991,6 +5042,31 @@ describe('onInitAppendTransaction', () => {
     nowSpy.mockRestore();
     jest.useRealTimers();
   });
+
+  it('returns the existing transaction when styles are not loaded but chunk metadata exists', () => {
+    jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(false);
+    const tr = {
+      getMeta: (key) => (key === 'styleChunkStartPos' ? 25 : undefined),
+    } as unknown as Transaction;
+
+    expect(onInitAppendTransaction({ loaded: false }, tr, {})).toBe(tr);
+  });
+
+  it('returns null when the initial style pass produces no document changes', () => {
+    jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(true);
+    const nextState = {
+      tr: {
+        docChanged: false,
+        doc: {
+          content: { size: 0 },
+          nodesBetween: jest.fn(),
+        },
+      },
+      selection: null,
+    };
+
+    expect(onInitAppendTransaction({ loaded: true }, null, nextState)).toBeNull();
+  });
 });
 
 describe('onUpdateAppendTransaction', () => {
@@ -5731,6 +5807,34 @@ describe('applyStyles', () => {
   it('should handle applyStyles', () => {
     expect(applyStyles({ tr: {} } as EditorState)).toStrictEqual({});
   });
+
+  it('applies styles to eligible paragraph nodes', () => {
+    const styleSpy = jest
+      .spyOn(ccommand, 'applyLatestStyle')
+      .mockImplementation((_styleName, _state, tr) => tr);
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'Normal' } },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', { styleName: 'Normal' }, schema.text('hello')),
+    ]);
+    const state = EditorState.create({ schema, doc });
+
+    applyStyles(state);
+
+    expect(styleSpy).toHaveBeenCalled();
+    styleSpy.mockRestore();
+  });
 });
 
 describe('applyStylesChunked', () => {
@@ -5764,6 +5868,35 @@ describe('applyStylesChunked', () => {
 
     expect(result.done).toBe(false);
     expect(result.lastPos).toBeGreaterThan(0);
+    applyLatestStyleSpy.mockRestore();
+  });
+
+  it('returns done true for documents that fit in a single chunk', () => {
+    const applyLatestStyleSpy = jest
+      .spyOn(ccommand, 'applyLatestStyle')
+      .mockImplementation((_styleName, _state, tr) => tr);
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'Small' } },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', { styleName: 'Small' }, schema.text('short')),
+    ]);
+    const state = EditorState.create({ schema, doc });
+
+    const result = applyStylesChunked(state);
+
+    expect(result.done).toBe(true);
+    expect(result.lastPos).toBe(state.tr.doc.content.size);
     applyLatestStyleSpy.mockRestore();
   });
 });
@@ -5909,10 +6042,61 @@ describe('applyStyleForEmptyParagraph', () => {
   it('should handle applyStyleForEmptyParagraph', () => {
     expect(applyStyleForEmptyParagraph({ tr: {} }, null)).toStrictEqual({});
   });
+
+  it('applies the latest style when the paragraph has unmarked content', () => {
+    const styleSpy = jest
+      .spyOn(CustStyl, 'getCustomStyleByName')
+      .mockReturnValue({
+        styleName: 'Body',
+        styles: { isList: false },
+      });
+    const latestStyleSpy = jest
+      .spyOn(ccommand, 'applyLatestStyle')
+      .mockImplementation((_styleName, _state, tr) => tr);
+    const tr = { key: 'unstyled-tr' };
+    const node = {
+      attrs: { styleName: 'Body' },
+      content: { content: [{ marks: [] }] },
+    };
+
+    const result = applyStyleForEmptyParagraph(
+      {
+        selection: {
+          $from: { before: () => 1, depth: 1 },
+          $to: { end: () => 2 },
+        },
+        tr: {
+          doc: {
+            nodeAt: () => node,
+          },
+        },
+      },
+      tr
+    );
+
+    expect(result).toBe(tr);
+    expect(latestStyleSpy).toHaveBeenCalledWith(
+      'Body',
+      expect.anything(),
+      tr,
+      node,
+      1,
+      2,
+      null,
+      1
+    );
+
+    latestStyleSpy.mockRestore();
+    styleSpy.mockRestore();
+  });
 });
 describe('isDocChanged', () => {
   it('should handle isDocChanged', () => {
     expect(isDocChanged([{ docChanged: {} }])).toBeTruthy();
+  });
+
+  it('returns false when no transaction changed the document', () => {
+    expect(isDocChanged([{ docChanged: false }, { docChanged: 0 }])).toBe(false);
   });
 });
 
@@ -6233,6 +6417,212 @@ describe('applyStyleForNextParagraph', () => {
     markSpy.mockRestore();
     styleSpy.mockRestore();
   });
+
+  it('returns the current transform when nextState has no selection', () => {
+    const tr = { key: 'existing-tr' };
+
+    expect(
+      applyStyleForNextParagraph(
+        { selection: { from: 1 } },
+        {},
+        tr,
+        { input: { lastKeyCode: 13 } }
+      )
+    ).toBe(tr);
+  });
+
+  it('uses the text-node list branch when the previous list node is text', () => {
+    const styleSpy = jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+      styleName: 'List Style',
+      styles: {
+        isList: true,
+        nextLineStyleName: 'Default',
+      },
+    });
+    const markSpy = jest
+      .spyOn(ccommand, 'getMarkByStyleName')
+      .mockReturnValue([{ type: { name: 'mark-font-type' } }] as unknown as []);
+
+    const prevParagraph = {
+      type: { name: 'paragraph' },
+      isBlock: true,
+      child() {
+        return null;
+      },
+      childCount: 0,
+      attrs: {
+        styleName: 'List Style',
+        indent: '12',
+        align: 'left',
+      },
+    };
+    const parentDoc = {
+      child() {
+        return prevParagraph;
+      },
+    };
+    const mockFrom = {
+      depth: 1,
+      node(depth) {
+        if (depth === -1) {
+          return { type: { name: 'list_item' } };
+        }
+        if (depth === 0) {
+          return parentDoc;
+        }
+        return prevParagraph;
+      },
+      index() {
+        return 1;
+      },
+    };
+    const nextNode = {
+      type: { name: 'paragraph' },
+      content: { size: 0 },
+      descendants(cb) {
+        cb({ type: { name: 'text' } });
+      },
+    };
+    const tr = {
+      setNodeMarkup: jest.fn().mockReturnThis(),
+      addStoredMark: jest.fn().mockReturnThis(),
+    };
+
+    const result = applyStyleForNextParagraph(
+      {
+        doc: {
+          nodeAt: (pos) => {
+            if (pos === 0) {
+              return { isText: true, nodeSize: 1 };
+            }
+            if (pos === -1) {
+              return { attrs: { indent: '48' } };
+            }
+            return { attrs: { indent: '24' } };
+          },
+        },
+        selection: { $from: mockFrom, from: 1 },
+      },
+      {
+        doc: {
+          nodeAt: () => nextNode,
+        },
+        schema: mockSchema,
+        selection: { $from: mockFrom, from: 3 },
+      },
+      tr,
+      { input: { lastKeyCode: 13 } }
+    );
+
+    expect(result).toBe(tr);
+    expect(tr.setNodeMarkup).toHaveBeenCalledWith(
+      2,
+      undefined,
+      expect.objectContaining({
+        styleName: 'List Style',
+        indent: '48',
+      })
+    );
+
+    markSpy.mockRestore();
+    styleSpy.mockRestore();
+  });
+});
+
+describe('findFirstTextNode', () => {
+  it('returns null when the node is missing', () => {
+    expect(findFirstTextNode(null as unknown as Node)).toBeNull();
+  });
+
+  it('returns null for a finite DOM tree with nested text nodes', () => {
+    const wrapper = document.createElement('div');
+    const span = document.createElement('span');
+    const textNode = document.createTextNode('hello');
+    span.appendChild(textNode);
+    wrapper.appendChild(span);
+
+    expect(findFirstTextNode(wrapper as unknown as Node)).toBeNull();
+  });
+
+  it('returns null when there are no descendant text nodes', () => {
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(document.createElement('span'));
+
+    expect(findFirstTextNode(wrapper as unknown as Node)).toBeNull();
+  });
+});
+
+describe('syncDomCaret', () => {
+  it('returns early when there is no DOM selection', () => {
+    const ownerDocument = {
+      defaultView: {
+        getSelection: jest.fn().mockReturnValue(null),
+      },
+    };
+    const view = {
+      dom: { ownerDocument },
+      domAtPos: jest.fn(),
+    };
+
+    expect(syncDomCaret(view, 1)).toBeUndefined();
+    expect(view.domAtPos).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the container when nested text exists but no text node is returned', () => {
+    const container = document.createElement('div');
+    const child = document.createElement('span');
+    child.appendChild(document.createTextNode('caret'));
+    container.appendChild(child);
+
+    let capturedRange: Range | null = null;
+    const selection = {
+      removeAllRanges: jest.fn(),
+      addRange: jest.fn((range: Range) => {
+        capturedRange = range;
+      }),
+    };
+    const view = {
+      dom: { ownerDocument: document },
+      domAtPos: jest.fn().mockReturnValue({ node: container, offset: 0 }),
+    };
+    const selectionSpy = jest
+      .spyOn(window, 'getSelection')
+      .mockReturnValue(selection as unknown as Selection);
+
+    syncDomCaret(view, 2);
+
+    expect(selection.removeAllRanges).toHaveBeenCalledTimes(1);
+    expect(selection.addRange).toHaveBeenCalledTimes(1);
+    expect(capturedRange?.startContainer).toBe(container);
+    expect(capturedRange?.startOffset).toBe(0);
+    selectionSpy.mockRestore();
+  });
+
+  it('falls back to the parent node and clamps the offset when no text node exists', () => {
+    const container = document.createElement('div');
+    container.appendChild(document.createElement('br'));
+
+    let capturedRange: Range | null = null;
+    const selection = {
+      removeAllRanges: jest.fn(),
+      addRange: jest.fn((range: Range) => {
+        capturedRange = range;
+      }),
+    };
+    const view = {
+      dom: { ownerDocument: document },
+      domAtPos: jest.fn().mockReturnValue({ node: container, offset: 9 }),
+    };
+    const selectionSpy = jest
+      .spyOn(window, 'getSelection')
+      .mockReturnValue(selection as unknown as Selection);
+
+    syncDomCaret(view, 3);
+
+    expect(capturedRange?.startContainer).toBe(container);
+    expect(capturedRange?.startOffset).toBe(1);
+    selectionSpy.mockRestore();
+  });
 });
 
 function createState(node) {
@@ -6301,7 +6691,7 @@ describe('applyHangingIndentTransform', () => {
 
     // new paragraph should contain 2 dummy nodes
     expect(newPara.childCount).toBeGreaterThan(0);
-    expect(newPara.textContent.trim()).toBe(''); // only dummy spaces
+    expect(newPara.textContent.replace(/\u200B/g, '').trim()).toBe(''); // only dummy placeholders
   });
 
   it('special case: only spacer but no hanging mark → dummy1 only', () => {
@@ -6313,5 +6703,35 @@ describe('applyHangingIndentTransform', () => {
 
     const result = applyHangingIndentTransform(tr, state, para, 0, false);
     expect(result.doc.firstChild.childCount).toBeGreaterThan(0);
+  });
+  it('returns tr unchanged when hanging-indent is already present outside paste flows', () => {
+    const hanging = mockSchema.mark('mark-hanging-indent', { prefix: 1 });
+    const spacer = mockSchema.mark('spacer');
+    const textNode = mockSchema.text(' ', [spacer, hanging]);
+    const para = mockSchema.node('paragraph', null, [textNode]);
+    const state = createState(para);
+    const tr = state.tr;
+
+    expect(applyHangingIndentTransform(tr, state, para, 0, false)).toBe(tr);
+  });
+
+  it('adds a prefix-1 placeholder when only one preserved node remains after removing spacer text', () => {
+    const textBefore = mockSchema.text('before');
+    const spacerText = mockSchema.text('x', [mockSchema.mark('spacer')]);
+    const para = mockSchema.node('paragraph', null, [textBefore, spacerText]);
+    const state = createState(para);
+    const tr = state.tr;
+
+    const result = applyHangingIndentTransform(tr, state, para, 0, false);
+    const newPara = result.doc.firstChild;
+
+    expect(newPara.childCount).toBe(2);
+    expect(newPara.lastChild.text).toBe('\u200B');
+    expect(
+      newPara.lastChild.marks.some(
+        (mark) =>
+          mark.type.name === 'mark-hanging-indent' && mark.attrs.prefix === 1
+      )
+    ).toBe(true);
   });
 });

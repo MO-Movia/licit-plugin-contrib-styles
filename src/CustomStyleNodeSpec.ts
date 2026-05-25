@@ -240,6 +240,7 @@ function getStyleEx(align, lineSpacing, styleName) {
       if (styleProps.styles.paragraphSpacingBefore) {
         style += `margin-top: ${styleProps.styles.paragraphSpacingBefore}pt !important;`;
       }
+      hideCapco = styleProps.styles.hideCapco ?? false;
       if (styleProps.styles.styleLevel) {
         if (styleProps.styles.strong) {
           style += 'font-weight: bold;';
@@ -273,7 +274,6 @@ function getStyleEx(align, lineSpacing, styleName) {
         tof = styleProps.styles.tof;
         prefix = styleProps.styles.prefixValue;
         hideNumbering = styleProps.styles.hideNumbering;
-        hideCapco = styleProps.styles.hideCapco ?? false;
         contNumber = styleProps.styles.contNumber;
         style += refreshCounters(styleLevel, isListStyle);
       }

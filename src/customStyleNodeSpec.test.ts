@@ -809,4 +809,39 @@ describe('toCustomStyleDOM', () => {
       },
     ]);
   });
+
+  it('should handle toCustomStyleDOM when hideCapco is true without style level', () => {
+    jest.spyOn(customstyle, 'getCustomStyleByName').mockReturnValue({
+      styles: {
+        styleLevel: 0,
+        hasNumbering: false,
+        hideCapco: true,
+      },
+      styleName: '',
+    });
+
+    const node = {
+      type: 'paragraph',
+      attrs: {
+        align: null,
+        color: null,
+        id: null,
+        indent: null,
+        lineSpacing: null,
+        paddingBottom: null,
+        paddingTop: null,
+        capco: null,
+        styleName: 'FS_B01',
+      },
+      content: [],
+    };
+
+    expect(toCustomStyleDOM(base, node as unknown as Node)).toStrictEqual([
+      'span',
+      {
+        'hideCapco': true,
+        styleName: 'FS_B01',
+      },
+    ]);
+  });
 });

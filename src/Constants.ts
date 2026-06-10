@@ -24,6 +24,8 @@ export const DEFAULT_NORMAL_STYLE = {
     toc: false,
     tot: false,
     tof: false,
+    hideCapco: false,
+    contNumber: false,
     selectedStyleMode: 'none',
   },
 };

@@ -1,5 +1,6 @@
 import { CustomStyleEditor } from './CustomStyleEditor';
 import * as customstyle from '../customStyle';
+import { RESERVED_STYLE_NONE } from '../CustomStyleNodeSpec';
 import { SyntheticEvent } from 'react';
 import { Style } from '@modusoperandi/licit-ui-commands';
 
@@ -315,6 +316,146 @@ describe('CustomStyleEditor', () => {
   });
   it('should handle handleNone', () => {
     expect(customstyleeditor.handleNone()).toBeUndefined();
+  });
+  it('should handle handleContNumber', () => {
+    expect(
+      customstyleeditor.handleContNumber({ target: { checked: true } })
+    ).toBeUndefined();
+  });
+  it('should allow Hide Capco without numbering when style level is set', () => {
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: false,
+        contNumber: false,
+        hasNumbering: false,
+        hideCapco: false,
+        styleLevel: 2,
+        isList: false,
+        toc: false,
+        tot: false,
+        tof: false,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+    };
+
+    expect(customstyleeditor.isCapcoOptionDisabled()).toBe(false);
+    expect(customstyleeditor.isNumberingOptionDisabled()).toBe(true);
+    expect(customstyleeditor.isContNumberDisabled()).toBe(true);
+  });
+  it('should allow Hide Capco when style level is none', () => {
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        hideCapco: false,
+        styleLevel: 0,
+        isList: false,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+    };
+
+    expect(customstyleeditor.isCapcoOptionDisabled()).toBe(false);
+  });
+  it('should allow Continue Numbering only for table and figure styles', () => {
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        contNumber: false,
+        hasNumbering: true,
+        styleLevel: 2,
+        isList: false,
+        tot: false,
+        tof: false,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+    };
+
+    expect(customstyleeditor.isContNumberDisabled()).toBe(true);
+
+    customstyleeditor.state.styles.tot = true;
+    expect(customstyleeditor.isContNumberDisabled()).toBe(false);
+
+    customstyleeditor.state.styles.tot = false;
+    customstyleeditor.state.styles.tof = true;
+    customstyleeditor.state.styles.styleLevel = 1;
+    expect(customstyleeditor.isContNumberDisabled()).toBe(false);
+
+    customstyleeditor.state.styles.tof = false;
+    customstyleeditor.state.styles.styleLevel = 2;
+    expect(customstyleeditor.isContNumberDisabled()).toBe(true);
+
+    customstyleeditor.state = {
+      ...customstyleeditor.state,
+      styleName: RESERVED_STYLE_NONE,
+      styles: {
+        ...customstyleeditor.state.styles,
+        tot: true,
+      },
+    };
+    expect(customstyleeditor.isContNumberDisabled()).toBe(true);
+  });
+  it('should reset continue numbering when switching to bullet formatting', () => {
+    const originalSetState = customstyleeditor.setState;
+    customstyleeditor.setState = jest.fn((update) => {
+      const newState =
+        typeof update === 'function'
+          ? update(customstyleeditor.state)
+          : update;
+      customstyleeditor.state = { ...customstyleeditor.state, ...newState };
+    });
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        boldNumbering: true,
+        bulletLevel: '25CF',
+        contNumber: true,
+        hasNumbering: true,
+        hideNumbering: true,
+        styleLevel: 2,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+    };
+
+    customstyleeditor.handleBulletPoints({ target: { checked: true } });
+
+    expect(customstyleeditor.state.styles.contNumber).toBe(false);
+    customstyleeditor.setState = originalSetState;
+  });
+  it('should reset continue numbering when level changes away from 2', () => {
+    const originalSetState = customstyleeditor.setState;
+    customstyleeditor.setState = jest.fn((update) => {
+      const newState =
+        typeof update === 'function'
+          ? update(customstyleeditor.state)
+          : update;
+      customstyleeditor.state = { ...customstyleeditor.state, ...newState };
+    });
+    customstyleeditor.state = {
+      styles: {
+        align: 'left',
+        contNumber: true,
+        hasNumbering: true,
+        hideCapco: false,
+        styleLevel: 2,
+      },
+      mode: 0,
+      styleName: 'A Apply Stylefff',
+      otherStyleSelected: '',
+    };
+
+    customstyleeditor.onLevelChange({ target: { value: '1' } });
+
+    expect(customstyleeditor.state.styles.styleLevel).toBe(1);
+    expect(customstyleeditor.state.styles.contNumber).toBe(false);
+    customstyleeditor.setState = originalSetState;
   });
   it('should handle selectStyleCheckboxState', () => {
     expect(customstyleeditor.selectStyleCheckboxState()).toBe(false);

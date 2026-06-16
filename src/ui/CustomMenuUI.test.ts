@@ -8,7 +8,7 @@ import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { CustomStyleCommand } from '../CustomStyleCommand';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
-import { SyntheticEvent } from 'react';
+import { ChangeEvent, SyntheticEvent } from 'react';
 import { Transform } from 'prosemirror-transform';
 import { Node } from 'prosemirror-model';
 
@@ -530,6 +530,27 @@ describe('Custom Menu UI   ', () => {
       .mockReturnValue([dom] as unknown as HTMLCollectionOf<Element>);
     custommenuui.componentDidMount();
     expect(dom.scrollTop).toBe(751);
+  });
+
+  it('should match styles by search term', () => {
+    expect(custommenuui.isStyleMatch('Heading One', 'heading')).toBe(true);
+    expect(custommenuui.isStyleMatch('Heading One', 'body')).toBe(false);
+    expect(custommenuui.isStyleMatch('Heading One', '')).toBe(true);
+  });
+
+  it('should update the style search term', () => {
+    const spy = jest
+      .spyOn(custommenuui, 'setState')
+      .mockImplementation((state) => {
+        custommenuui.state = { ...custommenuui.state, ...state };
+      });
+    custommenuui._selectedIndex = 4;
+    custommenuui._onSearchChange({
+      target: { value: 'head' },
+    } as unknown as ChangeEvent<HTMLInputElement>);
+    expect(custommenuui._selectedIndex).toBe(0);
+    expect(spy).toHaveBeenCalledWith({ searchTerm: 'head' });
+    spy.mockRestore();
   });
 
   it('should handle isAllowedNode', () => {

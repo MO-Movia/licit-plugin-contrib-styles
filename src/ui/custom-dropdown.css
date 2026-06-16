@@ -18,6 +18,29 @@
   overflow: auto;
 }
 
+.czi-editor-frameset .molsp-search-wrapper {
+  box-sizing: border-box;
+  padding: 4px 2px 6px;
+}
+
+.czi-editor-frameset .molsp-search-input {
+  border-color: #cec7c7;
+  border-style: solid;
+  border-width: 1px;
+  box-sizing: border-box;
+  color: #5a615e;
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  padding: 4px 8px;
+  width: 100%;
+}
+
+.czi-editor-frameset .molsp-search-input:focus {
+  border-color: #5a615e;
+  outline: none;
+}
+
 .czi-editor-frameset .molsp-dropdown-content {
   background-color: #f9f9f9;
   border-color: #cec7c7;

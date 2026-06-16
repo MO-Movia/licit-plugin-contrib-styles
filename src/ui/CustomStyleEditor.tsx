@@ -65,6 +65,19 @@ const LEVEL_VALUES = [
   '10',
 ];
 
+const NUMBERING_STYLES = [
+  { label: '1.', value: 'decimal' },
+  { label: '1)', value: 'decimal-parenthesis' },
+  { label: '(1)', value: 'decimal-bracket' },
+  { label: 'A.', value: 'upper-alpha-period' },
+  { label: 'A)', value: 'upper-alpha-parenthesis' },
+  { label: '(A)', value: 'upper-alpha-bracket' },
+  { label: 'a)', value: 'lower-alpha-parenthesis' },
+  { label: '(a)', value: 'lower-alpha-bracket' },
+  { label: 'a.', value: 'lower-alpha' },
+  { label: 'i.', value: 'lower-roman' },
+];
+
 const SAMPLE_TEXT = `Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample.
 Sample Text Sample Text Sample Text Sample Text Sample Text`;
 // eslint-disable-next-line
@@ -109,6 +122,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
     }
     if (this.state.styles.contNumber === undefined) {
       this.state.styles.contNumber = false;
+    }
+    if (!this.state.styles.numberingStyle) {
+      this.state.styles.numberingStyle = 'decimal';
     }
     this.getCustomStyles();
   }
@@ -300,7 +316,8 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       ) {
         const numberingLevel = this.getNumberingLevel(
           this.state.styles.styleLevel,
-          this.state.styles.prefixValue
+          this.state.styles.prefixValue,
+          this.state.styles.numberingStyle
         );
         const numberingNode = document.createTextNode(numberingLevel);
         if (this.state.styles.boldNumbering) {
@@ -331,16 +348,51 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
   // [FS] IRAD-1111 2020-12-10
   // get the numbering corresponding to the level
-  getNumberingLevel(level: string | number, prefixValue: string | number) {
-    let levelStyle = '';
-    for (let i = 0; i < parseInt(`${level}`); i++) {
-      if (i === 0 && prefixValue) {
-        levelStyle = levelStyle + prefixValue + '1.';
-      } else {
-        levelStyle = levelStyle + '1.';
-      }
+  getNumberingLevel(
+    level: string | number,
+    prefixValue: string | number,
+    numberingStyle = 'decimal'
+  ) {
+    const prefix = prefixValue || '';
+    const levelCount = parseInt(`${level}`);
+    if (!Number.isFinite(levelCount) || levelCount <= 0) {
+      return '';
     }
-    return levelStyle + ' ';
+    const buildLevel = (value: string, trailingDot = false) => {
+      const levelStyle = Array(levelCount).fill(value).join('.');
+      return `${prefix}${levelStyle}${trailingDot && levelCount === 1 ? '.' : ''} `;
+    };
+
+    switch (numberingStyle) {
+      case 'decimal-period':
+      case 'decimal':
+        return buildLevel('1', true);
+      case 'decimal-parenthesis':
+        return buildLevel('1)');
+      case 'decimal-bracket':
+        return buildLevel('(1)');
+      case 'upper-alpha-period':
+        return buildLevel('A', true);
+      case 'upper-alpha-parenthesis':
+        return buildLevel('A)');
+      case 'upper-alpha-bracket':
+        return buildLevel('(A)');
+      case 'lower-alpha-parenthesis':
+        return buildLevel('a)');
+      case 'lower-alpha-bracket':
+        return buildLevel('(a)');
+      default:
+        break;
+    }
+
+    const sampleCounter =
+      numberingStyle === 'lower-alpha'
+        ? 'a'
+        : numberingStyle === 'lower-roman'
+          ? 'i'
+          : '1';
+    const levelStyle = Array(levelCount).fill(sampleCounter).join('.');
+    return `${prefix}${levelStyle}${levelCount === 1 ? '.' : ''} `;
   }
 
   // handles font name change
@@ -446,6 +498,12 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
           ? false
           : prevState.styles.hideNumbering,
       },
+    }));
+  }
+
+  onNumberingStyleChange(e) {
+    this.setState((prevState) => ({
+      styles: { ...prevState.styles, numberingStyle: e.target.value },
     }));
   }
 
@@ -617,6 +675,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         ...prevState.styles,
         hasNumbering: val.target.checked,
         hasBullet: val.target.checked ? false : prevState.styles?.hasBullet,
+        numberingStyle: prevState.styles.numberingStyle || 'decimal',
         contNumber:
           val.target.checked && prevState.styles.styleLevel === 2
             ? prevState.styles.contNumber
@@ -1721,7 +1780,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             top: '-2px',
                           }}
                         >
-                          Numbering (1.1)
+                          Numbering Styles
                         </span>
                       </label>
                       <div style={{ marginLeft: '20px', marginTop: '5px' }}>
@@ -1759,6 +1818,30 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                             type="checkbox"
                           />
                           <span style={{ marginLeft: '5px' }}>Bold</span>
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            marginBottom: '5px',
+                            marginLeft: '-6px',
+                          }}
+                        >
+                          <span style={{ marginRight: '5px' }}>
+                            Format:
+                          </span>
+                          <select
+                            className="molsp-fontstyle"
+                            disabled={numberingOptionsDisabled}
+                            onChange={this.onNumberingStyleChange.bind(this)}
+                            value={this.state.styles.numberingStyle || 'decimal'}
+                          >
+                            {NUMBERING_STYLES.map((style) => (
+                              <option key={style.value} value={style.value}>
+                                {style.label}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                         <div
                           style={{

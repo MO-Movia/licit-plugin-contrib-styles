@@ -182,7 +182,7 @@ describe('customstyleitem', () => {
       hasBullet: false,
     };
     const result = customstyleitem.sampleLevel(styles);
-    expect(result).toBe('1.1.1.');
+    expect(result).toBe('1.1.1');
   });
 
   it('should prepend prefixValue only for the first level', () => {
@@ -194,7 +194,81 @@ describe('customstyleitem', () => {
       prefixValue: 'A',
     };
     const result = customstyleitem.sampleLevel(styles);
-    expect(result).toBe('A1.1.1.');
+    expect(result).toBe('A1.1.1');
+  });
+
+  it('should show alphabet sample levels', () => {
+    const styles = {
+      hasNumbering: true,
+      isList: false,
+      numberingStyle: 'lower-alpha',
+      styleLevel: 3,
+      hasBullet: false,
+      prefixValue: 'A',
+    };
+    const result = customstyleitem.sampleLevel(styles);
+    expect(result).toBe('Aa.a.a');
+  });
+
+  it('should show roman sample levels', () => {
+    const styles = {
+      hasNumbering: true,
+      isList: false,
+      numberingStyle: 'lower-roman',
+      styleLevel: 2,
+      hasBullet: false,
+    };
+    const result = customstyleitem.sampleLevel(styles);
+    expect(result).toBe('i.i');
+  });
+
+  it('should show parenthesis sample levels', () => {
+    expect(
+      customstyleitem.sampleLevel({
+        hasNumbering: true,
+        isList: false,
+        numberingStyle: 'decimal-parenthesis',
+        styleLevel: 2,
+        hasBullet: false,
+        prefixValue: 'A',
+      })
+    ).toBe('A1).1)');
+    expect(
+      customstyleitem.sampleLevel({
+        hasNumbering: true,
+        isList: false,
+        numberingStyle: 'lower-alpha-bracket',
+        styleLevel: 2,
+        hasBullet: false,
+      })
+    ).toBe('(a).(a)');
+    expect(
+      customstyleitem.sampleLevel({
+        hasNumbering: true,
+        isList: false,
+        numberingStyle: 'upper-alpha-parenthesis',
+        styleLevel: 2,
+        hasBullet: false,
+      })
+    ).toBe('A).A)');
+    expect(
+      customstyleitem.sampleLevel({
+        hasNumbering: true,
+        isList: false,
+        numberingStyle: 'upper-alpha-period',
+        styleLevel: 4,
+        hasBullet: false,
+      })
+    ).toBe('A.A.A.A');
+    expect(
+      customstyleitem.sampleLevel({
+        hasNumbering: true,
+        isList: false,
+        numberingStyle: 'upper-alpha-bracket',
+        styleLevel: 3,
+        hasBullet: false,
+      })
+    ).toBe('(A).(A).(A)');
   });
 
 

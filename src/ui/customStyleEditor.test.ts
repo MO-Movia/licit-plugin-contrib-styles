@@ -119,7 +119,37 @@ describe('CustomStyleEditor', () => {
     expect(customstyleeditor.onStyleClick('', event)).toBeUndefined();
   });
   it('should handle getNumberingLevel', () => {
-    expect(customstyleeditor.getNumberingLevel('2', 'A')).toBe('A1.1. ');
+    expect(customstyleeditor.getNumberingLevel('2', 'A')).toBe('A1.1 ');
+  });
+
+  it('should handle alphabet getNumberingLevel', () => {
+    expect(customstyleeditor.getNumberingLevel('2', 'A', 'lower-alpha')).toBe(
+      'Aa.a '
+    );
+  });
+
+  it('should handle roman getNumberingLevel', () => {
+    expect(customstyleeditor.getNumberingLevel('2', '', 'lower-roman')).toBe(
+      'i.i '
+    );
+  });
+
+  it('should handle parenthesis numbering styles', () => {
+    expect(
+      customstyleeditor.getNumberingLevel('2', 'A', 'decimal-parenthesis')
+    ).toBe('A1).1) ');
+    expect(
+      customstyleeditor.getNumberingLevel('2', '', 'lower-alpha-bracket')
+    ).toBe('(a).(a) ');
+    expect(
+      customstyleeditor.getNumberingLevel('2', '', 'upper-alpha-parenthesis')
+    ).toBe('A).A) ');
+    expect(
+      customstyleeditor.getNumberingLevel('2', '', 'upper-alpha-period')
+    ).toBe('A.A ');
+    expect(
+      customstyleeditor.getNumberingLevel('2', '', 'upper-alpha-bracket')
+    ).toBe('(A).(A) ');
   });
 
   it('should handle onFontNameChange', () => {

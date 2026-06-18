@@ -8,6 +8,7 @@ import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { CustomStyleCommand } from '../CustomStyleCommand';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
+import type * as React from 'react';
 import { SyntheticEvent } from 'react';
 import { Transform } from 'prosemirror-transform';
 import { Node } from 'prosemirror-model';
@@ -528,8 +529,362 @@ describe('Custom Menu UI   ', () => {
     jest
       .spyOn(document, 'getElementsByClassName')
       .mockReturnValue([dom] as unknown as HTMLCollectionOf<Element>);
+    // Make setState apply synchronously and run its callback so the scroll
+    // math (driven by state.selectedIndex) can be asserted.
+    jest
+      .spyOn(custommenuui, 'setState')
+      .mockImplementation((update, cb?: () => void) => {
+        const partial =
+          typeof update === 'function' ? update(custommenuui.state) : update;
+        custommenuui.state = { ...custommenuui.state, ...partial };
+        cb?.();
+      });
+    const rafSpy = jest
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation(() => 0);
+    custommenuui._appliedIndex = 29;
     custommenuui.componentDidMount();
+    expect(custommenuui.state.selectedIndex).toBe(29);
     expect(dom.scrollTop).toBe(751);
+    expect(rafSpy).toHaveBeenCalled();
+    (custommenuui.setState as jest.Mock).mockRestore();
+    rafSpy.mockRestore();
+  });
+
+  const makeStyleDiv = (scrollTop: number, clientHeight: number) => {
+    const dom = document.createElement('div');
+    dom.className = 'molsp-stylenames';
+    dom.scrollTop = scrollTop;
+    Object.defineProperty(dom, 'clientHeight', {
+      value: clientHeight,
+      configurable: true,
+    });
+    jest
+      .spyOn(document, 'getElementsByClassName')
+      .mockReturnValue([dom] as unknown as HTMLCollectionOf<Element>);
+    return dom;
+  };
+
+  it('should scroll down when the selected row is below the viewport', () => {
+    // 5 rows visible (clientHeight 140), currently showing rows 0..4.
+    const dom = makeStyleDiv(0, 140);
+    custommenuui.state = { ...custommenuui.state, selectedIndex: 6 };
+    custommenuui.scrollSelectedIntoView();
+    // rowBottom (7*28=196) - clientHeight (140) = 56
+    expect(dom.scrollTop).toBe(56);
+  });
+
+  it('should scroll up when the selected row is above the viewport', () => {
+    // Showing rows 6..10 (scrollTop 168, clientHeight 140).
+    const dom = makeStyleDiv(168, 140);
+    custommenuui.state = { ...custommenuui.state, selectedIndex: 2 };
+    custommenuui.scrollSelectedIntoView();
+    // rowTop = 2 * 28 = 56
+    expect(dom.scrollTop).toBe(56);
+  });
+
+  it('should not scroll when the selected row is already visible', () => {
+    // Showing rows 2..6 (scrollTop 56, clientHeight 140); row 3 is in view.
+    const dom = makeStyleDiv(56, 140);
+    custommenuui.state = { ...custommenuui.state, selectedIndex: 3 };
+    custommenuui.scrollSelectedIntoView();
+    expect(dom.scrollTop).toBe(56);
+  });
+
+  it('should not throw in scrollSelectedIntoView when container missing', () => {
+    jest
+      .spyOn(document, 'getElementsByClassName')
+      .mockReturnValue([] as unknown as HTMLCollectionOf<Element>);
+    expect(() => custommenuui.scrollSelectedIntoView()).not.toThrow();
+  });
+
+  it('should move highlight down with ArrowDown', () => {
+    custommenuui._navItems = [
+      { command: cmdGrp1, label: 'a' },
+      { command: cmdGrp2, label: 'b' },
+    ] as unknown as Array<{ command: UICommand; label: string }>;
+    custommenuui.state = { ...custommenuui.state, selectedIndex: 0 };
+    const setStateSpy = jest
+      .spyOn(custommenuui, 'setState')
+      .mockImplementation((update) => {
+        const partial =
+          typeof update === 'function' ? update(custommenuui.state) : update;
+        custommenuui.state = { ...custommenuui.state, ...partial };
+      });
+    const preventDefault = jest.fn();
+    const stopPropagation = jest.fn();
+    custommenuui._onMenuKeyDown({
+      key: 'ArrowDown',
+      preventDefault,
+      stopPropagation,
+    } as unknown as React.KeyboardEvent);
+    expect(preventDefault).toHaveBeenCalled();
+    expect(stopPropagation).toHaveBeenCalled();
+    expect(custommenuui.state.selectedIndex).toBe(1);
+    setStateSpy.mockRestore();
+  });
+
+  it('should wrap to the first row when ArrowDown past the end', () => {
+    custommenuui._navItems = [
+      { command: cmdGrp1, label: 'a' },
+      { command: cmdGrp2, label: 'b' },
+    ] as unknown as Array<{ command: UICommand; label: string }>;
+    custommenuui.state = { ...custommenuui.state, selectedIndex: 1 };
+    const setStateSpy = jest
+      .spyOn(custommenuui, 'setState')
+      .mockImplementation((update) => {
+        const partial =
+          typeof update === 'function' ? update(custommenuui.state) : update;
+        custommenuui.state = { ...custommenuui.state, ...partial };
+      });
+    custommenuui._onMenuKeyDown({
+      key: 'ArrowDown',
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as React.KeyboardEvent);
+    expect(custommenuui.state.selectedIndex).toBe(0);
+    setStateSpy.mockRestore();
+  });
+
+  it('should wrap to the last row when ArrowUp past the start', () => {
+    custommenuui._navItems = [
+      { command: cmdGrp1, label: 'a' },
+      { command: cmdGrp2, label: 'b' },
+    ] as unknown as Array<{ command: UICommand; label: string }>;
+    custommenuui.state = { ...custommenuui.state, selectedIndex: 0 };
+    const setStateSpy = jest
+      .spyOn(custommenuui, 'setState')
+      .mockImplementation((update) => {
+        const partial =
+          typeof update === 'function' ? update(custommenuui.state) : update;
+        custommenuui.state = { ...custommenuui.state, ...partial };
+      });
+    custommenuui._onMenuKeyDown({
+      key: 'ArrowUp',
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as React.KeyboardEvent);
+    expect(custommenuui.state.selectedIndex).toBe(1);
+    setStateSpy.mockRestore();
+  });
+
+  it('should move highlight up with ArrowUp', () => {
+    custommenuui._navItems = [
+      { command: cmdGrp1, label: 'a' },
+      { command: cmdGrp2, label: 'b' },
+    ] as unknown as Array<{ command: UICommand; label: string }>;
+    custommenuui.state = { ...custommenuui.state, selectedIndex: 1 };
+    const setStateSpy = jest
+      .spyOn(custommenuui, 'setState')
+      .mockImplementation((update) => {
+        const partial =
+          typeof update === 'function' ? update(custommenuui.state) : update;
+        custommenuui.state = { ...custommenuui.state, ...partial };
+      });
+    custommenuui._onMenuKeyDown({
+      key: 'ArrowUp',
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as React.KeyboardEvent);
+    expect(custommenuui.state.selectedIndex).toBe(0);
+    setStateSpy.mockRestore();
+  });
+
+  it('should execute the selected command on Enter', () => {
+    custommenuui._navItems = [
+      { command: cmdGrp1, label: 'a' },
+      { command: cmdGrp2, label: 'b' },
+    ] as unknown as Array<{ command: UICommand; label: string }>;
+    custommenuui.state = { ...custommenuui.state, selectedIndex: 1 };
+    const executeSpy = jest
+      .spyOn(custommenuui, '_execute')
+      .mockImplementation(() => {});
+    const preventDefault = jest.fn();
+    const stopPropagation = jest.fn();
+    custommenuui._onMenuKeyDown({
+      key: 'Enter',
+      preventDefault,
+      stopPropagation,
+    } as unknown as React.KeyboardEvent);
+    expect(preventDefault).toHaveBeenCalled();
+    expect(stopPropagation).toHaveBeenCalled();
+    expect(executeSpy).toHaveBeenCalledWith(cmdGrp2, expect.anything());
+    executeSpy.mockRestore();
+  });
+
+  it('should ignore keys when the style list is empty', () => {
+    custommenuui._navItems = [];
+    const preventDefault = jest.fn();
+    const result = custommenuui._onMenuKeyDown({
+      key: 'ArrowDown',
+      preventDefault,
+      stopPropagation: jest.fn(),
+    } as unknown as React.KeyboardEvent);
+    expect(result).toBeUndefined();
+    expect(preventDefault).not.toHaveBeenCalled();
+  });
+
+  it('should set the selection to the hovered row index', () => {
+    custommenuui.state = { ...custommenuui.state, selectedIndex: 0 };
+    const setStateSpy = jest
+      .spyOn(custommenuui, 'setState')
+      .mockImplementation((update) => {
+        const partial =
+          typeof update === 'function' ? update(custommenuui.state) : update;
+        custommenuui.state = { ...custommenuui.state, ...partial };
+      });
+    custommenuui._onItemMouseEnter(3);
+    expect(custommenuui.state.selectedIndex).toBe(3);
+    setStateSpy.mockRestore();
+  });
+
+  it('should select the hovered row from a nested target via data-index', () => {
+    const row = document.createElement('div');
+    row.setAttribute('data-index', '4');
+    const span = document.createElement('span');
+    row.appendChild(span);
+    custommenuui._lastPointerX = null;
+    custommenuui._lastPointerY = null;
+    const spy = jest
+      .spyOn(custommenuui, '_onItemMouseEnter')
+      .mockImplementation(() => {});
+    custommenuui._onMenuMouseOver({
+      target: span,
+      clientX: 10,
+      clientY: 20,
+    } as unknown as MouseEvent);
+    expect(spy).toHaveBeenCalledWith(4);
+    spy.mockRestore();
+  });
+
+  it('should ignore mouseover when no row is under the pointer', () => {
+    const orphan = document.createElement('span');
+    const spy = jest
+      .spyOn(custommenuui, '_onItemMouseEnter')
+      .mockImplementation(() => {});
+    custommenuui._onMenuMouseOver({
+      target: orphan,
+      clientX: 99,
+      clientY: 99,
+    } as unknown as MouseEvent);
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
+  it('should ignore scroll-induced mouseover with an unchanged pointer position', () => {
+    const row = document.createElement('div');
+    row.setAttribute('data-index', '6');
+    const span = document.createElement('span');
+    row.appendChild(span);
+    // Pointer last rested at (30, 40); arrow-key scrolling brings a new row
+    // under the SAME coordinates — this must not hijack the keyboard selection.
+    custommenuui._lastPointerX = 30;
+    custommenuui._lastPointerY = 40;
+    const spy = jest
+      .spyOn(custommenuui, '_onItemMouseEnter')
+      .mockImplementation(() => {});
+    custommenuui._onMenuMouseOver({
+      target: span,
+      clientX: 30,
+      clientY: 40,
+    } as unknown as MouseEvent);
+    expect(spy).not.toHaveBeenCalled();
+    // A genuine move (coordinates change) is still honored.
+    custommenuui._onMenuMouseOver({
+      target: span,
+      clientX: 31,
+      clientY: 40,
+    } as unknown as MouseEvent);
+    expect(spy).toHaveBeenCalledWith(6);
+    spy.mockRestore();
+  });
+
+  it('should attach and detach the native mouseover listener', () => {
+    const node = document.createElement('div');
+    const addSpy = jest.spyOn(node, 'addEventListener');
+    const removeSpy = jest.spyOn(node, 'removeEventListener');
+    (custommenuui._menuRef as { current: HTMLDivElement | null }).current = node;
+    jest.spyOn(custommenuui, 'setState').mockImplementation(() => {});
+    jest
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation(() => 0);
+    custommenuui.componentDidMount();
+    expect(addSpy).toHaveBeenCalledWith(
+      'mouseover',
+      custommenuui._onMenuMouseOver
+    );
+    custommenuui.componentWillUnmount();
+    expect(removeSpy).toHaveBeenCalledWith(
+      'mouseover',
+      custommenuui._onMenuMouseOver
+    );
+    jest.restoreAllMocks();
+  });
+
+  it('should re-enter the style range with ArrowDown from a static row', () => {
+    custommenuui._navItems = [
+      { command: cmdGrp1, label: 'a' },
+      { command: cmdGrp2, label: 'b' },
+    ] as unknown as Array<{ command: UICommand; label: string }>;
+    // selectedIndex sits on a static row (beyond the style range).
+    custommenuui.state = { ...custommenuui.state, selectedIndex: 5 };
+    const setStateSpy = jest
+      .spyOn(custommenuui, 'setState')
+      .mockImplementation((update) => {
+        const partial =
+          typeof update === 'function' ? update(custommenuui.state) : update;
+        custommenuui.state = { ...custommenuui.state, ...partial };
+      });
+    custommenuui._onMenuKeyDown({
+      key: 'ArrowDown',
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as React.KeyboardEvent);
+    expect(custommenuui.state.selectedIndex).toBe(0);
+    setStateSpy.mockRestore();
+  });
+
+  it('should re-enter the style range with ArrowUp from a static row', () => {
+    custommenuui._navItems = [
+      { command: cmdGrp1, label: 'a' },
+      { command: cmdGrp2, label: 'b' },
+    ] as unknown as Array<{ command: UICommand; label: string }>;
+    custommenuui.state = { ...custommenuui.state, selectedIndex: 5 };
+    const setStateSpy = jest
+      .spyOn(custommenuui, 'setState')
+      .mockImplementation((update) => {
+        const partial =
+          typeof update === 'function' ? update(custommenuui.state) : update;
+        custommenuui.state = { ...custommenuui.state, ...partial };
+      });
+    custommenuui._onMenuKeyDown({
+      key: 'ArrowUp',
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as React.KeyboardEvent);
+    expect(custommenuui.state.selectedIndex).toBe(1);
+    setStateSpy.mockRestore();
+  });
+
+  it('should execute a static command on Enter when it is selected', () => {
+    custommenuui._navItems = [
+      { command: cmdGrp1, label: 'a' },
+    ] as unknown as Array<{ command: UICommand; label: string }>;
+    custommenuui._staticItems = [
+      { command: cmdGrp2, label: 'static' },
+    ] as unknown as Array<{ command: UICommand; label: string }>;
+    // index 1 = first static row (just past the single style row).
+    custommenuui.state = { ...custommenuui.state, selectedIndex: 1 };
+    const executeSpy = jest
+      .spyOn(custommenuui, '_execute')
+      .mockImplementation(() => {});
+    custommenuui._onMenuKeyDown({
+      key: 'Enter',
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as React.KeyboardEvent);
+    expect(executeSpy).toHaveBeenCalledWith(cmdGrp2, expect.anything());
+    executeSpy.mockRestore();
   });
 
   it('should handle isAllowedNode', () => {

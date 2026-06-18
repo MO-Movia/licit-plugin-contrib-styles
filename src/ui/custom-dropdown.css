@@ -14,8 +14,17 @@
 
 .czi-editor-frameset .molsp-stylenames {
   max-height: 205px;
-  min-height: 30px;
+  min-height: 15px;
   overflow: auto;
+}
+
+.czi-editor-frameset .molsp-stylenames-empty {
+  height: 15px;
+  overflow: hidden;
+}
+
+.czi-editor-frameset .molsp-menu-separator {
+  margin: 4px 0;
 }
 
 .czi-editor-frameset .molsp-search-wrapper {
@@ -25,6 +34,7 @@
 
 .czi-editor-frameset .molsp-search-input {
   border-color: #cec7c7;
+  border-radius: 6px;
   border-style: solid;
   border-width: 1px;
   box-sizing: border-box;
@@ -32,7 +42,7 @@
   font-family: 'Arial', sans-serif;
   font-size: 14px;
   line-height: 20px;
-  padding: 4px 8px;
+  padding: 4px 12px;
   width: 100%;
 }
 

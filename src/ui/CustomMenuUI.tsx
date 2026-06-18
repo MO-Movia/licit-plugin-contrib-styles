@@ -115,6 +115,11 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
         );
       });
     });
+    const styleNamesClassName =
+      searchTerm && !children.length
+        ? 'molsp-stylenames molsp-stylenames-empty'
+        : 'molsp-stylenames';
+
     return (
       <div>
         <span data-cy="cyStyleDropdown">
@@ -125,15 +130,16 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
                 className="molsp-search-input"
                 onChange={this._onSearchChange}
                 onClick={this._onSearchClick}
+                onContextMenu={this._onSearchContextMenu}
                 onKeyDown={this._onSearchKeyDown}
                 placeholder="Search styles"
                 type="search"
                 value={this.state.searchTerm}
               />
             </div>
-            <div className="molsp-stylenames">{children}</div>
+            <div className={styleNamesClassName}>{children}</div>
 
-            <hr></hr>
+            <hr className="molsp-menu-separator"></hr>
             {children1}
           </div>
         </span>
@@ -161,6 +167,10 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   };
 
   _onSearchClick = (event: SyntheticEvent<HTMLInputElement>): void => {
+    event.stopPropagation();
+  };
+
+  _onSearchContextMenu = (event: SyntheticEvent<HTMLInputElement>): void => {
     event.stopPropagation();
   };
 

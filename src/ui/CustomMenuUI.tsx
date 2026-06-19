@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from 'react';
+import React, { ChangeEvent, SyntheticEvent } from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Schema, Node } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
@@ -38,6 +38,7 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
   state = {
     expanded: false,
+    searchTerm: '',
     style: {
       display: 'none',
       top: '',
@@ -58,9 +59,13 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     const children1 = [];
     let counter = 0;
     let selecteClassName = '';
+    const searchTerm = this.state.searchTerm.toLowerCase();
     const selectedName = this.getTheSelectedCustomStyle(this.props.editorState);
     commandGroups.forEach((group) => {
       Object.keys(group).forEach((label) => {
+        if (!this.isStyleMatch(label, searchTerm)) {
+          return;
+        }
         const command = group[label];
         counter++;
         if (label === selectedName && '' === selecteClassName) {
@@ -110,13 +115,31 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
         );
       });
     });
+    const styleNamesClassName =
+      searchTerm && !children.length
+        ? 'molsp-stylenames molsp-stylenames-empty'
+        : 'molsp-stylenames';
+
     return (
       <div>
         <span data-cy="cyStyleDropdown">
           <div className="molsp-dropbtn" id={this._id}>
-            <div className="molsp-stylenames">{children}</div>
+            <div className="molsp-search-wrapper">
+              <input
+                aria-label="Search custom styles"
+                className="molsp-search-input"
+                onChange={this._onSearchChange}
+                onClick={this._onSearchClick}
+                onContextMenu={this._onSearchContextMenu}
+                onKeyDown={this._onSearchKeyDown}
+                placeholder="Search styles"
+                type="search"
+                value={this.state.searchTerm}
+              />
+            </div>
+            <div className={styleNamesClassName}>{children}</div>
 
-            <hr></hr>
+            <hr className="molsp-menu-separator"></hr>
             {children1}
           </div>
         </span>
@@ -126,9 +149,34 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
 
   componentDidMount() {
     const styleDiv = document.getElementsByClassName('molsp-stylenames')[0];
-    styleDiv.scrollTop =
-      this._menuItemHeight * this._selectedIndex - this._menuItemHeight * 2 - 5;
+    if (styleDiv) {
+      styleDiv.scrollTop =
+        this._menuItemHeight * this._selectedIndex -
+        this._menuItemHeight * 2 -
+        5;
+    }
   }
+
+  isStyleMatch(label: string, searchTerm: string): boolean {
+    return !searchTerm || label.toLowerCase().includes(searchTerm);
+  }
+
+  _onSearchChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    this._selectedIndex = 0;
+    this.setState({ searchTerm: event.target.value });
+  };
+
+  _onSearchClick = (event: SyntheticEvent<HTMLInputElement>): void => {
+    event.stopPropagation();
+  };
+
+  _onSearchContextMenu = (event: SyntheticEvent<HTMLInputElement>): void => {
+    event.stopPropagation();
+  };
+
+  _onSearchKeyDown = (event: SyntheticEvent<HTMLInputElement>): void => {
+    event.stopPropagation();
+  };
 
   isAllowedNode(node: Node) {
     return node.type.name === 'paragraph' || node.type.name === 'ordered_list' || node.type.name === 'enhanced_table_figure_notes';

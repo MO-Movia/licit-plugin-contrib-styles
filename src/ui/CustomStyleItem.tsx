@@ -164,13 +164,43 @@ export class CustomStyleItem extends React.PureComponent<
       styles &&
       (styles.hasNumbering || styles.isList)
     ) {
-      for (let i = 0; i < styles.styleLevel; i++) {
-        if (i === 0 && styles.prefixValue) {
-          level = level + styles.prefixValue + '1.';
-        } else {
-          level = level + '1.';
-        }
+      const levelCount = Number(styles.styleLevel);
+      if (!Number.isFinite(levelCount) || levelCount <= 0) {
+        return '';
       }
+      const buildLevel = (value: string, trailingDot = false) => {
+        const levelStyle = Array(levelCount).fill(value).join('.');
+        return `${styles.prefixValue || ''}${levelStyle}${trailingDot && levelCount === 1 ? '.' : ''}`;
+      };
+      switch (styles.numberingStyle) {
+        case 'decimal':
+        case 'decimal-period':
+          return buildLevel('1', true);
+        case 'decimal-parenthesis':
+          return buildLevel('1)');
+        case 'decimal-bracket':
+          return buildLevel('(1)');
+        case 'upper-alpha-period':
+          return buildLevel('A', true);
+        case 'upper-alpha-parenthesis':
+          return buildLevel('A)');
+        case 'upper-alpha-bracket':
+          return buildLevel('(A)');
+        case 'lower-alpha-parenthesis':
+          return buildLevel('a)');
+        case 'lower-alpha-bracket':
+          return buildLevel('(a)');
+        default:
+          break;
+      }
+      const sampleCounter =
+        styles.numberingStyle === 'lower-alpha'
+          ? 'a'
+          : styles.numberingStyle === 'lower-roman'
+            ? 'i'
+            : '1';
+      level = Array(levelCount).fill(sampleCounter).join('.');
+      level = `${styles.prefixValue || ''}${level}${levelCount === 1 ? '.' : ''}`;
     }
 
     if (this.props.hasText && styles?.hasBullet) {

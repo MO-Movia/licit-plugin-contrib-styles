@@ -10,6 +10,7 @@ import { CustomStyleCommand } from '../CustomStyleCommand';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import type * as React from 'react';
 import { SyntheticEvent } from 'react';
+import { ChangeEvent, SyntheticEvent } from 'react';
 import { Transform } from 'prosemirror-transform';
 import { Node } from 'prosemirror-model';
 
@@ -885,6 +886,54 @@ describe('Custom Menu UI   ', () => {
     } as unknown as React.KeyboardEvent);
     expect(executeSpy).toHaveBeenCalledWith(cmdGrp2, expect.anything());
     executeSpy.mockRestore();
+  });
+
+  it('should match styles by search term', () => {
+    expect(custommenuui.isStyleMatch('Heading One', 'heading')).toBe(true);
+    expect(custommenuui.isStyleMatch('Heading One', 'body')).toBe(false);
+    expect(custommenuui.isStyleMatch('Heading One', '')).toBe(true);
+  });
+
+  it('should compact the style list when search has no matches', () => {
+    const ui = new CustomMenuUI({
+      ...CustomMenuTestProps,
+      commandGroups: [{ Heading: cmdGrp1 }],
+    });
+    ui.state = { ...ui.state, searchTerm: 'missing' };
+
+    const rendered = ui.render();
+    const span = rendered.props.children;
+    const dropDown = span.props.children;
+    const styleNames = dropDown.props.children[1];
+
+    expect(styleNames.props.className).toBe(
+      'molsp-stylenames molsp-stylenames-empty'
+    );
+  });
+
+  it('should update the style search term', () => {
+    const spy = jest
+      .spyOn(custommenuui, 'setState')
+      .mockImplementation((state) => {
+        custommenuui.state = { ...custommenuui.state, ...state };
+      });
+    custommenuui._selectedIndex = 4;
+    custommenuui._onSearchChange({
+      target: { value: 'head' },
+    } as unknown as ChangeEvent<HTMLInputElement>);
+    expect(custommenuui._selectedIndex).toBe(0);
+    expect(spy).toHaveBeenCalledWith({ searchTerm: 'head' });
+    spy.mockRestore();
+  });
+
+  it('should keep the style menu open when the search context menu is opened', () => {
+    const stopPropagation = jest.fn();
+
+    custommenuui._onSearchContextMenu({
+      stopPropagation,
+    } as unknown as SyntheticEvent<HTMLInputElement>);
+
+    expect(stopPropagation).toHaveBeenCalled();
   });
 
   it('should handle isAllowedNode', () => {

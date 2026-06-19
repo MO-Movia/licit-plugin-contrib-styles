@@ -503,6 +503,601 @@ html {
   font-size: var(--czi-content-font-size);
 }
 
+.ProseMirror p[data-style-level='1'][hide-style-level='false'][numbering-style='lower-alpha']::before {
+  content: attr(prefix) counter(C1, lower-alpha) '. ';
+}
+
+.ProseMirror p[data-style-level='2'][hide-style-level='false'][numbering-style='lower-alpha']::before {
+  content: attr(prefix) counter(C1, lower-alpha) '.' counter(C2, lower-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='3'][hide-style-level='false'][numbering-style='lower-alpha']::before {
+  content: attr(prefix) counter(C1, lower-alpha) '.' counter(C2, lower-alpha) '.'
+    counter(C3, lower-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='4'][hide-style-level='false'][numbering-style='lower-alpha']::before {
+  content: attr(prefix) counter(C1, lower-alpha) '.' counter(C2, lower-alpha) '.'
+    counter(C3, lower-alpha) '.' counter(C4, lower-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='5'][hide-style-level='false'][numbering-style='lower-alpha']::before {
+  content: attr(prefix) counter(C1, lower-alpha) '.' counter(C2, lower-alpha) '.'
+    counter(C3, lower-alpha) '.' counter(C4, lower-alpha) '.'
+    counter(C5, lower-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='6'][hide-style-level='false'][numbering-style='lower-alpha']::before {
+  content: attr(prefix) counter(C1, lower-alpha) '.' counter(C2, lower-alpha) '.'
+    counter(C3, lower-alpha) '.' counter(C4, lower-alpha) '.'
+    counter(C5, lower-alpha) '.' counter(C6, lower-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='7'][hide-style-level='false'][numbering-style='lower-alpha']::before {
+  content: attr(prefix) counter(C1, lower-alpha) '.' counter(C2, lower-alpha) '.'
+    counter(C3, lower-alpha) '.' counter(C4, lower-alpha) '.'
+    counter(C5, lower-alpha) '.' counter(C6, lower-alpha) '.'
+    counter(C7, lower-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='8'][hide-style-level='false'][numbering-style='lower-alpha']::before {
+  content: attr(prefix) counter(C1, lower-alpha) '.' counter(C2, lower-alpha) '.'
+    counter(C3, lower-alpha) '.' counter(C4, lower-alpha) '.'
+    counter(C5, lower-alpha) '.' counter(C6, lower-alpha) '.'
+    counter(C7, lower-alpha) '.' counter(C8, lower-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='9'][hide-style-level='false'][numbering-style='lower-alpha']::before {
+  content: attr(prefix) counter(C1, lower-alpha) '.' counter(C2, lower-alpha) '.'
+    counter(C3, lower-alpha) '.' counter(C4, lower-alpha) '.'
+    counter(C5, lower-alpha) '.' counter(C6, lower-alpha) '.'
+    counter(C7, lower-alpha) '.' counter(C8, lower-alpha) '.'
+    counter(C9, lower-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='10'][hide-style-level='false'][numbering-style='lower-alpha']::before {
+  content: attr(prefix) counter(C1, lower-alpha) '.' counter(C2, lower-alpha) '.'
+    counter(C3, lower-alpha) '.' counter(C4, lower-alpha) '.'
+    counter(C5, lower-alpha) '.' counter(C6, lower-alpha) '.'
+    counter(C7, lower-alpha) '.' counter(C8, lower-alpha) '.'
+    counter(C9, lower-alpha) '.' counter(C10, lower-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='1'][hide-style-level='false'][numbering-style='lower-roman']::before {
+  content: attr(prefix) counter(C1, lower-roman) '. ';
+}
+
+.ProseMirror p[data-style-level='2'][hide-style-level='false'][numbering-style='lower-roman']::before {
+  content: attr(prefix) counter(C1, lower-roman) '.' counter(C2, lower-roman) ' ';
+}
+
+.ProseMirror p[data-style-level='3'][hide-style-level='false'][numbering-style='lower-roman']::before {
+  content: attr(prefix) counter(C1, lower-roman) '.' counter(C2, lower-roman) '.'
+    counter(C3, lower-roman) ' ';
+}
+
+.ProseMirror p[data-style-level='4'][hide-style-level='false'][numbering-style='lower-roman']::before {
+  content: attr(prefix) counter(C1, lower-roman) '.' counter(C2, lower-roman) '.'
+    counter(C3, lower-roman) '.' counter(C4, lower-roman) ' ';
+}
+
+.ProseMirror p[data-style-level='5'][hide-style-level='false'][numbering-style='lower-roman']::before {
+  content: attr(prefix) counter(C1, lower-roman) '.' counter(C2, lower-roman) '.'
+    counter(C3, lower-roman) '.' counter(C4, lower-roman) '.'
+    counter(C5, lower-roman) ' ';
+}
+
+.ProseMirror p[data-style-level='6'][hide-style-level='false'][numbering-style='lower-roman']::before {
+  content: attr(prefix) counter(C1, lower-roman) '.' counter(C2, lower-roman) '.'
+    counter(C3, lower-roman) '.' counter(C4, lower-roman) '.'
+    counter(C5, lower-roman) '.' counter(C6, lower-roman) ' ';
+}
+
+.ProseMirror p[data-style-level='7'][hide-style-level='false'][numbering-style='lower-roman']::before {
+  content: attr(prefix) counter(C1, lower-roman) '.' counter(C2, lower-roman) '.'
+    counter(C3, lower-roman) '.' counter(C4, lower-roman) '.'
+    counter(C5, lower-roman) '.' counter(C6, lower-roman) '.'
+    counter(C7, lower-roman) ' ';
+}
+
+.ProseMirror p[data-style-level='8'][hide-style-level='false'][numbering-style='lower-roman']::before {
+  content: attr(prefix) counter(C1, lower-roman) '.' counter(C2, lower-roman) '.'
+    counter(C3, lower-roman) '.' counter(C4, lower-roman) '.'
+    counter(C5, lower-roman) '.' counter(C6, lower-roman) '.'
+    counter(C7, lower-roman) '.' counter(C8, lower-roman) ' ';
+}
+
+.ProseMirror p[data-style-level='9'][hide-style-level='false'][numbering-style='lower-roman']::before {
+  content: attr(prefix) counter(C1, lower-roman) '.' counter(C2, lower-roman) '.'
+    counter(C3, lower-roman) '.' counter(C4, lower-roman) '.'
+    counter(C5, lower-roman) '.' counter(C6, lower-roman) '.'
+    counter(C7, lower-roman) '.' counter(C8, lower-roman) '.'
+    counter(C9, lower-roman) ' ';
+}
+
+.ProseMirror p[data-style-level='10'][hide-style-level='false'][numbering-style='lower-roman']::before {
+  content: attr(prefix) counter(C1, lower-roman) '.' counter(C2, lower-roman) '.'
+    counter(C3, lower-roman) '.' counter(C4, lower-roman) '.'
+    counter(C5, lower-roman) '.' counter(C6, lower-roman) '.'
+    counter(C7, lower-roman) '.' counter(C8, lower-roman) '.'
+    counter(C9, lower-roman) '.' counter(C10, lower-roman) ' ';
+}
+
+.ProseMirror p[data-style-level='1'][hide-style-level='false'][numbering-style='decimal-period']::before,
+.ProseMirror p[data-style-level='1'][hide-style-level='false'][numbering-style='decimal']::before {
+  content: attr(prefix) counter(C1, decimal) '. ';
+}
+
+.ProseMirror p[data-style-level='2'][hide-style-level='false'][numbering-style='decimal-period']::before,
+.ProseMirror p[data-style-level='2'][hide-style-level='false'][numbering-style='decimal']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) ' ';
+}
+
+.ProseMirror p[data-style-level='3'][hide-style-level='false'][numbering-style='decimal-period']::before,
+.ProseMirror p[data-style-level='3'][hide-style-level='false'][numbering-style='decimal']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) ' ';
+}
+
+.ProseMirror p[data-style-level='4'][hide-style-level='false'][numbering-style='decimal-period']::before,
+.ProseMirror p[data-style-level='4'][hide-style-level='false'][numbering-style='decimal']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) ' ';
+}
+
+.ProseMirror p[data-style-level='5'][hide-style-level='false'][numbering-style='decimal-period']::before,
+.ProseMirror p[data-style-level='5'][hide-style-level='false'][numbering-style='decimal']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) ' ';
+}
+
+.ProseMirror p[data-style-level='6'][hide-style-level='false'][numbering-style='decimal-period']::before,
+.ProseMirror p[data-style-level='6'][hide-style-level='false'][numbering-style='decimal']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
+    counter(C6, decimal) ' ';
+}
+
+.ProseMirror p[data-style-level='7'][hide-style-level='false'][numbering-style='decimal-period']::before,
+.ProseMirror p[data-style-level='7'][hide-style-level='false'][numbering-style='decimal']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
+    counter(C6, decimal) '.' counter(C7, decimal) ' ';
+}
+
+.ProseMirror p[data-style-level='8'][hide-style-level='false'][numbering-style='decimal-period']::before,
+.ProseMirror p[data-style-level='8'][hide-style-level='false'][numbering-style='decimal']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
+    counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) ' ';
+}
+
+.ProseMirror p[data-style-level='9'][hide-style-level='false'][numbering-style='decimal-period']::before,
+.ProseMirror p[data-style-level='9'][hide-style-level='false'][numbering-style='decimal']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
+    counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) '.'
+    counter(C9, decimal) ' ';
+}
+
+.ProseMirror p[data-style-level='10'][hide-style-level='false'][numbering-style='decimal-period']::before,
+.ProseMirror p[data-style-level='10'][hide-style-level='false'][numbering-style='decimal']::before {
+  content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
+    counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
+    counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) '.'
+    counter(C9, decimal) '.' counter(C10, decimal) ' ';
+}
+
+.ProseMirror p[data-style-level='1'][hide-style-level='false'][numbering-style='decimal-parenthesis']::before {
+  content: attr(prefix) counter(C1, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='2'][hide-style-level='false'][numbering-style='decimal-parenthesis']::before {
+  content: attr(prefix) counter(C1, decimal) ').' counter(C2, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='3'][hide-style-level='false'][numbering-style='decimal-parenthesis']::before {
+  content: attr(prefix) counter(C1, decimal) ').' counter(C2, decimal) ').'
+    counter(C3, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='4'][hide-style-level='false'][numbering-style='decimal-parenthesis']::before {
+  content: attr(prefix) counter(C1, decimal) ').' counter(C2, decimal) ').'
+    counter(C3, decimal) ').' counter(C4, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='5'][hide-style-level='false'][numbering-style='decimal-parenthesis']::before {
+  content: attr(prefix) counter(C1, decimal) ').' counter(C2, decimal) ').'
+    counter(C3, decimal) ').' counter(C4, decimal) ').' counter(C5, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='6'][hide-style-level='false'][numbering-style='decimal-parenthesis']::before {
+  content: attr(prefix) counter(C1, decimal) ').' counter(C2, decimal) ').'
+    counter(C3, decimal) ').' counter(C4, decimal) ').' counter(C5, decimal) ').'
+    counter(C6, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='7'][hide-style-level='false'][numbering-style='decimal-parenthesis']::before {
+  content: attr(prefix) counter(C1, decimal) ').' counter(C2, decimal) ').'
+    counter(C3, decimal) ').' counter(C4, decimal) ').' counter(C5, decimal) ').'
+    counter(C6, decimal) ').' counter(C7, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='8'][hide-style-level='false'][numbering-style='decimal-parenthesis']::before {
+  content: attr(prefix) counter(C1, decimal) ').' counter(C2, decimal) ').'
+    counter(C3, decimal) ').' counter(C4, decimal) ').' counter(C5, decimal) ').'
+    counter(C6, decimal) ').' counter(C7, decimal) ').' counter(C8, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='9'][hide-style-level='false'][numbering-style='decimal-parenthesis']::before {
+  content: attr(prefix) counter(C1, decimal) ').' counter(C2, decimal) ').'
+    counter(C3, decimal) ').' counter(C4, decimal) ').' counter(C5, decimal) ').'
+    counter(C6, decimal) ').' counter(C7, decimal) ').' counter(C8, decimal) ').'
+    counter(C9, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='10'][hide-style-level='false'][numbering-style='decimal-parenthesis']::before {
+  content: attr(prefix) counter(C1, decimal) ').' counter(C2, decimal) ').'
+    counter(C3, decimal) ').' counter(C4, decimal) ').' counter(C5, decimal) ').'
+    counter(C6, decimal) ').' counter(C7, decimal) ').' counter(C8, decimal) ').'
+    counter(C9, decimal) ').' counter(C10, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='1'][hide-style-level='false'][numbering-style='decimal-bracket']::before {
+  content: attr(prefix) '(' counter(C1, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='2'][hide-style-level='false'][numbering-style='decimal-bracket']::before {
+  content: attr(prefix) '(' counter(C1, decimal) ').(' counter(C2, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='3'][hide-style-level='false'][numbering-style='decimal-bracket']::before {
+  content: attr(prefix) '(' counter(C1, decimal) ').(' counter(C2, decimal) ').('
+    counter(C3, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='4'][hide-style-level='false'][numbering-style='decimal-bracket']::before {
+  content: attr(prefix) '(' counter(C1, decimal) ').(' counter(C2, decimal) ').('
+    counter(C3, decimal) ').(' counter(C4, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='5'][hide-style-level='false'][numbering-style='decimal-bracket']::before {
+  content: attr(prefix) '(' counter(C1, decimal) ').(' counter(C2, decimal) ').('
+    counter(C3, decimal) ').(' counter(C4, decimal) ').(' counter(C5, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='6'][hide-style-level='false'][numbering-style='decimal-bracket']::before {
+  content: attr(prefix) '(' counter(C1, decimal) ').(' counter(C2, decimal) ').('
+    counter(C3, decimal) ').(' counter(C4, decimal) ').(' counter(C5, decimal) ').('
+    counter(C6, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='7'][hide-style-level='false'][numbering-style='decimal-bracket']::before {
+  content: attr(prefix) '(' counter(C1, decimal) ').(' counter(C2, decimal) ').('
+    counter(C3, decimal) ').(' counter(C4, decimal) ').(' counter(C5, decimal) ').('
+    counter(C6, decimal) ').(' counter(C7, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='8'][hide-style-level='false'][numbering-style='decimal-bracket']::before {
+  content: attr(prefix) '(' counter(C1, decimal) ').(' counter(C2, decimal) ').('
+    counter(C3, decimal) ').(' counter(C4, decimal) ').(' counter(C5, decimal) ').('
+    counter(C6, decimal) ').(' counter(C7, decimal) ').(' counter(C8, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='9'][hide-style-level='false'][numbering-style='decimal-bracket']::before {
+  content: attr(prefix) '(' counter(C1, decimal) ').(' counter(C2, decimal) ').('
+    counter(C3, decimal) ').(' counter(C4, decimal) ').(' counter(C5, decimal) ').('
+    counter(C6, decimal) ').(' counter(C7, decimal) ').(' counter(C8, decimal) ').('
+    counter(C9, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='10'][hide-style-level='false'][numbering-style='decimal-bracket']::before {
+  content: attr(prefix) '(' counter(C1, decimal) ').(' counter(C2, decimal) ').('
+    counter(C3, decimal) ').(' counter(C4, decimal) ').(' counter(C5, decimal) ').('
+    counter(C6, decimal) ').(' counter(C7, decimal) ').(' counter(C8, decimal) ').('
+    counter(C9, decimal) ').(' counter(C10, decimal) ') ';
+}
+
+.ProseMirror p[data-style-level='1'][hide-style-level='false'][numbering-style='upper-alpha-period']::before {
+  content: attr(prefix) counter(C1, upper-alpha) '. ';
+}
+
+.ProseMirror p[data-style-level='2'][hide-style-level='false'][numbering-style='upper-alpha-period']::before {
+  content: attr(prefix) counter(C1, upper-alpha) '.' counter(C2, upper-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='3'][hide-style-level='false'][numbering-style='upper-alpha-period']::before {
+  content: attr(prefix) counter(C1, upper-alpha) '.' counter(C2, upper-alpha) '.'
+    counter(C3, upper-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='4'][hide-style-level='false'][numbering-style='upper-alpha-period']::before {
+  content: attr(prefix) counter(C1, upper-alpha) '.' counter(C2, upper-alpha) '.'
+    counter(C3, upper-alpha) '.' counter(C4, upper-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='5'][hide-style-level='false'][numbering-style='upper-alpha-period']::before {
+  content: attr(prefix) counter(C1, upper-alpha) '.' counter(C2, upper-alpha) '.'
+    counter(C3, upper-alpha) '.' counter(C4, upper-alpha) '.'
+    counter(C5, upper-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='6'][hide-style-level='false'][numbering-style='upper-alpha-period']::before {
+  content: attr(prefix) counter(C1, upper-alpha) '.' counter(C2, upper-alpha) '.'
+    counter(C3, upper-alpha) '.' counter(C4, upper-alpha) '.'
+    counter(C5, upper-alpha) '.' counter(C6, upper-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='7'][hide-style-level='false'][numbering-style='upper-alpha-period']::before {
+  content: attr(prefix) counter(C1, upper-alpha) '.' counter(C2, upper-alpha) '.'
+    counter(C3, upper-alpha) '.' counter(C4, upper-alpha) '.'
+    counter(C5, upper-alpha) '.' counter(C6, upper-alpha) '.'
+    counter(C7, upper-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='8'][hide-style-level='false'][numbering-style='upper-alpha-period']::before {
+  content: attr(prefix) counter(C1, upper-alpha) '.' counter(C2, upper-alpha) '.'
+    counter(C3, upper-alpha) '.' counter(C4, upper-alpha) '.'
+    counter(C5, upper-alpha) '.' counter(C6, upper-alpha) '.'
+    counter(C7, upper-alpha) '.' counter(C8, upper-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='9'][hide-style-level='false'][numbering-style='upper-alpha-period']::before {
+  content: attr(prefix) counter(C1, upper-alpha) '.' counter(C2, upper-alpha) '.'
+    counter(C3, upper-alpha) '.' counter(C4, upper-alpha) '.'
+    counter(C5, upper-alpha) '.' counter(C6, upper-alpha) '.'
+    counter(C7, upper-alpha) '.' counter(C8, upper-alpha) '.'
+    counter(C9, upper-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='10'][hide-style-level='false'][numbering-style='upper-alpha-period']::before {
+  content: attr(prefix) counter(C1, upper-alpha) '.' counter(C2, upper-alpha) '.'
+    counter(C3, upper-alpha) '.' counter(C4, upper-alpha) '.'
+    counter(C5, upper-alpha) '.' counter(C6, upper-alpha) '.'
+    counter(C7, upper-alpha) '.' counter(C8, upper-alpha) '.'
+    counter(C9, upper-alpha) '.' counter(C10, upper-alpha) ' ';
+}
+
+.ProseMirror p[data-style-level='1'][hide-style-level='false'][numbering-style='upper-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='2'][hide-style-level='false'][numbering-style='upper-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, upper-alpha) ').' counter(C2, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='3'][hide-style-level='false'][numbering-style='upper-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, upper-alpha) ').' counter(C2, upper-alpha) ').'
+    counter(C3, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='4'][hide-style-level='false'][numbering-style='upper-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, upper-alpha) ').' counter(C2, upper-alpha) ').'
+    counter(C3, upper-alpha) ').' counter(C4, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='5'][hide-style-level='false'][numbering-style='upper-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, upper-alpha) ').' counter(C2, upper-alpha) ').'
+    counter(C3, upper-alpha) ').' counter(C4, upper-alpha) ').'
+    counter(C5, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='6'][hide-style-level='false'][numbering-style='upper-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, upper-alpha) ').' counter(C2, upper-alpha) ').'
+    counter(C3, upper-alpha) ').' counter(C4, upper-alpha) ').'
+    counter(C5, upper-alpha) ').' counter(C6, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='7'][hide-style-level='false'][numbering-style='upper-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, upper-alpha) ').' counter(C2, upper-alpha) ').'
+    counter(C3, upper-alpha) ').' counter(C4, upper-alpha) ').'
+    counter(C5, upper-alpha) ').' counter(C6, upper-alpha) ').'
+    counter(C7, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='8'][hide-style-level='false'][numbering-style='upper-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, upper-alpha) ').' counter(C2, upper-alpha) ').'
+    counter(C3, upper-alpha) ').' counter(C4, upper-alpha) ').'
+    counter(C5, upper-alpha) ').' counter(C6, upper-alpha) ').'
+    counter(C7, upper-alpha) ').' counter(C8, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='9'][hide-style-level='false'][numbering-style='upper-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, upper-alpha) ').' counter(C2, upper-alpha) ').'
+    counter(C3, upper-alpha) ').' counter(C4, upper-alpha) ').'
+    counter(C5, upper-alpha) ').' counter(C6, upper-alpha) ').'
+    counter(C7, upper-alpha) ').' counter(C8, upper-alpha) ').'
+    counter(C9, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='10'][hide-style-level='false'][numbering-style='upper-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, upper-alpha) ').' counter(C2, upper-alpha) ').'
+    counter(C3, upper-alpha) ').' counter(C4, upper-alpha) ').'
+    counter(C5, upper-alpha) ').' counter(C6, upper-alpha) ').'
+    counter(C7, upper-alpha) ').' counter(C8, upper-alpha) ').'
+    counter(C9, upper-alpha) ').' counter(C10, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='1'][hide-style-level='false'][numbering-style='upper-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='2'][hide-style-level='false'][numbering-style='upper-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, upper-alpha) ').(' counter(C2, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='3'][hide-style-level='false'][numbering-style='upper-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, upper-alpha) ').(' counter(C2, upper-alpha) ').('
+    counter(C3, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='4'][hide-style-level='false'][numbering-style='upper-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, upper-alpha) ').(' counter(C2, upper-alpha) ').('
+    counter(C3, upper-alpha) ').(' counter(C4, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='5'][hide-style-level='false'][numbering-style='upper-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, upper-alpha) ').(' counter(C2, upper-alpha) ').('
+    counter(C3, upper-alpha) ').(' counter(C4, upper-alpha) ').('
+    counter(C5, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='6'][hide-style-level='false'][numbering-style='upper-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, upper-alpha) ').(' counter(C2, upper-alpha) ').('
+    counter(C3, upper-alpha) ').(' counter(C4, upper-alpha) ').('
+    counter(C5, upper-alpha) ').(' counter(C6, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='7'][hide-style-level='false'][numbering-style='upper-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, upper-alpha) ').(' counter(C2, upper-alpha) ').('
+    counter(C3, upper-alpha) ').(' counter(C4, upper-alpha) ').('
+    counter(C5, upper-alpha) ').(' counter(C6, upper-alpha) ').('
+    counter(C7, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='8'][hide-style-level='false'][numbering-style='upper-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, upper-alpha) ').(' counter(C2, upper-alpha) ').('
+    counter(C3, upper-alpha) ').(' counter(C4, upper-alpha) ').('
+    counter(C5, upper-alpha) ').(' counter(C6, upper-alpha) ').('
+    counter(C7, upper-alpha) ').(' counter(C8, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='9'][hide-style-level='false'][numbering-style='upper-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, upper-alpha) ').(' counter(C2, upper-alpha) ').('
+    counter(C3, upper-alpha) ').(' counter(C4, upper-alpha) ').('
+    counter(C5, upper-alpha) ').(' counter(C6, upper-alpha) ').('
+    counter(C7, upper-alpha) ').(' counter(C8, upper-alpha) ').('
+    counter(C9, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='10'][hide-style-level='false'][numbering-style='upper-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, upper-alpha) ').(' counter(C2, upper-alpha) ').('
+    counter(C3, upper-alpha) ').(' counter(C4, upper-alpha) ').('
+    counter(C5, upper-alpha) ').(' counter(C6, upper-alpha) ').('
+    counter(C7, upper-alpha) ').(' counter(C8, upper-alpha) ').('
+    counter(C9, upper-alpha) ').(' counter(C10, upper-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='1'][hide-style-level='false'][numbering-style='lower-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='2'][hide-style-level='false'][numbering-style='lower-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, lower-alpha) ').' counter(C2, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='3'][hide-style-level='false'][numbering-style='lower-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, lower-alpha) ').' counter(C2, lower-alpha) ').'
+    counter(C3, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='4'][hide-style-level='false'][numbering-style='lower-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, lower-alpha) ').' counter(C2, lower-alpha) ').'
+    counter(C3, lower-alpha) ').' counter(C4, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='5'][hide-style-level='false'][numbering-style='lower-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, lower-alpha) ').' counter(C2, lower-alpha) ').'
+    counter(C3, lower-alpha) ').' counter(C4, lower-alpha) ').'
+    counter(C5, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='6'][hide-style-level='false'][numbering-style='lower-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, lower-alpha) ').' counter(C2, lower-alpha) ').'
+    counter(C3, lower-alpha) ').' counter(C4, lower-alpha) ').'
+    counter(C5, lower-alpha) ').' counter(C6, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='7'][hide-style-level='false'][numbering-style='lower-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, lower-alpha) ').' counter(C2, lower-alpha) ').'
+    counter(C3, lower-alpha) ').' counter(C4, lower-alpha) ').'
+    counter(C5, lower-alpha) ').' counter(C6, lower-alpha) ').'
+    counter(C7, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='8'][hide-style-level='false'][numbering-style='lower-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, lower-alpha) ').' counter(C2, lower-alpha) ').'
+    counter(C3, lower-alpha) ').' counter(C4, lower-alpha) ').'
+    counter(C5, lower-alpha) ').' counter(C6, lower-alpha) ').'
+    counter(C7, lower-alpha) ').' counter(C8, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='9'][hide-style-level='false'][numbering-style='lower-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, lower-alpha) ').' counter(C2, lower-alpha) ').'
+    counter(C3, lower-alpha) ').' counter(C4, lower-alpha) ').'
+    counter(C5, lower-alpha) ').' counter(C6, lower-alpha) ').'
+    counter(C7, lower-alpha) ').' counter(C8, lower-alpha) ').'
+    counter(C9, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='10'][hide-style-level='false'][numbering-style='lower-alpha-parenthesis']::before {
+  content: attr(prefix) counter(C1, lower-alpha) ').' counter(C2, lower-alpha) ').'
+    counter(C3, lower-alpha) ').' counter(C4, lower-alpha) ').'
+    counter(C5, lower-alpha) ').' counter(C6, lower-alpha) ').'
+    counter(C7, lower-alpha) ').' counter(C8, lower-alpha) ').'
+    counter(C9, lower-alpha) ').' counter(C10, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='1'][hide-style-level='false'][numbering-style='lower-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='2'][hide-style-level='false'][numbering-style='lower-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, lower-alpha) ').(' counter(C2, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='3'][hide-style-level='false'][numbering-style='lower-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, lower-alpha) ').(' counter(C2, lower-alpha) ').('
+    counter(C3, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='4'][hide-style-level='false'][numbering-style='lower-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, lower-alpha) ').(' counter(C2, lower-alpha) ').('
+    counter(C3, lower-alpha) ').(' counter(C4, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='5'][hide-style-level='false'][numbering-style='lower-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, lower-alpha) ').(' counter(C2, lower-alpha) ').('
+    counter(C3, lower-alpha) ').(' counter(C4, lower-alpha) ').('
+    counter(C5, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='6'][hide-style-level='false'][numbering-style='lower-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, lower-alpha) ').(' counter(C2, lower-alpha) ').('
+    counter(C3, lower-alpha) ').(' counter(C4, lower-alpha) ').('
+    counter(C5, lower-alpha) ').(' counter(C6, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='7'][hide-style-level='false'][numbering-style='lower-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, lower-alpha) ').(' counter(C2, lower-alpha) ').('
+    counter(C3, lower-alpha) ').(' counter(C4, lower-alpha) ').('
+    counter(C5, lower-alpha) ').(' counter(C6, lower-alpha) ').('
+    counter(C7, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='8'][hide-style-level='false'][numbering-style='lower-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, lower-alpha) ').(' counter(C2, lower-alpha) ').('
+    counter(C3, lower-alpha) ').(' counter(C4, lower-alpha) ').('
+    counter(C5, lower-alpha) ').(' counter(C6, lower-alpha) ').('
+    counter(C7, lower-alpha) ').(' counter(C8, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='9'][hide-style-level='false'][numbering-style='lower-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, lower-alpha) ').(' counter(C2, lower-alpha) ').('
+    counter(C3, lower-alpha) ').(' counter(C4, lower-alpha) ').('
+    counter(C5, lower-alpha) ').(' counter(C6, lower-alpha) ').('
+    counter(C7, lower-alpha) ').(' counter(C8, lower-alpha) ').('
+    counter(C9, lower-alpha) ') ';
+}
+
+.ProseMirror p[data-style-level='10'][hide-style-level='false'][numbering-style='lower-alpha-bracket']::before {
+  content: attr(prefix) '(' counter(C1, lower-alpha) ').(' counter(C2, lower-alpha) ').('
+    counter(C3, lower-alpha) ').(' counter(C4, lower-alpha) ').('
+    counter(C5, lower-alpha) ').(' counter(C6, lower-alpha) ').('
+    counter(C7, lower-alpha) ').(' counter(C8, lower-alpha) ').('
+    counter(C9, lower-alpha) ').(' counter(C10, lower-alpha) ') ';
+}
+
 .ProseMirror p[hideNumbering='true'] {
   margin-left: 0 !important;
 }
@@ -521,7 +1116,11 @@ html {
   counter-reset: none;
 }
 
-.ProseMirror p[data-style-level='2'][tot='true'][stylename$='Cont'] {
+.ProseMirror p[data-style-level='2'][tot='true'][contNumber ='true'] {
+  counter-increment: none;
+}
+
+.ProseMirror p[data-style-level='2'][tof='true'][contNumber ='true'] {
   counter-increment: none;
 }
 
@@ -536,3 +1135,8 @@ html {
   font-weight: var(--czi-counter-bold); 
   font-size: var(--czi-content-font-size);
 }
+
+.ProseMirror[contenteditable="false"] [hidecapco="true"] .capco.ProseMirror-widget {
+  display: none !important;
+}
+

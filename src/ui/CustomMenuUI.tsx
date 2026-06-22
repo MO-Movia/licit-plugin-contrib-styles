@@ -66,8 +66,6 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     } = this.props;
     const children = [];
     const children1 = [];
-    let counter = 0;
-    let selecteClassName = '';
     const searchTerm = this.state.searchTerm.toLowerCase();
     const selectedName = this.getTheSelectedCustomStyle(this.props.editorState);
     // [Keyboard navigation] One highlight, driven by selectedIndex, is shared
@@ -304,20 +302,13 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
         this._execute(selected.command, e);
       }
     }
-    if (styleDiv) {
-      styleDiv.scrollTop =
-        this._menuItemHeight * this._selectedIndex -
-        this._menuItemHeight * 2 -
-        5;
-    }
-  }
+  };
 
   isStyleMatch(label: string, searchTerm: string): boolean {
     return !searchTerm || label.toLowerCase().includes(searchTerm);
   }
 
   _onSearchChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    this._selectedIndex = 0;
     this.setState({ searchTerm: event.target.value });
   };
 

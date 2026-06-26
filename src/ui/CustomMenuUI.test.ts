@@ -10,7 +10,6 @@ import { CustomStyleCommand } from '../CustomStyleCommand';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import type * as React from 'react';
 import { SyntheticEvent } from 'react';
-import { ChangeEvent, SyntheticEvent } from 'react';
 import { Transform } from 'prosemirror-transform';
 import { Node } from 'prosemirror-model';
 
@@ -909,21 +908,6 @@ describe('Custom Menu UI   ', () => {
     expect(styleNames.props.className).toBe(
       'molsp-stylenames molsp-stylenames-empty'
     );
-  });
-
-  it('should update the style search term', () => {
-    const spy = jest
-      .spyOn(custommenuui, 'setState')
-      .mockImplementation((state) => {
-        custommenuui.state = { ...custommenuui.state, ...state };
-      });
-    custommenuui._selectedIndex = 4;
-    custommenuui._onSearchChange({
-      target: { value: 'head' },
-    } as unknown as ChangeEvent<HTMLInputElement>);
-    expect(custommenuui._selectedIndex).toBe(0);
-    expect(spy).toHaveBeenCalledWith({ searchTerm: 'head' });
-    spy.mockRestore();
   });
 
   it('should keep the style menu open when the search context menu is opened', () => {

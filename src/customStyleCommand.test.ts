@@ -1729,7 +1729,7 @@ describe('getMarkByStyleName', () => {
             },
           ],
           toDOM() {
-            return ['span', 0];
+            return ['span', { 'background-color': '' }, 0];
           },
         },
         'mark-font-size': {
@@ -1926,7 +1926,7 @@ describe('getMarkByStyleName', () => {
             },
           ],
           toDOM() {
-            return ['span', 0];
+            return ['span', { 'background-color': '' }, 0];
           },
         },
         'mark-font-size': {

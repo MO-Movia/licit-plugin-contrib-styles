@@ -90,10 +90,10 @@
   height: 30px;
 }
 
-#container1:hover {
-  background-color: lightgrey;
-}
-
+/* [Keyboard navigation] Mouse hover drives the same selection as the arrow
+   keys (see CustomMenuUI._onItemMouseEnter), so a separate :hover highlight
+   would show two selected rows at once. The single highlight below is applied
+   to whichever row is selected, by mouse or keyboard. */
 .selectbackground {
   background-color: lightgrey;
 }

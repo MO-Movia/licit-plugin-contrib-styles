@@ -33,10 +33,13 @@ const ENTERKEYCODE = 13;
 const BACKSPACEKEYCODE = 8;
 const PARA_POSITION_DIFF = 4;
 const ATTR_STYLE_NAME = 'styleName';
-const STYLE_CHUNK_LIMIT = 5000;
+const STYLE_CHUNK_LIMIT = 20000;
 const STYLE_CHUNK_START_POS = 'styleChunkStartPos';
+const STYLE_CHUNK_IDLE_MS = 600;
+const ZERO_WIDTH_SPACE = '\u200B';
 let slice1;
-
+let styleChunkTimer = null;
+let styleChunkLastInteractionAt = 0;
 const isNodeHasAttribute = (node, attrName) => {
   return attrName in (node?.attrs || {});
 };
@@ -90,7 +93,18 @@ export class CustomstylePlugin extends Plugin {
         },
         handleDOMEvents: {
           keydown(view) {
+            styleChunkLastInteractionAt = Date.now();
             csview = view;
+          },
+          mousedown(view) {
+            styleChunkLastInteractionAt = Date.now();
+            csview = view;
+            return false;
+          },
+          focus(view) {
+            styleChunkLastInteractionAt = Date.now();
+            csview = view;
+            return false;
           },
         },
         nodeViews: {},
@@ -98,8 +112,10 @@ export class CustomstylePlugin extends Plugin {
       appendTransaction: (transactions, prevState, nextState) => {
         let tr = null;
         const ref = { firstTime, loaded };
-        if (!loaded) {
-          tr = onInitAppendTransaction(ref, tr, nextState);
+        const chunkStartPos = getChunkStartPos(transactions);
+        const isChunking = typeof chunkStartPos === 'number';
+        if (!loaded || isChunking) {
+          tr = onInitAppendTransaction(ref, tr, nextState, chunkStartPos ?? 0, csview);
           if (tr?.docChanged) {
             tr.setMeta('styleInitialLoad', true);
           }
@@ -151,27 +167,78 @@ function hasTransactionChanges(tr) {
   if (!tr) {
     return false;
   }
-  return !!tr.docChanged;
+  return (
+    !!tr.docChanged || typeof tr?.getMeta?.(STYLE_CHUNK_START_POS) === 'number'
+  );
 }
 
-export function onInitAppendTransaction(ref, tr, nextState) {
+function getChunkStartPos(transactions) {
+  for (let i = transactions.length - 1; i >= 0; i--) {
+    const chunkStartPos = transactions[i]?.getMeta?.(STYLE_CHUNK_START_POS);
+    if (typeof chunkStartPos === 'number') {
+      return chunkStartPos;
+    }
+  }
+  return null;
+}
+function scheduleNextStyleChunk(view, chunkStartPos) {
+  if (!view || typeof chunkStartPos !== 'number') {
+    return;
+  }
+  if (styleChunkTimer !== null) {
+    clearTimeout(styleChunkTimer);
+  }
+  const idleFor = Date.now() - styleChunkLastInteractionAt;
+  const waitMs = Math.max(0, STYLE_CHUNK_IDLE_MS - idleFor);
+  styleChunkTimer = setTimeout(() => {
+    styleChunkTimer = null;
+    if (!view?.dispatch || view.isDestroyed) {
+      return;
+    }
+    const updatedIdleFor = Date.now() - styleChunkLastInteractionAt;
+    if (updatedIdleFor < STYLE_CHUNK_IDLE_MS) {
+      scheduleNextStyleChunk(view, chunkStartPos);
+      return;
+    }
+    const hadFocus = typeof view.hasFocus === 'function' ? view.hasFocus() : false;
+    const continuationTr = view.state.tr
+      .setMeta(STYLE_CHUNK_START_POS, chunkStartPos)
+      .setMeta('addToHistory', false);
+    view.dispatch(continuationTr);
+    if (hadFocus && typeof view.hasFocus === 'function' && !view.hasFocus()) {
+      view.focus();
+    }
+  }, waitMs);
+}
+
+function preserveSelectionAfterChunk(tr, selection) {
+  if (!tr?.docChanged || !selection) {
+    return tr;
+  }
+  const anchor = tr.mapping.map(selection.anchor);
+  const head = tr.mapping.map(selection.head);
+  try {
+    return tr.setSelection(TextSelection.between(tr.doc.resolve(anchor), tr.doc.resolve(head)));
+  }
+  catch (_error) {
+    console.info(_error);
+    return tr;
+  }
+}
+
+export function onInitAppendTransaction(ref, tr, nextState, chunkStartPos = 0, csview = null) {
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
     tr ??= nextState.tr;
-    let chunkStartPos = tr.getMeta(STYLE_CHUNK_START_POS);
-    chunkStartPos = typeof chunkStartPos === 'number' ? chunkStartPos : 0;
     const result = applyStylesChunked(nextState, chunkStartPos);
+    const chunkTr = preserveSelectionAfterChunk(result.tr, nextState.selection);
+
     if (!result.done) {
-      // Schedule next chunk by appending another transaction with next start pos
-      // This returns immediately -- next chunk runs in the next PM cycle
-      const continuationTr = nextState.tr.setMeta(
-        STYLE_CHUNK_START_POS,
-        result.lastPos
-      );
-      result.tr.steps.forEach((step) => continuationTr.step(step)); // carry over changes
-      return continuationTr;
+      // Continue chunking asynchronously so host app focus/update work
+      // does not break the appendTransaction chain.
+      scheduleNextStyleChunk(csview, result.lastPos);
     }
-    return result.tr.docChanged ? result.tr : null;
+    return chunkTr.docChanged ? chunkTr : null;
   }
   return hasTransactionChanges(tr) ? tr : null;
 }
@@ -187,6 +254,7 @@ export function onUpdateAppendTransaction(
 ) {
   tr = applyStyleForEmptyParagraph(nextState, tr);
   ref.firstTime = false;
+  const isPaste = !!transactions?.[0]?.getMeta?.('paste');
   // custom style for next line
   if (csview) {
     if (BACKSPACEKEYCODE === csview.input.lastKeyCode) {
@@ -229,7 +297,8 @@ export function onUpdateAppendTransaction(
       tr = applyStyleForNextParagraph(prevState, nextState, tr, csview);
     } else if (
       ENTERKEYCODE === csview.input.lastKeyCode &&
-      tr.selection.$cursor?.pos === tr.selection.$from.start()
+      tr.selection.$cursor?.pos === tr.selection.$from.start() &&
+      prevState.selection.$cursor?.pos === prevState.selection.$from.start()
     ) {
       tr = applyStyleForPreviousEmptyParagraph(nextState, tr);
       const cursourPosition = prevState.tr.selection.$cursor?.pos;
@@ -248,8 +317,8 @@ export function onUpdateAppendTransaction(
       tr = applyStoredMarksAfterHardBreak(nextState, tr);
     }
   }
-  tr = applyLineStyleForBoldPartial(nextState, tr, transactions.length && transactions[0].getMeta('paste'));
-  if (0 < transactions.length && transactions[0].getMeta('paste')) {
+  tr = applyLineStyleForBoldPartial(nextState, tr, isPaste);
+  if (0 < transactions.length && isPaste) {
     let _startPos = 0;
     let _endPos = 0;
     let node2 = null;
@@ -452,30 +521,30 @@ export function applyStylesChunked(
   startPos: number = 0
 ): { tr: Transform; lastPos: number; done: boolean } {
   let tr: Transform = state.tr;
+  const docSize = tr.doc.content.size;
+  const chunkEndPos = Math.min(startPos + STYLE_CHUNK_LIMIT, docSize);
   let lastPos = startPos;
-  let done = true;
 
-  tr.doc.descendants((child: Node, pos: number) => {
-    // Skip nodes before our start position
-    if (pos > STYLE_CHUNK_LIMIT) return;
+  tr.doc.nodesBetween(startPos, chunkEndPos, (child, pos) => {
+    if (pos < startPos || pos >= chunkEndPos)
+      return;
 
     const contentLen = child.content.size;
     if (haveEligibleChildren(child, contentLen)) {
       const docLen = tr.doc.content.size;
       const end = Math.min(pos + contentLen, docLen);
       const styleName = child.attrs?.styleName ?? RESERVED_STYLE_NONE;
-
       tr = applyLatestStyle(styleName, state, tr, child, pos, end);
-      lastPos = pos;
-
-      // Stop this chunk here, signal more work remains
-      if (pos - startPos > STYLE_CHUNK_LIMIT) {
-        done = false;
-      }
+      lastPos = Math.max(lastPos, pos + child.nodeSize);
     }
   });
 
-  return { tr, lastPos: lastPos + 1, done };
+  const done = chunkEndPos >= docSize;
+  return {
+    tr,
+    lastPos: done ? docSize : Math.max(chunkEndPos, lastPos),
+    done,
+  };
 }
 
 function validateStyleName(node) {
@@ -520,6 +589,7 @@ function applyLineStyleForBoldPartial(nextState, tr, isPaste) {
         tr = applyLineStyle(nextState, tr, node, pos);
       }
       if (style?.styles?.indentPosition) {
+        tr = removeResolvedHangingIndentAnchors(tr, nextState, pos);
         tr = applyHangingIndentTransform(tr, nextState, node, pos, isPaste);
       }
     }
@@ -724,6 +794,10 @@ export function setNodeAttrs(nextLineStyleName, newattrs) {
       newattrs.lineSpacing = getLineSpacingValue(
         nextLineStyle.styles.lineHeight ? nextLineStyle.styles.lineHeight : ''
       );
+      if (nextLineStyle.styles.indentPosition) {
+        newattrs.indentPosition = nextLineStyle.styles.indentPosition;
+        newattrs.hangingIndent = true;
+      }
     } else if (RESERVED_STYLE_NONE === nextLineStyleName) {
       // Next line style None not applied
       newattrs = resetNodeAttrs(newattrs, nextLineStyleName);
@@ -785,6 +859,7 @@ function haveEligibleChildren(node, contentLen) {
 // Hanging indent implementation
 export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
   if (!node || node.type.name !== 'paragraph') return tr;
+  const mappedPos = tr.mapping.mapResult(pos, -1).pos;
 
   const newContent = [];
   let spacerRemoved = false;
@@ -793,12 +868,14 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
   let isParagraphStartsWithTab = false;
   let counter = 0;
   let emptyChild;
+  let existingMarks = [];
+  let prefix1AnchorInserted = false;
   // Scan once for spacers and existing hanging-indents
   node.content.forEach((child) => {
     if (child.marks.some(m => m?.type.name === 'spacer')) {
       foundSpacer = true;
     }
-    if (child.marks.some(m => m?.type.name === 'mark-hanging-indent')) {
+    if (child.marks.some(m => m?.type.name === 'mark-hanging-indent' && m?.attrs?.prefix === 1)) {
       foundHangingIndent = !isPaste;
     }
   });
@@ -813,12 +890,17 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
     if (!spacerRemoved && child.marks.some(m => m.type.name === 'spacer')) {
       spacerRemoved = true;
       if (counter === 1) isParagraphStartsWithTab = true;
+      if (_node.text === ' ') {
+        existingMarks = child.marks.filter(m => !['spacer', 'mark-hanging-indent'].includes(m.type.name));
+      }
       emptyChild = child;
       return;
     }
 
     // Remove existing spacer marks
-    const existingMarks = child.marks.filter(m => m.type.name !== 'spacer');
+    if (_node.text !== ' ') {
+      existingMarks = child.marks.filter(m => !['spacer', 'mark-hanging-indent'].includes(m.type.name));
+    }
 
     // Create hangingIndent mark
     const hangingIndentMark = state.schema.marks['mark-hanging-indent'].create({
@@ -828,10 +910,20 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
       const prefix1 = state.schema.marks['mark-hanging-indent'].create({ prefix: 0 });
       const dummy1 = state.schema.text(' ', [...existingMarks, prefix1]);
       newContent.push(dummy1);
-      _node = _node.mark([hangingIndentMark, ...existingMarks]);
+      const prefix1Marks = [hangingIndentMark, ...existingMarks];
+      const prefix1Anchor = state.schema.text(ZERO_WIDTH_SPACE, prefix1Marks);
+      newContent.push(prefix1Anchor);
+      prefix1AnchorInserted = true;
+      _node = _node.mark(prefix1Marks);
       isParagraphStartsWithTab = false;
     } else {
-      _node = _node.mark([hangingIndentMark, ...existingMarks]);
+      const nodeMarks = [hangingIndentMark, ...existingMarks];
+      if (spacerRemoved && !prefix1AnchorInserted) {
+        const prefix1Anchor = state.schema.text(ZERO_WIDTH_SPACE, nodeMarks);
+        newContent.push(prefix1Anchor);
+        prefix1AnchorInserted = true;
+      }
+      _node = _node.mark(nodeMarks);
 
     }
 
@@ -840,25 +932,114 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
     newContent.push(_node);
   });
   if (isParagraphStartsWithTab && newContent.length === 0) {
-    const existingMarks = emptyChild.marks.filter(m => m.type.name !== 'spacer');
+    existingMarks = emptyChild.marks.filter(m => !['spacer', 'mark-hanging-indent'].includes(m.type.name));
     const prefix = state.schema.marks['mark-hanging-indent'].create({ prefix: 0 });
-    const dummy = state.schema.text(' ', [...existingMarks, prefix]);
+    const dummy = state.schema.text(ZERO_WIDTH_SPACE, [...existingMarks, prefix]);
     newContent.push(dummy);
     const prefix1 = state.schema.marks['mark-hanging-indent'].create({ prefix: 1 });
-    const dummy1 = state.schema.text(' ', [...existingMarks, prefix1]);
+    const dummy1 = state.schema.text(`${ZERO_WIDTH_SPACE}${ZERO_WIDTH_SPACE}`, [...existingMarks, prefix1]);
     newContent.push(dummy1);
   }
   if (newContent?.length === 1 && spacerRemoved) {
-    const existingMarks = emptyChild.marks.filter(m => m.type.name !== 'spacer');
+    if (emptyChild.text?.trim() !== '') {
+      existingMarks = emptyChild.marks.filter(m => !['spacer', 'mark-hanging-indent'].includes(m.type.name));
+    }
     const prefix1 = state.schema.marks['mark-hanging-indent'].create({ prefix: 1 });
-    const dummy1 = state.schema.text(' ', [...existingMarks, prefix1]);
+    const dummy1 = state.schema.text(`${ZERO_WIDTH_SPACE}${ZERO_WIDTH_SPACE}`, [...existingMarks, prefix1]);
     newContent.push(dummy1);
   }
   // Recreate updated paragraph
   const newParagraph = node.type.create(node.attrs, newContent);
-  tr.replaceWith(pos, pos + node.nodeSize, newParagraph);
-  (tr as Transaction).setSelection(TextSelection.create(tr.doc, state.selection?.from));
+  tr.replaceWith(mappedPos, mappedPos + node.nodeSize, newParagraph);
+  const prefix1Pos = getHangingIndentPrefixStartPos(
+    tr.doc.nodeAt(mappedPos),
+    mappedPos,
+    1
+  );
+  const selectionPos = prefix1Pos ?? tr.mapping.map(state.selection?.from, -1);
+  (tr as Transaction).setSelection(
+    TextSelection.create(tr.doc, Math.min(selectionPos, tr.doc.content.size))
+  );
 
   return tr;
+}
+
+function getHangingIndentPrefixStartPos(node, pos, prefix) {
+  if (!node || node.type.name !== 'paragraph') {
+    return null;
+  }
+  let offset = 0;
+  let prefixPos = null;
+  node.forEach((child) => {
+    if (prefixPos !== null) {
+      return;
+    }
+    if (
+      child.marks.some(
+        (mark) =>
+          mark.type.name === 'mark-hanging-indent' &&
+          mark.attrs?.prefix === prefix
+      )
+    ) {
+      prefixPos =
+        child.text?.startsWith(ZERO_WIDTH_SPACE)
+          ? pos + 1 + offset + 1
+          : pos + 1 + offset;
+      return;
+    }
+    offset += child.nodeSize;
+  });
+  return prefixPos;
+}
+
+function removeResolvedHangingIndentAnchors(tr, state, pos) {
+  if (!tr) {
+    tr = state.tr;
+  }
+  const mappedPos = tr.mapping.map(pos, -1);
+  const node = tr.doc.nodeAt(mappedPos);
+  if (!node || node.type.name !== 'paragraph') {
+    return tr;
+  }
+
+  const deletePositions = [];
+  let offset = 0;
+  node.forEach((child) => {
+    const isPrefix1 = child.marks.some(
+      (mark) =>
+        mark.type.name === 'mark-hanging-indent' &&
+        mark.attrs?.prefix === 1
+    );
+    if (isPrefix1 && child.text?.includes(ZERO_WIDTH_SPACE)) {
+      const visibleText = child.text.replace(/\u200B/g, '');
+      if (visibleText.length > 0) {
+        for (let index = 0; index < child.text.length; index++) {
+          if (child.text[index] === ZERO_WIDTH_SPACE) {
+            deletePositions.push(mappedPos + 1 + offset + index);
+          }
+        }
+      }
+    }
+    offset += child.nodeSize;
+  });
+
+  if (deletePositions.length === 0) {
+    return tr;
+  }
+
+  const selectionFrom = state.selection.from;
+  deletePositions
+    .sort((left, right) => right - left)
+    .forEach((deletePos) => {
+      tr = tr.delete(deletePos, deletePos + 1);
+    });
+
+  const mappedSelection = Math.min(
+    tr.mapping.mapResult(selectionFrom, -1).pos,
+    tr.doc.content.size
+  );
+  return (tr as Transaction).setSelection(
+    TextSelection.create(tr.doc, mappedSelection)
+  );
 }
 

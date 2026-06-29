@@ -290,14 +290,14 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         }
         // Clear previous content using a loop
         while (sampleDiv.firstChild) {
-          sampleDiv.removeChild(sampleDiv.firstChild);
+          sampleDiv.firstChild.remove();
         }
         const newContentContainer = document.createElement('div');
 
         // Populate the fragment dynamically
-        fragment.childNodes.forEach((child) => {
+        for (const child of fragment.childNodes) {
           newContentContainer.appendChild(child.cloneNode(true));
-        });
+        }
 
         // Append the fragment or new content to the sampleDiv
         sampleDiv.appendChild(newContentContainer);

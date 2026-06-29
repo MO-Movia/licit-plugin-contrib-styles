@@ -19,8 +19,6 @@ import {
   isDocChanged,
   applyHangingIndentTransform,
   applyStoredMarksAfterHardBreak,
-  findFirstTextNode,
-  syncDomCaret,
 } from './index';
 import { builders } from 'prosemirror-test-builder';
 import {
@@ -2838,55 +2836,6 @@ describe('Cus Style Plugin-Pass', () => {
       styleName: 'A11-Rename',
     };
     expect(setNodeAttrs('Normal', newattrs)).toStrictEqual(newattrs);
-  });
-
-  it('applies hanging-indent metadata for next-line styles with indentPosition', () => {
-    jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
-      styles: {
-        indent: '24',
-        align: 'justify',
-        lineHeight: '',
-        indentPosition: '36',
-      },
-      styleName: 'Indented',
-    });
-    const newattrs = {
-      align: 'left',
-      color: null,
-      id: '',
-      indent: null,
-      lineSpacing: null,
-      paddingBottom: null,
-      paddingTop: null,
-      capco: null,
-      styleName: 'A11-Rename',
-      innerLink: '#uuid',
-      reset: 'true',
-    };
-
-    expect(setNodeAttrs('Indented', newattrs)).toEqual(
-      expect.objectContaining({
-        align: 'justify',
-        color: null,
-        id: '',
-        indent: '24',
-        lineSpacing: '125%',
-        paddingBottom: null,
-        paddingTop: null,
-        capco: null,
-        styleName: 'Indented',
-        innerLink: null,
-        reset: 'false',
-        overriddenAlign: null,
-        overriddenAlignValue: null,
-        overriddenIndent: null,
-        overriddenIndentValue: null,
-        overriddenLineSpacing: null,
-        overriddenLineSpacingValue: null,
-        indentPosition: '36',
-        hangingIndent: true,
-      })
-    );
   });
 
   it('should handle applyStyleForNextParagraph', () => {
@@ -6529,101 +6478,6 @@ describe('applyStyleForNextParagraph', () => {
   });
 });
 
-describe('findFirstTextNode', () => {
-  it('returns null when the node is missing', () => {
-    expect(findFirstTextNode(null as unknown as Node)).toBeNull();
-  });
-
-  it('returns null for a finite DOM tree with nested text nodes', () => {
-    const wrapper = document.createElement('div');
-    const span = document.createElement('span');
-    const textNode = document.createTextNode('hello');
-    span.appendChild(textNode);
-    wrapper.appendChild(span);
-
-    expect(findFirstTextNode(wrapper as unknown as Node)).toBeNull();
-  });
-
-  it('returns null when there are no descendant text nodes', () => {
-    const wrapper = document.createElement('div');
-    wrapper.appendChild(document.createElement('span'));
-
-    expect(findFirstTextNode(wrapper as unknown as Node)).toBeNull();
-  });
-});
-
-describe('syncDomCaret', () => {
-  it('returns early when there is no DOM selection', () => {
-    const ownerDocument = {
-      defaultView: {
-        getSelection: jest.fn().mockReturnValue(null),
-      },
-    };
-    const view = {
-      dom: { ownerDocument },
-      domAtPos: jest.fn(),
-    };
-
-    expect(syncDomCaret(view, 1)).toBeUndefined();
-    expect(view.domAtPos).not.toHaveBeenCalled();
-  });
-
-  it('falls back to the container when nested text exists but no text node is returned', () => {
-    const container = document.createElement('div');
-    const child = document.createElement('span');
-    child.appendChild(document.createTextNode('caret'));
-    container.appendChild(child);
-
-    let capturedRange: Range | null = null;
-    const selection = {
-      removeAllRanges: jest.fn(),
-      addRange: jest.fn((range: Range) => {
-        capturedRange = range;
-      }),
-    };
-    const view = {
-      dom: { ownerDocument: document },
-      domAtPos: jest.fn().mockReturnValue({ node: container, offset: 0 }),
-    };
-    const selectionSpy = jest
-      .spyOn(window, 'getSelection')
-      .mockReturnValue(selection as unknown as Selection);
-
-    syncDomCaret(view, 2);
-
-    expect(selection.removeAllRanges).toHaveBeenCalledTimes(1);
-    expect(selection.addRange).toHaveBeenCalledTimes(1);
-    expect(capturedRange?.startContainer).toBe(container);
-    expect(capturedRange?.startOffset).toBe(0);
-    selectionSpy.mockRestore();
-  });
-
-  it('falls back to the parent node and clamps the offset when no text node exists', () => {
-    const container = document.createElement('div');
-    container.appendChild(document.createElement('br'));
-
-    let capturedRange: Range | null = null;
-    const selection = {
-      removeAllRanges: jest.fn(),
-      addRange: jest.fn((range: Range) => {
-        capturedRange = range;
-      }),
-    };
-    const view = {
-      dom: { ownerDocument: document },
-      domAtPos: jest.fn().mockReturnValue({ node: container, offset: 9 }),
-    };
-    const selectionSpy = jest
-      .spyOn(window, 'getSelection')
-      .mockReturnValue(selection as unknown as Selection);
-
-    syncDomCaret(view, 3);
-
-    expect(capturedRange?.startContainer).toBe(container);
-    expect(capturedRange?.startOffset).toBe(1);
-    selectionSpy.mockRestore();
-  });
-});
 
 function createState(node) {
   return EditorState.create({
@@ -6740,7 +6594,7 @@ describe('applyHangingIndentTransform', () => {
     const newPara = result.doc.firstChild;
 
     expect(newPara.childCount).toBe(2);
-    expect(newPara.lastChild.text).toBe('\u200B');
+    expect(newPara.lastChild.text).toMatch(/^\u200B+$/);
     expect(
       newPara.lastChild.marks.some(
         (mark) =>

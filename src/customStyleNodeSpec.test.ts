@@ -48,6 +48,7 @@ describe('toCustomStyleDOM', () => {
         indentPosition: '1.5',
         isHangingIndentapplied: true,
         prefixValue: 'ab',
+        numberingStyle: 'lower-alpha',
         tot: true,
         tof: false,
         hideCapco: false,
@@ -105,6 +106,7 @@ describe('toCustomStyleDOM', () => {
         'contNumber': false,
         'hideCapco': false,
         'list-style-level': 1,
+        'numbering-style': 'lower-alpha',
         'prefix': 'ab',
         // 'hide-style-level': false,
         style:
@@ -242,6 +244,7 @@ describe('toCustomStyleDOM', () => {
         fontName: 'null',
         indent: 'null',
         hasNumbering: true,
+        numberingStyle: 'lower-roman',
         align: 'null',
       },
       styleName: '',
@@ -285,6 +288,7 @@ describe('toCustomStyleDOM', () => {
         'data-style-level': '1',
         'hideCapco': false,
         'hide-style-level': false,
+        'numbering-style': 'lower-roman',
         style:
           'line-height: 16pt;--czi-content-line-height: 16pt;text-align: null;margin-bottom: nullpt !important;margin-top: nullpt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: null;font-size: nullpt;font-family: null;counter-increment: C1 ;',
         styleName: 'FS_B01',

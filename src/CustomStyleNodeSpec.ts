@@ -6,6 +6,7 @@ import { getCustomStyleByName, getHidenumberingFlag } from './customStyle';
 
 // This assumes that every 36pt maps to one indent level.
 export const ATTRIBUTE_PREFIX = 'prefix';
+export const ATTRIBUTE_NUMBERING_STYLE = 'numbering-style';
 export const ATTRIBUTE_TOT = 'tot';
 export const ATTRIBUTE_TOF = 'tof';
 export const ATTRIBUTE_HIDENUMBERING = 'hideNumbering';
@@ -63,6 +64,7 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
     bulletDetails,
     isListStyle,
     prefix,
+    numberingStyle,
     hideNumbering,
     hideCapco,
     contNumber,
@@ -96,6 +98,9 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
 
   if (prefix) {
     output[1][ATTRIBUTE_PREFIX] = prefix;
+  }
+  if (numberingStyle) {
+    output[1][ATTRIBUTE_NUMBERING_STYLE] = numberingStyle;
   }
   if (tot) {
     output[1][ATTRIBUTE_TOT] = tot;
@@ -191,6 +196,7 @@ function getStyleEx(align, lineSpacing, styleName) {
   let indentPosition = '';
   let isListStyle = false;
   let prefix = '';
+  let numberingStyle = '';
   let tot = false;
   let tof = false;
   let hideNumbering = false;
@@ -273,6 +279,7 @@ function getStyleEx(align, lineSpacing, styleName) {
         tot = styleProps.styles.tot;
         tof = styleProps.styles.tof;
         prefix = styleProps.styles.prefixValue;
+        numberingStyle = styleProps.styles.numberingStyle || '';
         hideNumbering = styleProps.styles.hideNumbering;
         contNumber = styleProps.styles.contNumber;
         style += refreshCounters(styleLevel, isListStyle);
@@ -295,6 +302,7 @@ function getStyleEx(align, lineSpacing, styleName) {
     bulletDetails,
     isListStyle,
     prefix,
+    numberingStyle,
     tot,
     tof,
     hideNumbering,

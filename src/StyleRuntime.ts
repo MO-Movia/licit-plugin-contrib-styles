@@ -11,6 +11,7 @@ export type HTMLStyles = {
   color?: string; // Text colour
   textHighlight?: string; // Text highlight
   hasNumbering?: boolean; // true= The style has numbering
+  numberingStyle?: string; // CSS counter style for numbering
   hasBullet?: boolean; // true= The style has bullet
   paragraphSpacingAfter?: string; // Spacing after a Paragraph
   paragraphSpacingBefore?: string; // Spacing before a Paragraph
@@ -23,6 +24,8 @@ export type HTMLStyles = {
   toc?: boolean;
   tot?: boolean;
   tof?: boolean;
+  hideCapco?: boolean;
+  contNumber?: boolean;
   isHidden?: boolean;
   strike?: string;
   isList?: boolean;

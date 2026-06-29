@@ -6,9 +6,12 @@ import { getCustomStyleByName, getHidenumberingFlag } from './customStyle';
 
 // This assumes that every 36pt maps to one indent level.
 export const ATTRIBUTE_PREFIX = 'prefix';
+export const ATTRIBUTE_NUMBERING_STYLE = 'numbering-style';
 export const ATTRIBUTE_TOT = 'tot';
 export const ATTRIBUTE_TOF = 'tof';
 export const ATTRIBUTE_HIDENUMBERING = 'hideNumbering';
+export const ATTRIBUTE_HIDECAPCO = 'hideCapco';
+export const ATTRIBUTE_CONTNUMBER = 'contNumber';
 export const INDENT_MARGIN_PT_SIZE = 36;
 export const MIN_INDENT_LEVEL = 0;
 export const MAX_INDENT_LEVEL = 7;
@@ -61,7 +64,10 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
     bulletDetails,
     isListStyle,
     prefix,
+    numberingStyle,
     hideNumbering,
+    hideCapco,
+    contNumber,
     tot,
     tof,
   } = getStyle(node.attrs);
@@ -93,6 +99,9 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
   if (prefix) {
     output[1][ATTRIBUTE_PREFIX] = prefix;
   }
+  if (numberingStyle) {
+    output[1][ATTRIBUTE_NUMBERING_STYLE] = numberingStyle;
+  }
   if (tot) {
     output[1][ATTRIBUTE_TOT] = tot;
   }
@@ -102,6 +111,12 @@ function toDOM(base: toDOMFn | undefined, node: Node) {
 
   if (hideNumbering) {
     output[1][ATTRIBUTE_HIDENUMBERING] = hideNumbering;
+  }
+  if (hideCapco !== undefined) {
+    output[1][ATTRIBUTE_HIDECAPCO] = hideCapco;
+  }
+  if (contNumber !== undefined) {
+    output[1][ATTRIBUTE_CONTNUMBER] = contNumber;
   }
 
   if (bulletDetails?.symbol?.length > 0) {
@@ -181,9 +196,12 @@ function getStyleEx(align, lineSpacing, styleName) {
   let indentPosition = '';
   let isListStyle = false;
   let prefix = '';
+  let numberingStyle = '';
   let tot = false;
   let tof = false;
   let hideNumbering = false;
+  let hideCapco = false;
+  let contNumber = undefined;
   let bulletDetails: {
     symbol: string;
     color: string;
@@ -228,6 +246,7 @@ function getStyleEx(align, lineSpacing, styleName) {
       if (styleProps.styles.paragraphSpacingBefore) {
         style += `margin-top: ${styleProps.styles.paragraphSpacingBefore}pt !important;`;
       }
+      hideCapco = styleProps.styles.hideCapco ?? false;
       if (styleProps.styles.styleLevel) {
         if (styleProps.styles.strong) {
           style += 'font-weight: bold;';
@@ -260,7 +279,9 @@ function getStyleEx(align, lineSpacing, styleName) {
         tot = styleProps.styles.tot;
         tof = styleProps.styles.tof;
         prefix = styleProps.styles.prefixValue;
+        numberingStyle = styleProps.styles.numberingStyle || '';
         hideNumbering = styleProps.styles.hideNumbering;
+        contNumber = styleProps.styles.contNumber;
         style += refreshCounters(styleLevel, isListStyle);
       }
     } else if (styleName?.includes(RESERVED_STYLE_NONE_NUMBERING)) {
@@ -281,9 +302,12 @@ function getStyleEx(align, lineSpacing, styleName) {
     bulletDetails,
     isListStyle,
     prefix,
+    numberingStyle,
     tot,
     tof,
     hideNumbering,
+    hideCapco,
+    contNumber,
   };
 }
 

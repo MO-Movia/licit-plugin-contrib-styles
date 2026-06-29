@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from 'react';
+import React, { ChangeEvent, SyntheticEvent } from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Schema, Node } from 'prosemirror-model';
 import { Transform } from 'prosemirror-transform';
@@ -34,10 +34,20 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   _menuItemHeight = 28;
 
   _id = uuid();
-  _selectedIndex = 0;
+  _menuRef = React.createRef<HTMLDivElement>();
+  _navItems: Array<{ command: UICommand; label: string }> = [];
+  _staticItems: Array<{ command: UICommand; label: string }> = [];
+  _appliedIndex = 0;
+  // [Keyboard navigation] Last real pointer position, used to tell genuine
+  // mouse movement apart from the mouseover the browser fires when the list
+  // scrolls under a stationary cursor (during arrow-key navigation).
+  _lastPointerX: number | null = null;
+  _lastPointerY: number | null = null;
 
   state = {
     expanded: false,
+    selectedIndex: 0,
+    searchTerm: '',
     style: {
       display: 'none',
       top: '',
@@ -56,19 +66,29 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
     } = this.props;
     const children = [];
     const children1 = [];
-    let counter = 0;
-    let selecteClassName = '';
+    const searchTerm = this.state.searchTerm.toLowerCase();
     const selectedName = this.getTheSelectedCustomStyle(this.props.editorState);
+    // [Keyboard navigation] One highlight, driven by selectedIndex, is shared
+    // by mouse and keyboard. Every row (style names and the static commands
+    // below the <hr>) occupies a slot in a single index space: style rows come
+    // first (0.._navItems.length-1, the range the arrow keys cycle through),
+    // followed by the static rows. Hovering a row sets selectedIndex to its
+    // slot, so the same 'selectbackground' highlight follows the pointer.
+    // _appliedIndex tracks the currently applied style so the highlight can
+    // start there on mount.
+    this._navItems = [];
+    this._staticItems = [];
     commandGroups.forEach((group) => {
       Object.keys(group).forEach((label) => {
-        const command = group[label];
-        counter++;
-        if (label === selectedName && '' === selecteClassName) {
-          selecteClassName = 'selectbackground';
-          this._selectedIndex = counter;
-        } else {
-          selecteClassName = '';
+        if (!this.isStyleMatch(label, searchTerm)) {
+          return;
         }
+        const command = group[label];
+        const index = this._navItems.length;
+        if (label === selectedName) {
+          this._appliedIndex = index;
+        }
+        const isSelected = index === this.state.selectedIndex;
         children.push(
           <CustomStyleItem
             command={command}
@@ -77,20 +97,24 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
             editorState={editorState}
             editorView={editorView}
             hasText={true}
+            index={index}
             key={label}
             label={label}
             onClick={this._onUIEnter}
             onCommand={onCommand}
             onMouseEnter={this._onUIEnter}
-            selectionClassName={selecteClassName}
+            selectionClassName={isSelected ? 'selectbackground' : ''}
             value={command}
           ></CustomStyleItem>
         );
+        this._navItems.push({ command, label });
       });
     });
     staticCommand.forEach((group) => {
       Object.keys(group).forEach((label) => {
         const command = group[label];
+        const index = this._navItems.length + this._staticItems.length;
+        const isSelected = index === this.state.selectedIndex;
         children1.push(
           <CustomStyleItem
             command={command}
@@ -99,24 +123,44 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
             editorState={editorState}
             editorView={editorView}
             hasText={false}
+            index={index}
             key={label}
             label={command._customStyleName}
             onClick={this._onUIEnter}
             onCommand={onCommand}
             onMouseEnter={this._onUIEnter}
-            selectionClassName={''}
+            selectionClassName={isSelected ? 'selectbackground' : ''}
             value={command}
           ></CustomStyleItem>
         );
+        this._staticItems.push({ command, label: command._customStyleName });
       });
     });
+    const styleNamesClassName =
+      searchTerm && !children.length
+        ? 'molsp-stylenames molsp-stylenames-empty'
+        : 'molsp-stylenames';
+
     return (
-      <div>
+      <div onKeyDown={this._onMenuKeyDown} ref={this._menuRef} tabIndex={-1}>
         <span data-cy="cyStyleDropdown">
           <div className="molsp-dropbtn" id={this._id}>
-            <div className="molsp-stylenames">{children}</div>
+            <div className="molsp-search-wrapper">
+              <input
+                aria-label="Search custom styles"
+                className="molsp-search-input"
+                onChange={this._onSearchChange}
+                onClick={this._onSearchClick}
+                onContextMenu={this._onSearchContextMenu}
+                onKeyDown={this._onSearchKeyDown}
+                placeholder="Search styles"
+                type="search"
+                value={this.state.searchTerm}
+              />
+            </div>
+            <div className={styleNamesClassName}>{children}</div>
 
-            <hr></hr>
+            <hr className="molsp-menu-separator"></hr>
             {children1}
           </div>
         </span>
@@ -125,10 +169,160 @@ export class CustomMenuUI extends React.PureComponent<any, any> {
   }
 
   componentDidMount() {
-    const styleDiv = document.getElementsByClassName('molsp-stylenames')[0];
-    styleDiv.scrollTop =
-      this._menuItemHeight * this._selectedIndex - this._menuItemHeight * 2 - 5;
+    // [Keyboard navigation] Start the highlight on the applied style, scroll it
+    // into view, and focus the menu so the arrow keys work without a click.
+    this.setState({ selectedIndex: this._appliedIndex }, () =>
+      this._scrollAppliedStyleIntoView()
+    );
+    requestAnimationFrame(() => this._menuRef.current?.focus());
+    // [Keyboard navigation] Hover is wired with a NATIVE delegated mouseover
+    // listener rather than a React onMouseOver/onMouseEnter prop. This menu is
+    // rendered into a foreign React root via createPopUp (legacy
+    // ReactDOM.render), where React's synthetic mouse events are unreliable;
+    // a native listener on the real DOM node always fires as events bubble.
+    this._menuRef.current?.addEventListener('mouseover', this._onMenuMouseOver);
   }
+
+  componentWillUnmount() {
+    this._menuRef.current?.removeEventListener(
+      'mouseover',
+      this._onMenuMouseOver
+    );
+  }
+
+  // [Keyboard navigation] Map the hovered element back to its row via the
+  // data-index attribute and make it the single selection, so mouse and
+  // keyboard share one highlight.
+  _onMenuMouseOver = (e: MouseEvent) => {
+    const target = e.target as HTMLElement | null;
+    const row = target?.closest?.('[data-index]') as HTMLElement | null;
+    if (!row) {
+      return;
+    }
+    // Ignore the mouseover the browser fires when arrow-key scrolling moves a
+    // new row under a stationary pointer: the pointer coordinates are
+    // unchanged, so this is not a real hover and must not hijack the keyboard
+    // selection. Only act on genuine pointer movement.
+    if (e.clientX === this._lastPointerX && e.clientY === this._lastPointerY) {
+      return;
+    }
+    this._lastPointerX = e.clientX;
+    this._lastPointerY = e.clientY;
+    const index = Number(row.getAttribute('data-index'));
+    if (!Number.isNaN(index)) {
+      this._onItemMouseEnter(index);
+    }
+  };
+
+  // [Keyboard navigation] On open, place the applied style near the top of the
+  // list (a couple of rows of context above it) so it is visible. This is the
+  // original one-shot placement and runs only from componentDidMount.
+  _scrollAppliedStyleIntoView() {
+    const styleDiv = document.getElementsByClassName('molsp-stylenames')[0];
+    if (styleDiv) {
+      styleDiv.scrollTop =
+        this._menuItemHeight * this.state.selectedIndex -
+        this._menuItemHeight * 2 -
+        5;
+    }
+  }
+
+  // [Keyboard navigation] Keep the highlighted row visible during arrow
+  // navigation, scrolling ONLY when the row is outside the visible area.
+  // Re-pinning the scroll position on every press (the old behaviour) made the
+  // whole list jump one row per keystroke even when the row was already in
+  // view; here we nudge just enough to reveal a row that is above or below the
+  // viewport and leave the scroll untouched otherwise.
+  scrollSelectedIntoView() {
+    const styleDiv = document.getElementsByClassName('molsp-stylenames')[0];
+    if (!styleDiv) {
+      return;
+    }
+    const rowTop = this._menuItemHeight * this.state.selectedIndex;
+    const rowBottom = rowTop + this._menuItemHeight;
+    const viewTop = styleDiv.scrollTop;
+    const viewBottom = viewTop + styleDiv.clientHeight;
+    if (rowTop < viewTop) {
+      styleDiv.scrollTop = rowTop;
+    } else if (rowBottom > viewBottom) {
+      styleDiv.scrollTop = rowBottom - styleDiv.clientHeight;
+    }
+  }
+
+  // [Keyboard navigation] Hovering a row makes it the single selection, so the
+  // mouse and the arrow keys share one highlight instead of showing two.
+  _onItemMouseEnter = (index: number) => {
+    this.setState({ selectedIndex: index });
+  };
+
+  // [Keyboard navigation] Move the highlight with ArrowUp/ArrowDown (wrapping
+  // around) and activate the highlighted row with Enter. preventDefault /
+  // stopPropagation keep the keys from leaking to the ProseMirror editor.
+  _onMenuKeyDown = (e: React.KeyboardEvent) => {
+    const items = this._navItems;
+    if (!items.length) {
+      return;
+    }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.setState(
+        (prev) => {
+          const last = items.length - 1;
+          // The selection may currently sit on a static row (set by hover);
+          // arrow keys only cycle the style names, so re-enter that range.
+          const onStyleRow =
+            prev.selectedIndex >= 0 && prev.selectedIndex <= last;
+          let next: number;
+          if (!onStyleRow) {
+            next = e.key === 'ArrowDown' ? 0 : last;
+          } else {
+            next =
+              e.key === 'ArrowDown'
+                ? prev.selectedIndex < last
+                  ? prev.selectedIndex + 1
+                  : 0
+                : prev.selectedIndex > 0
+                  ? prev.selectedIndex - 1
+                  : last;
+          }
+          return { selectedIndex: next };
+        },
+        () => this.scrollSelectedIntoView()
+      );
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      // Enter activates whichever row is highlighted — a style name or, if the
+      // pointer last hovered below the <hr>, a static command.
+      const selected =
+        items[this.state.selectedIndex] ??
+        this._staticItems[this.state.selectedIndex - items.length];
+      if (selected) {
+        this._execute(selected.command, e);
+      }
+    }
+  };
+
+  isStyleMatch(label: string, searchTerm: string): boolean {
+    return !searchTerm || label.toLowerCase().includes(searchTerm);
+  }
+
+  _onSearchChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    this.setState({ searchTerm: event.target.value });
+  };
+
+  _onSearchClick = (event: SyntheticEvent<HTMLInputElement>): void => {
+    event.stopPropagation();
+  };
+
+  _onSearchContextMenu = (event: SyntheticEvent<HTMLInputElement>): void => {
+    event.stopPropagation();
+  };
+
+  _onSearchKeyDown = (event: SyntheticEvent<HTMLInputElement>): void => {
+    event.stopPropagation();
+  };
 
   isAllowedNode(node: Node) {
     return node.type.name === 'paragraph' || node.type.name === 'ordered_list' || node.type.name === 'enhanced_table_figure_notes';

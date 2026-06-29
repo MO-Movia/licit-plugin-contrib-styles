@@ -554,6 +554,9 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         },
       }));
     } else if (1 === selectedOption) {
+      if (this.state.styles.tot || this.state.styles.tof) {
+        return;
+      }
       this.setState({
         otherStyleSelected: false,
       });
@@ -2057,6 +2060,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                         this.state.styleName &&
                         !this.state.otherStyleSelected
                       }
+                      disabled={this.state.styles.tot || this.state.styles.tof}
                       name="nextlinestyle"
                       onChange={this.onNextLineStyleSelected.bind(this, 1)}
                       style={{

@@ -1124,13 +1124,17 @@ html {
   counter-increment: none;
 }
 
-.ProseMirror p[data-style-level='2'][tof='true']::before {
+.ProseMirror p[data-style-level='2'][tof='true']::before,
+.ProseMirror
+  p[data-style-level='2'][hide-style-level='false'][tof='true'][numbering-style]::before {
   content: attr(prefix) counter(C1, decimal) '.' counter(F1, decimal) ' ';
   font-weight: var(--czi-counter-bold);
   font-size: var(--czi-content-font-size);
 }
 
-.ProseMirror p[data-style-level='2'][tot='true']::before {
+.ProseMirror p[data-style-level='2'][tot='true']::before,
+.ProseMirror
+  p[data-style-level='2'][hide-style-level='false'][tot='true'][numbering-style]::before {
   content: attr(prefix) counter(C1, decimal) '.' counter(D1, decimal) ' ';
   font-weight: var(--czi-counter-bold); 
   font-size: var(--czi-content-font-size);

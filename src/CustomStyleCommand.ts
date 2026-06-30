@@ -1428,7 +1428,6 @@ export function removeAllMarksExceptLink(
       node.marks.some((mark) => {
         if (
           'link' !== mark.type.name &&
-          'mark-hanging-indent' !== mark.type.name &&
           'override' !== mark.type.name &&
           'spacer' !== mark.type.name
         ) {

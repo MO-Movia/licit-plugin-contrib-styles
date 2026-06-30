@@ -455,7 +455,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       styles: {
         ...prevState.styles,
         styleLevel: level,
-        hideCapco: isCheckboxDisabled ? false : prevState.styles.hideCapco,
+        hideCapco: prevState.styles.hideCapco,
         contNumber:
           isCheckboxDisabled || level !== 2 ? false : prevState.styles.contNumber,
         hasNumbering: isCheckboxDisabled
@@ -710,7 +710,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         tot: false,
         tof: false,
         prefixValue: '',
-        hideCapco: false,
+        hideCapco: prevState.styles.hideCapco,
         contNumber: false,
         hasNumbering: false,
         nextLineStyleName: RESERVED_STYLE_NONE,
@@ -728,7 +728,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         tot: false,
         tof: false,
         prefixValue: '',
-        hideCapco: false,
+        hideCapco: prevState.styles.hideCapco,
         contNumber: false,
         hasNumbering: false,
         styleLevel: 0,
@@ -746,7 +746,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         tot: val.target.checked,
         tof: false,
         prefixValue: val.target.checked ? 'TABLE ' : '',
-        hideCapco: false,
+        hideCapco: prevState.styles.hideCapco,
         contNumber: false,
         hasNumbering: val.target.checked,
         nextLineStyleName: val.target.checked
@@ -766,7 +766,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
         tot: false,
         tof: val.target.checked,
         prefixValue: val.target.checked ? 'FIGURE ' : '',
-        hideCapco: false,
+        hideCapco: prevState.styles.hideCapco,
         contNumber: false,
         hasNumbering: val.target.checked,
         nextLineStyleName: val.target.checked
@@ -791,7 +791,7 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
           ...prevState.styles,
           styleLevel,
           isList,
-          hideCapco: isList ? false : prevState.styles.hideCapco,
+          hideCapco: prevState.styles.hideCapco,
           contNumber: isList ? false : prevState.styles.contNumber,
         },
         isRadioDisabled: styleLevel === 0,
@@ -938,7 +938,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
   }
 
   render() {
-    const capcoOptionsDisabled = this.isCapcoOptionDisabled();
     const numberingOptionsDisabled = this.isNumberingOptionDisabled();
     const contNumberDisabled = this.isContNumberDisabled();
 
@@ -1380,7 +1379,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
                   >
                     <input
                       checked={this.state.styles.hideCapco}
-                      disabled={capcoOptionsDisabled}
                       onChange={this.handleHideCapco.bind(this)}
                       type="checkbox"
                     />
@@ -2299,13 +2297,6 @@ export class CustomStyleEditor extends React.PureComponent<any, any> {
       this.state.styles.styleLevel === 0 ||
       this.state.styles.styleLevel === undefined ||
       (this.state.styles.styleLevel === 1 && this.state.styles.isList === true)
-    );
-  }
-
-  isCapcoOptionDisabled() {
-    return (
-      this.state.styles.isList === true ||
-      this.state.styleName === RESERVED_STYLE_NONE
     );
   }
 

@@ -1927,6 +1927,7 @@ describe('getMarkByStyleName', () => {
           ],
           toDOM() {
             return ['span', { 'background-color': '' }, 0];
+            return ['span', { highlightColor: '' }, 0];
           },
         },
         'mark-font-size': {

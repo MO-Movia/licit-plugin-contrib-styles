@@ -476,141 +476,141 @@ describe('applyNormalIfNoStyle', () => {
   });
 
   describe('applyStoredMarksAfterHardBreak', () => {
-  const mockStyleName = 'A_12';
+    const mockStyleName = 'A_12';
 
-  const buildStateWithParagraph = (styleName: string | null, hasCursor = true) => {
-    const paragraph = mockSchema.nodes.paragraph.create(
-      { styleName },
-      mockSchema.text('Hello')
-    );
-    const doc = mockSchema.nodes.doc.create({}, paragraph);
-    const state = EditorState.create({ schema: mockSchema, doc });
+    const buildStateWithParagraph = (styleName: string | null, hasCursor = true) => {
+      const paragraph = mockSchema.nodes.paragraph.create(
+        { styleName },
+        mockSchema.text('Hello')
+      );
+      const doc = mockSchema.nodes.doc.create({}, paragraph);
+      const state = EditorState.create({ schema: mockSchema, doc });
 
-    const pos = hasCursor ? 3 : undefined;
-    const tr = state.tr.setSelection(
-      TextSelection.create(state.doc, pos ?? 1)
-    );
-    return state.apply(tr);
-  };
+      const pos = hasCursor ? 3 : undefined;
+      const tr = state.tr.setSelection(
+        TextSelection.create(state.doc, pos ?? 1)
+      );
+      return state.apply(tr);
+    };
 
-  beforeEach(() => {
-    jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
-      styleName: mockStyleName,
-      styles: { strong: true },
+    beforeEach(() => {
+      jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
+        styleName: mockStyleName,
+        styles: { strong: true },
+      });
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should return a new tr from nextState when tr is null/undefined', () => {
+      const state = buildStateWithParagraph(mockStyleName);
+      jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
+      const result = applyStoredMarksAfterHardBreak(
+        state,
+        null as unknown as Transaction
+      );
+      expect(result).toBeDefined();
+    });
+
+    it('should return tr unchanged when no parent paragraph is found', () => {
+      const state = buildStateWithParagraph(mockStyleName);
+      const tr = state.tr;
+
+      jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
+
+      const mockResolve = jest.spyOn(state.doc, 'resolve').mockReturnValue({
+        pos: 0,
+        depth: 0,
+        node: () => null,
+        parent: mockSchema.nodes.doc.create(),
+      } as unknown as ResolvedPos);
+
+      const result = applyStoredMarksAfterHardBreak(state, tr);
+      expect(result).toBe(tr);
+      mockResolve.mockRestore();
+    });
+
+    it('should return tr unchanged when styleName is undefined', () => {
+      const state = buildStateWithParagraph(null);
+      const tr = state.tr;
+      jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
+      const result = applyStoredMarksAfterHardBreak(state, tr);
+      expect(result).toBeDefined();
+    });
+
+    it('should return tr unchanged when styleName is RESERVED_STYLE_NONE ("None")', () => {
+      const state = buildStateWithParagraph('None');
+      const tr = state.tr;
+      jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
+      const result = applyStoredMarksAfterHardBreak(state, tr);
+      expect(result).toBeDefined();
+    });
+
+    it('should return tr unchanged when getMarkByStyleName returns empty array', () => {
+      const state = buildStateWithParagraph(mockStyleName);
+      const tr = state.tr;
+      jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
+      const result = applyStoredMarksAfterHardBreak(state, tr);
+      expect(result).toBe(tr);
+    });
+
+    it('should return tr unchanged when getMarkByStyleName returns null', () => {
+      const state = buildStateWithParagraph(mockStyleName);
+      const tr = state.tr;
+      jest
+        .spyOn(ccommand, 'getMarkByStyleName')
+        .mockReturnValue(null as unknown as Mark[]);
+      const result = applyStoredMarksAfterHardBreak(state, tr);
+      expect(result).toBe(tr);
+    });
+
+    it('should call addStoredMark for each mark returned by getMarkByStyleName', () => {
+      const state = buildStateWithParagraph(mockStyleName);
+      const tr = state.tr;
+      const mockMark = mockSchema.marks.strong.create({ overridden: false });
+      const mockMark2 = mockSchema.marks.em.create({ overridden: false });
+
+      jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([mockMark, mockMark2]);
+      const addStoredMarkSpy = jest.spyOn(tr, 'addStoredMark').mockReturnValue(tr);
+
+      applyStoredMarksAfterHardBreak(state, tr);
+
+      expect(addStoredMarkSpy).toHaveBeenCalledTimes(0);
+    });
+
+    it('should use selection.$from.pos when $cursor is not available', () => {
+      const paragraph = mockSchema.nodes.paragraph.create(
+        { styleName: mockStyleName },
+        mockSchema.text('Hello')
+      );
+      const doc = mockSchema.nodes.doc.create({}, paragraph);
+      const state = EditorState.create({ schema: mockSchema, doc });
+
+      const tr = state.tr.setSelection(
+        TextSelection.create(state.doc, 2, 4)
+      );
+      const nextState = state.apply(tr);
+
+      const mockMark = mockSchema.marks.strong.create({ overridden: false });
+      jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([mockMark]);
+
+      const result = applyStoredMarksAfterHardBreak(nextState, nextState.tr);
+      expect(result).toBeDefined();
+    });
+
+    it('should return the updated tr with stored marks applied', () => {
+      const state = buildStateWithParagraph(mockStyleName);
+      const tr = state.tr;
+      const mockMark = mockSchema.marks.strong.create({ overridden: false });
+
+      jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([mockMark]);
+
+      const result = applyStoredMarksAfterHardBreak(state, tr);
+      expect(result).toBeDefined();
     });
   });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it('should return a new tr from nextState when tr is null/undefined', () => {
-    const state = buildStateWithParagraph(mockStyleName);
-    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
-    const result = applyStoredMarksAfterHardBreak(
-      state,
-      null as unknown as Transaction
-    );
-    expect(result).toBeDefined();
-  });
-
-  it('should return tr unchanged when no parent paragraph is found', () => {
-    const state = buildStateWithParagraph(mockStyleName);
-    const tr = state.tr;
-
-    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
-
-    const mockResolve = jest.spyOn(state.doc, 'resolve').mockReturnValue({
-      pos: 0,
-      depth: 0,
-      node: () => null,
-      parent: mockSchema.nodes.doc.create(),
-    } as unknown as ResolvedPos);
-
-    const result = applyStoredMarksAfterHardBreak(state, tr);
-    expect(result).toBe(tr);
-    mockResolve.mockRestore();
-  });
-
-  it('should return tr unchanged when styleName is undefined', () => {
-    const state = buildStateWithParagraph(null);
-    const tr = state.tr;
-    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
-    const result = applyStoredMarksAfterHardBreak(state, tr);
-    expect(result).toBeDefined();
-  });
-
-  it('should return tr unchanged when styleName is RESERVED_STYLE_NONE ("None")', () => {
-    const state = buildStateWithParagraph('None');
-    const tr = state.tr;
-    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
-    const result = applyStoredMarksAfterHardBreak(state, tr);
-    expect(result).toBeDefined();
-  });
-
-  it('should return tr unchanged when getMarkByStyleName returns empty array', () => {
-    const state = buildStateWithParagraph(mockStyleName);
-    const tr = state.tr;
-    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([]);
-    const result = applyStoredMarksAfterHardBreak(state, tr);
-    expect(result).toBe(tr);
-  });
-
-  it('should return tr unchanged when getMarkByStyleName returns null', () => {
-    const state = buildStateWithParagraph(mockStyleName);
-    const tr = state.tr;
-    jest
-      .spyOn(ccommand, 'getMarkByStyleName')
-      .mockReturnValue(null as unknown as Mark[]);
-    const result = applyStoredMarksAfterHardBreak(state, tr);
-    expect(result).toBe(tr);
-  });
-
-  it('should call addStoredMark for each mark returned by getMarkByStyleName', () => {
-    const state = buildStateWithParagraph(mockStyleName);
-    const tr = state.tr;
-    const mockMark = mockSchema.marks.strong.create({ overridden: false });
-    const mockMark2 = mockSchema.marks.em.create({ overridden: false });
-
-    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([mockMark, mockMark2]);
-    const addStoredMarkSpy = jest.spyOn(tr, 'addStoredMark').mockReturnValue(tr);
-
-    applyStoredMarksAfterHardBreak(state, tr);
-
-    expect(addStoredMarkSpy).toHaveBeenCalledTimes(0);
-  });
-
-  it('should use selection.$from.pos when $cursor is not available', () => {
-    const paragraph = mockSchema.nodes.paragraph.create(
-      { styleName: mockStyleName },
-      mockSchema.text('Hello')
-    );
-    const doc = mockSchema.nodes.doc.create({}, paragraph);
-    const state = EditorState.create({ schema: mockSchema, doc });
-
-    const tr = state.tr.setSelection(
-      TextSelection.create(state.doc, 2, 4)
-    );
-    const nextState = state.apply(tr);
-
-    const mockMark = mockSchema.marks.strong.create({ overridden: false });
-    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([mockMark]);
-
-    const result = applyStoredMarksAfterHardBreak(nextState, nextState.tr);
-    expect(result).toBeDefined();
-  });
-
-  it('should return the updated tr with stored marks applied', () => {
-    const state = buildStateWithParagraph(mockStyleName);
-    const tr = state.tr;
-    const mockMark = mockSchema.marks.strong.create({ overridden: false });
-
-    jest.spyOn(ccommand, 'getMarkByStyleName').mockReturnValue([mockMark]);
-
-    const result = applyStoredMarksAfterHardBreak(state, tr);
-    expect(result).toBeDefined();
-  });
-});
 });
 
 describe('onUpdateAppendTransaction', () => {
@@ -5656,6 +5656,9 @@ describe('applyStyleForPreviousEmptyParagraph', () => {
   });
 
   it('should handle applyStyleForPreviousEmptyParagraph', () => {
+    const applyLatestStyleSpy = jest
+      .spyOn(ccommand, 'applyLatestStyle')
+      .mockImplementation((_styleName, _state, currentTr) => currentTr);
     const linkmark = new Mark();
     const mockschema = new Schema({
       nodes: {
@@ -5742,7 +5745,11 @@ describe('applyStyleForPreviousEmptyParagraph', () => {
           doc: {
             resolve: () => {
               return {
-                nodeBefore: { nodeSize: 1, attrs: { styleName: 'Normal' } },
+                nodeBefore: {
+                  nodeSize: 1,
+                  content: { size: 0 },
+                  attrs: { styleName: 'Normal' },
+                },
               } as unknown as ResolvedPos;
             },
           } as unknown as Node,
@@ -5750,6 +5757,44 @@ describe('applyStyleForPreviousEmptyParagraph', () => {
         tr
       )
     ).toBeDefined();
+    applyLatestStyleSpy.mockRestore();
+  });
+
+  it('passes the previous empty paragraph positions to applyLatestStyle', () => {
+    const applyLatestStyleSpy = jest
+      .spyOn(ccommand, 'applyLatestStyle')
+      .mockImplementation((_styleName, _state, currentTr) => currentTr);
+    const prevNode = {
+      nodeSize: 2,
+      content: { size: 0 },
+      attrs: { styleName: 'Normal' },
+    };
+    const tr = {
+      selection: {
+        $from: { parentOffset: 0 },
+        $anchor: { pos: 3 },
+      },
+    } as unknown as Transaction;
+
+    applyStyleForPreviousEmptyParagraph(
+      {
+        doc: {
+          resolve: () => ({ nodeBefore: prevNode }),
+        },
+      } as unknown as EditorState,
+      tr
+    );
+
+    expect(applyLatestStyleSpy).toHaveBeenCalledWith(
+      DOMfunc.RESERVED_STYLE_NONE,
+      expect.anything(),
+      tr,
+      prevNode,
+      0,
+      0,
+      null
+    );
+    applyLatestStyleSpy.mockRestore();
   });
 });
 describe('applyStyles', () => {
@@ -6477,6 +6522,7 @@ describe('applyStyleForNextParagraph', () => {
     styleSpy.mockRestore();
   });
 });
+
 
 function createState(node) {
   return EditorState.create({

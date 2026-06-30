@@ -110,7 +110,7 @@ describe('toCustomStyleDOM', () => {
         'prefix': 'ab',
         // 'hide-style-level': false,
         style:
-          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;--hangingIndentMargin: 144px;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;counter-increment: L1 ;',
+          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;--hangingIndentMargin: 144px;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;--czi-counter-font-size: 10pt;font-family: Tahoma;--czi-counter-font-family: Tahoma;counter-increment: L1 ;',
         styleName: 'test-level1',
         'tot': true,
       },
@@ -176,7 +176,7 @@ describe('toCustomStyleDOM', () => {
         'data-show-bullet': true,
         'hideCapco': false,
         style:
-          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
+          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;--czi-counter-font-size: 10pt;font-family: Tahoma;--czi-counter-font-family: Tahoma;',
         styleName: 'FS_B01',
       },
     ]);
@@ -223,7 +223,7 @@ describe('toCustomStyleDOM', () => {
         'data-show-bullet': true,
         'hideCapco': false,
         style:
-          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
+          'text-align: right;line-height: 16pt;--czi-content-line-height: 16pt;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;--czi-counter-font-size: 10pt;font-family: Tahoma;--czi-counter-font-family: Tahoma;',
         styleName: '10Normal-@#$-10',
       },
     ]);
@@ -687,7 +687,7 @@ describe('toCustomStyleDOM', () => {
         'hideCapco': false,
         'hide-style-level': false,
         style:
-          'text-align: right;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
+          'text-align: right;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;--czi-counter-font-size: 10pt;font-family: Tahoma;--czi-counter-font-family: Tahoma;',
         styleName: 'FS_B01',
       },
     ]);
@@ -755,7 +755,7 @@ describe('toCustomStyleDOM', () => {
         'hideCapco': false,
         'hide-style-level': false,
         style:
-          'line-height: 16pt;--czi-content-line-height: 16pt;text-align: left;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;font-family: Tahoma;',
+          'line-height: 16pt;--czi-content-line-height: 16pt;text-align: left;margin-bottom: 10pt !important;margin-top: 10pt !important;font-weight: bold; --czi-counter-bold: bold;font-style: italic;color: blue;font-size: 10pt;--czi-counter-font-size: 10pt;font-family: Tahoma;--czi-counter-font-family: Tahoma;',
 
         styleName: 'FS_B01',
       },

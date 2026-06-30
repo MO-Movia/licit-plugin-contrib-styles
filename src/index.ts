@@ -436,18 +436,24 @@ export function applyStyleForPreviousEmptyParagraph(
   nextState: EditorState,
   tr: Transform
 ) {
-  if ((tr as Transaction).selection.$from.parentOffset === 0) {
-    const prevNode = nextState.doc.resolve(
-      (tr as Transaction).selection.$anchor.pos - 1
-    ).nodeBefore;
+  const selection = (tr as Transaction).selection;
+  if (selection.$from.parentOffset === 0) {
+    const previousNodeEndPos = selection.$anchor.pos - 1;
+    const prevNode = nextState.doc.resolve(previousNodeEndPos).nodeBefore;
     if (prevNode) {
+      const style = getCustomStyleByName(prevNode.attrs.styleName);
+      const emptyParaStyleName =
+        prevNode.attrs.styleName === style?.styles?.nextLineStyleName
+          ? prevNode?.attrs?.styleName
+          : RESERVED_STYLE_NONE;
+      const previousNodeStartPos = previousNodeEndPos - prevNode.nodeSize;
       tr = applyLatestStyle(
-        prevNode?.attrs?.styleName,
+        emptyParaStyleName,
         nextState,
         tr,
         prevNode,
-        (tr as Transaction).selection.$head.before(),
-        (tr as Transaction).selection.$from.end(),
+        previousNodeStartPos,
+        previousNodeStartPos + prevNode.content.size,
         null
       );
     }

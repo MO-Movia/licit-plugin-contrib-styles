@@ -5656,6 +5656,9 @@ describe('applyStyleForPreviousEmptyParagraph', () => {
   });
 
   it('should handle applyStyleForPreviousEmptyParagraph', () => {
+    const applyLatestStyleSpy = jest
+      .spyOn(ccommand, 'applyLatestStyle')
+      .mockImplementation((_styleName, _state, currentTr) => currentTr);
     const linkmark = new Mark();
     const mockschema = new Schema({
       nodes: {
@@ -5742,7 +5745,11 @@ describe('applyStyleForPreviousEmptyParagraph', () => {
           doc: {
             resolve: () => {
               return {
-                nodeBefore: { nodeSize: 1, attrs: { styleName: 'Normal' } },
+                nodeBefore: {
+                  nodeSize: 1,
+                  content: { size: 0 },
+                  attrs: { styleName: 'Normal' },
+                },
               } as unknown as ResolvedPos;
             },
           } as unknown as Node,
@@ -5750,6 +5757,44 @@ describe('applyStyleForPreviousEmptyParagraph', () => {
         tr
       )
     ).toBeDefined();
+    applyLatestStyleSpy.mockRestore();
+  });
+
+  it('passes the previous empty paragraph positions to applyLatestStyle', () => {
+    const applyLatestStyleSpy = jest
+      .spyOn(ccommand, 'applyLatestStyle')
+      .mockImplementation((_styleName, _state, currentTr) => currentTr);
+    const prevNode = {
+      nodeSize: 2,
+      content: { size: 0 },
+      attrs: { styleName: 'Normal' },
+    };
+    const tr = {
+      selection: {
+        $from: { parentOffset: 0 },
+        $anchor: { pos: 3 },
+      },
+    } as unknown as Transaction;
+
+    applyStyleForPreviousEmptyParagraph(
+      {
+        doc: {
+          resolve: () => ({ nodeBefore: prevNode }),
+        },
+      } as unknown as EditorState,
+      tr
+    );
+
+    expect(applyLatestStyleSpy).toHaveBeenCalledWith(
+      DOMfunc.RESERVED_STYLE_NONE,
+      expect.anything(),
+      tr,
+      prevNode,
+      0,
+      0,
+      null
+    );
+    applyLatestStyleSpy.mockRestore();
   });
 });
 describe('applyStyles', () => {

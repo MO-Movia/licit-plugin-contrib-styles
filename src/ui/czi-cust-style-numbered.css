@@ -6,6 +6,12 @@ html {
   --czi-counter-bold: 100;
 }
 
+.ProseMirror p[list-style-level]::before,
+.ProseMirror p[data-style-level][hide-style-level]::before,
+.ProseMirror p[data-show-bullet='true']::before {
+  font-family: var(--czi-counter-font-family, inherit);
+}
+
 .ProseMirror p[list-style-level='1'][reset='true'] {
   counter-set: L1 1;
 
@@ -198,34 +204,34 @@ html {
 .ProseMirror p[list-style-level='1']::before {
   content: attr(prefix) counter(L1, decimal) '. ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[list-style-level='2']::before {
   content: attr(prefix) counter(L1, decimal) '.' counter(L2, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[list-style-level='3']::before {
   content: attr(prefix) counter(L1, decimal) '.' counter(L2, decimal) '.'
     counter(L3, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[list-style-level='4']::before {
   content: attr(prefix) counter(L1, decimal) '.' counter(L2, decimal) '.'
     counter(L3, decimal) '.' counter(L4, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[list-style-level='5']::before {
   content: attr(prefix) counter(L1, decimal) '.' counter(L2, decimal) '.'
     counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[list-style-level='6']::before {
@@ -233,7 +239,7 @@ html {
     counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) '.'
     counter(L6, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[list-style-level='7']::before {
@@ -241,7 +247,7 @@ html {
     counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) '.'
     counter(L6, decimal) '.' counter(L7, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[list-style-level='8']::before {
@@ -249,7 +255,7 @@ html {
     counter(L3, decimal) '.' counter(L4, decimal) '.' counter(L5, decimal) '.'
     counter(L6, decimal) '.' counter(L7, decimal) '.' counter(L8, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[list-style-level='9']::before {
@@ -258,7 +264,7 @@ html {
     counter(L6, decimal) '.' counter(L7, decimal) '.' counter(L8, decimal) '.'
     counter(L9, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[list-style-level='10']::before {
@@ -267,7 +273,7 @@ html {
     counter(L6, decimal) '.' counter(L7, decimal) '.' counter(L8, decimal) '.'
     counter(L9, decimal) '.' counter(L10, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 /* List style counter */
@@ -350,7 +356,7 @@ html {
 .ProseMirror p[data-show-bullet='true']::before {
   content: attr(data-bullet-symbol) !important;
   font-weight: normal !important;
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[data-style-level='1'][hide-style-level='true']::before {
@@ -362,7 +368,7 @@ html {
 .ProseMirror p[data-style-level='1'][hide-style-level='false']::before {
   content: attr(prefix) counter(C1, decimal) '. ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[data-style-level='2'][hide-style-level='true']::before {
@@ -374,7 +380,7 @@ html {
 .ProseMirror p[data-style-level='2'][hide-style-level='false']::before {
   content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[data-style-level='3'][hide-style-level='true']::before {
@@ -388,7 +394,7 @@ html {
   content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[data-style-level='4'][hide-style-level='true']::before {
@@ -402,7 +408,7 @@ html {
   content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) '.' counter(C4, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[data-style-level='5'][hide-style-level='true']::before {
@@ -416,7 +422,7 @@ html {
   content: attr(prefix) counter(C1, decimal) '.' counter(C2, decimal) '.'
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[data-style-level='6'][hide-style-level='true']::before {
@@ -432,7 +438,7 @@ html {
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
     counter(C6, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[data-style-level='7'][hide-style-level='true']::before {
@@ -448,7 +454,7 @@ html {
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
     counter(C6, decimal) '.' counter(C7, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[data-style-level='8'][hide-style-level='true']::before {
@@ -464,7 +470,7 @@ html {
     counter(C3, decimal) '.' counter(C4, decimal) '.' counter(C5, decimal) '.'
     counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[data-style-level='9'][hide-style-level='true']::before {
@@ -482,7 +488,7 @@ html {
     counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) '.'
     counter(C9, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[data-style-level='10'][hide-style-level='true']::before {
@@ -500,7 +506,7 @@ html {
     counter(C6, decimal) '.' counter(C7, decimal) '.' counter(C8, decimal) '.'
     counter(C9, decimal) '.' counter(C10, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[data-style-level='1'][hide-style-level='false'][numbering-style='lower-alpha']::before {
@@ -1127,13 +1133,13 @@ html {
 .ProseMirror p[data-style-level='2'][tof='true']::before {
   content: attr(prefix) counter(C1, decimal) '.' counter(F1, decimal) ' ';
   font-weight: var(--czi-counter-bold);
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror p[data-style-level='2'][tot='true']::before {
   content: attr(prefix) counter(C1, decimal) '.' counter(D1, decimal) ' ';
   font-weight: var(--czi-counter-bold); 
-  font-size: var(--czi-content-font-size);
+  font-size: var(--czi-counter-font-size, var(--czi-content-font-size));
 }
 
 .ProseMirror[contenteditable="false"] [hidecapco="true"] .capco.ProseMirror-widget {

@@ -436,18 +436,24 @@ export function applyStyleForPreviousEmptyParagraph(
   nextState: EditorState,
   tr: Transform
 ) {
-  if ((tr as Transaction).selection.$from.parentOffset === 0) {
-    const prevNode = nextState.doc.resolve(
-      (tr as Transaction).selection.$anchor.pos - 1
-    ).nodeBefore;
+  const selection = (tr as Transaction).selection;
+  if (selection.$from.parentOffset === 0) {
+    const previousNodeEndPos = selection.$anchor.pos - 1;
+    const prevNode = nextState.doc.resolve(previousNodeEndPos).nodeBefore;
     if (prevNode) {
+      const style = getCustomStyleByName(prevNode.attrs.styleName);
+      const emptyParaStyleName =
+        prevNode.attrs.styleName === style?.styles?.nextLineStyleName
+          ? prevNode?.attrs?.styleName
+          : RESERVED_STYLE_NONE;
+      const previousNodeStartPos = previousNodeEndPos - prevNode.nodeSize;
       tr = applyLatestStyle(
-        prevNode?.attrs?.styleName,
+        emptyParaStyleName,
         nextState,
         tr,
         prevNode,
-        (tr as Transaction).selection.$head.before(),
-        (tr as Transaction).selection.$from.end(),
+        previousNodeStartPos,
+        previousNodeStartPos + prevNode.content.size,
         null
       );
     }
@@ -482,9 +488,9 @@ export function applyStoredMarksAfterHardBreak(
   const marks = getMarkByStyleName(styleName, schema);
   if (!marks || marks.length === 0) return tr;
   // Set them as storedMarks so next typed character inherits them
-  marks.forEach((mark) => {
+  for (const mark of marks) {
     tr = (tr as Transaction).addStoredMark(mark);
-  });
+  }
   return tr;
 }
 export function remapCounterFlags(tr) {
@@ -956,7 +962,7 @@ export function applyHangingIndentTransform(tr, state, node, pos, isPaste) {
     mappedPos,
     1
   );
-  const selectionPos = prefix1Pos ?? tr.mapping.map(state.selection?.from, -1);
+  const selectionPos = prefix1Pos ?? tr.mapping.mapResult(state.selection?.from, -1).pos;
   (tr as Transaction).setSelection(
     TextSelection.create(tr.doc, Math.min(selectionPos, tr.doc.content.size))
   );
@@ -970,69 +976,86 @@ function getHangingIndentPrefixStartPos(node, pos, prefix) {
   }
   let offset = 0;
   let prefixPos = null;
-  node.forEach((child) => {
+  for (const child of getChildNodes(node)) {
     if (prefixPos !== null) {
-      return;
+      break;
     }
-    if (
-      child.marks.some(
-        (mark) =>
-          mark.type.name === 'mark-hanging-indent' &&
-          mark.attrs?.prefix === prefix
-      )
-    ) {
+    if (hasHangingIndentPrefix(child, prefix)) {
       prefixPos =
         child.text?.startsWith(ZERO_WIDTH_SPACE)
           ? pos + 1 + offset + 1
           : pos + 1 + offset;
-      return;
+      break;
     }
     offset += child.nodeSize;
-  });
+  }
   return prefixPos;
+}
+
+function getChildNodes(node) {
+  return Array.from(
+    { length: node.childCount },
+    (_, index) => node.child(index)
+  );
+}
+
+function hasHangingIndentPrefix(child, prefix) {
+  return child.marks.some(
+    (mark) =>
+      mark.type.name === 'mark-hanging-indent' &&
+      mark.attrs?.prefix === prefix
+  );
+}
+
+function getZeroWidthSpaceDeletePositions(text, startPos) {
+  if (text.replaceAll(ZERO_WIDTH_SPACE, '').length === 0) {
+    return [];
+  }
+
+  const deletePositions = [];
+  for (let index = 0; index < text.length; index++) {
+    if (text[index] === ZERO_WIDTH_SPACE) {
+      deletePositions.push(startPos + index);
+    }
+  }
+  return deletePositions;
+}
+
+function getResolvedHangingIndentAnchorPositions(node, mappedPos) {
+  const deletePositions = [];
+  let offset = 0;
+  for (const child of getChildNodes(node)) {
+    if (hasHangingIndentPrefix(child, 1) && child.text?.includes(ZERO_WIDTH_SPACE)) {
+      deletePositions.push(
+        ...getZeroWidthSpaceDeletePositions(child.text, mappedPos + 1 + offset)
+      );
+    }
+    offset += child.nodeSize;
+  }
+  return deletePositions;
 }
 
 function removeResolvedHangingIndentAnchors(tr, state, pos) {
   if (!tr) {
     tr = state.tr;
   }
-  const mappedPos = tr.mapping.map(pos, -1);
+  const mappedPos = tr.mapping.mapResult(pos, -1).pos;
   const node = tr.doc.nodeAt(mappedPos);
   if (!node || node.type.name !== 'paragraph') {
     return tr;
   }
 
-  const deletePositions = [];
-  let offset = 0;
-  node.forEach((child) => {
-    const isPrefix1 = child.marks.some(
-      (mark) =>
-        mark.type.name === 'mark-hanging-indent' &&
-        mark.attrs?.prefix === 1
-    );
-    if (isPrefix1 && child.text?.includes(ZERO_WIDTH_SPACE)) {
-      const visibleText = child.text.replace(/\u200B/g, '');
-      if (visibleText.length > 0) {
-        for (let index = 0; index < child.text.length; index++) {
-          if (child.text[index] === ZERO_WIDTH_SPACE) {
-            deletePositions.push(mappedPos + 1 + offset + index);
-          }
-        }
-      }
-    }
-    offset += child.nodeSize;
-  });
+  const deletePositions = getResolvedHangingIndentAnchorPositions(node, mappedPos);
 
   if (deletePositions.length === 0) {
     return tr;
   }
 
   const selectionFrom = state.selection.from;
-  deletePositions
-    .sort((left, right) => right - left)
-    .forEach((deletePos) => {
-      tr = tr.delete(deletePos, deletePos + 1);
-    });
+  deletePositions.sort((left, right) => right - left);
+  for (const deletePos of deletePositions) {
+    tr = tr.delete(deletePos, deletePos + 1);
+  }
 
   const mappedSelection = Math.min(
     tr.mapping.mapResult(selectionFrom, -1).pos,

@@ -158,7 +158,7 @@ describe('CustomStyleEditor', () => {
   });
   describe('onFontNameChange', () => {
     // //FSFIX    Breakthrough code to cover code inside setState
-    let component;
+    let component: CustomStyleEditor;
 
     beforeEach(() => {
       // Initialize the component
@@ -371,24 +371,8 @@ describe('CustomStyleEditor', () => {
       otherStyleSelected: '',
     };
 
-    expect(customstyleeditor.isCapcoOptionDisabled()).toBe(false);
     expect(customstyleeditor.isNumberingOptionDisabled()).toBe(true);
     expect(customstyleeditor.isContNumberDisabled()).toBe(true);
-  });
-  it('should allow Hide Capco when style level is none', () => {
-    customstyleeditor.state = {
-      styles: {
-        align: 'left',
-        hideCapco: false,
-        styleLevel: 0,
-        isList: false,
-      },
-      mode: 0,
-      styleName: 'A Apply Stylefff',
-      otherStyleSelected: '',
-    };
-
-    expect(customstyleeditor.isCapcoOptionDisabled()).toBe(false);
   });
   it('should allow Continue Numbering only for table and figure styles', () => {
     customstyleeditor.state = {

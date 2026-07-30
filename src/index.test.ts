@@ -14,7 +14,7 @@ import {
   remapCounterFlags,
   applyStyleForPreviousEmptyParagraph,
   applyStyles,
-  applyStylesChunked,
+  applyStylesTimeBatched,
   applyStyleForEmptyParagraph,
   isDocChanged,
   applyHangingIndentTransform,
@@ -4899,7 +4899,7 @@ describe('onInitAppendTransaction', () => {
     ).toBeDefined();
   });
 
-  it('returns result.tr when applyStylesChunked changes the document', () => {
+  it('returns result.tr when applyStylesTimeBatched changes the document', () => {
     jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(true);
     const styleSpy = jest.spyOn(CustStyl, 'getCustomStyleByName').mockReturnValue({
       styleName: 'Test',
@@ -4928,9 +4928,15 @@ describe('onInitAppendTransaction', () => {
     styleSpy.mockRestore();
   });
 
-  it('schedules and dispatches the next style chunk when the first pass is incomplete', () => {
+  it('schedules the next style batch when the first pass is incomplete', () => {
     jest.useFakeTimers();
-    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(9_000_000_000_000_000);
+    let timeCallCount = 0;
+    const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => {
+      timeCallCount++;
+      // First few calls (startTime + first nodes): within budget.
+      // Later calls: exceed budget to force stopping.
+      return timeCallCount <= 10 ? 0 : 10000;
+    });
     const loadedSpy = jest
       .spyOn(CustStyl, 'isStylesLoaded')
       .mockReturnValue(true);
@@ -4951,41 +4957,29 @@ describe('onInitAppendTransaction', () => {
         text: { group: 'inline' },
       },
     });
-    const doc = schema.node('doc', null, [
-      schema.node(
-        'paragraph',
-        { styleName: 'Large' },
-        schema.text('a'.repeat(21000))
-      ),
-    ]);
+    // Build a doc with many paragraphs so the time budget is exceeded mid-way.
+    const paragraphs = [];
+    for (let i = 0; i < 100; i++) {
+      paragraphs.push(
+        schema.node('paragraph', { styleName: 'Large' }, schema.text('test'))
+      );
+    }
+    const doc = schema.node('doc', null, paragraphs);
     const nextState = EditorState.create({ schema, doc });
-    const dispatch = jest.fn();
-    const focus = jest.fn();
-    const hasFocus = jest.fn().mockReturnValueOnce(true).mockReturnValueOnce(false);
-    const view = {
-      dispatch,
-      focus,
-      hasFocus,
-      isDestroyed: false,
-      state: nextState,
-    };
+    const scheduleNext = jest.fn();
 
     const result = onInitAppendTransaction(
       { loaded: true },
       { getMeta: () => 0 } as unknown as Transaction,
       nextState,
       0,
-      view as unknown as EditorView
+      500,
+      scheduleNext
     );
 
     expect(result).toBeInstanceOf(Transaction);
-    jest.runOnlyPendingTimers();
-    expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(dispatch.mock.calls[0][0].getMeta('addToHistory')).toBe(false);
-    expect(typeof dispatch.mock.calls[0][0].getMeta('styleChunkStartPos')).toBe(
-      'number'
-    );
-    expect(focus).toHaveBeenCalledTimes(1);
+    expect(scheduleNext).toHaveBeenCalledTimes(1);
+    expect(typeof scheduleNext.mock.calls[0][0]).toBe('number');
 
     styleSpy.mockRestore();
     loadedSpy.mockRestore();
@@ -4993,13 +4987,14 @@ describe('onInitAppendTransaction', () => {
     jest.useRealTimers();
   });
 
-  it('returns the existing transaction when styles are not loaded but chunk metadata exists', () => {
+  it('returns null when styles are not loaded', () => {
     jest.spyOn(CustStyl, 'isStylesLoaded').mockReturnValue(false);
     const tr = {
-      getMeta: (key) => (key === 'styleChunkStartPos' ? 25 : undefined),
+      getMeta: () => undefined,
+      docChanged: false,
     } as unknown as Transaction;
 
-    expect(onInitAppendTransaction({ loaded: false }, tr, {})).toBe(tr);
+    expect(onInitAppendTransaction({ loaded: false }, tr, {})).toBeNull();
   });
 
   it('returns null when the initial style pass produces no document changes', () => {
@@ -5832,11 +5827,18 @@ describe('applyStyles', () => {
   });
 });
 
-describe('applyStylesChunked', () => {
-  it('returns done false when the document exceeds the chunk limit', () => {
+describe('applyStylesTimeBatched', () => {
+  it('returns done false when the time budget is exceeded', () => {
     const applyLatestStyleSpy = jest
       .spyOn(ccommand, 'applyLatestStyle')
       .mockImplementation((_styleName, _state, tr) => tr);
+    let timeCallCount = 0;
+    const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => {
+      timeCallCount++;
+      // First few calls (startTime + first nodes): within budget.
+      // Later calls: exceed budget to force stopping.
+      return timeCallCount <= 10 ? 0 : 10000;
+    });
     const schema = new Schema({
       nodes: {
         doc: { content: 'paragraph+' },
@@ -5850,23 +5852,25 @@ describe('applyStylesChunked', () => {
         text: { group: 'inline' },
       },
     });
-    const doc = schema.node('doc', null, [
-      schema.node(
-        'paragraph',
-        { styleName: 'Large' },
-        schema.text('a'.repeat(21000))
-      ),
-    ]);
+    // Build a doc with many paragraphs so the time budget is exceeded mid-way.
+    const paragraphs = [];
+    for (let i = 0; i < 100; i++) {
+      paragraphs.push(
+        schema.node('paragraph', { styleName: 'Large' }, schema.text('test'))
+      );
+    }
+    const doc = schema.node('doc', null, paragraphs);
     const state = EditorState.create({ schema, doc });
 
-    const result = applyStylesChunked(state);
+    const result = applyStylesTimeBatched(state, 0, 500);
 
     expect(result.done).toBe(false);
     expect(result.lastPos).toBeGreaterThan(0);
     applyLatestStyleSpy.mockRestore();
+    nowSpy.mockRestore();
   });
 
-  it('returns done true for documents that fit in a single chunk', () => {
+  it('returns done true for documents that fit within the time budget', () => {
     const applyLatestStyleSpy = jest
       .spyOn(ccommand, 'applyLatestStyle')
       .mockImplementation((_styleName, _state, tr) => tr);
@@ -5888,10 +5892,36 @@ describe('applyStylesChunked', () => {
     ]);
     const state = EditorState.create({ schema, doc });
 
-    const result = applyStylesChunked(state);
+    const result = applyStylesTimeBatched(state);
 
     expect(result.done).toBe(true);
     expect(result.lastPos).toBe(state.tr.doc.content.size);
+    applyLatestStyleSpy.mockRestore();
+  });
+
+  it('returns done true when startPos is beyond the document', () => {
+    const applyLatestStyleSpy = jest
+      .spyOn(ccommand, 'applyLatestStyle')
+      .mockImplementation((_styleName, _state, tr) => tr);
+    const schema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'Small' } },
+          toDOM() { return ['p', 0]; },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', { styleName: 'Small' }, schema.text('short')),
+    ]);
+    const state = EditorState.create({ schema, doc });
+
+    const result = applyStylesTimeBatched(state, 99999);
+
+    expect(result.done).toBe(true);
     applyLatestStyleSpy.mockRestore();
   });
 });

@@ -31,6 +31,7 @@ import type { StyleRuntime } from './StyleRuntime';
 
 const ENTERKEYCODE = 13;
 const BACKSPACEKEYCODE = 8;
+const DELETEKEYCODE = 46;
 const PARA_POSITION_DIFF = 4;
 const ATTR_STYLE_NAME = 'styleName';
 const DEFAULT_CHUNK_BUDGET_MS = 100;
@@ -157,9 +158,12 @@ export class CustomstylePlugin extends Plugin {
           return false;
         },
         handleDOMEvents: {
-          keydown(view) {
+          keydown(view, event) {
             styleChunkLastInteractionAt = Date.now();
+            styleLastKeyCode = event?.keyCode ?? event?.which ?? null;
+            styleLastKeyCodeAt = styleChunkLastInteractionAt;
             csview = view;
+            return false;
           },
           mousedown(view) {
             styleChunkLastInteractionAt = Date.now();
@@ -367,6 +371,12 @@ export function onUpdateAppendTransaction(
       tr = applyStoredMarksAfterHardBreak(nextState, tr);
     }
   }
+  tr = removeHangingIndentOnBackspaceOrDelete(
+    prevState,
+    nextState,
+    tr,
+    getLastKeyCode(csview)
+  );
   tr = applyLineStyleForBoldPartial(nextState, tr, isPaste);
   if (0 < transactions.length && isPaste) {
     let _startPos = 0;
@@ -1069,6 +1079,160 @@ function hasHangingIndentPrefix(child, prefix) {
     (mark) =>
       mark.type.name === 'mark-hanging-indent' &&
       mark.attrs?.prefix === prefix
+  );
+}
+
+export function removeHangingIndentOnBackspaceOrDelete(
+  prevState,
+  nextState,
+  tr,
+  lastKeyCode
+) {
+  if (lastKeyCode !== BACKSPACEKEYCODE && lastKeyCode !== DELETEKEYCODE) {
+    return tr;
+  }
+  if (!prevState?.selection?.empty) {
+    return tr;
+  }
+
+  const cursorPos = prevState.selection.from;
+  const prevParagraph = findParentNodeClosestToPos(
+    prevState.doc.resolve(cursorPos),
+    (node) => node.type === prevState.schema.nodes.paragraph
+  );
+  if (!prevParagraph) {
+    return tr;
+  }
+
+  const shouldRemoveHangingIndent =
+    lastKeyCode === BACKSPACEKEYCODE
+      ? isBackspaceAtPrefix1Start(
+        prevParagraph.node,
+        prevParagraph.pos,
+        cursorPos
+      )
+      : isDeleteAtPrefix0EndBeforePrefix1(
+        prevParagraph.node,
+        prevParagraph.pos,
+        cursorPos
+      );
+
+  if (!shouldRemoveHangingIndent) {
+    return tr;
+  }
+
+  tr ??= nextState.tr;
+  const nextCursorPos = Math.min(nextState.selection.from, tr.doc.content.size);
+  const nextParagraph = findParentNodeClosestToPos(
+    tr.doc.resolve(nextCursorPos),
+    (node) => node.type === nextState.schema.nodes.paragraph
+  );
+
+  if (!nextParagraph) {
+    return tr;
+  }
+
+  return removeHangingIndentFromParagraph(
+    tr,
+    nextState,
+    nextParagraph.node,
+    nextParagraph.pos
+  );
+}
+
+function isBackspaceAtPrefix1Start(node, pos, cursorPos) {
+  let offset = 0;
+  for (const child of getChildNodes(node)) {
+    const childStart = pos + 1 + offset;
+    if (
+      hasHangingIndentPrefix(child, 1) &&
+      cursorPos === getEditableChildStart(child, childStart)
+    ) {
+      return true;
+    }
+    offset += child.nodeSize;
+  }
+  return false;
+}
+
+function getEditableChildStart(child, childStart) {
+  let cursorPos = childStart;
+  const text = child.text ?? '';
+  while (text[cursorPos - childStart] === ZERO_WIDTH_SPACE) {
+    cursorPos++;
+  }
+  return cursorPos;
+}
+
+function isDeleteAtPrefix0EndBeforePrefix1(node, pos, cursorPos) {
+  let offset = 0;
+  for (let index = 0; index < node.childCount; index++) {
+    const child = node.child(index);
+    const childEnd = pos + 1 + offset + child.nodeSize;
+    if (
+      hasHangingIndentPrefix(child, 0) &&
+      cursorPos === childEnd &&
+      hasAdjacentPrefix1Child(node, index)
+    ) {
+      return true;
+    }
+    offset += child.nodeSize;
+  }
+  return false;
+}
+
+function hasAdjacentPrefix1Child(node, index) {
+  for (let nextIndex = index + 1; nextIndex < node.childCount; nextIndex++) {
+    if (hasHangingIndentPrefix(node.child(nextIndex), 1)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function removeHangingIndentFromParagraph(tr, state, node, pos) {
+  const mappedPos = tr.mapping.mapResult(pos, -1).pos;
+  const currentNode = tr.doc.nodeAt(mappedPos);
+  if (!currentNode || currentNode.type.name !== 'paragraph') {
+    return tr;
+  }
+
+  const newContent = [];
+  let changed = false;
+  currentNode.content.forEach((child) => {
+    if (!hasHangingIndentMark(child)) {
+      newContent.push(child);
+      return;
+    }
+
+    const marks = child.marks.filter(
+      (mark) => mark.type.name !== 'mark-hanging-indent'
+    );
+    const text = child.text?.replaceAll(ZERO_WIDTH_SPACE, '') ?? '';
+    changed = true;
+    if (text.length > 0) {
+      newContent.push(state.schema.text(text, marks));
+    }
+  });
+
+  if (!changed) {
+    return tr;
+  }
+
+  const newParagraph = currentNode.type.create(currentNode.attrs, newContent);
+  tr.replaceWith(mappedPos, mappedPos + currentNode.nodeSize, newParagraph);
+  const mappedSelection = Math.min(
+    tr.mapping.mapResult(state.selection.from, -1).pos,
+    tr.doc.content.size
+  );
+  return (tr as Transaction).setSelection(
+    TextSelection.create(tr.doc, mappedSelection)
+  );
+}
+
+function hasHangingIndentMark(child) {
+  return child.marks.some(
+    (mark) => mark.type.name === 'mark-hanging-indent'
   );
 }
 

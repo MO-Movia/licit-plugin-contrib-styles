@@ -46,7 +46,6 @@ describe('toCustomStyleDOM', () => {
         hasNumbering: true,
         isList: true,
         indentPosition: '1.5',
-        isHangingIndentapplied: true,
         prefixValue: 'ab',
         numberingStyle: 'lower-alpha',
         tot: true,

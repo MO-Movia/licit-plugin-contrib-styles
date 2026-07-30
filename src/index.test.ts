@@ -18,6 +18,7 @@ import {
   applyStyleForEmptyParagraph,
   isDocChanged,
   applyHangingIndentTransform,
+  removeHangingIndentOnBackspaceOrDelete,
   applyStoredMarksAfterHardBreak,
 } from './index';
 import { builders } from 'prosemirror-test-builder';
@@ -6646,5 +6647,111 @@ describe('applyHangingIndentTransform', () => {
           mark.type.name === 'mark-hanging-indent' && mark.attrs.prefix === 1
       )
     ).toBe(true);
+  });
+});
+
+describe('removeHangingIndentOnBackspaceOrDelete', () => {
+  const backspaceKeyCode = 8;
+  const deleteKeyCode = 46;
+
+  function createStateWithSelection(node, pos) {
+    const state = createState(node);
+    return state.apply(
+      state.tr.setSelection(TextSelection.create(state.doc, pos))
+    );
+  }
+
+  function hasHangingIndentMark(child) {
+    return child.marks.some(
+      (mark) => mark.type.name === 'mark-hanging-indent'
+    );
+  }
+
+  it('removes hanging-indent marks when Backspace is pressed at the start of prefix:1 text', () => {
+    const prefix0 = mockSchema.mark('mark-hanging-indent', { prefix: 0 });
+    const prefix1 = mockSchema.mark('mark-hanging-indent', { prefix: 1 });
+    const para = mockSchema.node('paragraph', null, [
+      mockSchema.text('lead', [prefix0]),
+      mockSchema.text('after', [prefix1]),
+    ]);
+    const prevState = createStateWithSelection(para, 5);
+    const nextState = createStateWithSelection(para, 5);
+
+    const result = removeHangingIndentOnBackspaceOrDelete(
+      prevState,
+      nextState,
+      nextState.tr,
+      backspaceKeyCode
+    );
+
+    const newPara = result.doc.firstChild;
+    expect(
+      newPara.content.content.some((child) => hasHangingIndentMark(child))
+    ).toBe(false);
+    expect(newPara.textContent).toBe('leadafter');
+  });
+
+  it('does not remove hanging-indent marks when Backspace is pressed inside prefix:1 text after its start', () => {
+    const prefix0 = mockSchema.mark('mark-hanging-indent', { prefix: 0 });
+    const prefix1 = mockSchema.mark('mark-hanging-indent', { prefix: 1 });
+    const para = mockSchema.node('paragraph', null, [
+      mockSchema.text('lead', [prefix0]),
+      mockSchema.text('after', [prefix1]),
+    ]);
+    const prevState = createStateWithSelection(para, 7);
+    const nextState = createStateWithSelection(para, 7);
+
+    const result = removeHangingIndentOnBackspaceOrDelete(
+      prevState,
+      nextState,
+      nextState.tr,
+      backspaceKeyCode
+    );
+
+    expect(result.doc).toBe(nextState.doc);
+  });
+
+  it('removes hanging-indent marks when Delete is pressed at the end of prefix:0 text', () => {
+    const prefix0 = mockSchema.mark('mark-hanging-indent', { prefix: 0 });
+    const prefix1 = mockSchema.mark('mark-hanging-indent', { prefix: 1 });
+    const para = mockSchema.node('paragraph', null, [
+      mockSchema.text('lead', [prefix0]),
+      mockSchema.text('\u200Bafter', [prefix1]),
+    ]);
+    const prevState = createStateWithSelection(para, 5);
+    const nextState = createStateWithSelection(para, 5);
+
+    const result = removeHangingIndentOnBackspaceOrDelete(
+      prevState,
+      nextState,
+      nextState.tr,
+      deleteKeyCode
+    );
+
+    const newPara = result.doc.firstChild;
+    expect(
+      newPara.content.content.some((child) => hasHangingIndentMark(child))
+    ).toBe(false);
+    expect(newPara.textContent).toBe('leadafter');
+  });
+
+  it('does not remove prefix:1 hanging-indent mark when Delete is pressed before the end of prefix:0 text', () => {
+    const prefix0 = mockSchema.mark('mark-hanging-indent', { prefix: 0 });
+    const prefix1 = mockSchema.mark('mark-hanging-indent', { prefix: 1 });
+    const para = mockSchema.node('paragraph', null, [
+      mockSchema.text('lead', [prefix0]),
+      mockSchema.text('after', [prefix1]),
+    ]);
+    const prevState = createStateWithSelection(para, 3);
+    const nextState = createStateWithSelection(para, 3);
+
+    const result = removeHangingIndentOnBackspaceOrDelete(
+      prevState,
+      nextState,
+      nextState.tr,
+      deleteKeyCode
+    );
+
+    expect(result.doc).toBe(nextState.doc);
   });
 });

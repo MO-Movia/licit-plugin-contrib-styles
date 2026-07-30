@@ -312,6 +312,10 @@ export class CustomStyleCommand extends UICommand {
       newAttrs['overriddenIndentValue'] = isOverriddenIndent
         ? newAttrs.overriddenIndentValue
         : null;
+      if (newAttrs.hangingIndent) {
+        newAttrs['hangingIndent'] = null;
+        newAttrs['indentPosition'] = null;
+      }
       tr = tr.setNodeMarkup(startPos, undefined, newAttrs);
     }
 
@@ -444,6 +448,7 @@ export class CustomStyleCommand extends UICommand {
     const to = selection.$to?.end();
     let _from = from;
     let _to = to;
+    tr = removeHangingIndentMark(_from, _to, tr);
     doc.nodesBetween(from, to, (node) => {
       if (
         node.attrs.styleName &&
@@ -886,7 +891,9 @@ function applyStyleEx(
       newattrs.indentPosition = styleProp.styles.indentPosition;
       newattrs.hangingIndent = true;
     }
-
+    if (!newattrs.hangingIndent) {
+      tr = removeHangingIndentMark(startPos, endPos, tr);
+    }
     _commands.forEach((element) => {
       if (styleProp?.styles) {
         // to set the node attribute for text-align
@@ -1413,6 +1420,22 @@ export function removeAllMarksExceptLinkForTableColumnCell(
 
   // });
   return handleRemoveMarks(tr, tasks);
+}
+
+function removeHangingIndentMark(startPos: number,
+  endPos: number,
+  tr: Transform) {
+  tr?.doc.nodesBetween(startPos, endPos, (node, pos) => {
+    if (node.marks?.length > 0) {
+      for (const mark of node.marks) {
+        if (mark.type.name === 'mark-hanging-indent' || mark.type.name === 'mark-spacer') {
+          tr.removeMark(pos, pos + node.nodeSize, mark.type);
+        }
+      }
+    }
+    return true;
+  });
+  return tr;
 }
 
 // [FS] IRAD-1087 2020-11-02

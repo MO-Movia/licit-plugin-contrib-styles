@@ -34,7 +34,6 @@ export type HTMLStyles = {
   hideNumbering?: boolean;
   resetValue?: boolean;
   indentPosition?: string;
-  isHangingIndentapplied?: boolean;
 };
 
 export type Style = {

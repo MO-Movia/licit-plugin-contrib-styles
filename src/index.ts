@@ -40,9 +40,6 @@ const ZERO_WIDTH_SPACE = '\u200B';
 let slice1;
 let styleChunkTimer = null;
 let styleChunkLastInteractionAt = 0;
-// TEMP: tracks wall-clock start time of the initial style application pass
-// so the total time-to-complete can be logged when all styles are applied.
-let styleApplyStartTime = 0;
 
 export type CustomstylePluginOptions = {
   chunkBudgetMs?: number;
@@ -158,10 +155,8 @@ export class CustomstylePlugin extends Plugin {
           return false;
         },
         handleDOMEvents: {
-          keydown(view, event) {
+          keydown(view) {
             styleChunkLastInteractionAt = Date.now();
-            styleLastKeyCode = event?.keyCode ?? event?.which ?? null;
-            styleLastKeyCodeAt = styleChunkLastInteractionAt;
             csview = view;
             return false;
           },
@@ -275,9 +270,6 @@ export function onInitAppendTransaction(
   ref.loaded = isStylesLoaded();
   if (ref.loaded) {
     tr ??= nextState.tr;
-    if (startPos === 0) {
-      styleApplyStartTime = Date.now();
-    }
     const result = applyStylesTimeBatched(nextState, startPos, budgetMs);
     const chunkTr = preserveSelectionAfterChunk(result.tr, nextState.selection);
 
@@ -285,12 +277,6 @@ export function onInitAppendTransaction(
       // Continue batched style application asynchronously so host app
       // focus/update work does not break the appendTransaction chain.
       scheduleNext(result.lastPos);
-    } else if (result.done) {
-      // TEMP: log when all styles have finished applying to the document.
-      const elapsedMs = Date.now() - styleApplyStartTime;
-      console.warn(
-        `[CustomstylePlugin] All styles applied to document in ${elapsedMs}ms.`
-      );
     }
     return chunkTr.docChanged ? chunkTr : null;
   }
@@ -1065,6 +1051,14 @@ function getHangingIndentPrefixStartPos(node, pos, prefix) {
     offset += child.nodeSize;
   }
   return prefixPos;
+}
+
+function getLastKeyCode(view) {
+  const viewLastKeyCode = view?.input?.lastKeyCode;
+  if (typeof viewLastKeyCode === 'number') {
+    return viewLastKeyCode;
+  }
+  return null;
 }
 
 function getChildNodes(node) {

@@ -6193,3 +6193,172 @@ describe('applyStyleToEachNode', () => {
     expect(spy).not.toHaveBeenCalled();
   });
 });
+
+describe('removeAllMarksExceptLink batched', () => {
+  it('skips overridden marks and removes non-overridden ones in one call per type', () => {
+    const mySchema = new Schema({
+      nodes: {
+        doc: { content: 'block+' },
+        paragraph: {
+          content: 'text*',
+          group: 'block',
+          parseDOM: [{ tag: 'p' }],
+          toDOM() { return ['p', 0]; },
+        },
+        text: { group: 'inline' },
+      },
+      marks: {
+        strong: {
+          attrs: { overridden: { default: false } },
+        },
+        em: {
+          attrs: { overridden: { default: false } },
+        },
+      },
+    });
+    const strongMark = mySchema.marks.strong.create({ overridden: false });
+    const emMark = mySchema.marks.em.create({ overridden: true });
+    const para = mySchema.nodes.paragraph.create(
+      null,
+      mySchema.text('Hello', [strongMark, emMark])
+    );
+    const mockDoc = mySchema.nodes.doc.create(null, [para]);
+    const removeMarkSpy = jest.fn().mockReturnValue({ doc: mockDoc });
+    const tr = {
+      doc: mockDoc,
+      removeMark: removeMarkSpy,
+    } as unknown as Transform;
+
+    removeAllMarksExceptLink(0, mockDoc.content.size, tr);
+    // Should call removeMark once for 'strong' (non-overridden) but not for 'em' (overridden)
+    expect(removeMarkSpy).toHaveBeenCalledTimes(1);
+    expect((removeMarkSpy.mock.calls[0][2] as { name: string }).name).toBe('strong');
+  });
+
+  it('removes marks from table column cell in one call per type', () => {
+    const mySchema = new Schema({
+      nodes: {
+        doc: { content: 'block+' },
+        paragraph: {
+          content: 'text*',
+          group: 'block',
+          parseDOM: [{ tag: 'p' }],
+          toDOM() { return ['p', 0]; },
+        },
+        text: { group: 'inline' },
+      },
+      marks: {
+        strong: {
+          attrs: { overridden: { default: false } },
+        },
+      },
+    });
+    const strongMark = mySchema.marks.strong.create({ overridden: false });
+    const para = mySchema.nodes.paragraph.create(
+      null,
+      mySchema.text('Hello', [strongMark])
+    );
+    const removeMarkSpy = jest.fn().mockReturnValue({ doc: {} });
+    const tr = {
+      removeMark: removeMarkSpy,
+    } as unknown as Transform;
+
+    removeAllMarksExceptLinkForTableColumnCell(0, para, tr);
+    expect(removeMarkSpy).toHaveBeenCalledTimes(1);
+    expect((removeMarkSpy.mock.calls[0][2] as { name: string }).name).toBe('strong');
+  });
+});
+
+describe('applyStyleEx no-op skip', () => {
+  it('skips mark removal when node already has correct attrs and marks', () => {
+    const mySchema = new Schema({
+      nodes: {
+        doc: { content: 'block+' },
+        paragraph: {
+          content: 'text*',
+          group: 'block',
+          attrs: {
+            styleName: { default: 'Test' },
+            indent: { default: null },
+            align: { default: null },
+            overriddenIndent: { default: null },
+            overriddenAlign: { default: null },
+            id: { default: null },
+          },
+          parseDOM: [{ tag: 'p' }],
+          toDOM() { return ['p', 0]; },
+        },
+        text: { group: 'inline' },
+      },
+      marks: {
+        strong: {},
+      },
+    });
+    const strongMark = mySchema.marks.strong.create();
+    const para = mySchema.nodes.paragraph.create(
+      { styleName: 'Test', indent: null, align: null, overriddenIndent: null, overriddenAlign: null, id: null },
+      mySchema.text('Hello', [strongMark])
+    );
+    const mockDoc = mySchema.nodes.doc.create(null, [para]);
+    const state = EditorState.create({ schema: mySchema, doc: mockDoc });
+    const tr = state.tr;
+
+    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
+      styleName: 'Test',
+      styles: { strong: true },
+    } as unknown as typeof customstyles.getCustomStyleByName extends (name: string) => infer R ? R : never);
+
+    const removeMarkSpy = jest.spyOn(tr, 'removeMark');
+
+    const result = applyLatestStyle('Test', state, tr, para, 0, para.content.size + 1);
+    expect(result).toBeDefined();
+    // removeMark should NOT be called because the no-op check passed
+    expect(removeMarkSpy).not.toHaveBeenCalled();
+
+    (customstyles.getCustomStyleByName as jest.Mock).mockRestore();
+  });
+
+  it('does not skip when node has wrong marks', () => {
+    const mySchema = new Schema({
+      nodes: {
+        doc: { content: 'block+' },
+        paragraph: {
+          content: 'text*',
+          group: 'block',
+          attrs: {
+            styleName: { default: 'Test' },
+            indent: { default: null },
+            align: { default: null },
+            overriddenIndent: { default: null },
+            overriddenAlign: { default: null },
+            id: { default: null },
+          },
+          parseDOM: [{ tag: 'p' }],
+          toDOM() { return ['p', 0]; },
+        },
+        text: { group: 'inline' },
+      },
+      marks: {
+        strong: {},
+      },
+    });
+    // No marks on the text — should NOT skip
+    const para = mySchema.nodes.paragraph.create(
+      { styleName: 'Test', indent: null, align: null, overriddenIndent: null, overriddenAlign: null, id: null },
+      mySchema.text('Hello')
+    );
+    const mockDoc = mySchema.nodes.doc.create(null, [para]);
+    const state = EditorState.create({ schema: mySchema, doc: mockDoc });
+    const tr = state.tr;
+
+    jest.spyOn(customstyles, 'getCustomStyleByName').mockReturnValue({
+      styleName: 'Test',
+      styles: { strong: true },
+    } as unknown as typeof customstyles.getCustomStyleByName extends (name: string) => infer R ? R : never);
+
+    const result = applyLatestStyle('Test', state, tr, para, 0, para.content.size + 1);
+    expect(result).toBeDefined();
+
+    (customstyles.getCustomStyleByName as jest.Mock).mockRestore();
+  });
+});

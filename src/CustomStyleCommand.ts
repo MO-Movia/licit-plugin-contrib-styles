@@ -7,7 +7,7 @@ import {
 import { Transform } from 'prosemirror-transform';
 import { CellSelection } from 'prosemirror-tables';
 import { EditorView } from 'prosemirror-view';
-import { Node, Fragment, Schema } from 'prosemirror-model';
+import { Node, Fragment, Schema, Mark, MarkType } from 'prosemirror-model';
 import { UICommand } from '@modusoperandi/licit-doc-attrs-step';
 import {
   atViewportCenter,
@@ -40,6 +40,7 @@ import {
   saveStyle,
   getStylesAsync,
   addStyleToList,
+  registerStyleCacheInvalidator,
 } from './customStyle';
 import type { Style } from './StyleRuntime';
 import {
@@ -88,6 +89,50 @@ const MISSED_HEIRACHY_ELEMENT = {
 const nodesAfterSelection = [];
 const nodesBeforeSelection = [];
 const selectedNodes = [];
+
+// Per-styleName caches for commands and marks. Since styles do not change
+// after editor load (and rare edits trigger invalidation via
+// registerStyleCacheInvalidator), these avoid recreating command/mark objects
+// on every applyStyleEx call (once per paragraph in the document).
+let styleCommandsCache = new Map<string, UICommand[]>();
+let styleMarksCache = new Map<string, Mark[]>();
+
+// Register invalidation callback so caches are cleared when styles change.
+registerStyleCacheInvalidator(() => {
+  styleCommandsCache = new Map<string, UICommand[]>();
+  styleMarksCache = new Map<string, Mark[]>();
+});
+
+// Cached wrapper: returns the command list for a styleName, creating and
+// caching it on first access. Falls back to direct creation if no styleName.
+function getCachedStyleCommands(styleName: string, customStyle): UICommand[] {
+  if (!styleName) {
+    return getCustomStyleCommands(customStyle);
+  }
+  let commands = styleCommandsCache.get(styleName);
+  if (!commands) {
+    commands = getCustomStyleCommands(customStyle);
+    styleCommandsCache.set(styleName, commands);
+  }
+  return commands;
+}
+
+// Cached wrapper: returns the mark array for a styleName+schema, creating and
+// caching it on first access.
+function getCachedMarksByStyleName(
+  styleName: string,
+  schema: Schema
+): Mark[] {
+  if (!styleName) {
+    return getMarkByStyleName(styleName, schema);
+  }
+  let marks = styleMarksCache.get(styleName);
+  if (!marks) {
+    marks = getMarkByStyleName(styleName, schema);
+    styleMarksCache.set(styleName, marks);
+  }
+  return marks;
+}
 
 function getCustomStyleCommandsEx(
   customStyle,
@@ -312,6 +357,10 @@ export class CustomStyleCommand extends UICommand {
       newAttrs['overriddenIndentValue'] = isOverriddenIndent
         ? newAttrs.overriddenIndentValue
         : null;
+      if (newAttrs.hangingIndent) {
+        newAttrs['hangingIndent'] = null;
+        newAttrs['indentPosition'] = null;
+      }
       tr = tr.setNodeMarkup(startPos, undefined, newAttrs);
     }
 
@@ -444,6 +493,7 @@ export class CustomStyleCommand extends UICommand {
     const to = selection.$to?.end();
     let _from = from;
     let _to = to;
+    tr = removeHangingIndentMark(_from, _to, tr);
     doc.nodesBetween(from, to, (node) => {
       if (
         node.attrs.styleName &&
@@ -814,7 +864,7 @@ export function applyStyleForTableColumnCell(
   }
 
   if (!styleProp?.styles) return tr;
-  const _commands = getCustomStyleCommands(styleProp.styles);
+  const _commands = getCachedStyleCommands(styleName, styleProp.styles);
   let newattrs = getUpdatedAttrs(node, styleProp, styleName);
 
   _commands.forEach((element) => {
@@ -830,7 +880,7 @@ export function applyStyleForTableColumnCell(
     }
   });
   const originalSelectionPos = state.selection?.from;
-  const storedmarks = getMarkByStyleName(styleName, state.schema);
+  const storedmarks = getCachedMarksByStyleName(styleName, state.schema);
   newattrs.id = null === newattrs.id ? '' : null;
   if (isAllowedNode(node)) {
     tr = tr.setNodeMarkup(startPos, undefined, newattrs);
@@ -845,6 +895,49 @@ export function applyStyleForTableColumnCell(
   }
 
   return tr;
+}
+
+// Shallow property-by-property equality for two attr objects.
+function shallowAttrsEqual(a: Record<string, unknown>, b: Record<string, unknown>): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const key of aKeys) {
+    if (a[key] !== b[key]) return false;
+  }
+  return true;
+}
+
+// Check if a paragraph node's text children already have exactly the expected
+// marks (plus any preserved link/override/spacer marks). If so, the
+// remove-all-marks + re-add cycle can be skipped entirely.
+function nodeAlreadyStyled(node: Node, expectedMarks: Mark[]): boolean {
+  let hasTextChildren = false;
+  let allCorrect = true;
+  node.forEach((child) => {
+    if (!child.isText || !allCorrect) return;
+    hasTextChildren = true;
+    const relevant = (child.marks || []).filter(
+      (m) =>
+        m.type.name !== 'link' &&
+        m.type.name !== 'override' &&
+        m.type.name !== 'spacer'
+    );
+    if (relevant.length !== expectedMarks.length) {
+      allCorrect = false;
+      return;
+    }
+    for (const em of expectedMarks) {
+      if (!relevant.some((rm) => rm.eq(em))) {
+        allCorrect = false;
+        return;
+      }
+    }
+  });
+  // No text children → marks are trivially correct (nothing to add/remove)
+  return !hasTextChildren || allCorrect;
 }
 
 function applyStyleEx(
@@ -865,15 +958,13 @@ function applyStyleEx(
   const lastChild = tr.doc.nodeAt(endPos);
   endPos = null === lastChild ? endPos : endPos + 1;
 
-  // Issue fix: applied link is missing after applying a custom style.
-  tr = removeAllMarksExceptLink(startPos, endPos, tr);
-
+  // Resolve styleProp early so we can detect no-ops before removing marks.
   if (loading || !opt) {
     styleProp = getCustomStyleByName(styleName);
   }
 
   if (styleProp?.styles) {
-    const _commands = getCustomStyleCommands(styleProp.styles);
+    const _commands = getCachedStyleCommands(styleName, styleProp.styles);
     const newattrs = { ...node.attrs };
 
     // Indent overriding not working on a paragraph where custom style is applied
@@ -887,6 +978,10 @@ function applyStyleEx(
       newattrs.hangingIndent = true;
     }
 
+    // Phase 1: compute newattrs from style commands (attrs only, no marks yet)
+    if (!newattrs.hangingIndent) {
+      tr = removeHangingIndentMark(startPos, endPos, tr);
+    }
     _commands.forEach((element) => {
       if (styleProp?.styles) {
         // to set the node attribute for text-align
@@ -931,7 +1026,21 @@ function applyStyleEx(
           }
         }
       }
+    });
 
+    // No-op check: if attrs are unchanged and marks already match, skip the
+    // entire remove-all-marks + re-add cycle. This is the biggest win on
+    // initial document load where nodes are already correctly styled.
+    const expectedMarks = getCachedMarksByStyleName(styleName, state.schema);
+    if (shallowAttrsEqual(node.attrs, newattrs) && nodeAlreadyStyled(node, expectedMarks)) {
+      return tr;
+    }
+
+    // Phase 2: remove existing marks and re-add style marks
+    // Issue fix: applied link is missing after applying a custom style.
+    tr = removeAllMarksExceptLink(startPos, endPos, tr);
+
+    _commands.forEach((element) => {
       // to set the marks for the node
       if (
         element.executeCustom &&
@@ -944,7 +1053,7 @@ function applyStyleEx(
       }
     });
     const originalSelectionPos = state.selection?.from;
-    const storedmarks = getMarkByStyleName(styleName, state.schema);
+    const storedmarks = expectedMarks;
     newattrs.id = null === newattrs.id ? '' : null;
 
     tr = _setNodeAttribute(state, tr, startPos, endPos, newattrs);
@@ -956,6 +1065,9 @@ function applyStyleEx(
     } else if (originalSelectionPos) {
       (tr as Transaction).setSelection(TextSelection.create(tr.doc, originalSelectionPos));
     }
+  } else {
+    // No style — just remove marks (original behavior for clearing styles)
+    tr = removeAllMarksExceptLink(startPos, endPos, tr);
   }
   return tr;
 }
@@ -1373,6 +1485,14 @@ function _setNodeAttribute(
   to: number,
   attribute
 ) {
+  // Fast path: if the range covers a single allowed node, skip the
+  // nodesBetween traversal and call setNodeMarkup directly.
+  if (typeof tr.doc.nodeAt === 'function') {
+    const node = tr.doc.nodeAt(from);
+    if (node && isAllowedNode(node) && from + node.nodeSize >= to) {
+      return tr.setNodeMarkup(from, undefined, attribute);
+    }
+  }
   tr.doc.nodesBetween(from, to, (node, startPos) => {
     if (isAllowedNode(node)) {
       tr = tr.setNodeMarkup(startPos, undefined, attribute);
@@ -1387,11 +1507,14 @@ export function removeAllMarksExceptLinkForTableColumnCell(
   tr: Transform
 ) {
 
-  if (!node || node.type.name !== 'paragraph') {
+  if (node?.type.name !== 'paragraph') {
     return tr;
   }
-  let offset = pos + 1;
-  const tasks = [];
+  // Batch mark removal: collect unique mark types, then issue one removeMark
+  // per type over the full paragraph range (instead of per-text-node-per-mark).
+  const from = pos + 1;
+  const to = pos + node.nodeSize - 1;
+  const markTypesToRemove = new Set<MarkType>();
   node.forEach((child) => {
     if (child.isText && child.marks?.length > 0) {
       child.marks.forEach((mark) => {
@@ -1400,19 +1523,31 @@ export function removeAllMarksExceptLinkForTableColumnCell(
           'link' !== mark.type.name &&
           'override' !== mark.type.name
         ) {
-          tasks.push({
-            node: child,
-            pos: offset,
-            mark,
-          });
+          markTypesToRemove.add(mark.type);
         }
       });
     }
-    offset += child.nodeSize;
   });
+  markTypesToRemove.forEach((markType) => {
+    tr = tr.removeMark(from, to, markType);
+  });
+  return tr;
+}
 
-  // });
-  return handleRemoveMarks(tr, tasks);
+function removeHangingIndentMark(startPos: number,
+  endPos: number,
+  tr: Transform) {
+  tr?.doc.nodesBetween(startPos, endPos, (node, pos) => {
+    if (node.marks?.length > 0) {
+      for (const mark of node.marks) {
+        if (mark.type.name === 'mark-hanging-indent' || mark.type.name === 'mark-spacer') {
+          tr.removeMark(pos, pos + node.nodeSize, mark.type);
+        }
+      }
+    }
+    return true;
+  });
+  return tr;
 }
 
 // [FS] IRAD-1087 2020-11-02
@@ -1422,27 +1557,28 @@ export function removeAllMarksExceptLink(
   to: number,
   tr: Transform
 ) {
-  const tasks = [];
-  tr?.doc.nodesBetween(from, to, (node, pos) => {
+  // Batch mark removal: collect unique mark types, then issue one removeMark
+  // per type over the full range (instead of per-text-node-per-mark).
+  const markTypesToRemove = new Set<MarkType>();
+  tr?.doc.nodesBetween(from, to, (node) => {
     if (node.marks?.length > 0) {
-      node.marks.some((mark) => {
+      node.marks.forEach((mark) => {
         if (
           'link' !== mark.type.name &&
           'override' !== mark.type.name &&
-          'spacer' !== mark.type.name
+          'spacer' !== mark.type.name &&
+          !mark.attrs[ATTR_OVERRIDDEN]
         ) {
-          tasks.push({
-            node,
-            pos,
-            mark,
-          });
+          markTypesToRemove.add(mark.type);
         }
       });
-      return true;
     }
     return true;
   });
-  return handleRemoveMarks(tr, tasks);
+  markTypesToRemove.forEach((markType) => {
+    tr = tr.removeMark(from, to, markType);
+  });
+  return tr;
 }
 
 export function handleRemoveMarks(tr: Transform, tasks) {
@@ -1599,7 +1735,7 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   const markType = state.schema.marks[MARKSTRONG];
   if (!markType) return tr;
 
-  const textContent = getNodeText(node);
+  const textContent = node.textContent;
   if (!textContent) return tr;
   let endIndex = -1;
   if (boldSentence) {
@@ -1621,84 +1757,61 @@ export function addMarksToLine(tr, state, node, pos, boldSentence) {
   // No valid sentence or word found
   if (endIndex === -1 || endIndex === Infinity) return tr;
   const firstSentence = textContent.slice(0, endIndex + (boldSentence ? 1 : 0));
-  let childSize = 0;
-  let boldSentenceEnd = 0;
+  const firstSentenceLen = firstSentence.length;
+
+  // Single-pass replacement for the original two-descendants traversal:
+  //   1) remove old bold marks from text children within the first sentence
+  //   2) once the child covering the end of the first sentence is reached,
+  //      add the new bold mark over the entire first sentence range
+  let cumulativeSize = 0;
   let childNodePos = pos;
   let stopTraversal = false;
   node.descendants((child) => {
     if (stopTraversal || !child.isText) {
-      return !stopTraversal; // Stop if already traversed or not text
+      return !stopTraversal;
     }
 
-    if (boldSentenceEnd > firstSentence.length) {
+    // Stop if previous children already exceeded the first sentence length.
+    if (cumulativeSize > firstSentenceLen) {
       stopTraversal = true;
       return false;
     }
 
-    boldSentenceEnd += child.nodeSize;
-    const mark = child.marks.find((mark) => mark.type === markType);
+    cumulativeSize += child.nodeSize;
+    const mark = child.marks.find((m) => m.type === markType);
 
-    if (!mark || mark.attrs.overridden) {
-      childNodePos = pos + boldSentenceEnd;
-      return true;
+    // Remove old bold mark if present and not overridden.
+    if (mark && !mark.attrs.overridden) {
+      tr = tr.removeMark(
+        childNodePos,
+        childNodePos + child.nodeSize + 1,
+        markType
+      );
     }
 
-    tr = tr.removeMark(
-      childNodePos,
-      childNodePos + child.nodeSize + 1,
-      markType
-    );
-    childNodePos = pos + boldSentenceEnd;
-    return true;
-  });
+    childNodePos = pos + cumulativeSize;
 
-  let stopTraversal_1 = false;
-  node.descendants((child) => {
-    if (stopTraversal_1 || !child.isText) {
-      return !stopTraversal_1; // Stop if already traversed or not text
-    }
-
-    const attrs = { boldSentence: true };
-    childSize += child.nodeSize;
-
-    if (firstSentence.length > childSize) {
-      return true; // Continue if sentence length not yet reached
-    }
-
-    const mark = child.marks.find((mark) => mark.type === markType);
-
-    if (!mark) {
-      tr = tr.addMark(pos, pos + firstSentence.length + 1, markType.create());
-      stopTraversal_1 = true;
+    // When we've covered the first sentence, add the new bold mark and stop.
+    if (firstSentenceLen <= cumulativeSize) {
+      if (!mark) {
+        tr = tr.addMark(pos, pos + firstSentenceLen + 1, markType.create());
+      } else if (!mark.attrs.overridden) {
+        tr = tr.addMark(
+          pos,
+          pos + firstSentenceLen + 1,
+          markType.create({ boldSentence: true })
+        );
+      }
+      // If mark is overridden, skip adding (preserve user override).
+      stopTraversal = true;
       return false;
     }
 
-    if (mark.attrs.overridden) {
-      return false; // Skip if mark is overridden
-    }
-
-    tr = tr.addMark(
-      pos,
-      pos + firstSentence.length + 1,
-      markType.create(attrs)
-    );
-    stopTraversal_1 = true;
-    return false;
+    return true;
   });
 
   return tr;
 }
-// get text content from selected node
-function getNodeText(node: Node) {
-  let textContent = '';
-  node.descendants(function (child: Node) {
-    if ('text' === child.type.name) {
-      textContent = `${textContent}${child.text}`;
-    }
-  });
-  return textContent;
-}
-
 //to get the selected node
 export function getNode(
   _state: EditorState,

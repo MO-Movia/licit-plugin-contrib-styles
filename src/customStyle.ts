@@ -8,6 +8,13 @@ import {
 import { DEFAULT_NORMAL_STYLE } from './Constants';
 import { setCustomStyles } from '@modusoperandi/licit-ui-commands';
 let customStyles = new Array(0);
+// O(1) lookup cache keyed by styleName. Rebuilt only when customStyles changes
+// (on load or user-initiated style edits), not on every getCustomStyleByName call.
+let styleByNameMap = new Map<string, Style>();
+// Callbacks registered by other modules to invalidate their own caches when
+// the style list changes (e.g. per-styleName command/mark caches in
+// CustomStyleCommand). See invalidateStyleCache/registerStyleCacheInvalidator.
+let styleCacheInvalidators: Array<() => void> = [];
 let styleRuntime;
 let hideNumbering = false;
 let _view: EditorView;
@@ -23,6 +30,33 @@ function isValidStyleName(styleName?: string) {
   );
 }
 
+// Rebuild the styleByName lookup map from the current customStyles array.
+function rebuildStyleByNameMap() {
+  styleByNameMap = new Map<string, Style>();
+  for (const style of customStyles) {
+    if (style?.styleName) {
+      styleByNameMap.set(style.styleName, style);
+    }
+  }
+}
+
+// Notify registered invalidators that the style list has changed so they can
+// clear their own per-styleName caches. Called from setStyles/addStyleToList.
+export function invalidateStyleCache() {
+  for (const fn of styleCacheInvalidators) {
+    fn();
+  }
+}
+
+// Register a callback to be invoked whenever the style list changes.
+// Returns an unregister function.
+export function registerStyleCacheInvalidator(fn: () => void): () => void {
+  styleCacheInvalidators.push(fn);
+  return () => {
+    styleCacheInvalidators = styleCacheInvalidators.filter((f) => f !== fn);
+  };
+}
+
 export function addStyleToList(style: Style) {
   if (0 < customStyles.length) {
     const index = customStyles.findIndex(
@@ -33,6 +67,8 @@ export function addStyleToList(style: Style) {
     } else {
       customStyles.push(style);
     }
+    rebuildStyleByNameMap();
+    invalidateStyleCache();
   }
   return customStyles;
 }
@@ -54,24 +90,16 @@ export function isCustomStyleExists(styleName: string) {
 
 // get a style by styleName
 export function getCustomStyleByName(name: string): Style {
-  let style: Style = { styleName: name };
-  let has = false;
   if (isValidStyleName(name)) {
-    // break the loop if find any matches
-    for (let i = 0; !has && i < customStyles.length; i++) {
-      if (name === customStyles[i].styleName) {
-        style = customStyles[i];
-        has = true;
-      }
-      // Marks are not getting applied to an undefined style.
-      else {
-        style = DEFAULT_NORMAL_STYLE;
-      }
+    const cached = styleByNameMap.get(name);
+    if (cached) {
+      return cached;
     }
-  } else {
-    style = DEFAULT_NORMAL_STYLE;
+    // Fallback: if the name is valid but not found in the map, treat it as
+    // an undefined style (matches the original loop's else-branch behavior).
+    return DEFAULT_NORMAL_STYLE;
   }
-  return style;
+  return DEFAULT_NORMAL_STYLE;
 }
 
 export function setView(csview: EditorView) {
@@ -81,6 +109,8 @@ export function setView(csview: EditorView) {
 // store styles in cache
 export function setStyles(style: Style[]) {
   customStyles = style;
+  rebuildStyleByNameMap();
+  invalidateStyleCache();
   setCustomStyles(style);
   let documentType;
   if (style && Array.isArray(style)) {

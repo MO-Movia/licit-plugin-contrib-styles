@@ -1,6 +1,6 @@
 {
   "name": "@modusoperandi/licit-custom-styles",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "license": "MIT",
   "type": "module",
   "subversion": "1",
@@ -36,7 +36,7 @@
     "color": "^5.0.3"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/eslint-plugin": "^8.66.0",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@types/jest": "^29.5.14",

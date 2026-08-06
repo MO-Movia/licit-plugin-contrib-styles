@@ -23,6 +23,7 @@ export class CustomStyleItem extends React.PureComponent<
     hasText?: boolean;
     onCommand?: () => void; //Function changed to ()=>void
     selectionClassName?: string;
+    showStyleEditAction?: boolean;
     // [Keyboard navigation] Position of this row in the menu's single
     // selection space. Exposed as a data-index attribute so the menu's
     // native (delegated) mouseover listener can map the hovered element back
@@ -31,7 +32,13 @@ export class CustomStyleItem extends React.PureComponent<
   }
   > {
   render(): React.ReactElement {
-    const { label, hasText, index, ...pointerProps } = this.props;
+    const {
+      label,
+      hasText,
+      index,
+      showStyleEditAction,
+      ...pointerProps
+    } = this.props;
     let text = '';
     let customStyle;
     // [FS] IRAD-1410 2021-06-28
@@ -143,7 +150,15 @@ export class CustomStyleItem extends React.PureComponent<
         <div
           className="molsp-arrow-right"
           data-cy="cyStyleEdit"
-          style={{ width: '50px', display: (hasText && getStyleRuntime()?.canEditStyle) ? 'block' : 'none' }}
+          style={{
+            width: '50px',
+            display:
+              hasText &&
+              showStyleEditAction !== false &&
+              getStyleRuntime()?.canEditStyle
+                ? 'block'
+                : 'none',
+          }}
         >
           {/* Need to change the below icon to downarroe */}
           <PointerSurface {...pointerProps} className={klass + ' edit-icon'}>

@@ -110,6 +110,28 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
     return node.type.name === 'paragraph' || node.type.name === 'ordered_list' || node.type.name === 'enhanced_table_figure_notes';
   }
 
+  isSelectionInsideTableCell(editorState: EditorState): boolean {
+    const positions = [editorState.selection.$from, editorState.selection.$to];
+
+    return positions.some(($pos) => {
+      let isInsideCell = false;
+      let isVignette = false;
+
+      for (let depth = $pos.depth; depth > 0; depth--) {
+        const node = $pos.node(depth);
+        const tableRole = node.type.spec.tableRole;
+        if (tableRole === 'cell' || tableRole === 'header_cell') {
+          isInsideCell = true;
+        }
+        if (node.attrs?.vignette === true || node.attrs?.vignette === 'true') {
+          isVignette = true;
+        }
+      }
+
+      return isInsideCell && !isVignette;
+    });
+  }
+
   render(): React.ReactElement {
     const { dispatch, editorState, editorView } = this.props;
     const { selection, doc } = editorState;
@@ -166,7 +188,9 @@ export class CustomstyleDropDownCommand extends React.PureComponent<{
         <CustomMenuButton
           className={backgroundColorClass}
           commandGroups={this.getCommandGroups()}
-          disabled={!this.hasRuntime}
+          disabled={
+            !this.hasRuntime || this.isSelectionInsideTableCell(editorState)
+          }
           dispatch={dispatch}
           editorState={editorState}
           editorView={editorView}

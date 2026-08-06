@@ -148,6 +148,11 @@ export function setStyleRuntime(runtime) {
 export function getStyleRuntime(): StyleRuntime {
   return styleRuntime;
 }
+
+export function getCachedStyles(): Style[] {
+  return [...customStyles];
+}
+
 export function setCustomStylesOnLoad() {
   getStylesAsync().then((result) => {
     if (result) {

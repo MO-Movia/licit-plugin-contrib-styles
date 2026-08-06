@@ -28,6 +28,16 @@ import { Node, Schema, Slice } from 'prosemirror-model';
 import { CustomstyleDropDownCommand } from './ui/CustomstyleDropDownCommand';
 import { applyEffectiveSchema } from './EditorSchema';
 import type { StyleRuntime } from './StyleRuntime';
+import {
+  applyStoredTableStyleAtSelection,
+  applyStoredTableStyles as applyAllStoredTableStyles,
+  applyTableStyle as applyStyleToTable,
+  openTableStylePicker as openStylePickerForTable,
+  TABLE_STYLE_NAME_ATTRIBUTE,
+} from './TableStyle';
+import type { OpenTableStylePickerOptions } from './TableStyle';
+
+export * from './TableStyle';
 
 const ENTERKEYCODE = 13;
 const BACKSPACEKEYCODE = 8;
@@ -218,6 +228,26 @@ export class CustomstylePlugin extends Plugin {
     return {
       '[H1] Header 1': CustomstyleDropDownCommand,
     };
+  }
+
+  openTableStylePicker(options: OpenTableStylePickerOptions) {
+    return openStylePickerForTable(options);
+  }
+
+  applyTableStyle(
+    state: EditorState,
+    tr: Transform,
+    tablePos: number,
+    styleName: string
+  ): Transform {
+    return applyStyleToTable(state, tr, tablePos, styleName);
+  }
+
+  applyStoredTableStyles(
+    state: EditorState,
+    tr: Transform
+  ): Transform {
+    return applyAllStoredTableStyles(state, tr);
   }
 
   static setLevelCounter(styleCounter) {
@@ -472,6 +502,10 @@ export function onUpdateAppendTransaction(
       }
     }
     tr = tr?.scrollIntoView();
+  }
+
+  if (isPaste) {
+    tr = applyStoredTableStyleAtSelection(nextState, tr ?? nextState.tr);
   }
 
   return hasTransactionChanges(tr) ? tr : null;
@@ -738,13 +772,17 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
       if (nextNode && IsActiveNode && nextNode.type.name === 'paragraph') {
         const posList = prevState.selection.from - 1;
         const Listnode = prevState.doc.nodeAt(posList);
-        const style = getCustomStyleByName(prevParagraph.attrs.styleName);
+        const tableStyleName = getEnclosingTableStyleName($from);
+        const style = tableStyleName
+          ? getTableContinuationStyle(tableStyleName)
+          : getCustomStyleByName(prevParagraph.attrs.styleName);
         if (style?.styles?.nextLineStyleName) {
           // [FS] IRAD-1217 2021-02-24
           // Select style for next line not working continuously for more that 2 paragraphs
           if ($from.node(-1).type.name !== 'list_item') {
             newattrs = setNodeAttrs(
-              resetTheDefaultStyleNameToNone(style.styles.nextLineStyleName),
+              tableStyleName ||
+                resetTheDefaultStyleNameToNone(style.styles.nextLineStyleName),
               newattrs
             );
           }
@@ -759,8 +797,8 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
             }
           }
           tr = tr.setNodeMarkup(nextNodePos, undefined, newattrs);
-          let styleName = style.styleName;
-          if ($from.node(-1).type.name !== 'list_item') {
+          let styleName = tableStyleName || style.styleName;
+          if (!tableStyleName && $from.node(-1).type.name !== 'list_item') {
             styleName = style.styles?.nextLineStyleName ?? RESERVED_STYLE_NONE;
           }
 
@@ -785,6 +823,38 @@ export function applyStyleForNextParagraph(prevState, nextState, tr, view) {
   }
 
   return modified ? tr : null;
+}
+
+function getEnclosingTableStyleName($from): string | null {
+  for (let depth = $from.depth; depth > 0; depth--) {
+    const node = $from.node(depth);
+    if (node.type.name !== 'table') {
+      continue;
+    }
+
+    if (node.attrs?.vignette === true || node.attrs?.vignette === 'true') {
+      return null;
+    }
+
+    const styleName = node.attrs?.[TABLE_STYLE_NAME_ATTRIBUTE];
+    return typeof styleName === 'string' && styleName
+      ? resetTheDefaultStyleNameToNone(styleName)
+      : null;
+  }
+
+  return null;
+}
+
+function getTableContinuationStyle(styleName: string) {
+  const style = getCustomStyleByName(styleName);
+  return {
+    ...style,
+    styleName,
+    styles: {
+      ...style?.styles,
+      nextLineStyleName: styleName,
+    },
+  };
 }
 
 function findPreviousParagraph($from) {
@@ -1288,4 +1358,3 @@ function removeResolvedHangingIndentAnchors(tr, state, pos) {
     TextSelection.create(tr.doc, mappedSelection)
   );
 }
-

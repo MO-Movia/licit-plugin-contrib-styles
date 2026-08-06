@@ -854,7 +854,8 @@ export function applyStyleForTableColumnCell(
   tr: Transform,
   node: Node,
   startPos: number,
-  opt?: number
+  opt?: number,
+  restoreSelection = true
 ) {
   const loading = !styleProp;
   tr = removeAllMarksExceptLinkForTableColumnCell(startPos, node, tr);
@@ -863,7 +864,15 @@ export function applyStyleForTableColumnCell(
     styleProp = getCustomStyleByName(styleName);
   }
 
-  if (!styleProp?.styles) return tr;
+  if (!styleProp?.styles) {
+    if (isAllowedNode(node)) {
+      tr = tr.setNodeMarkup(startPos, undefined, {
+        ...node.attrs,
+        styleName,
+      });
+    }
+    return tr;
+  }
   const _commands = getCachedStyleCommands(styleName, styleProp.styles);
   let newattrs = getUpdatedAttrs(node, styleProp, styleName);
 
@@ -886,11 +895,11 @@ export function applyStyleForTableColumnCell(
     tr = tr.setNodeMarkup(startPos, undefined, newattrs);
   }
   (tr as Transaction).storedMarks = storedmarks;
-  if (state.selection && !state.selection.empty) {
+  if (restoreSelection && state.selection && !state.selection.empty) {
     const newFrom = tr.mapping.map(state.selection.from);
     const newTo = tr.mapping.map(state.selection.to);
     (tr as Transaction).setSelection(TextSelection.create(tr.doc, newFrom, newTo));
-  } else if (originalSelectionPos) {
+  } else if (restoreSelection && originalSelectionPos) {
     (tr as Transaction).setSelection(TextSelection.create(tr.doc, originalSelectionPos));
   }
 

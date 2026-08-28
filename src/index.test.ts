@@ -912,6 +912,165 @@ describe('onUpdateAppendTransaction', () => {
       )
     ).toBeNull();
   });
+  // Regression: pasting cut content into a paragraph whose first child has
+  // attrs (the `else` branch at index.ts:441) caused
+  // `onUpdateAppendTransaction` to access `node2.type.name` without a null
+  // guard. When `nodeAt` returned null (e.g. position at a boundary inside
+  // a table cell after paste), `node2` was null and it threw
+  // `TypeError: Cannot read properties of null (reading 'type')`.
+  it('should not throw when node2 is null and node1 has attrs (paste into cell)', () => {
+    class Transaction {
+      amount;
+      meta;
+      constructor(amount, meta) {
+        this.amount = amount;
+        this.meta = meta;
+      }
+      getMeta(key) {
+        return this.meta[key];
+      }
+    }
+
+    const mockTransactions = [
+      new Transaction(100, { type: 'deposit', paste: true }),
+    ];
+
+    const mockschema = new Schema({
+      nodes: {
+        doc: { content: 'paragraph+' },
+        paragraph: {
+          content: 'text*',
+          attrs: { styleName: { default: 'test' } },
+          toDOM() {
+            return ['p', 0];
+          },
+        },
+        text: { group: 'inline' },
+      },
+    });
+    const mockdoc = mockschema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { styleName: 'Normal' },
+          content: [{ type: 'text', text: 'Hi' }],
+        },
+      ],
+    });
+    // node1.parent has a first child WITH attrs → takes the else branch
+    // where `node2.type.name` is read unguarded.
+    mockdoc.resolve = () => {
+      return {
+        type: 'paragraph',
+        isTextblock: true,
+        parent: {
+          attrs: { styleName: 'Normal' },
+          content: {
+            content: [{ attrs: { styleName: 'Normal' } }],
+          },
+        },
+        min: () => 0,
+        max: () => 1,
+        depth: 1,
+        node: () => ({ type: 'paragraph' }),
+        before: () => 1,
+        start: () => 1,
+      } as unknown as ResolvedPos;
+    };
+    // node2 (from csview.state.tr.doc.nodeAt) is null → used to crash with
+    // `Cannot read properties of null (reading 'type')` in the else branch.
+    // mockdoc.nodeAt (used for nextState.tr.doc.nodeAt) returns a valid node.
+    mockdoc.nodeAt = () =>
+      ({ nodeSize: 20, attrs: { styleName: 'Normal' } }) as unknown as Node;
+    mockdoc.nodesBetween = () => {};
+    const mockSlice1 = {
+      content: {
+        childCount: 1,
+        content: [
+          {
+            type: { name: 'paragraph' },
+            attrs: { styleName: 'paragraph-style' },
+            content: { size: 10 },
+          },
+        ],
+      },
+    };
+    const setSelection = () => {
+      return {
+        doc: {
+          content: { size: 0 },
+          resolve: () =>
+            ({
+              min: () => 0,
+              max: () => 1,
+            }) as unknown as ResolvedPos,
+          nodesBetween: () => ({}),
+          nodeAt: () => null,
+        },
+        setSelection: setSelection,
+        mapping: { map: (pos) => pos },
+        scrollIntoView: () => ({}),
+      };
+    };
+
+    expect(
+      onUpdateAppendTransaction(
+        { firstTime: false },
+        {
+          doc: mockdoc,
+          selection: {
+            $from: { start: () => 1, end: () => 1 },
+          },
+          scrollIntoView: () => ({}),
+          setSelection: setSelection,
+          mapping: { map: (pos) => pos },
+        },
+        {
+          schema: { nodes: { paragraph: 'paragraph' } },
+          selection: {
+            $cursor: null,
+            $from: { before: () => 0, end: () => 1 },
+            $to: { after: () => 1, end: () => 1, pos: 0 },
+          },
+          tr: {
+            doc: mockdoc,
+            scrollIntoView: () => ({}),
+            selection: {
+              $from: { start: () => 1, end: () => 1 },
+            },
+            setSelection: setSelection,
+            mapping: { map: (pos) => pos },
+          },
+          doc: mockdoc,
+        },
+        {
+          selection: {
+            from: { before: () => 0 },
+            to: { after: () => 1 },
+          },
+          tr: {
+            doc: { nodeAt: () => null },
+          },
+          doc: mockdoc,
+        },
+        {
+          input: { lastKeyCode: 13 },
+          state: {
+            selection: {
+              $from: { before() { return 5; } },
+            },
+            tr: {
+              doc: { nodeAt: () => null },
+            },
+          },
+        },
+        mockTransactions,
+        mockSlice1
+      )
+    ).toBeDefined();
+  });
+
 
   it('onUpdateAppendTransaction', () => {
     const linkmark = new Mark();

@@ -393,6 +393,15 @@ export function onUpdateAppendTransaction(
           node2 = csview.state.tr.doc.nodeAt(demoPos);
         }
 
+        // `node2` comes from `nodeAt(...)` and may be null when the
+        // resolved position lands on a boundary with no node (e.g. when
+        // pasting into a table cell). Without a target node we cannot
+        // correctly apply styles — skip this iteration instead of
+        // applying styles to the wrong paragraph.
+        if (!node2) {
+          continue;
+        }
+
         if (!node1.content?.content[0]?.attrs) {
           const opt = 1;
           if (node2?.type?.name === 'table') {
